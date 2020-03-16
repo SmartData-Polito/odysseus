@@ -1,0 +1,261 @@
+import numpy as np
+import pandas as pd
+from sklearn.neighbors import KernelDensity
+
+class EFFCS_SimInput ():
+    
+    def __init__ (self,
+                  sim_general_conf,
+                  sim_scenario_conf, 
+                  grid,
+                  bookings):
+        
+        self.sim_general_conf = \
+            sim_general_conf
+
+        self.sim_scenario_conf = \
+            sim_scenario_conf
+
+        self.city = \
+            sim_general_conf["city"]
+
+        self.n_cars = \
+            sim_general_conf["n_cars"]
+        
+        self.grid = grid
+        self.bookings = bookings.copy()
+
+        self.hub_n_charging_poles = \
+            sim_scenario_conf["hub_n_charging_poles"]
+
+        self.n_charging_poles = \
+            sim_scenario_conf["n_charging_poles"]
+
+    def get_input_bookings_filtered (self):
+
+        def filter_bookings_for_simulation (bookings):
+        
+            return \
+                bookings.loc\
+                [(bookings.duration > 3)\
+                 &(bookings.duration < 60)\
+                 &(bookings.euclidean_distance > 0.5)]\
+                 .copy()        
+
+        self.bookings = \
+            filter_bookings_for_simulation(self.bookings)
+        self.bookings.loc[:, "ia_timeout"] = \
+            (self.bookings.start_time - \
+             self.bookings.start_time.shift())\
+            .apply(lambda x: x.total_seconds())
+        self.bookings = self.bookings\
+            .loc[self.bookings.ia_timeout >= 0]
+
+        self.bookings["avg_speed"] = \
+            (self.bookings["euclidean_distance"])\
+            / (self.bookings["duration"] / 60)
+
+        self.input_bookings = self.bookings.loc\
+            [(self.bookings.start_time\
+              > self.sim_general_conf["model_start"])\
+             & (self.bookings.start_time\
+              < self.sim_general_conf["model_end"])].copy()
+
+        return self.input_bookings
+            
+    def get_booking_requests_list (self):
+
+        self.sim_bookings = self.bookings.loc\
+            [(self.bookings.start_time\
+              > self.sim_general_conf["sim_start"])\
+             & (self.bookings.start_time\
+              < self.sim_general_conf["sim_end"])]
+#        print(self.sim_bookings.shape)
+        
+        self.booking_requests_list = \
+            self.sim_bookings[[
+                    "origin_id",
+                    "destination_id",
+                    "start_time",
+                    "end_time",
+                    "ia_timeout",
+                    "euclidean_distance",
+                    "day",
+                    "hour",
+                    "minute",
+                    "duration",
+                    "soc_delta"
+                 ]].dropna(subset=["ia_timeout", "origin_id", "destination_id"])\
+                    .to_dict("records")
+        return self.booking_requests_list
+
+    def get_neighbors_dicts (self):
+
+        self.od_distances = self.grid.centroid.apply\
+            (lambda x: self.grid.centroid.distance(x))
+        self.od_distances.to_pickle("./Data/od_distances.pickle")
+
+#        self.od_distances = pd.read_pickle\
+#            ("./Data/" + self.city + "_od_distances.pickle")
+
+        self.neighbors = self.od_distances\
+            [self.od_distances < 1000].apply\
+            (lambda x: pd.Series\
+             (x.sort_values().dropna().iloc[1:].index.values),
+             axis=1)
+
+        self.neighbors_dict = {}
+        for zone in self.neighbors.index:
+            self.neighbors_dict[int(zone)] = \
+                dict(self.neighbors.loc[zone].dropna())
+                
+        return self.neighbors,\
+                self.neighbors_dict
+                    
+    def get_requests_rates (self):
+
+        self.request_rates = {}
+
+        for daytype, daytype_bookings_gdf \
+        in self.input_bookings.groupby("daytype"):
+            self.request_rates[daytype] = {}  
+            for hour, hour_df\
+            in daytype_bookings_gdf.groupby("hour"):
+                self.request_rates[daytype][hour] = \
+                    hour_df.city.count()\
+                    / (len(hour_df.day.unique()))\
+                    / 3600
+
+        return self.request_rates
+
+    def get_trip_kdes (self):
+
+        self.trip_kdes = {}        
+        self.kde_columns = [
+            "origin_id", 
+            "destination_id",
+            "duration"        
+        ]
+        
+        for daytype, daytype_bookings_gdf\
+        in self.input_bookings.groupby("daytype"):
+            self.trip_kdes[daytype] = {}
+            for hour, hour_df\
+            in daytype_bookings_gdf.groupby("hour"):
+                self.trip_kdes[daytype][hour] = \
+                    KernelDensity(
+                            bandwidth=0.01
+                        ).fit(\
+                        hour_df[self.kde_columns].dropna())
+                    
+        return self.trip_kdes
+
+    def get_valid_zones (self):
+
+        origin_zones_count = \
+            self.input_bookings.origin_id.value_counts()
+        dest_zones_count = \
+            self.input_bookings.destination_id.value_counts()
+        self.zones_count = pd.concat\
+            ([origin_zones_count, dest_zones_count], axis=1)
+        valid_origin_zones = origin_zones_count\
+            [(origin_zones_count > 0)]
+        valid_dest_zones = dest_zones_count\
+            [(dest_zones_count > 0)]
+        self.valid_zones = valid_origin_zones.index\
+            .intersection(valid_dest_zones.index)\
+            .astype(int)
+
+        return self.valid_zones
+
+    def init_cars (self):
+
+        self.cars_soc_dict = \
+            list(np.random.uniform\
+                 (25, 100, self.n_cars)\
+                 .astype(int))
+        self.cars_soc_dict = \
+            {i:self.cars_soc_dict[i] for i in range(self.n_cars)}            
+
+        self.cars_zones = \
+            list(np.random.uniform\
+                 (0, len(self.valid_zones), self.n_cars)\
+                 .astype(int))
+        self.cars_zones = \
+            [self.valid_zones[i] 
+            for i in self.cars_zones]
+        self.cars_zones = \
+            {i:self.cars_zones[i] for i in range(self.n_cars)}            
+
+        return self.cars_soc_dict,\
+                self.cars_zones
+            
+    def init_cars_dicts (self):
+        
+        self.available_cars_dict = \
+            {int(zone):[] for zone in self.grid.zone_id}
+
+        self.neighbors_cars_dict = \
+            {int(zone):{} for zone in self.grid.zone_id}
+        for zone in range(len(self.neighbors_dict)):
+            for k in self.neighbors_dict[zone]:
+                self.neighbors_cars_dict[zone]\
+                [int(self.neighbors_dict[zone][k])] = []
+                    
+        for car in range(len(self.cars_zones)):
+            zone = self.cars_zones[car]
+            self.available_cars_dict[zone] += [car]
+            for neighbor in self.neighbors_cars_dict[zone].keys():
+                self.neighbors_cars_dict[neighbor][zone]\
+                    .append(car)
+
+        return self.available_cars_dict,\
+                self.neighbors_cars_dict
+
+    def init_charging_poles (self):
+
+        top_dest_zones = self.input_bookings\
+            .destination_id.value_counts().iloc[:40]
+
+        self.n_charging_poles_by_zone = \
+            dict((top_dest_zones / top_dest_zones.sum()\
+                  * self.n_charging_poles))
+                
+        def assign_incrementally ():            
+            assigned_cps = 0
+            for zone_id in self.n_charging_poles_by_zone:
+                zone_n_cps = int(np.floor\
+                    (self.n_charging_poles_by_zone[zone_id]))
+                assigned_cps += zone_n_cps
+                self.n_charging_poles_by_zone[zone_id] = \
+                    zone_n_cps
+            for zone_id in self.n_charging_poles_by_zone:
+                if assigned_cps < self.n_charging_poles:
+                    self.n_charging_poles_by_zone[zone_id] += 1
+                    assigned_cps += 1
+            
+        assign_incrementally()
+
+        self.n_charging_poles_by_zone = \
+            dict(pd.Series\
+            (self.n_charging_poles_by_zone)\
+            .replace({0:np.NaN}).dropna())
+
+        zones_with_cps = pd.Series\
+            (self.n_charging_poles_by_zone).index
+
+        self.zones_cp_distances = \
+            self.grid.centroid.apply\
+            (lambda x: self.grid.loc[zones_with_cps]\
+             .centroid.distance(x))
+
+        self.closest_cp_zone = \
+            self.zones_cp_distances.idxmin(axis=1)
+
+        return self.n_charging_poles_by_zone
+
+    def init_relocation (self):
+        pass
+    
+    def init_workers (self):
+        pass

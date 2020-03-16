@@ -1,0 +1,134 @@
+import datetime
+import numpy as np
+import pandas as pd
+
+sim = sim_traceB
+
+sim_events = pd.DataFrame(sim.events)
+sim_events.columns = [        
+            "ev_time",
+            "ev_seqno",
+            "ev_class",        
+        ]
+
+sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
+sim_bookings = sim_booking_requests.dropna()
+
+sim_charges = pd.DataFrame(sim.sim_charges)
+sim_system_charges_bookings = pd.DataFrame(sim.list_system_charging)
+sim_system_charges_bookings["end_hour"] = \
+    sim_system_charges_bookings["end_time"].apply\
+    (lambda d: d.hour)
+sim_users_charges_bookings = pd.DataFrame(sim.list_users_charging)
+sim_users_charges_bookings["end_hour"] = \
+    sim_users_charges_bookings["end_time"].apply\
+    (lambda d: d.hour)
+    
+sim_booking_requests["n_cars_charging_system"] = \
+    pd.Series(sim.list_n_cars_charging_system)
+sim_booking_requests["n_cars_charging_users"] = \
+    pd.Series(sim.list_n_cars_charging_users)
+sim_booking_requests["n_cars_available"] = \
+    pd.Series(sim.list_n_cars_available)
+sim_booking_requests["n_cars_booked"] = \
+    pd.Series(sim.list_n_cars_booked)
+
+print (sim.n_same_zone_trips, 
+       sim.n_not_same_zone_trips,
+       sim.n_no_close_cars,
+       sim.n_deaths)
+    
+sim_stats = pd.Series(name="sim_stats")
+sim_stats.loc["n_same_zone_trips"] = \
+    sim.n_same_zone_trips
+sim_stats.loc["n_not_same_zone_trips"] = \
+    sim.n_not_same_zone_trips
+sim_stats.loc["n_no_close_cars"] = \
+    sim.n_no_close_cars
+
+sim_stats.loc["n_charges"] = \
+    len(sim_charges)
+sim_stats.loc["soc_avg"] = \
+    sim_bookings.start_soc.mean()
+sim_stats.loc["soc_med"] = \
+    sim_bookings.start_soc.median()
+sim_stats.loc["charging_time_avg"] = \
+    sim_charges.duration.mean() / 60
+sim_stats.loc["charging_time_med"] = \
+    sim_charges.duration.median() / 60
+sim_stats.loc["n_charges_by_car_avg"] = \
+    sim_charges.groupby("plate").date.count().mean()
+sim_stats.loc["n_charges_by_car_system_avg"] = \
+    sim_charges[sim_charges.operator == "system"]\
+        .groupby("plate").date.count().mean()
+sim_stats.loc["n_charges_by_car_users_avg"] = \
+    sim_charges[sim_charges.operator == "users"]\
+        .groupby("plate").date.count().mean()
+sim_stats.loc["tot_energy"] =   \
+    sim_charges["soc_delta_kwh"].sum()
+sim_stats.loc["n_deaths"] = \
+    sim.n_deaths
+sim_stats.loc["n_charges_users_vs_system_ratio"] = \
+    sim_charges.groupby("operator").date.count().loc["users"]\
+    / sim_charges.groupby("operator").date.count().loc["system"]
+sim_stats.loc["n_charges_system_vs_users_ratio"] = \
+    sim_charges.groupby("operator").date.count().loc["system"]\
+    / sim_charges.groupby("operator").date.count().loc["users"]
+
+sim_stats.loc["charging_energy_event_avg"] = \
+    sim_charges.soc_delta_kwh.mean()
+sim_stats.loc["charging_energy_event_max"] = \
+    sim_charges.soc_delta_kwh.max()
+sim_stats.loc["charging_energy_event_med"] = \
+    sim_charges.soc_delta_kwh.median()
+
+stat_names = ["n_charges", "charging_energy"]
+group_cols = ["date", "day_hour"]
+stat_ops = ["avg", "max", "med"]
+
+for group_col in group_cols:
+
+    sim_stats.loc["n_charges_by_" + group_col + "_avg"] = \
+        sim_charges.groupby(group_col).date.count().mean()
+    sim_stats.loc["n_charges_by_" + group_col + "_max"] = \
+        sim_charges.groupby(group_col).date.count().max()
+    sim_stats.loc["n_charges_by_" + group_col + "_med"] = \
+        sim_charges.groupby(group_col).date.count().median()
+
+for group_col in group_cols:
+
+    sim_stats.loc["charging_energy_by_" + group_col + "_avg"] = \
+        sim_charges.groupby(group_col).soc_delta_kwh.sum().mean()
+    sim_stats.loc["charging_energy_by_" + group_col + "_max"] = \
+        sim_charges.groupby(group_col).soc_delta_kwh.sum().max()
+    sim_stats.loc["charging_energy_by_" + group_col + "_med"] = \
+        sim_charges.groupby(group_col).soc_delta_kwh.sum().median()
+
+#stat_names = ["n_charges", "charging_energy"]
+#resample_freqs = ["60Min", "1440Min", "10080Min"]
+#stat_ops = ["avg", "max", "med"]
+#
+#for freq_col in resample_freqs:
+#
+#    sim_stats.loc["n_charges_by_" + freq_col + "_avg"] = \
+#        sim_charges.set_index("start_time").resample(freq_col).date.count().mean()
+#    sim_stats.loc["n_charges_by_" + freq_col + "_max"] = \
+#        sim_charges.set_index("start_time").resample(freq_col).date.count().max()
+#    sim_stats.loc["n_charges_by_" + freq_col + "_med"] = \
+#        sim_charges.set_index("start_time").resample(freq_col).date.count().median()
+#
+#for freq_col in resample_freqs:
+#
+#    sim_stats.loc["charging_energy_by_" + freq_col + "_avg"] = \
+#        sim_charges.set_index("start_time").resample(freq_col).soc_delta_kwh.sum().mean()
+#    sim_stats.loc["charging_energy_by_" + freq_col + "_max"] = \
+#        sim_charges.set_index("start_time").resample(freq_col).soc_delta_kwh.sum().max()
+#    sim_stats.loc["charging_energy_by_" + freq_col + "_med"] = \
+#        sim_charges.set_index("start_time").resample(freq_col).soc_delta_kwh.sum().median()
+
+# TODO -> organise and standardise output
+#city = "Torino"
+#start_string = str(start.date())
+#end_string = str(end.date())
+#charging_strategy = sim.charging_strategy
+#simulation_type = "trace"

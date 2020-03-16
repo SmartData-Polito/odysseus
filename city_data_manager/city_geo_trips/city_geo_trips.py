@@ -13,7 +13,7 @@ from city_data_manager.city_data_source.utils.time_utils import get_time_group_c
 
 class CityGeoTrips:
 
-	def __init__(self, city_name, trips_data_source_id, year, month, bin_side_length=500):
+	def __init__(self, city_name, trips_data_source_id, year, month, bin_side_length):
 
 		self.city_name = city_name
 		self.trips_data_source_id = trips_data_source_id
@@ -28,16 +28,26 @@ class CityGeoTrips:
 			data_paths_dict[self.city_name],
 			"_".join([str(self.year), str(self.month)]),
 			self.trips_data_source_id,
+			str(bin_side_length),
 			"points",
 		)
 		check_create_path(self.points_data_path)
+
+		self.od_trips_data_path = os.path.join(
+			data_paths_dict[self.city_name],
+			"_".join([str(self.year), str(self.month)]),
+			self.trips_data_source_id,
+			str(bin_side_length),
+			"od_trips",
+		)
+		check_create_path(self.od_trips_data_path)
 
 		self.squared_grid_data_path = os.path.join(
 			data_paths_dict[self.city_name],
 			"_".join([str(self.year), str(self.month)]),
 			self.trips_data_source_id,
-			"squared_grid",
 			str(bin_side_length),
+			"squared_grid",
 		)
 		check_create_path(self.squared_grid_data_path)
 
@@ -45,6 +55,7 @@ class CityGeoTrips:
 			data_paths_dict[self.city_name],
 			"_".join([str(self.year), str(self.month)]),
 			self.trips_data_source_id,
+			str(bin_side_length),
 			"resampled_points",
 		)
 		check_create_path(self.resampled_points_data_path)
@@ -76,6 +87,9 @@ class CityGeoTrips:
 			how='left',
 			op='within'
 		)
+		self.od_trips_df = self.trips_df_norm.copy()
+		self.od_trips_df["origin_id"] = self.trips_origins.zone_id
+		self.od_trips_df["destination_id"] = self.trips_destinations.zone_id
 
 	def map_trips_on_zones(self, zones):
 		zones = add_grouped_count_to_grid(
@@ -167,5 +181,19 @@ class CityGeoTrips:
 			os.path.join(
 				self.resampled_points_data_path,
 				"origins.pickle"
+			)
+		)
+
+	def save_od_trips(self, od_trips, filename):
+		od_trips.to_csv(
+			os.path.join(
+				self.od_trips_data_path,
+				filename + ".csv"
+			)
+		)
+		od_trips.to_pickle(
+			os.path.join(
+				self.od_trips_data_path,
+				filename + ".pickle"
 			)
 		)

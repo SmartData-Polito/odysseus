@@ -10,10 +10,10 @@ from city_data_manager.city_geo_trips.city_geo_trips import CityGeoTrips
 
 class MinneapolisGeoTrips(CityGeoTrips):
 
-	def __init__(self, trips_data_source_id, year, month):
+	def __init__(self, trips_data_source_id, year, month, bin_side_length):
 
 		self.city_name = "Minneapolis"
-		super().__init__(self.city_name, trips_data_source_id, year, month)
+		super().__init__(self.city_name, trips_data_source_id, year, month, bin_side_length)
 		self.trips_ds_dict = {
 			"city_of_minneapolis": MinneapolisScooterTrips()
 		}
@@ -31,6 +31,7 @@ class MinneapolisGeoTrips(CityGeoTrips):
 
 		self.trips_ds_dict[self.trips_data_source_id].load_raw(self.year, self.month)
 		self.trips_ds_dict[self.trips_data_source_id].normalise()
+
 
 		self.trips_df_norm = self.trips_ds_dict[self.trips_data_source_id].load_norm(
 			self.year, self.month
@@ -66,16 +67,16 @@ class MinneapolisGeoTrips(CityGeoTrips):
 			self.centerlines_gdf_norm,
 			left_on="start_centerline_id", right_on="centerline_id"
 		))
-
 		if len(trips_origins_trails):
 			trips_origins_trails = gpd.GeoDataFrame(pd.merge(
 				trips_origins_trails,
 				self.trails_gdf_norm,
 				left_on="start_centerline_id", right_on="trail_id"
 			))
+		print(trips_origins_trails.shape, trips_origins_centerlines.shape)
 		self.trips_origins = pd.concat([
 			trips_origins_centerlines,
-			trips_origins_trails
+			#trips_origins_trails
 		], sort=False)
 		self.trips_origins.geometry = self.trips_origins.geometry.apply(
 			get_random_point_from_linestring
@@ -93,11 +94,13 @@ class MinneapolisGeoTrips(CityGeoTrips):
 				self.trails_gdf_norm,
 				left_on="end_centerline_id", right_on="trail_id"
 			))
+		print(trips_destinations_trails.shape, trips_destinations_centerlines.shape)
 		self.trips_destinations = pd.concat([
 			trips_destinations_centerlines,
-			trips_destinations_trails
+			#trips_destinations_trails
 		], sort=False)
 		self.trips_destinations.geometry = self.trips_destinations.geometry.apply(
 			get_random_point_from_linestring
 		)
 		self.trips_destinations.crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+
