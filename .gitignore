@@ -4,6 +4,8 @@ city_data_manager/data/*
 city_data_manager/city_data_source/data/*
 
 simulator/Data/*
+simulator/Figures/*
+simulator/Results/*
 
 # trips_count_predictor/data/*
 # trips_count_predictor/results/*
