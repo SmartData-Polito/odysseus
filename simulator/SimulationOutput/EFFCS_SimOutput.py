@@ -5,10 +5,10 @@ import pandas as pd
 from Simulation.EFFCS_ChargingPrimitives import get_charging_soc
 from utils.car_utils import soc_to_kwh
 
+
 class EFFCS_SimOutput ():
 
 	def __init__ (self, sim):
-
 
 #        self.sim_events = \
 #            pd.DataFrame(sim.events)
@@ -19,13 +19,16 @@ class EFFCS_SimOutput ():
 #                    "ev_class",
 #                ]
 
+		self.sim_general_conf = sim.simInput.sim_general_conf
+		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
+
 		self.sim_booking_requests = \
 			pd.DataFrame(sim.sim_booking_requests)
-		print(self.sim_booking_requests.shape)
+		#print(self.sim_booking_requests.shape)
 
 		self.sim_bookings = \
 			self.sim_booking_requests.dropna()
-		print(self.sim_bookings.shape)
+		#print(self.sim_bookings.shape)
 
 		self.sim_charges = \
 			pd.DataFrame(sim.chargingStrategy.sim_charges)
@@ -193,7 +196,7 @@ class EFFCS_SimOutput ():
 		else:
 			self.sim_stats.loc["n_charges_by_car_users_avg"] = 0
 
-		self.sim_stats["sim_duration"] = (self.sim_stats.sim_end - self.sim_stats.sim_start).total_seconds()
+		self.sim_stats["sim_duration"] = (sim.end - sim.start).total_seconds()
 
 		self.sim_stats.loc["tot_potential_mobility_energy"] = \
 			self.sim_booking_requests.soc_delta.sum()
@@ -251,56 +254,6 @@ class EFFCS_SimOutput ():
 
 		self.sim_stats.loc["charging_energy_event_med"] = \
 			self.sim_charges.soc_delta_kwh.median()
-
-#        stat_names = ["n_charges", "charging_energy"]
-#        group_cols = ["date", "day_hour"]
-#        stat_ops = ["avg", "max", "med"]
-#
-#        for group_col in group_cols:
-#
-#            self.sim_stats.loc["n_charges_by_" + group_col + "_avg"] = \
-#                self.sim_charges.groupby(group_col).date.count().mean()
-#            self.sim_stats.loc["n_charges_by_" + group_col + "_max"] = \
-#                self.sim_charges.groupby(group_col).date.count().max()
-#            self.sim_stats.loc["n_charges_by_" + group_col + "_med"] = \
-#                self.sim_charges.groupby(group_col).date.count().median()
-#
-#        for group_col in group_cols:
-#
-#            self.sim_stats.loc["charging_energy_by_" + group_col + "_avg"] = \
-#                self.sim_charges.groupby(group_col).soc_delta_kwh.sum().mean()
-#            self.sim_stats.loc["charging_energy_by_" + group_col + "_max"] = \
-#                self.sim_charges.groupby(group_col).soc_delta_kwh.sum().max()
-#            self.sim_stats.loc["charging_energy_by_" + group_col + "_med"] = \
-#                self.sim_charges.groupby(group_col).soc_delta_kwh.sum().median()
-#
-#        stat_names = ["n_charges", "charging_energy"]
-#        resample_freqs = ["60Min", "1440Min", "10080Min"]
-#        stat_ops = ["avg", "max", "med"]
-#
-#        for freq_col in resample_freqs:
-#
-#            self.sim_stats.loc["n_charges_by_" + freq_col + "_avg"] = \
-#                self.sim_charges.set_index("start_time")\
-#                .resample(freq_col).date.count().mean()
-#            self.sim_stats.loc["n_charges_by_" + freq_col + "_max"] = \
-#                self.sim_charges.set_index("start_time")\
-#                .resample(freq_col).date.count().max()
-#            self.sim_stats.loc["n_charges_by_" + freq_col + "_med"] = \
-#                self.sim_charges.set_index("start_time")\
-#                .resample(freq_col).date.count().median()
-#
-#        for freq_col in resample_freqs:
-#
-#            self.sim_stats.loc["charging_energy_by_" + freq_col + "_avg"] = \
-#                self.sim_charges.set_index("start_time")\
-#                .resample(freq_col).soc_delta_kwh.sum().mean()
-#            self.sim_stats.loc["charging_energy_by_" + freq_col + "_max"] = \
-#                self.sim_charges.set_index("start_time")\
-#                .resample(freq_col).soc_delta_kwh.sum().max()
-#            self.sim_stats.loc["charging_energy_by_" + freq_col + "_med"] = \
-#                self.sim_charges.set_index("start_time")\
-#                .resample(freq_col).soc_delta_kwh.sum().median()
 
 		self.sim_charges["cr_timeout"] = \
 			self.sim_charges.timeout_outward\

@@ -1,6 +1,7 @@
 import copy
 import datetime
 from functools import partial, wraps
+import pytz
 
 import simpy
 
@@ -15,8 +16,16 @@ class EFFCS_Sim ():
 
 				 ):
 
-		self.start = simInput.sim_general_conf["sim_start"]
-		self.end = simInput.sim_general_conf["sim_end"]
+		self.start = datetime.datetime(
+			simInput.sim_general_conf["year"],
+			simInput.sim_general_conf["month_start"],
+			1, tzinfo=pytz.UTC
+		)
+		self.end = datetime.datetime(
+			simInput.sim_general_conf["year"],
+			simInput.sim_general_conf["month_end"],
+			1, tzinfo=pytz.UTC
+		)
 		self.total_seconds = (self.end - self.start).total_seconds()
 		self.hours_spent = 0
 		self.current_datetime = self.start

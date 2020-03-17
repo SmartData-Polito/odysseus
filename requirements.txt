@@ -1,10 +1,7 @@
-matplotlib==3.0.2
-numpy==1.18.1
-pandas==0.25.3
 scikit-learn==0.20.1
 scipy==1.1.0
 simpy==3.0.11
-geopandas==0.5.1
+geopandas==0.7.0
 statsmodels==0.10.1
 seaborn==0.9.0
 descartes==1.1.0
@@ -12,3 +9,4 @@ xlrd==1.2.0
 rtree==0.8.3
 pytz==2019.2
 xlsxwriter==1.2.1
+contextily==1.0rc2

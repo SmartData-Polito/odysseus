@@ -31,7 +31,7 @@ class EFFCS_SimInput ():
 
 		#self.n_cars_original = \
 		#	len(self.bookings.plate.unique())
-		self.n_cars_original = 2000
+		self.n_cars_original = self.sim_general_conf["n_vehicles_original"]
 
 		self.n_cars = \
 			int(abs(self.n_cars_original * self.sim_scenario_conf["n_cars_factor"]))
@@ -63,7 +63,7 @@ class EFFCS_SimInput ():
 			self.sim_scenario_conf["hub_n_charging_poles"] = \
 				self.hub_n_charging_poles
 
-		self.sim_general_conf["n_cars"] = self.n_cars
+		self.sim_scenario_conf["n_vehicles_sim"] = self.n_cars
 
 		if self.sim_scenario_conf["alpha"] == "auto":
 			self.sim_scenario_conf["alpha"] = np.ceil(get_soc_delta(self.od_distances.max().max() / 1000))

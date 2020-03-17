@@ -32,7 +32,6 @@ class MinneapolisGeoTrips(CityGeoTrips):
 		self.trips_ds_dict[self.trips_data_source_id].load_raw(self.year, self.month)
 		self.trips_ds_dict[self.trips_data_source_id].normalise()
 
-
 		self.trips_df_norm = self.trips_ds_dict[self.trips_data_source_id].load_norm(
 			self.year, self.month
 		)
@@ -73,7 +72,6 @@ class MinneapolisGeoTrips(CityGeoTrips):
 				self.trails_gdf_norm,
 				left_on="start_centerline_id", right_on="trail_id"
 			))
-		print(trips_origins_trails.shape, trips_origins_centerlines.shape)
 		self.trips_origins = pd.concat([
 			trips_origins_centerlines,
 			#trips_origins_trails
@@ -94,7 +92,6 @@ class MinneapolisGeoTrips(CityGeoTrips):
 				self.trails_gdf_norm,
 				left_on="end_centerline_id", right_on="trail_id"
 			))
-		print(trips_destinations_trails.shape, trips_destinations_centerlines.shape)
 		self.trips_destinations = pd.concat([
 			trips_destinations_centerlines,
 			#trips_destinations_trails

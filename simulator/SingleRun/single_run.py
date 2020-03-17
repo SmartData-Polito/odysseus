@@ -13,8 +13,6 @@ from SingleRun.run_eventG_sim import run_eventG_sim
 from SimulationOutput.EFFCS_SimOutput import EFFCS_SimOutput
 from SimulationOutput.EFFCS_SimOutputPlotter import EFFCS_SimOutputPlotter
 
-from utils.path_utils import check_create_path
-
 
 def single_run(conf_tuple):
 
@@ -29,21 +27,26 @@ def single_run(conf_tuple):
 	sim_scenario_name = \
 		conf_tuple[4]
 
+	model_general_conf_string = "_".join([
+		str(v) for v in sim_general_conf.values()]
+	).replace("'", "").replace(".", "-")
+	model_conf_string = "_".join([
+		str(v) for v in sim_scenario_conf.values()]
+	).replace("'", "").replace(".", "-")
 	results_path = os.path.join(
 		os.path.dirname(os.path.dirname(__file__)),
 		"Results",
 		city,
 		"single_run",
-		sim_scenario_name
+		sim_scenario_name,
+		model_general_conf_string,
+		model_conf_string
 	)
 	os.makedirs(results_path, exist_ok=True)
 
 	sim_general_conf["city"] = city
-	sim_general_conf["bin_side_length"] = 500
 
-	city_obj = City\
-		(city,
-		 sim_general_conf)
+	city_obj = City(city, sim_general_conf)
 
 	if sim_type == "eventG":
 
@@ -71,13 +74,6 @@ def single_run(conf_tuple):
 		simInput = simInput_traceB
 		simOutput = simOutput_traceB
 
-	model_conf_string = "_".join([str(v) for v in sim_scenario_conf.values()]).replace("'", "")
-	check_create_path(results_path)
-	results_path = os.path.join(
-		results_path,
-		model_conf_string
-	)
-	check_create_path(results_path)
 
 	sim_stats.to_pickle\
 		(os.path.join(results_path,

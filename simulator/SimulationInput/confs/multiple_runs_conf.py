@@ -1,4 +1,5 @@
 import datetime
+import numpy as np
 
 sim_scenario_conf_grid = {
 
@@ -7,8 +8,8 @@ sim_scenario_conf_grid = {
 
     "time_estimation": [True],
     "queuing": [True],
-    "alpha": [25],
-    "beta": [40, 60, 80, 90],
+    "alpha": np.arange(20, 100, 20),
+    "beta": [100],
 
     "hub": [True],
     "hub_zone_policy": ["num_parkings"],
@@ -19,11 +20,13 @@ sim_scenario_conf_grid = {
 
     "distributed_cps": [True],
     "cps_placement_policy": ["num_parkings"],
-    "n_charging_poles": [20],
+
     "cps_zones_percentage": [0.1],
 
     "user_contribution": [True],
     "system_cps": [True],
     "willingness": [0.99],
+
+    "battery_swap": [True],
 
 }

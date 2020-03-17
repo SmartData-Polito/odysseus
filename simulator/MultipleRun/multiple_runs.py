@@ -18,12 +18,18 @@ from SimulationOutput.EFFCS_MultipleRunsPlotter import EFFCS_MultipleRunsPlotter
 def multiple_runs(city, sim_type, sim_general_conf, sim_scenario_conf_grid,
 				  n_cores = 4, sim_scenario_name="trial"):
 
+	model_general_conf_string = "_".join([str(v) for v in sim_general_conf.values()]).replace("'", "").replace(".", "-")
+	model_scenario_conf_grid_string = "_".join([
+		str(v) for v in sim_scenario_conf_grid.values()
+	]).replace(" ", "-").replace("'", "").replace(".", "d").replace(",", "-").replace("[", "-").replace("]", "-")
 	results_path = os.path.join(
 		os.path.dirname(os.path.dirname(__file__)),
 		"Results",
 		city,
 		"multiple_runs",
-		sim_scenario_name
+		sim_scenario_name,
+		model_general_conf_string,
+		model_scenario_conf_grid_string
 	)
 	os.makedirs(results_path, exist_ok=True)
 

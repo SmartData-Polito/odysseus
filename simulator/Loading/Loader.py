@@ -3,9 +3,10 @@ import pandas as pd
 
 from city_data_manager.config.config import root_data_path
 
+
 class Loader ():
     
-    def __init__ (self, city, year, month):
+    def __init__ (self, city, year, month, bin_side_length):
         
         self.city = city
         self.year = year
@@ -13,25 +14,34 @@ class Loader ():
         self.norm_data_path = os.path.join(
             root_data_path,
             self.city,
-            "2019_5",
-            "city_of_minneapolis"
+            "_".join([str(year), str(month)]),
+            "city_of_minneapolis",
+            str(bin_side_length),
+
         )
 
-    def read_bookings_grid (self):
+    def read_origins_destinations (self):
+        path = os.path.join(
+            self.norm_data_path,
+            "points",
+            "origins.pickle"
+        )
+        self.trips_origins = pd.read_pickle(path)
+        path = os.path.join(
+            self.norm_data_path,
+            "points",
+            "destinations.pickle"
+        )
+        self.trips_destinations = pd.read_pickle(path)
+        return self.trips_origins, self.trips_destinations
+
+    def read_trips (self):
 
         path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "Data",
-            self.city,
-            "bookings.pickle"
+            self.norm_data_path,
+            "od_trips",
+            "od_trips.pickle"
         )
         self.bookings = pd.read_pickle(path)
-        path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "Data",
-            self.city,
-            "grid.pickle"
-        )
-        self.grid = pd.read_pickle(path)
 
-        return self.bookings, self.grid
+        return self.bookings

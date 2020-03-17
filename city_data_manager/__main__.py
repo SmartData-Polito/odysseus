@@ -3,7 +3,7 @@ from city_data_manager.city_geo_trips.minneapolis_geo_trips import MinneapolisGe
 
 print(datetime.datetime.now())
 
-for month in [6, 7, 8]:
+for month in [5, 6, 7, 8]:
     for bin_side_length in [100, 200, 300, 400, 500]:
 
         minneapolis = MinneapolisGeoTrips("city_of_minneapolis", 2019, month, bin_side_length)

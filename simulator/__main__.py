@@ -15,6 +15,8 @@ confs_dict = {}
 
 from SimulationInput.confs.sim_general_conf import sim_general_conf
 
+print(sim_general_conf)
+
 from SimulationInput.confs.multiple_runs_conf import sim_scenario_conf_grid
 confs_dict["multiple_runs"] = sim_scenario_conf_grid
 
@@ -37,7 +39,7 @@ if sim_run_mode == "single_run":
     single_run((
         city_name,
         sim_general_conf,
-        confs_dict["single_run"],
+        confs_dict[sim_run_mode],
         "traceB",
         sim_scenario_name
     ))
@@ -46,7 +48,7 @@ elif sim_run_mode == "multiple_runs":
         city_name,
         "multiple_runs",
         sim_general_conf,
-        confs_dict[sim_scenario_name],
+        confs_dict[sim_run_mode],
         int(n_cores),
         sim_scenario_name
     )

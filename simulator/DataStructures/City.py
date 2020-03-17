@@ -6,9 +6,12 @@ import pandas as pd
 import numpy as np
 from sklearn.neighbors import KernelDensity
 
+from city_data_manager.city_data_source.utils.geospatial_utils import get_city_grid
+
 from simulator.utils.bookings_utils import pre_process_time
 from simulator.Loading.Loader import Loader
 from simulator.utils.car_utils import get_soc_delta
+
 
 class City:
 
@@ -18,68 +21,78 @@ class City:
 		self.sim_general_conf = sim_general_conf
 		self.kde_bw = kde_bw
 
-		loader = Loader(self.city_name, 2019, 5)
-		self.bookings, self.grid = loader.read_bookings_grid()
+		year = self.sim_general_conf["year"]
+		start_month = self.sim_general_conf["month_start"]
+		end_month = self.sim_general_conf["month_end"]
+		self.bin_side_length = self.sim_general_conf["bin_side_length"]
+
+		self.bookings = pd.DataFrame()
+		self.trips_origins = pd.DataFrame()
+		self.trips_destinations = pd.DataFrame()
+		for month in range(start_month, end_month):
+			loader = Loader(self.city_name, year, month, self.bin_side_length)
+			bookings = loader.read_trips()
+			origins, destinations = loader.read_origins_destinations()
+			self.bookings = pd.concat([self.bookings, bookings], ignore_index=True)
+			self.trips_origins = pd.concat([self.trips_origins, origins], ignore_index=True)
+			self.trips_destinations = pd.concat([self.trips_destinations, destinations], ignore_index=True)
+
+		self.grid = self.get_squared_grid()
 		self.grid = self.grid.to_crs("epsg:3857")
 
 		self.input_bookings = self.get_input_bookings_filtered()
-		print(self.input_bookings.shape)
 
-		#self.valid_zones = self.get_valid_zones()
-		self.valid_zones = self.grid["zone_id"]
-		#print(self.valid_zones)
-
+		self.valid_zones = self.get_valid_zones()
 		self.grid = self.grid.loc[self.valid_zones]
-		#self.grid["new_zone_id"] = range(len(self.grid))
-		#print(self.input_bookings.origin_id)
-		#self.input_bookings.loc[:, ["origin_id", "destination_id"]] = \
-		#	self.input_bookings[["origin_id", "destination_id"]] \
-		#		.dropna().astype(int).replace(self.grid.zone_id, self.grid.new_zone_id)
-		#self.grid["zone_id"] = self.grid.new_zone_id
-
+		self.input_bookings = self.input_bookings.loc[
+			(self.input_bookings.origin_id.isin(self.grid.index)) & (
+				self.input_bookings.destination_id.isin(self.grid.index)
+			)
+		]
 		self.grid = self.grid.reset_index()
+		self.grid["zone_id"] = self.grid.index.values
 		self.original_valid_zones = self.valid_zones.copy()
-		#self.valid_zones = self.grid.index
-		#print(self.valid_zones)
-		#print(self.input_bookings.origin_id)
+		self.zones_replace_dict = {}
+		for i in range(len(self.original_valid_zones)):
+			self.zones_replace_dict[self.original_valid_zones[i]] = i
+		self.input_bookings.loc[:, ["origin_id", "destination_id"]] = \
+			self.input_bookings.loc[:, ["origin_id", "destination_id"]].replace(
+				self.zones_replace_dict
+			)
+		self.valid_zones = self.get_valid_zones()
 
 		self.od_distances = self.get_od_distances()
-		#print(self.od_distances.index, self.od_distances.columns)
 
 		self.neighbors, self.neighbors_dict = self.get_neighbors_dicts()
-
 
 		self.input_bookings["city"] = self.city_name
 		self.request_rates = self.get_requests_rates()
 		self.trip_kdes = self.get_trip_kdes()
 
+	def get_squared_grid (self):
+
+		locations = pd.concat([
+				self.trips_origins.geometry, self.trips_destinations.geometry
+		], ignore_index=True)
+		locations.crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+		squared_grid = get_city_grid(
+			locations,
+			self.bin_side_length
+		)
+		return squared_grid
 
 	def get_valid_zones(self):
 
-		self.valid_zones = self.input_bookings \
-							 .origin_id.value_counts() \
-							 .iloc[:500].index
-
-		return self.valid_zones
+		return self.input_bookings.origin_id.value_counts().sort_values().tail(
+			self.sim_general_conf["k_zones"]
+		).index
 
 	def get_od_distances(self):
 
-		path = os.path.join(
-			os.path.dirname(os.path.dirname(__file__)),
-			"Data",
-			self.city_name,
-			"od_distances.pickle"
-		)
 		points = self.grid.centroid.geometry
-		#print(points)
 		od_distances = points.apply(lambda p: points.distance(p))
 		od_distances = pd.DataFrame(od_distances, index=self.grid.zone_id.values, columns=self.grid.zone_id.values)
-		od_distances.to_pickle(path)
-
-		# cfr. projection distortion
-		self.od_distances = od_distances
-
-		return self.od_distances
+		return od_distances
 
 	def get_neighbors_dicts(self):
 
@@ -158,8 +171,6 @@ class City:
 			self.input_bookings.end_time + now_local.utcoffset()
 		self.input_bookings = pre_process_time(self.input_bookings)
 
-		print(self.input_bookings.shape)
-
 		return self.input_bookings
 
 	def get_hourly_ods(self):
@@ -198,8 +209,7 @@ class City:
 					/ (len(hour_df.day.unique())) \
 					/ 3600
 
-		self.sim_general_conf["avg_request_rate"] = \
-			pd.DataFrame(self.request_rates.values()).mean().mean()
+		self.avg_request_rate = pd.DataFrame(self.request_rates.values()).mean().mean()
 
 		return self.request_rates
 

@@ -3,9 +3,12 @@ import pytz
 
 sim_general_conf = {
 
-    "model_start": datetime.datetime(2019, 5, 1, tzinfo=pytz.UTC),
-    "model_end": datetime.datetime(2019, 6, 1, tzinfo=pytz.UTC),
-    "sim_start": datetime.datetime(2019, 5, 1, tzinfo=pytz.UTC),
-    "sim_end": datetime.datetime(2019, 6, 1, tzinfo=pytz.UTC)
+    "bin_side_length": 200,
+    "k_zones": 500,
+    "n_vehicles_original": 2000,
+
+    "year": 2019,
+    "month_start": 5,
+    "month_end": 7,
 
 }
