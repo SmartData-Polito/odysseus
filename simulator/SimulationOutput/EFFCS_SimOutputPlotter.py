@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 matplotlib.style.use('ggplot')
 matplotlib.rcParams["axes.grid"] = True
 matplotlib.rcParams["figure.figsize"] = (15., 7.)
+import seaborn as sns
 
 SMALL_SIZE = 8
 MEDIUM_SIZE = 12
@@ -20,6 +21,8 @@ plt.rc('xtick', labelsize=BIGGER_SIZE)    # fontsize of the tick labels
 plt.rc('ytick', labelsize=BIGGER_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=MEDIUM_SIZE)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+from city_data_manager.city_data_source.utils.time_utils import *
 
 
 class EFFCS_SimOutputPlotter ():
@@ -225,26 +228,25 @@ class EFFCS_SimOutputPlotter ():
 #        plt.show()
 		plt.close()
 
-	def plot_hourly_events_boxplot (self, which_df):
+	def plot_hourly_events_boxplot (self, which_df, start_or_end):
 
-		if which_df == "unsatisfied":
-			df = self.sim_unsatisfied_requests
-		if which_df == "charges":
-			df = self.sim_charges
+		if which_df == "bookings":
+			df = self.sim_bookings
 
-		table = df.pivot_table\
-			(index="date", columns="hour", aggfunc=len)\
-			.fillna(0.0).loc[:, "start_time"]
+		df = get_time_group_columns(df)
+		trips_df_norm_count = get_time_grouped_hourly_count(
+			df, start_or_end, which_df
+		)
+		trips_df_norm_count.hour = trips_df_norm_count.hour.astype(int)
 
-		print(table)
-
-		plt.figure()
-		table.reset_index().boxplot(column=list(table.columns))
-		plt.title(which_df + " hourly boxplot")
-		plt.xlabel("hour")
-		plt.ylabel("n events")
-		plt.savefig(os.path.join\
-			(self.figures_path, which_df + "_hourly_boxplot.png"))
+		plt.figure(figsize=(15, 7))
+		sns.boxplot(x="hour", y="_".join([which_df, "hourly", start_or_end, "count"]), data=trips_df_norm_count)
+		sns.swarmplot(x="hour", y="_".join([which_df, "hourly", start_or_end, "count"]), data=trips_df_norm_count, color="black")
+		plt.savefig(
+			os.path.join(
+				self.figures_path, "_".join([which_df, "hourly", start_or_end, "count", "_boxplot.png"])
+			)
+		)
 		# plt.show()
 		plt.close()
 

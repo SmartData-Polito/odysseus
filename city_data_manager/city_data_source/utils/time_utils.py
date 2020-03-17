@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 def get_time_group_columns (trips_df_norm):
@@ -34,6 +35,25 @@ def get_time_group_columns (trips_df_norm):
 	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(19, 24)), "end_daymoment"] = "evening"
 
 	return trips_df_norm
+
+
+def get_time_grouped_hourly_count(df_norm, start_or_end, which_df):
+
+	time_grouped_hourly_count = pd.DataFrame()
+
+	for time_categorial_col in ["hour", "weekday", "daymoment", "weekend"]:
+
+		time_grouped_hourly_count[time_categorial_col] = df_norm.set_index(
+			"_".join([start_or_end, "time"])
+		).resample("60Min")["_".join([start_or_end, time_categorial_col])].apply(
+			lambda x: x.unique()[0] if len(x) > 0 else np.NaN
+		).fillna(0)
+
+		time_grouped_hourly_count["_".join([which_df, "hourly", start_or_end, "count"])] = df_norm.set_index(
+			"_".join([start_or_end, "time"])
+		).resample("60Min").count().iloc[:, 0]
+
+	return time_grouped_hourly_count
 
 
 def get_grouped_resampled_count (df, group_cols, freq):

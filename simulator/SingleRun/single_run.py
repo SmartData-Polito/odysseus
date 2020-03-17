@@ -14,6 +14,7 @@ from SimulationOutput.EFFCS_SimOutput import EFFCS_SimOutput
 from SimulationOutput.EFFCS_SimOutputPlotter import EFFCS_SimOutputPlotter
 
 
+
 def single_run(conf_tuple):
 
 	city = \
@@ -43,8 +44,6 @@ def single_run(conf_tuple):
 		model_conf_string
 	)
 	os.makedirs(results_path, exist_ok=True)
-
-	sim_general_conf["city"] = city
 
 	city_obj = City(city, sim_general_conf)
 
@@ -175,7 +174,8 @@ def single_run(conf_tuple):
 	plotter.plot_events_profile()
 
 	plotter.plot_charging_t_hist()
-	#plotter.plot_hourly_events_boxplot("charges")
+	plotter.plot_hourly_events_boxplot("bookings", "start")
+	plotter.plot_hourly_events_boxplot("bookings", "end")
 	#plotter.plot_hourly_charging_boxplot("system")
 	#plotter.plot_hourly_charging_boxplot("users")
 	plotter.plot_fleet_status()

@@ -9,6 +9,6 @@ sim_general_conf = {
 
     "year": 2019,
     "month_start": 5,
-    "month_end": 7,
+    "month_end": 6,
 
 }
