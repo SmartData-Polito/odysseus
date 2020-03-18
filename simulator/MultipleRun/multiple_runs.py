@@ -5,14 +5,11 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 
-from DataStructures.City import City
-
-from SimulationInput.EFFCS_SimConfGrid import EFFCS_SimConfGrid
-
-from SingleRun.get_eventG_input import get_eventG_input
-from SingleRun.run_eventG_sim import get_eventG_sim_stats
-
-from SimulationOutput.EFFCS_MultipleRunsPlotter import EFFCS_MultipleRunsPlotter
+from simulator.DataStructures.City import City
+from simulator.SimulationInput.EFFCS_SimConfGrid import EFFCS_SimConfGrid
+from simulator.SingleRun.get_eventG_input import get_eventG_input
+from simulator.SingleRun.run_eventG_sim import get_eventG_sim_stats
+from simulator.SimulationOutput.EFFCS_MultipleRunsPlotter import EFFCS_MultipleRunsPlotter
 
 
 def multiple_runs(city, sim_type, sim_general_conf, sim_scenario_conf_grid,

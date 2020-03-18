@@ -4,15 +4,12 @@ import pickle
 import pandas as pd
 
 from simulator.DataStructures.City import City
-
 from simulator.SingleRun.get_traceB_input import get_traceB_input
 from simulator.SingleRun.get_eventG_input import get_eventG_input
 from simulator.SingleRun.run_traceB_sim import run_traceB_sim
 from simulator.SingleRun.run_eventG_sim import run_eventG_sim
-
 from simulator.SimulationOutput.EFFCS_SimOutput import EFFCS_SimOutput
 from simulator.SimulationOutput.EFFCS_SimOutputPlotter import EFFCS_SimOutputPlotter
-
 
 
 def single_run(conf_tuple):
