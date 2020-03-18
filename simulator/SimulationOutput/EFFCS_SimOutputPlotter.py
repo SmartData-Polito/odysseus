@@ -7,7 +7,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.style.use('ggplot')
 matplotlib.rcParams["axes.grid"] = True
-matplotlib.rcParams["figure.figsize"] = (15., 7.)
+
 import seaborn as sns
 
 SMALL_SIZE = 8

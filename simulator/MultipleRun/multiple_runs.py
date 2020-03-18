@@ -33,17 +33,10 @@ def multiple_runs(city, sim_type, sim_general_conf, sim_scenario_conf_grid,
 	)
 	os.makedirs(results_path, exist_ok=True)
 
-	sim_general_conf["city"] = city
-	sim_general_conf["bin_side_length"] = 500
-
 	with mp.Pool(n_cores) as pool:
 
-		city_obj = City\
-			(sim_general_conf["city"],
-			 sim_general_conf)
-
-		sim_conf_grid = EFFCS_SimConfGrid\
-			(sim_general_conf, sim_scenario_conf_grid)
+		city_obj = City(city, sim_general_conf)
+		sim_conf_grid = EFFCS_SimConfGrid(sim_general_conf, sim_scenario_conf_grid)
 
 		pool_stats_list = []
 		for i in np.arange(0, len(sim_conf_grid.conf_list), n_cores):
@@ -51,9 +44,11 @@ def multiple_runs(city, sim_type, sim_general_conf, sim_scenario_conf_grid,
 			conf_tuples = []
 
 			for sim_scenario_conf in sim_conf_grid.conf_list[i: i + n_cores]:
-				conf_tuples += [(sim_general_conf,
-								sim_scenario_conf,
-								city_obj)]
+				conf_tuples += [(
+					sim_general_conf,
+					sim_scenario_conf,
+					city_obj
+				)]
 				conf_tuples += [(
 					sim_general_conf,
 					sim_scenario_conf,
@@ -70,21 +65,18 @@ def multiple_runs(city, sim_type, sim_general_conf, sim_scenario_conf_grid,
 
 			print ("Batch", i / n_cores, datetime.datetime.now())
 
-	sim_stats_df = pd.concat\
-		([sim_stats for sim_stats in pool_stats_list],
-		 axis=1, ignore_index=True).T
+	sim_stats_df = pd.concat([sim_stats for sim_stats in pool_stats_list], axis=1, ignore_index=True).T
 
-	sim_stats_df.to_csv\
-		(os.path.join(results_path,
-					  "sim_stats.csv"))
-	sim_stats_df.to_pickle\
-		(os.path.join(results_path,
-					  "sim_stats.pickle"))
+	sim_stats_df.to_csv(os.path.join(results_path, "sim_stats.csv"))
+	pd.Series(sim_general_conf).to_csv(os.path.join(results_path, "sim_general_conf.csv"))
+	pd.Series(sim_scenario_conf_grid).to_csv(os.path.join(results_path, "sim_scenario_conf_grid.csv"))
 
-	pd.Series(sim_general_conf).to_pickle\
-		(os.path.join(results_path,
-					  "sim_general_conf.pickle"))
+	sim_stats_df.to_pickle(os.path.join(results_path, "sim_stats.pickle"))
+	pd.Series(sim_general_conf).to_pickle(os.path.join(results_path, "sim_general_conf.pickle"))
+	pd.Series(sim_scenario_conf_grid).to_pickle(os.path.join(results_path, "sim_scenario_conf_grid.pickle"))
 
-	pd.Series(sim_scenario_conf_grid).to_pickle\
-		(os.path.join(results_path,
-					  "sim_scenario_conf_grid.pickle"))
+	plotter = EFFCS_MultipleRunsPlotter(
+		city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
+		"alpha", "fraction_unsatisfied", "beta"
+	)
+	plotter.plot_x_y_param()
