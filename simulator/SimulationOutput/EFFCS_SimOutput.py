@@ -2,8 +2,8 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from Simulation.EFFCS_ChargingPrimitives import get_charging_soc
-from utils.car_utils import soc_to_kwh
+from simulator.Simulation.EFFCS_ChargingPrimitives import get_charging_soc
+from simulator.utils.car_utils import soc_to_kwh
 
 
 class EFFCS_SimOutput ():
