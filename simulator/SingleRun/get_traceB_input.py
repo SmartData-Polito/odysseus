@@ -1,6 +1,7 @@
 import datetime
 
-from SimulationInput.EFFCS_SimInput import EFFCS_SimInput
+from simulator.SimulationInput.EFFCS_SimInput import EFFCS_SimInput
+
 
 def get_traceB_input (conf_tuple):
 

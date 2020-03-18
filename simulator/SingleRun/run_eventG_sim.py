@@ -1,7 +1,8 @@
 import datetime
 
-from Simulation.EventG_EFFCS_Sim import EventG_EFFCS_Sim
-from SimulationOutput.EFFCS_SimOutput import EFFCS_SimOutput
+from simulator.Simulation.EventG_EFFCS_Sim import EventG_EFFCS_Sim
+from simulator.SimulationOutput.EFFCS_SimOutput import EFFCS_SimOutput
+
 
 def run_eventG_sim (simInput):
 

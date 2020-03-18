@@ -1,6 +1,7 @@
 import datetime
 
-from Simulation.TraceB_EFFCS_Sim import TraceB_EFFCS_Sim
+from simulator.Simulation.TraceB_EFFCS_Sim import TraceB_EFFCS_Sim
+
 
 def run_traceB_sim (simInput):
 
