@@ -1,24 +1,19 @@
-import os
 import sys
 import datetime
 
-import pandas as pd
-
 from simulator.SingleRun.single_run import single_run
-from MultipleRun.multiple_runs import multiple_runs
+from simulator.MultipleRun.multiple_runs import multiple_runs
 
 from simulator.utils.path_utils import create_output_folders
 
 confs_dict = {}
 
-from SimulationInput.confs.sim_general_conf import sim_general_conf
+from simulator.SimulationInput.confs.sim_general_conf import sim_general_conf
 
-print(sim_general_conf)
-
-from SimulationInput.confs.multiple_runs_conf import sim_scenario_conf_grid
+from simulator.SimulationInput.confs.multiple_runs_conf import sim_scenario_conf_grid
 confs_dict["multiple_runs"] = sim_scenario_conf_grid
 
-from SimulationInput.confs.single_run_conf import sim_scenario_conf
+from simulator.SimulationInput.confs.single_run_conf import sim_scenario_conf
 confs_dict["single_run"] = sim_scenario_conf
 
 
@@ -30,8 +25,6 @@ sim_scenario_name = sys.argv[4]
 print (datetime.datetime.now(), city_name, sim_scenario_name, "starting..")
 
 create_output_folders(city_name, sim_scenario_name)
-#run_model_validation(city_name)
-#print (datetime.datetime.now(), city_name, "validation finished")
 
 if sim_run_mode == "single_run":
     single_run((
