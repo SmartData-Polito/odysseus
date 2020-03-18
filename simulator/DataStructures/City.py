@@ -42,6 +42,8 @@ class City:
 
 		self.input_bookings = self.get_input_bookings_filtered()
 
+		if self.sim_general_conf["k_zones"] == "all":
+			self.sim_general_conf["k_zones"] = len(self.grid)
 		self.valid_zones = self.get_valid_zones()
 		self.grid = self.grid.loc[self.valid_zones]
 		self.input_bookings = self.input_bookings.loc[

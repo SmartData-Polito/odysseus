@@ -63,10 +63,6 @@ class EFFCS_MultipleRunsPlotter:
         self.sim_stats_df.n_cars_factor = \
             self.sim_stats_df.n_cars_factor.apply(lambda x: np.around(x, decimals=2))
 
-        self.sim_stats_df["fraction_unsatisfied"] = self.sim_stats_df.percentage_unsatisfied
-        self.sim_stats_df["fraction_unsatisfied_no_energy"] = self.sim_stats_df.percentage_deaths
-        self.sim_stats_df["fraction_charge_deaths"] = self.sim_stats_df.percentage_charge_deaths
-
     def plot_x_y_param(self):
         fig, ax = plt.subplots(figsize=(15, 7))
         plt.xlabel(self.x_col)

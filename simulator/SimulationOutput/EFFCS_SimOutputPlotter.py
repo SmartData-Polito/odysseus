@@ -232,6 +232,8 @@ class EFFCS_SimOutputPlotter ():
 
 		if which_df == "bookings":
 			df = self.sim_bookings
+		if which_df == "charges":
+			df = self.sim_charges
 
 		df = get_time_group_columns(df)
 		trips_df_norm_count = get_time_grouped_hourly_count(

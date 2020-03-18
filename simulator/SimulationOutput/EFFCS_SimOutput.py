@@ -118,37 +118,34 @@ class EFFCS_SimOutput ():
 			self.sim_stats["n_no_close_cars"]\
 			+ self.sim_stats["n_deaths"]
 
-		self.sim_stats.loc["percentage_satisfied"] = \
+		self.sim_stats.loc["fraction_satisfied"] = \
 			self.sim_stats["n_bookings"] / self.sim_stats["n_booking_reqs"]
 
-		self.sim_stats.loc["percentage_unsatisfied"] = \
-			1.0 - self.sim_stats.loc["percentage_satisfied"]
+		self.sim_stats.loc["fraction_unsatisfied"] = \
+			1.0 - self.sim_stats.loc["fraction_satisfied"]
 
-		self.sim_stats.loc["percentage_same_zone_trips"] = \
-					self.sim_stats["n_unsatisfied"] / self.sim_stats["n_booking_reqs"]
-
-		self.sim_stats.loc["percentage_same_zone_trips"] = \
+		self.sim_stats.loc["fraction_same_zone_trips"] = \
 			sim.n_same_zone_trips / self.sim_stats["n_booking_reqs"]
 
-		self.sim_stats.loc["percentage_not_same_zone_trips"] = \
+		self.sim_stats.loc["fraction_not_same_zone_trips"] = \
 			sim.n_not_same_zone_trips / self.sim_stats["n_booking_reqs"]
 
-		self.sim_stats.loc["percentage_no_close_cars"] = \
+		self.sim_stats.loc["fraction_no_close_cars"] = \
 			sim.n_no_close_cars / self.sim_stats["n_booking_reqs"]
 
-		self.sim_stats.loc["percentage_deaths"] = \
+		self.sim_stats.loc["fraction_not_enough_energy"] = \
 			sim.n_deaths / self.sim_stats["n_booking_reqs"]
 
-		self.sim_stats.loc["percentage_same_zone_trips_satisfied"] = \
+		self.sim_stats.loc["fraction_same_zone_trips_satisfied"] = \
 			sim.n_same_zone_trips / self.sim_stats["n_bookings"]
 
-		self.sim_stats.loc["percentage_not_same_zone_trips_satisfied"] = \
+		self.sim_stats.loc["fraction_not_same_zone_trips_satisfied"] = \
 			sim.n_not_same_zone_trips / self.sim_stats["n_bookings"]
 
-		self.sim_stats.loc["percentage_no_close_cars_unsatisfied"] = \
+		self.sim_stats.loc["fraction_no_close_cars_unsatisfied"] = \
 			sim.n_no_close_cars / self.sim_stats["n_unsatisfied"]
 
-		self.sim_stats.loc["percentage_deaths_unsatisfied"] = \
+		self.sim_stats.loc["fraction_deaths_unsatisfied"] = \
 			sim.n_deaths / self.sim_stats["n_unsatisfied"]
 
 		self.sim_stats.loc["n_charges"] = \
@@ -164,10 +161,10 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["n_charge_deaths"] = \
 			len(self.sim_charge_deaths)
 
-		self.sim_stats.loc["percentage_charge_deaths"] = \
+		self.sim_stats.loc["fraction_charge_deaths"] = \
 			len(self.sim_charge_deaths) / self.sim_stats.loc["n_charges"]
 
-		self.sim_stats.loc["percentage_charge_deaths_system"] = \
+		self.sim_stats.loc["fraction_charge_deaths_system"] = \
 			len(self.sim_charge_deaths) / self.sim_stats.loc["n_charges_system"]
 
 		self.sim_stats.loc["soc_avg"] = \
@@ -207,44 +204,44 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["tot_charging_energy"] = \
 			self.sim_charges["soc_delta_kwh"].sum()
 
-		self.sim_stats.loc["percentage_charges_system"] = \
+		self.sim_stats.loc["fraction_charges_system"] = \
 			self.sim_charges.groupby("operator")\
 			.date.count().loc["system"]\
 			/ len(self.sim_charges)
 
 		if "users" in self.sim_charges.operator.unique():
-			self.sim_stats.loc["percentage_charges_users"] = \
+			self.sim_stats.loc["fraction_charges_users"] = \
 				self.sim_charges.groupby("operator")\
 				.date.count().loc["users"]\
 				/ len(self.sim_charges)
 		else:
-			self.sim_stats.loc["percentage_charges_users"] = 0
+			self.sim_stats.loc["fraction_charges_users"] = 0
 
 		if "users" in self.sim_charges.operator.unique():
-			self.sim_stats.loc["percentage_energy_system"] = \
+			self.sim_stats.loc["fraction_energy_system"] = \
 				self.sim_charges.groupby("operator")\
 				.soc_delta_kwh.sum().loc["system"]\
 				/ self.sim_stats["tot_charging_energy"]
-			self.sim_stats.loc["percentage_energy_users"] = \
+			self.sim_stats.loc["fraction_energy_users"] = \
 				self.sim_charges.groupby("operator")\
 				.soc_delta_kwh.sum().loc["users"]\
 				/ self.sim_stats["tot_charging_energy"]
 		else:
-			self.sim_stats.loc["percentage_energy_system"] = 1
-			self.sim_stats.loc["percentage_energy_users"] = 0
+			self.sim_stats.loc["fraction_energy_system"] = 1
+			self.sim_stats.loc["fraction_energy_users"] = 0
 
 		if len(self.sim_users_charges_bookings):
-			self.sim_stats.loc["percentage_duration_system"] = \
+			self.sim_stats.loc["fraction_duration_system"] = \
 				self.sim_charges.groupby("operator")\
 				.duration.sum().loc["system"]\
 				/ self.sim_charges.duration.sum()
-			self.sim_stats.loc["percentage_duration_users"] = \
+			self.sim_stats.loc["fraction_duration_users"] = \
 				self.sim_charges.groupby("operator")\
 				.duration.sum().loc["users"]\
 				/ self.sim_charges.duration.sum()
 		else:
-			self.sim_stats.loc["percentage_duration_system"] = 1
-			self.sim_stats.loc["percentage_duration_users"] = 0
+			self.sim_stats.loc["fraction_duration_system"] = 1
+			self.sim_stats.loc["fraction_duration_users"] = 0
 
 		self.sim_stats.loc["charging_energy_event_avg"] = \
 			self.sim_charges.soc_delta_kwh.mean()

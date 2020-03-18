@@ -188,7 +188,7 @@ def single_run(conf_tuple):
 
 	plotter.plot_origin_heatmap()
 	plotter.plot_charging_needed_heatmap_system()
-	plotter.plot_charging_needed_heatmap_users()
+	#plotter.plot_charging_needed_heatmap_users()
 	plotter.plot_unsatisfied_origins_heatmap()
 
 	#plotter.plot_deaths_t_hist()

@@ -80,10 +80,21 @@ def multiple_runs(city, sim_type, sim_general_conf, sim_scenario_conf_grid,
 		"alpha", "fraction_unsatisfied", "beta"
 	)
 	plotter.plot_x_y_param()
+
 	plotter = EFFCS_MultipleRunsPlotter(
 		city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
-		"alpha", "cum_relo_t", "beta"
+		"alpha", "fraction_not_same_zone_trips", "beta"
 	)
 	plotter.plot_x_y_param()
 
+	plotter = EFFCS_MultipleRunsPlotter(
+		city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
+		"alpha", "fraction_no_close_cars", "beta"
+	)
+	plotter.plot_x_y_param()
 
+	plotter = EFFCS_MultipleRunsPlotter(
+		city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
+		"alpha", "fraction_not_enough_energy", "beta"
+	)
+	plotter.plot_x_y_param()
