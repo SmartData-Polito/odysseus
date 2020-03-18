@@ -60,13 +60,10 @@ class EFFCS_SimOutputPlotter ():
 			simOutput.sim_charges
 
 		self.sim_not_enough_energy_requests = \
-			pd.DataFrame(sim.sim_booking_requests_deaths)
+			pd.DataFrame(simOutput.sim_not_enough_energy_requests)
 
 		self.sim_no_close_car_requests = \
-			pd.DataFrame(sim.sim_no_close_car_requests)
-
-		self.sim_deaths = \
-			simOutput.sim_deaths
+			pd.DataFrame(simOutput.sim_no_close_car_requests)
 
 		self.sim_unsatisfied_requests = \
 			simOutput.sim_unsatisfied_requests
@@ -148,21 +145,21 @@ class EFFCS_SimOutputPlotter ():
 	def plot_events_profile (self):
 
 		fig, ax = plt.subplots(figsize=(15, 7))
-		plt.title("Percentage of events, single simulation")
+		plt.title("fraction of events, single simulation")
 		pd.DataFrame([
 			pd.Series( \
-				[self.simOutput.sim_stats["percentage_same_zone_trips_satisfied"],
-				 self.simOutput.sim_stats["percentage_not_same_zone_trips_satisfied"]],
+				[self.simOutput.sim_stats["fraction_same_zone_trips_satisfied"],
+				 self.simOutput.sim_stats["fraction_not_same_zone_trips_satisfied"]],
 				index=["same zone", "neighbor zone"],
 				name="satisfied %"),
 			pd.Series( \
-				[self.simOutput.sim_stats["percentage_no_close_cars_unsatisfied"],
-				 self.simOutput.sim_stats["percentage_deaths_unsatisfied"]],
+				[self.simOutput.sim_stats["fraction_no_close_cars_unsatisfied"],
+				 self.simOutput.sim_stats["fraction_deaths_unsatisfied"]],
 				index=["no close car", "not enough energy"],
 				name="unsatisfied %"),
 			pd.Series( \
-				[self.simOutput.sim_stats["percentage_unsatisfied"],
-				 self.simOutput.sim_stats["percentage_satisfied"]],
+				[self.simOutput.sim_stats["fraction_unsatisfied"],
+				 self.simOutput.sim_stats["fraction_satisfied"]],
 				index=["unsatisfied", "satified"],
 				name="events %"),
 
@@ -177,8 +174,8 @@ class EFFCS_SimOutputPlotter ():
 		fig, ax = plt.subplots(figsize=(15, 7))
 		pie_s = \
 			pd.Series( \
-				[self.simOutput.sim_stats["percentage_same_zone_trips_satisfied"],
-				 self.simOutput.sim_stats["percentage_not_same_zone_trips_satisfied"]],
+				[self.simOutput.sim_stats["fraction_same_zone_trips_satisfied"],
+				 self.simOutput.sim_stats["fraction_not_same_zone_trips_satisfied"]],
 				index=["same zone", "neighbor zone"],
 				name="events %"
 			)
@@ -197,8 +194,8 @@ class EFFCS_SimOutputPlotter ():
 		fig, ax = plt.subplots(figsize=(15, 7))
 		pie_s = \
 			pd.Series( \
-				[self.simOutput.sim_stats["percentage_no_close_cars_unsatisfied"],
-				 self.simOutput.sim_stats["percentage_deaths_unsatisfied"]],
+				[self.simOutput.sim_stats["fraction_no_close_cars_unsatisfied"],
+				 self.simOutput.sim_stats["fraction_deaths_unsatisfied"]],
 				index=["no close car", "not enough energy"],
 				name="events %"
 			)
@@ -217,8 +214,8 @@ class EFFCS_SimOutputPlotter ():
 		fig, ax = plt.subplots(figsize=(15, 7))
 		pie_s = \
 			pd.Series( \
-				[self.simOutput.sim_stats["percentage_satisfied"],
-				 self.simOutput.sim_stats["percentage_unsatisfied"]],
+				[self.simOutput.sim_stats["fraction_satisfied"],
+				 self.simOutput.sim_stats["fraction_unsatisfied"]],
 				index=["satisfied", "unsatified"],
 				name="events %"
 			)

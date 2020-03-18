@@ -69,7 +69,7 @@ def single_run(conf_tuple):
 		sim_traceB = run_traceB_sim \
 			(simInput=simInput_traceB)
 		simOutput_traceB = EFFCS_SimOutput(sim_traceB)
-		sim_stats  = simOutput_traceB.sim_stats
+		sim_stats = simOutput_traceB.sim_stats
 		simInput = simInput_traceB
 		simOutput = simOutput_traceB
 
@@ -110,10 +110,16 @@ def single_run(conf_tuple):
 			"sim_charges.pickle"
 		)
 	)
-	simOutput.sim_deaths.to_pickle(
+	simOutput.sim_not_enough_energy_requests.to_pickle(
 		os.path.join(
 			results_path,
 			"sim_unsatisfied_no-energy.pickle"
+		)
+	)
+	simOutput.sim_no_close_car_requests.to_pickle(
+		os.path.join(
+			results_path,
+			"sim_unsatisfied_no_close_car.pickle"
 		)
 	)
 	simOutput.sim_unsatisfied_requests.to_pickle(

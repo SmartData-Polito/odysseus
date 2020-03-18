@@ -65,7 +65,7 @@ class EFFCS_Sim ():
 		self.sim_booking_requests = []
 		self.sim_booking_requests_deaths = []
 		self.sim_unsatisfied_requests = []
-		self.sim_no_close_cars_requests = []
+		self.sim_no_close_car_requests = []
 
 		self.n_booking_requests = 0
 		self.n_same_zone_trips = 0
