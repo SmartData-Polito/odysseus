@@ -1,12 +1,10 @@
-import datetime
-
 sim_scenario_conf = {
 
 	"requests_rate_factor": 1,
 	"n_cars_factor": 1,
 	"time_estimation": True,
-
 	"queuing": True,
+
 	"alpha": 50,
 	"beta": 100,
 
@@ -22,9 +20,9 @@ sim_scenario_conf = {
 	"system_cps": False,
 	"willingness": 0.0,
 
-	"relocation": True,
-	"finite_workers": False,
-
 	"battery_swap": True,
+
+	"relocation": False,
+	"finite_workers": False,
 
 }
