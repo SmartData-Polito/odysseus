@@ -4,8 +4,6 @@ import datetime
 from simulator.SingleRun.single_run import single_run
 from simulator.MultipleRun.multiple_runs import multiple_runs
 
-from simulator.utils.path_utils import create_output_folders
-
 confs_dict = {}
 
 from simulator.SimulationInput.confs.sim_general_conf import sim_general_conf
@@ -23,8 +21,6 @@ sim_run_mode = sys.argv[3]
 sim_scenario_name = sys.argv[4]
 
 print (datetime.datetime.now(), city_name, sim_scenario_name, "starting..")
-
-create_output_folders(city_name, sim_scenario_name)
 
 if sim_run_mode == "single_run":
     single_run((
