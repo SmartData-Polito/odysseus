@@ -3,10 +3,10 @@ import itertools
 
 import numpy as np
 
-from utils.car_utils import get_soc_delta
-from utils.car_utils import soc_to_kwh
+from simulator.utils.car_utils import get_soc_delta
+from simulator.utils.car_utils import soc_to_kwh
+from simulator.Simulation.EFFCS_Sim import EFFCS_Sim
 
-from Simulation.EFFCS_Sim import EFFCS_Sim
 
 class EventG_EFFCS_Sim (EFFCS_Sim):
 

@@ -1,8 +1,10 @@
 import itertools
 import datetime
+
 import numpy as np
-from utils.car_utils import *
-from Simulation.EFFCS_Sim import EFFCS_Sim
+
+from simulator.utils.car_utils import *
+from simulator.Simulation.EFFCS_Sim import EFFCS_Sim
 
 class TraceB_EFFCS_Sim (EFFCS_Sim):
 

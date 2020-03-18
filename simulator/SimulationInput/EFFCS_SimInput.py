@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import KernelDensity
-from utils.car_utils import get_soc_delta
+
+from simulator.utils.car_utils import get_soc_delta
 
 
 class EFFCS_SimInput ():

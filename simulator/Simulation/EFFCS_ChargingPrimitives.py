@@ -2,8 +2,8 @@ import datetime
 
 import numpy as np
 
-from utils.car_utils import soc_to_kwh
-from utils.car_utils import get_soc_delta
+from simulator.utils.car_utils import soc_to_kwh
+from simulator.utils.car_utils import get_soc_delta
 
 
 def get_charging_time (soc_delta,
