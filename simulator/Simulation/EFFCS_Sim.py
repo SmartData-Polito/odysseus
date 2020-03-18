@@ -65,6 +65,7 @@ class EFFCS_Sim ():
 		self.sim_booking_requests = []
 		self.sim_booking_requests_deaths = []
 		self.sim_unsatisfied_requests = []
+		self.sim_no_close_cars_requests = []
 
 		self.n_booking_requests = 0
 		self.n_same_zone_trips = 0
@@ -194,6 +195,7 @@ class EFFCS_Sim ():
 		if not available_car_flag:
 			self.n_no_close_cars += 1
 			self.sim_unsatisfied_requests += [booking_request]
+			self.sim_no_close_car_requests += [booking_request]
 
 		if not found_car_flag and available_car_flag:
 			self.n_deaths += 1

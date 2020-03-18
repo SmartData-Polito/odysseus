@@ -32,10 +32,12 @@ class EFFCS_SimOutput ():
 
 		self.sim_charges = \
 			pd.DataFrame(sim.chargingStrategy.sim_charges)
-		# print(self.sim_charges)
 
-		self.sim_deaths = \
+		self.sim_not_enough_energy_requests = \
 			pd.DataFrame(sim.sim_booking_requests_deaths)
+
+		self.sim_no_close_car_requests = \
+			pd.DataFrame(sim.sim_no_close_car_requests)
 
 		self.sim_unsatisfied_requests = \
 			pd.DataFrame(sim.sim_unsatisfied_requests)

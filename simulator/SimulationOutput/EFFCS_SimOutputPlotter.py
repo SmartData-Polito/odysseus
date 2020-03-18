@@ -59,6 +59,12 @@ class EFFCS_SimOutputPlotter ():
 		self.sim_charges = \
 			simOutput.sim_charges
 
+		self.sim_not_enough_energy_requests = \
+			pd.DataFrame(sim.sim_booking_requests_deaths)
+
+		self.sim_no_close_car_requests = \
+			pd.DataFrame(sim.sim_no_close_car_requests)
+
 		self.sim_deaths = \
 			simOutput.sim_deaths
 
@@ -228,12 +234,67 @@ class EFFCS_SimOutputPlotter ():
 #        plt.show()
 		plt.close()
 
+
+	def plot_fleet_status (self):
+
+		plt.figure()
+
+		self.sim_booking_requests\
+		   .set_index("start_time")\
+		   .n_cars_available\
+		   .plot(label="available", linewidth=2, alpha=0.7)
+		plt.legend()
+		plt.title("number of available cars in time")
+		plt.xlabel("t")
+		plt.ylabel("n_cars")
+		plt.savefig(os.path.join(self.figures_path,
+			 "n_cars_available_profile.png"))
+		# plt.show()
+		plt.close()
+
+		plt.figure()
+
+		self.sim_booking_requests\
+		   .set_index("start_time")\
+		   .n_cars_charging_system\
+		   .plot(label="system charging", linewidth=2, alpha=0.7)
+
+		self.sim_booking_requests\
+		   .set_index("start_time")\
+		   .n_cars_charging_users\
+		   .plot(label="users charging", linewidth=2, alpha=0.7)
+
+		self.sim_booking_requests\
+		   .set_index("start_time")\
+		   .n_cars_booked\
+		   .plot(label="booked", linewidth=2, alpha=0.7)
+
+		self.sim_booking_requests\
+		   .set_index("start_time")\
+		   .n_cars_dead\
+		   .plot(label="dead", linewidth=2, alpha=0.7)
+
+		plt.legend()
+		plt.title("number of cars charging/available/booked in time")
+		plt.xlabel("t")
+		plt.ylabel("n_cars")
+		plt.savefig(os.path.join(self.figures_path,
+			 "n_cars_profile.png"))
+		# plt.show()
+		plt.close()
+
 	def plot_hourly_events_boxplot (self, which_df, start_or_end):
 
 		if which_df == "bookings":
 			df = self.sim_bookings
 		if which_df == "charges":
 			df = self.sim_charges
+		if which_df == "unsatisfied":
+			df = self.sim_unsatisfied_requests
+		if which_df == "no_close_car":
+			df = self.sim_no_close_car_requests
+		if which_df == "not_enough_energy":
+			df = self.sim_not_enough_energy_requests
 
 		df = get_time_group_columns(df)
 		trips_df_norm_count = get_time_grouped_hourly_count(
@@ -293,34 +354,6 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_charging_duration_hist (self):
-
-		plt.figure()
-		self.sim_charges.duration.apply\
-		   (lambda x: x/60).hist\
-		   (bins=50, cumulative=False, density=True)
-		plt.title("charge duration histogram")
-		plt.xlabel("hours")
-		plt.savefig(os.path.join(self.figures_path,
-			 "duration_hist.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_charging_energy_avg (self):
-
-		plt.figure()
-		(self.sim_charges.sort_values\
-		   ("start_time").groupby\
-		   ("hour").soc_delta_kwh.sum() / len(self.sim_charges.date.unique()))\
-		   .plot(marker="o")
-		plt.title("average charging energy by hour")
-		plt.xlabel("hour")
-		plt.ylabel("E [kwh]")
-		plt.savefig(os.path.join(self.figures_path,
-			 "avg_charging_energy.png"))
-		# plt.show()
-		plt.close()
-
 	def plot_tot_energy (self):
 
 		plt.figure()
@@ -332,54 +365,6 @@ class EFFCS_SimOutputPlotter ():
 		plt.ylabel("E [kwh]")
 		plt.savefig(os.path.join(self.figures_path,
 			 "charging_energy_t.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_fleet_status (self):
-
-		plt.figure()
-
-		self.sim_booking_requests\
-		   .set_index("start_time")\
-		   .n_cars_available\
-		   .plot(label="available", linewidth=2, alpha=0.7)
-		plt.legend()
-		plt.title("number of available cars in time")
-		plt.xlabel("t")
-		plt.ylabel("n_cars")
-		plt.savefig(os.path.join(self.figures_path,
-			 "n_cars_available_profile.png"))
-		# plt.show()
-		plt.close()
-
-		plt.figure()
-
-		self.sim_booking_requests\
-		   .set_index("start_time")\
-		   .n_cars_charging_system\
-		   .plot(label="system charging", linewidth=2, alpha=0.7)
-
-		self.sim_booking_requests\
-		   .set_index("start_time")\
-		   .n_cars_charging_users\
-		   .plot(label="users charging", linewidth=2, alpha=0.7)
-
-		self.sim_booking_requests\
-		   .set_index("start_time")\
-		   .n_cars_booked\
-		   .plot(label="booked", linewidth=2, alpha=0.7)
-
-		self.sim_booking_requests\
-		   .set_index("start_time")\
-		   .n_cars_dead\
-		   .plot(label="dead", linewidth=2, alpha=0.7)
-
-		plt.legend()
-		plt.title("number of cars charging/available/booked in time")
-		plt.xlabel("t")
-		plt.ylabel("n_cars")
-		plt.savefig(os.path.join(self.figures_path,
-			 "n_cars_profile.png"))
 		# plt.show()
 		plt.close()
 
@@ -400,23 +385,6 @@ class EFFCS_SimOutputPlotter ():
 		plt.ylabel("n cars")
 		plt.savefig(os.path.join(self.figures_path,
 			 "n_cars_charging_t.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_charging_t_hist (self):
-
-		plt.figure()
-		self.sim_system_charges_bookings["end_hour"].hist\
-		   (bins=24, alpha=0.7, density=True,
-				 label="system")
-		self.sim_users_charges_bookings["end_hour"].hist\
-		   (bins=24, alpha=0.7, density=True,
-				 label="users")
-		plt.legend()
-		plt.title("charging timestamps histogram system vs users")
-		plt.xlabel("hour")
-		plt.savefig(os.path.join(self.figures_path,
-			 "charging_t_hist.png"))
 		# plt.show()
 		plt.close()
 
@@ -481,20 +449,6 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_unsatisfied_t_hist (self):
-
-		plt.figure()
-		self.sim_unsatisfied_requests["hour"].hist\
-		   (bins=24, alpha=0.7, density=True,
-				 label="system")
-		plt.legend()
-		plt.title("unsatisfied demand timestamps histogram")
-		plt.xlabel("hour")
-		plt.savefig(os.path.join(self.figures_path,
-			 "unsatisfied_t_hist.png"))
-		# plt.show()
-		plt.close()
-
 	def plot_unsatisfied_origins_heatmap (self):
 
 		fig,ax = plt.subplots(1,1,figsize=(15,15))
@@ -511,21 +465,6 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_deaths_t_hist (self):
-
-
-		plt.figure()
-		self.sim_deaths["hour"].hist\
-		   (bins=24, alpha=0.7, density=True,
-				 label="system")
-		plt.legend()
-		plt.title("deaths timestamps histogram")
-		plt.xlabel("hour")
-		plt.savefig(os.path.join(self.figures_path,
-			 "deaths_t_hist.png"))
-		# plt.show()
-		plt.close()
-
 	def plot_deaths_origins_heatmap (self):
 
 		fig,ax = plt.subplots(1,1,figsize=(15,15))
@@ -538,20 +477,6 @@ class EFFCS_SimOutputPlotter ():
 		#plt.ylabel("latitude")
 		plt.savefig(os.path.join(self.figures_path,
 			 "deaths_origins_heatmap.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_charge_deaths_t_hist (self):
-
-		plt.figure()
-		self.sim_charge_deaths["hour"].hist\
-		   (bins=24, alpha=0.7, density=True,
-				 label="system")
-		plt.legend()
-		plt.title("charge deaths timestamps histogram")
-		plt.xlabel("hour")
-		plt.savefig(os.path.join(self.figures_path,
-			 "charge_deaths_t_hist.png"))
 		# plt.show()
 		plt.close()
 

@@ -180,21 +180,17 @@ def single_run(conf_tuple):
 
 	plotter.plot_hourly_events_boxplot("bookings", "start")
 	plotter.plot_hourly_events_boxplot("bookings", "end")
-
-	#plotter.plot_charging_energy_avg()
-	#plotter.plot_charging_t_hist()
-	#plotter.plot_unsatisfied_t_hist()
-	#plotter.plot_charging_duration_hist()
+	plotter.plot_hourly_events_boxplot("charges", "start")
+	plotter.plot_hourly_events_boxplot("charges", "end")
+	plotter.plot_hourly_events_boxplot("unsatisfied", "start")
+	plotter.plot_hourly_events_boxplot("no_close_car", "start")
+	plotter.plot_hourly_events_boxplot("not_enough_energy", "start")
 
 	plotter.plot_origin_heatmap()
 	plotter.plot_charging_needed_heatmap_system()
 	#plotter.plot_charging_needed_heatmap_users()
 	plotter.plot_unsatisfied_origins_heatmap()
-
-	#plotter.plot_deaths_t_hist()
 	#plotter.plot_deaths_origins_heatmap()
-
-	#plotter.plot_charge_deaths_t_hist()
 	#plotter.plot_charge_deaths_origins_heatmap()
 
 	return sim_stats
