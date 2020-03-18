@@ -11,9 +11,6 @@ matplotlib.rcParams["axes.grid"] = True
 
 import seaborn as sns
 
-from SimulationOutput.plot_multiple_runs import plot_events_percentage
-from SimulationOutput.plot_multiple_runs import plot_param_cross_section
-
 
 class EFFCS_MultipleRunsPlotter:
 
