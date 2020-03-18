@@ -92,8 +92,6 @@ class EFFCS_SimOutput ():
 			([self.sim_stats,
 			  pd.Series(sim.simInput.sim_scenario_conf)])
 
-		print(self.sim_stats)
-
 		self.sim_stats.loc["n_same_zone_trips"] = \
 			sim.n_same_zone_trips
 
