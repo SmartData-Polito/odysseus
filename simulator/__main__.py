@@ -37,6 +37,7 @@ elif sim_run_mode == "multiple_runs":
         sim_general_conf,
         confs_dict[sim_run_mode],
         int(n_cores),
+        "traceB",
         sim_scenario_name
     )
 
