@@ -12,7 +12,7 @@ from simulator.SingleRun.get_eventG_input import get_eventG_input
 from simulator.SingleRun.run_traceB_sim import run_traceB_sim
 from simulator.SingleRun.run_eventG_sim import run_eventG_sim
 from simulator.SingleRun.run_eventG_sim import get_eventG_sim_stats
-from simulator.SingleRun.run_eventG_sim import get_traceB_sim_stats
+from simulator.SingleRun.run_traceB_sim import get_traceB_sim_stats
 from simulator.SimulationOutput.EFFCS_MultipleRunsPlotter import EFFCS_MultipleRunsPlotter
 
 
