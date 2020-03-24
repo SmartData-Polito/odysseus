@@ -234,7 +234,7 @@ class EFFCS_SimOutputPlotter ():
 
 	def plot_fleet_status (self):
 
-		plt.figure()
+		plt.figure(15, 7)
 
 		self.sim_booking_requests\
 		   .set_index("start_time")\
