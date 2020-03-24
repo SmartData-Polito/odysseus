@@ -56,6 +56,24 @@ def get_time_grouped_hourly_count(df_norm, start_or_end, which_df):
 	return time_grouped_hourly_count
 
 
+def get_time_grouped_hourly_mean(df_norm, start_or_end, which_df, mean_col):
+
+	time_grouped_hourly_count = pd.DataFrame()
+
+	for time_categorial_col in ["hour", "weekday", "daymoment", "weekend"]:
+
+		time_grouped_hourly_count[time_categorial_col] = df_norm.set_index(
+			"_".join([start_or_end, "time"])
+		).resample("60Min")["_".join([start_or_end, time_categorial_col])].apply(
+			lambda x: x.unique()[0] if len(x) > 0 else np.NaN
+		).fillna(0)
+
+		time_grouped_hourly_count["_".join([which_df, "hourly", "mean"])] = df_norm.set_index(
+			"_".join([start_or_end, "time"])
+		).resample("60Min")[mean_col].mean()
+
+	return time_grouped_hourly_count
+
 def get_grouped_resampled_count (df, group_cols, freq):
 	grouped_resampled_df = pd.DataFrame(
 		index=df.set_index("start_time").iloc[:, 0].resample(freq).count().index

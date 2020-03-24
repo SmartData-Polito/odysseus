@@ -22,32 +22,25 @@ class EFFCS_SimOutput ():
 		self.sim_general_conf = sim.simInput.sim_general_conf
 		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
 
-		self.sim_booking_requests = \
-			pd.DataFrame(sim.sim_booking_requests)
+		self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
 		#print(self.sim_booking_requests.shape)
 
-		self.sim_bookings = \
-			self.sim_booking_requests.dropna()
+		self.sim_bookings = self.sim_booking_requests.dropna()
 		#print(self.sim_bookings.shape)
 
-		self.sim_charges = \
-			pd.DataFrame(sim.chargingStrategy.sim_charges)
+		self.sim_charges = pd.DataFrame(sim.chargingStrategy.sim_charges)
 
-		self.sim_not_enough_energy_requests = \
-			pd.DataFrame(sim.sim_booking_requests_deaths)
+		self.sim_not_enough_energy_requests = pd.DataFrame(sim.sim_booking_requests_deaths)
 
-		self.sim_no_close_car_requests = \
-			pd.DataFrame(sim.sim_no_close_car_requests)
+		self.sim_no_close_car_requests = pd.DataFrame(sim.sim_no_close_car_requests)
 
-		self.sim_unsatisfied_requests = \
-			pd.DataFrame(sim.sim_unsatisfied_requests)
+		self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 
-		self.sim_system_charges_bookings = \
-			pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
+		self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
 
-		self.sim_system_charges_bookings["end_hour"] = \
-			self.sim_system_charges_bookings["end_time"].apply\
-			(lambda d: d.hour)
+		self.sim_system_charges_bookings["end_hour"] = self.sim_system_charges_bookings["end_time"].apply(
+			lambda d: d.hour
+		)
 
 		self.sim_users_charges_bookings = pd.DataFrame\
 			(sim.chargingStrategy.list_users_charging_bookings,
@@ -78,6 +71,8 @@ class EFFCS_SimOutput ():
 
 		self.sim_charge_deaths = \
 					pd.DataFrame(sim.chargingStrategy.sim_unfeasible_charge_bookings)
+
+		self.grid = sim.simInput.grid
 
 		# Sim Stats creation
 
@@ -271,3 +266,26 @@ class EFFCS_SimOutput ():
 
 		self.sim_stats.loc["avg_hourly_relo_t"] = \
 			self.sim_charges.groupby("hour").cr_timeout.sum().mean()
+
+		self.grid[
+			"origin_count"
+		] = self.sim_booking_requests.origin_id.value_counts()
+		self.grid[
+			"destination_count"
+		] = self.sim_booking_requests.destination_id.value_counts()
+		self.grid[
+			"charge_needed_system_zones_count"
+		] = self.sim_system_charges_bookings.destination_id.value_counts()
+		self.grid[
+			"charge_needed_users_zones_count"
+		] = self.sim_users_charges_bookings.destination_id.value_counts()
+		self.grid[
+			"unsatisfied_demand_origins_fraction"
+		] = self.sim_unsatisfied_requests.origin_id.value_counts() / len(self.sim_unsatisfied_requests)
+		self.grid[
+			"not_enough_energy_origins_count"
+		] = self.sim_not_enough_energy_requests.origin_id.value_counts()
+		if len(self.sim_charge_deaths):
+			self.grid[
+				"charge_deaths_origins_count"
+			] = self.sim_charge_deaths.zone_id.value_counts()

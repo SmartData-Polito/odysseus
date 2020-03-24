@@ -9,8 +9,6 @@ from simulator.DataStructures.City import City
 from simulator.SimulationInput.EFFCS_SimConfGrid import EFFCS_SimConfGrid
 from simulator.SingleRun.get_traceB_input import get_traceB_input
 from simulator.SingleRun.get_eventG_input import get_eventG_input
-from simulator.SingleRun.run_traceB_sim import run_traceB_sim
-from simulator.SingleRun.run_eventG_sim import run_eventG_sim
 from simulator.SingleRun.run_eventG_sim import get_eventG_sim_stats
 from simulator.SingleRun.run_traceB_sim import get_traceB_sim_stats
 from simulator.SimulationOutput.EFFCS_MultipleRunsPlotter import EFFCS_MultipleRunsPlotter
@@ -36,7 +34,7 @@ def multiple_runs(city, sim_run_mode, sim_general_conf, sim_scenario_conf_grid, 
 	with mp.Pool(n_cores) as pool:
 
 		city_obj = City(city, sim_general_conf)
-		sim_conf_grid = EFFCS_SimConfGrid(sim_general_conf, sim_scenario_conf_grid)
+		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 
 		pool_stats_list = []
 		for i in np.arange(0, len(sim_conf_grid.conf_list), n_cores):

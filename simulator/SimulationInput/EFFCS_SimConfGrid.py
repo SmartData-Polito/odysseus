@@ -6,7 +6,7 @@ import pandas as pd
 
 class EFFCS_SimConfGrid ():
     
-    def __init__ (self, general_conf, conf_grid):
+    def __init__ (self, conf_grid):
 
         self.conf_keys = conf_grid.values()
         self.conf_list = []        

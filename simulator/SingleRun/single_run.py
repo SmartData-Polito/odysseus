@@ -46,10 +46,11 @@ def single_run(conf_tuple):
 
 	if sim_type == "eventG":
 
-		simInput_eventG = get_eventG_input\
-			((sim_general_conf,
-			 sim_scenario_conf,
-			 city_obj))
+		simInput_eventG = get_eventG_input((
+			sim_general_conf,
+			sim_scenario_conf,
+			city_obj
+		))
 		sim_eventG = run_eventG_sim\
 			(simInput = simInput_eventG)
 		simOutput_eventG = EFFCS_SimOutput(sim_eventG)
@@ -69,7 +70,6 @@ def single_run(conf_tuple):
 		sim_stats = simOutput_traceB.sim_stats
 		simInput = simInput_traceB
 		simOutput = simOutput_traceB
-
 
 	sim_stats.to_pickle\
 		(os.path.join(results_path,
@@ -171,39 +171,38 @@ def single_run(conf_tuple):
 			"sim_charges_10.csv"
 		)
 	)
+
 	plotter = EFFCS_SimOutputPlotter\
-		(simOutput, city, simInput.grid, sim_scenario_name)
+		(simOutput, city, sim_scenario_name)
 
-	plotter.plot_events_profile()
-	plotter.plot_fleet_status()
+	plotter.plot_events_profile_barh()
+	plotter.plot_events_profile_pies()
 
-	plotter.plot_tot_energy()
-	plotter.plot_n_cars_charging()
+	plotter.plot_fleet_status_t()
+	plotter.plot_tot_energy_t()
+	plotter.plot_n_cars_charging_t()
 	plotter.plot_relo_cost_t()
 
-	plotter.plot_hourly_events_boxplot("bookings", "start")
-	plotter.plot_hourly_events_boxplot("bookings", "end")
-	plotter.plot_hourly_events_boxplot("charges", "start")
-	plotter.plot_hourly_events_boxplot("charges", "end")
-	plotter.plot_hourly_events_boxplot("unsatisfied", "start")
-	plotter.plot_hourly_events_boxplot("no_close_car", "start")
-	plotter.plot_hourly_events_boxplot("not_enough_energy", "start")
+	plotter.plot_events_hourly_count_boxplot("bookings", "start")
+	plotter.plot_events_hourly_count_boxplot("bookings", "end")
+	plotter.plot_events_hourly_count_boxplot("charges", "start")
+	plotter.plot_events_hourly_count_boxplot("charges", "end")
+	plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
+	plotter.plot_events_hourly_count_boxplot("no_close_car", "start")
+	plotter.plot_events_hourly_count_boxplot("not_enough_energy", "start")
 
-	plotter.plot_origin_heatmap()
-	plotter.plot_charging_needed_heatmap_system()
-	#plotter.plot_charging_needed_heatmap_users()
-	plotter.plot_unsatisfied_origins_heatmap()
-	#plotter.plot_deaths_origins_heatmap()
-	#plotter.plot_charge_deaths_origins_heatmap()
+	plotter.plot_n_cars_charging_hourly_mean_boxplot()
+
+	for col in [
+		"origin_count",
+		"destination_count",
+		"charge_needed_system_zones_count",
+		"charge_needed_users_zones_count",
+		"unsatisfied_demand_origins_fraction",
+		"not_enough_energy_origins_count",
+		"charge_deaths_origins_count",
+	]:
+		if col in simOutput.grid:
+			plotter.plot_choropleth(col)
 
 	return sim_stats
-
-# from SimulationInput.confs.sim_general_conf import sim_general_conf
-# from SimulationInput.confs.single_run_conf import sim_scenario_conf
-# single_run((
-# 	"Torino",
-# 	sim_general_conf,
-# 	sim_scenario_conf,
-# 	"eventG",
-# 	"single_run"
-# ))

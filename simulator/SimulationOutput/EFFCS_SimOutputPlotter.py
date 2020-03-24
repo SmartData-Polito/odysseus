@@ -27,9 +27,12 @@ from city_data_manager.city_data_source.utils.time_utils import *
 
 class EFFCS_SimOutputPlotter ():
 
-	def __init__ (self, simOutput, city, grid, sim_scenario_name = "trial"):
+	def __init__ (self, simOutput, city, sim_scenario_name):
 
+		self.simOutput = simOutput
 		self.city = city
+		self.grid = simOutput.grid
+		self.sim_scenario_name = sim_scenario_name
 
 		model_general_conf_string = "_".join([
 			str(v) for v in simOutput.sim_general_conf.values()]
@@ -48,40 +51,31 @@ class EFFCS_SimOutputPlotter ():
 		)
 		os.makedirs(self.figures_path, exist_ok=True)
 
-		self.grid = grid
+		self.sim_booking_requests = simOutput.sim_booking_requests
 
-		self.sim_booking_requests = \
-			simOutput.sim_booking_requests
+		self.sim_bookings = simOutput.sim_booking_requests
 
-		self.sim_bookings = \
-			simOutput.sim_booking_requests
+		self.sim_charges = simOutput.sim_charges
 
-		self.sim_charges = \
-			simOutput.sim_charges
+		self.sim_not_enough_energy_requests = pd.DataFrame(simOutput.sim_not_enough_energy_requests)
 
-		self.sim_not_enough_energy_requests = \
-			pd.DataFrame(simOutput.sim_not_enough_energy_requests)
+		self.sim_no_close_car_requests = pd.DataFrame(simOutput.sim_no_close_car_requests)
 
-		self.sim_no_close_car_requests = \
-			pd.DataFrame(simOutput.sim_no_close_car_requests)
+		self.sim_unsatisfied_requests = simOutput.sim_unsatisfied_requests
 
-		self.sim_unsatisfied_requests = \
-			simOutput.sim_unsatisfied_requests
+		self.sim_system_charges_bookings = simOutput.sim_system_charges_bookings
 
-		self.sim_system_charges_bookings = \
-			simOutput.sim_system_charges_bookings
+		self.sim_users_charges_bookings = simOutput.sim_users_charges_bookings
 
-		self.sim_users_charges_bookings = \
-			simOutput.sim_users_charges_bookings
+		self.sim_cars_events = pd.concat([
+			self.sim_bookings, self.sim_charges
+		], ignore_index=True, sort=False).sort_values("start_time")
 
-		self.sim_cars_events = pd.concat\
-			([self.sim_bookings, self.sim_charges], ignore_index=True, sort=False)\
-			.sort_values("start_time")
-
-		self.sim_charge_deaths = \
-			simOutput.sim_charge_deaths
+		self.sim_charge_deaths = simOutput.sim_charge_deaths
 
 		self.simOutput = simOutput
+
+	def plot_city_zones(self):
 
 		fig, ax = plt.subplots(1, 1, figsize=(15, 15))
 		plt.title("")
@@ -89,15 +83,14 @@ class EFFCS_SimOutputPlotter ():
 		plt.xticks([])
 		plt.ylabel(None)
 		plt.yticks([])
-		grid.plot(color="white", edgecolor="black", ax=ax)
-		grid.plot \
-			(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
-		plt.savefig(os.path.join(self.figures_path,
-			 "city_zones.png"),
-				transparent=True)
+		self.grid.plot(color="white", edgecolor="black", ax=ax)
+		self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
+		plt.savefig(os.path.join(self.figures_path, "city_zones.png"), transparent=True)
 		plt.close()
 
-		if sim_scenario_name == "only_hub":
+	def plot_charging_infrastructure(self):
+
+		if self.simOutput.sim_scenario_conf["hub"]:
 
 			fig, ax = plt.subplots(1, 1, figsize=(15, 15))
 			plt.title("")
@@ -105,26 +98,17 @@ class EFFCS_SimOutputPlotter ():
 			plt.xticks([])
 			plt.ylabel(None)
 			plt.yticks([])
-			grid.plot(color="white", edgecolor="black", ax=ax)
-			grid.plot \
-				(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
-			grid.iloc[self.simOutput.sim_stats["hub_zone"]:self.simOutput.sim_stats["hub_zone"]+1]\
-				.plot(ax=ax)
-			plt.savefig(os.path.join(self.figures_path,
-				 "hub_location.png"),
-				transparent=True)
+			self.grid.plot(color="white", edgecolor="black", ax=ax)
+			self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
+			self.grid.iloc[self.simOutput.sim_stats["hub_zone"]:self.simOutput.sim_stats["hub_zone"]+1].plot(ax=ax)
+			plt.savefig(os.path.join(self.figures_path, "hub_location.png"), transparent=True)
 			plt.close()
 
-		if sim_scenario_name == "only_cps":
+		elif self.simOutput.sim_scenario_conf["cps"]:
 
-			charging_zones = \
-				pd.Index(self.sim_charges\
-				.zone_id.unique())
-			charging_poles_by_zone = \
-				self.sim_charges \
-				.zone_id.value_counts()
-			grid.loc[charging_zones, "poles_count"] = \
-				charging_poles_by_zone
+			charging_zones = pd.Index(self.sim_charges.zone_id.unique())
+			charging_poles_by_zone = self.sim_charges.zone_id.value_counts()
+			self.grid.loc[charging_zones, "poles_count"] = charging_poles_by_zone
 
 			fig, ax = plt.subplots(1, 1, figsize=(15, 15))
 			plt.title("")
@@ -132,155 +116,155 @@ class EFFCS_SimOutputPlotter ():
 			plt.xticks([])
 			plt.ylabel(None)
 			plt.yticks([])
-			grid.plot(color="white", edgecolor="black", ax=ax)
-			grid.plot \
-				(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
-			grid.loc[charging_zones].plot(ax=ax)
+			self.grid.plot(color="white", edgecolor="black", ax=ax)
+			self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
+			self.grid.loc[charging_zones].plot(ax=ax)
 			# grid.dropna().plot(column="poles_count", ax=ax, legend=True)
-			plt.savefig(os.path.join(self.figures_path,
-				 "cps_locations.png"),
-				transparent=True)
+			plt.savefig(os.path.join(self.figures_path, "cps_locations.png"), transparent=True)
 			plt.close()
 
-	def plot_events_profile (self):
+	def plot_events_profile_barh (self):
 
 		fig, ax = plt.subplots(figsize=(15, 7))
 		plt.title("fraction of events, single simulation")
 		pd.DataFrame([
-			pd.Series( \
-				[self.simOutput.sim_stats["fraction_same_zone_trips_satisfied"],
-				 self.simOutput.sim_stats["fraction_not_same_zone_trips_satisfied"]],
-				index=["same zone", "neighbor zone"],
-				name="satisfied %"),
-			pd.Series( \
-				[self.simOutput.sim_stats["fraction_no_close_cars_unsatisfied"],
-				 self.simOutput.sim_stats["fraction_deaths_unsatisfied"]],
-				index=["no close car", "not enough energy"],
-				name="unsatisfied %"),
-			pd.Series( \
-				[self.simOutput.sim_stats["fraction_unsatisfied"],
-				 self.simOutput.sim_stats["fraction_satisfied"]],
-				index=["unsatisfied", "satified"],
-				name="events %"),
-
+			pd.Series([
+				self.simOutput.sim_stats["fraction_same_zone_trips_satisfied"],
+				self.simOutput.sim_stats["fraction_not_same_zone_trips_satisfied"]
+			], index=["same zone", "neighbor zone"], name="satisfied %"),
+			pd.Series([
+				self.simOutput.sim_stats["fraction_no_close_cars_unsatisfied"],
+				self.simOutput.sim_stats["fraction_deaths_unsatisfied"]
+			], index=["no close car", "not enough energy"], name="unsatisfied %"),
+			pd.Series([
+				self.simOutput.sim_stats["fraction_unsatisfied"],
+				self.simOutput.sim_stats["fraction_satisfied"]
+			], index=["unsatisfied", "satisfied"], name="events %"),
 		]).plot.barh(stacked=True, ax=ax)
 
 		plt.tight_layout()
-		plt.savefig(os.path.join(self.figures_path,
-			 "events_profile.png"))
+		plt.savefig(os.path.join(self.figures_path, "events_profile.png"))
 		# plt.show()
 		plt.close()
 
-		fig, ax = plt.subplots(figsize=(15, 7))
-		pie_s = \
-			pd.Series( \
-				[self.simOutput.sim_stats["fraction_same_zone_trips_satisfied"],
-				 self.simOutput.sim_stats["fraction_not_same_zone_trips_satisfied"]],
-				index=["same zone", "neighbor zone"],
-				name="events %"
-			)
-		plt.pie(pie_s.values,
-				colors=["yellowgreen", "olivedrab"],
-				labels=pie_s.index,
-				autopct="%1.1f%%",)
+	def plot_events_profile_pies(self):
 
+		plt.figure(figsize=(10, 10))
+		pie_s = pd.Series([
+			self.simOutput.sim_stats["fraction_same_zone_trips_satisfied"],
+			self.simOutput.sim_stats["fraction_not_same_zone_trips_satisfied"]
+		], index=["same zone", "neighbor zone"], name="events %")
+		plt.pie(
+			pie_s.values,
+			colors=["yellowgreen", "olivedrab"],
+			labels=pie_s.index,
+			autopct="%1.1f%%",
+		)
 		plt.tight_layout()
-		plt.savefig(os.path.join(self.figures_path,
-			 "events_profile_pie1.png"),
-				transparent=True)
+		plt.savefig(os.path.join(self.figures_path, "events_profile_satisfied_pie.png"), transparent=True)
 #        plt.show()
 		plt.close()
 
-		fig, ax = plt.subplots(figsize=(15, 7))
-		pie_s = \
-			pd.Series( \
-				[self.simOutput.sim_stats["fraction_no_close_cars_unsatisfied"],
-				 self.simOutput.sim_stats["fraction_deaths_unsatisfied"]],
-				index=["no close car", "not enough energy"],
-				name="events %"
-			)
-		plt.pie(pie_s.values,
-				colors=["grey", "yellow"],
-				labels=pie_s.index,
-				autopct="%1.1f%%")
-
+		plt.figure(figsize=(10, 10))
+		pie_s = pd.Series([
+			self.simOutput.sim_stats["fraction_no_close_cars_unsatisfied"],
+			self.simOutput.sim_stats["fraction_deaths_unsatisfied"]
+		], index=["no close car", "not enough energy"], name="unsatisfied %")
+		plt.pie(
+			pie_s.values,
+			colors=["grey", "yellow"],
+			labels=pie_s.index,
+			autopct="%1.1f%%",
+		)
 		plt.tight_layout()
-		plt.savefig(os.path.join(self.figures_path,
-			 "events_profile_pie2.png"),
-				transparent=True)
-#        plt.show()
+		plt.savefig(os.path.join(self.figures_path, "events_profile_unsatisfied_pie.png"), transparent=True)
+		#        plt.show()
 		plt.close()
 
-		fig, ax = plt.subplots(figsize=(15, 7))
-		pie_s = \
-			pd.Series( \
-				[self.simOutput.sim_stats["fraction_satisfied"],
-				 self.simOutput.sim_stats["fraction_unsatisfied"]],
-				index=["satisfied", "unsatified"],
-				name="events %"
-			)
-		plt.pie(pie_s.values,
-				colors=["green", "red"],
-				labels=pie_s.index,
-				autopct="%1.1f%%")
-
+		plt.figure(figsize=(10, 10))
+		pie_s = pd.Series([
+			self.simOutput.sim_stats["fraction_satisfied"],
+			self.simOutput.sim_stats["fraction_unsatisfied"]
+		], index=["satisfied", "unsatisfied"], name="satisfied %")
+		plt.pie(
+			pie_s.values,
+			colors=["green", "red"],
+			labels=pie_s.index,
+			autopct="%1.1f%%",
+		)
 		plt.tight_layout()
-		plt.savefig(os.path.join(self.figures_path,
-			 "events_profile_pie3.png"),
-				transparent=True)
-#        plt.show()
+		plt.savefig(os.path.join(self.figures_path, "events_profile_sat_unsat_pie.png"), transparent=True)
+		#plt.show()
 		plt.close()
 
+	def plot_fleet_status_t (self):
 
-	def plot_fleet_status (self):
+		for col in [
+			"n_cars_available", "n_cars_charging_system", "n_cars_charging_users", "n_cars_booked"
+		]:
+			plt.figure(figsize=(15, 7))
+			self.sim_booking_requests.set_index("start_time")[col].plot(
+				label="available", linewidth=2, alpha=0.7
+			)
+			plt.legend()
+			plt.title("number of available cars in time")
+			plt.xlabel("t")
+			plt.ylabel("n_cars")
+			plt.savefig(os.path.join(self.figures_path, col + "_profile.png"))
+			# plt.show()
+			plt.close()
+
+	def plot_tot_energy_t (self):
 
 		plt.figure(figsize=(15, 7))
-
-		self.sim_booking_requests\
-		   .set_index("start_time")\
-		   .n_cars_available\
-		   .plot(label="available", linewidth=2, alpha=0.7)
-		plt.legend()
-		plt.title("number of available cars in time")
+		self.sim_charges.sort_values\
+		   ("start_time").groupby\
+		   ("day_hour").soc_delta_kwh.sum().plot()
+		plt.title("charging energy sum by hour in time")
 		plt.xlabel("t")
-		plt.ylabel("n_cars")
+		plt.ylabel("E [kwh]")
 		plt.savefig(os.path.join(self.figures_path,
-			 "n_cars_available_profile.png"))
+			 "charging_energy_t.png"))
 		# plt.show()
 		plt.close()
 
-		plt.figure()
+	def plot_n_cars_charging_t (self):
 
+		plt.figure(figsize=(15, 7))
 		self.sim_booking_requests\
-		   .set_index("start_time")\
-		   .n_cars_charging_system\
-		   .plot(label="system charging", linewidth=2, alpha=0.7)
-
+			.set_index("start_time")\
+			.n_cars_charging_system\
+			.plot(label="system charging", linewidth=2, alpha=0.7)
 		self.sim_booking_requests\
-		   .set_index("start_time")\
-		   .n_cars_charging_users\
-		   .plot(label="users charging", linewidth=2, alpha=0.7)
-
-		self.sim_booking_requests\
-		   .set_index("start_time")\
-		   .n_cars_booked\
-		   .plot(label="booked", linewidth=2, alpha=0.7)
-
-		self.sim_booking_requests\
-		   .set_index("start_time")\
-		   .n_cars_dead\
-		   .plot(label="dead", linewidth=2, alpha=0.7)
-
+			.set_index("start_time")\
+			.n_cars_charging_users\
+			.plot(label="users charging", linewidth=2, alpha=0.7)
 		plt.legend()
-		plt.title("number of cars charging/available/booked in time")
+		plt.title("number of cars charging in time")
 		plt.xlabel("t")
-		plt.ylabel("n_cars")
+		plt.ylabel("n cars")
 		plt.savefig(os.path.join(self.figures_path,
-			 "n_cars_profile.png"))
+			 "n_cars_charging_t.png"))
 		# plt.show()
 		plt.close()
 
-	def plot_hourly_events_boxplot (self, which_df, start_or_end):
+	def plot_relo_cost_t (self):
+
+		plt.figure(figsize=(15, 7))
+		self.sim_charges \
+			.set_index("start_time") \
+			.timeout_outward.apply(lambda x: x / 3600).resample("60Min").sum() \
+			.plot(label="relocation hours", linewidth=2, alpha=0.7)
+		plt.legend()
+		plt.title("Relocation hours needed every 60 minutes")
+		plt.xlabel("t")
+		plt.ylabel("relocation hours")
+		plt.savefig(os.path.join(self.figures_path,
+			 "relo_cost_t.png"))
+		# plt.show()
+		plt.close()
+
+	def plot_events_hourly_count_boxplot (self, which_df, start_or_end):
 
 		if which_df == "bookings":
 			df = self.sim_bookings
@@ -304,34 +288,34 @@ class EFFCS_SimOutputPlotter ():
 		sns.swarmplot(x="hour", y="_".join([which_df, "hourly", start_or_end, "count"]), data=trips_df_norm_count, color="black")
 		plt.savefig(
 			os.path.join(
-				self.figures_path, "_".join([which_df, "hourly", start_or_end, "count", "_boxplot.png"])
+				self.figures_path, "_".join([which_df, "hourly", start_or_end, "count", "boxplot.png"])
 			)
 		)
 		# plt.show()
 		plt.close()
 
-	def plot_hourly_charging_boxplot (self, operator="system"):
+	def plot_n_cars_charging_hourly_mean_boxplot(self):
 
-		if operator == "system":
-			values_col = "n_cars_charging_system"
-		elif operator == "users":
-			values_col = "n_cars_charging_users"
+		df = get_time_group_columns(self.sim_booking_requests)
+		trips_df_norm_count = get_time_grouped_hourly_mean(
+			df, "start", "n_cars_charging_system", "n_cars_charging_system"
+		)
+		trips_df_norm_count.hour = trips_df_norm_count.hour.astype(int)
 
-		table = self.sim_booking_requests.pivot_table\
-			(index=["date"], columns=["hour"], values=[values_col], aggfunc=np.mean)\
-			.fillna(0.0).loc[:, values_col]
-
-		# print(table)
-
-		plt.figure()
-		table.reset_index().boxplot(column=list(table.columns))
-		plt.title("n cars charging hourly boxplot")
-		plt.xlabel("hour")
-		plt.ylabel("n cars")
-		plt.savefig(os.path.join\
-			(self.figures_path, "n_cars_charging_" + operator + "_hourly_boxplot.png"))
-		# plt.show()
-		plt.close()
+		plt.figure(figsize=(15, 7))
+		sns.boxplot(
+			x="hour", y="_".join(["n_cars_charging_system", "hourly", "mean"]),
+			data=trips_df_norm_count
+		)
+		sns.swarmplot(
+			x="hour", y="_".join(["n_cars_charging_system", "hourly", "mean"]),
+			data=trips_df_norm_count, color="black"
+		)
+		plt.savefig(
+			os.path.join(
+				self.figures_path, "_".join(["n_cars_charging_system", "hourly", "mean", "boxplot.png"])
+			)
+		)
 
 	def plot_hourly_relocost_boxplot (self):
 
@@ -351,159 +335,19 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_tot_energy (self):
+	def plot_choropleth (self, col):
 
-		plt.figure()
-		self.sim_charges.sort_values\
-		   ("start_time").groupby\
-		   ("day_hour").soc_delta_kwh.sum().plot()
-		plt.title("charging energy sum by hour in time")
-		plt.xlabel("t")
-		plt.ylabel("E [kwh]")
-		plt.savefig(os.path.join(self.figures_path,
-			 "charging_energy_t.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_n_cars_charging (self):
-
-		plt.figure()
-		self.sim_booking_requests\
-			.set_index("start_time")\
-			.n_cars_charging_system\
-			.plot(label="system charging", linewidth=2, alpha=0.7)
-		self.sim_booking_requests\
-			.set_index("start_time")\
-			.n_cars_charging_users\
-			.plot(label="users charging", linewidth=2, alpha=0.7)
-		plt.legend()
-		plt.title("number of cars charging in time")
-		plt.xlabel("t")
-		plt.ylabel("n cars")
-		plt.savefig(os.path.join(self.figures_path,
-			 "n_cars_charging_t.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_origin_heatmap (self):
-
-		fig, ax = plt.subplots(1,1,figsize=(15,15))
-		self.grid["origin_count"] = \
-		   self.sim_booking_requests.origin_id.value_counts()
-		self.grid.dropna(subset=["origin_count"])\
-		   .plot(column="origin_count", ax=ax, legend=True)
-		plt.title("origin heatmap")
-		#plt.xlabel("longitude")
-		#plt.ylabel("latitude")
-		plt.savefig(os.path.join(self.figures_path,
-			 "origins_map.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_destinations_heatmap (self):
-
-		fig,ax = plt.subplots(1,1,figsize=(15,15))
-		self.grid["destination_count"] = \
-		   self.sim_booking_requests.destination_id.value_counts()
-		self.grid.dropna(subset=["destination_count"])\
-		   .plot(column="destination_count", ax=ax, legend=True)
-		plt.title("destination heatmap")
-		#plt.xlabel("longitude")
-		#plt.ylabel("latitude")
-		plt.savefig(os.path.join(self.figures_path,
-			 "destinations_map.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_charging_needed_heatmap_system (self):
-
-		fig,ax = plt.subplots(1,1,figsize=(15,15))
-		self.grid["charge_needed_system_zones_count"] = \
-		   self.sim_system_charges_bookings.destination_id.value_counts()\
-		   / len(self.sim_system_charges_bookings)
-		self.grid.dropna(subset=["charge_needed_system_zones_count"])\
-		   .plot(column="charge_needed_system_zones_count", ax=ax, legend=True)
-		plt.title("system charging needed locations heatmap")
-		#plt.xlabel("longitude")
-		#plt.ylabel("latitude")
-		plt.savefig(os.path.join(self.figures_path,
-			 "system_charges_map.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_charging_needed_heatmap_users (self):
-
-		fig,ax = plt.subplots(1,1,figsize=(15,15))
-		self.grid["charge_needed_users_zones_count"] = \
-		   self.sim_users_charges_bookings.destination_id.value_counts()
-		self.grid.dropna(subset=["charge_needed_users_zones_count"])\
-		   .plot(column="charge_needed_users_zones_count", ax=ax, legend=True)
-		plt.title("users charging needed locations heatmap")
-		#plt.xlabel("longitude")
-		#plt.ylabel("latitude")
-		plt.savefig(os.path.join(self.figures_path,
-			 "users_charges_map.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_unsatisfied_origins_heatmap (self):
-
-		fig,ax = plt.subplots(1,1,figsize=(15,15))
-		self.grid["unsatisfied_demand_origins_count"] = \
-		   self.sim_unsatisfied_requests.origin_id.value_counts()\
-		   / len(self.sim_unsatisfied_requests)
-		self.grid.dropna(subset=["unsatisfied_demand_origins_count"])\
-		   .plot(column="unsatisfied_demand_origins_count", ax=ax, legend=True)
-		plt.title("unsatisfied demand origins heatmap")
-		#plt.xlabel("longitude")
-		#plt.ylabel("latitude")
-		plt.savefig(os.path.join(self.figures_path,
-			 "unsatisfied_origins_heatmap.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_deaths_origins_heatmap (self):
-
-		fig,ax = plt.subplots(1,1,figsize=(15,15))
-		self.grid["deaths_origins_count"] = \
-		   self.sim_deaths.origin_id.value_counts()
-		self.grid.dropna(subset=["deaths_origins_count"])\
-		   .plot(column="deaths_origins_count", ax=ax, legend=True)
-		plt.title("deaths origin heatmap")
-		#plt.xlabel("longitude")
-		#plt.ylabel("latitude")
-		plt.savefig(os.path.join(self.figures_path,
-			 "deaths_origins_heatmap.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_charge_deaths_origins_heatmap (self):
-
-		fig,ax = plt.subplots(1,1,figsize=(15,15))
-		self.grid["charge_deaths_origins_count"] = \
-		   self.sim_charge_deaths.origin_id.value_counts()
-		self.grid.dropna(subset=["charge_deaths_origins_count"])\
-		   .plot(column="deaths_origins_count", ax=ax, legend=True)
-		plt.title("charge deaths origin heatmap")
-		#plt.xlabel("longitude")
-		#plt.ylabel("latitude")
-		plt.savefig(os.path.join(self.figures_path,
-			 "charge_deaths_origins_heatmap.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_relo_cost_t (self):
-
-		plt.figure(figsize=(15, 7))
-		self.sim_charges \
-			.set_index("start_time") \
-			.timeout_outward.apply(lambda x: x / 3600).resample("60Min").sum() \
-			.plot(label="relocation hours", linewidth=2, alpha=0.7)
-		plt.legend()
-		plt.title("Relocation hours needed every 60 minutes")
-		plt.xlabel("t")
-		plt.ylabel("relocation hours")
-		plt.savefig(os.path.join(self.figures_path,
-			 "relo_cost_t.png"))
-		# plt.show()
+		fig, ax = plt.subplots(1, 1, figsize=(15,15))
+		self.grid.dropna(subset=[col]).plot(column=col, ax=ax, legend=True)
+		plt.xlabel(None)
+		plt.xticks([])
+		plt.ylabel(None)
+		plt.yticks([])
+		plt.title(col + " chorophlet map")
+		plt.savefig(
+			os.path.join(
+				self.figures_path,
+				"_".join([col, "clorophlet", "map.png"])
+			)
+		)
 		plt.close()
