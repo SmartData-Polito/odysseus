@@ -1,13 +1,13 @@
 def remap_plates (events):
     ass_dict = {
-            sorted(events.plate.unique())[i]: i 
-            for i in range(len(sorted(events.plate.unique())))
-        }
+        sorted(events.plate.unique())[i]: i
+        for i in range(len(sorted(events.plate.unique())))
+    }
     events.loc[:, "plate"] = events.plate.replace(ass_dict)
     return ass_dict, events
 
 
-def soc_to_kwh(soc, a=0., b=3.5):
+def soc_to_kwh(soc, a=0., b=0.25):
     return (b - a) / (100) * (soc - 100) + b
 
 
