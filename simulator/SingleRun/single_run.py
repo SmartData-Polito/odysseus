@@ -83,7 +83,18 @@ def single_run(conf_tuple):
 		(os.path.join(results_path,
 					  "sim_scenario_conf.pickle"))
 
-	simInput.grid.to_pickle(
+	f_out = open(
+		os.path.join(
+			results_path,
+			"sim_output.pickle"
+		), "wb"
+	)
+	pickle.dump(
+		simOutput,
+		f_out
+	)
+
+	simOutput.grid.to_pickle(
 		os.path.join(
 			results_path,
 			"grid.pickle"
@@ -147,28 +158,6 @@ def single_run(conf_tuple):
 		os.path.join(
 			results_path,
 			"sim_unfeasible_charges.pickle"
-		)
-	)
-	f_out = open(
-		os.path.join(
-			results_path,
-			"sim_output.pickle"
-		), "wb"
-	)
-	pickle.dump(
-		simOutput,
-		f_out
-	)
-	simOutput.sim_bookings[simOutput.sim_bookings.plate == 10].to_csv(
-		os.path.join(
-			results_path,
-			"sim_bookings_10.csv"
-		)
-	)
-	simOutput.sim_charges[simOutput.sim_charges.plate == 10].to_csv(
-		os.path.join(
-			results_path,
-			"sim_charges_10.csv"
 		)
 	)
 

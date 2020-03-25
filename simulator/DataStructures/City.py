@@ -61,7 +61,6 @@ class City:
 			self.input_bookings.loc[:, ["origin_id", "destination_id"]].replace(
 				self.zones_replace_dict
 			)
-		self.valid_zones = self.get_valid_zones()
 
 		self.od_distances = self.get_od_distances()
 
