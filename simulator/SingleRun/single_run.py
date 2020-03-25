@@ -25,6 +25,8 @@ def single_run(conf_tuple):
 	sim_scenario_name = \
 		conf_tuple[4]
 
+	city_obj = City(city, sim_general_conf)
+
 	model_general_conf_string = "_".join([
 		str(v) for v in sim_general_conf.values()]
 	).replace("'", "").replace(".", "-")
@@ -42,8 +44,6 @@ def single_run(conf_tuple):
 	)
 	os.makedirs(results_path, exist_ok=True)
 
-	city_obj = City(city, sim_general_conf)
-
 	if sim_type == "eventG":
 
 		simInput_eventG = get_eventG_input((
@@ -55,7 +55,6 @@ def single_run(conf_tuple):
 			(simInput = simInput_eventG)
 		simOutput_eventG = EFFCS_SimOutput(sim_eventG)
 		sim_stats = simOutput_eventG.sim_stats
-		simInput = simInput_eventG
 		simOutput = simOutput_eventG
 
 	elif sim_type == "traceB":
@@ -68,20 +67,13 @@ def single_run(conf_tuple):
 			(simInput=simInput_traceB)
 		simOutput_traceB = EFFCS_SimOutput(sim_traceB)
 		sim_stats = simOutput_traceB.sim_stats
-		simInput = simInput_traceB
 		simOutput = simOutput_traceB
 
-	sim_stats.to_pickle\
-		(os.path.join(results_path,
-					  "sim_stats.pickle"))
+	sim_stats.to_pickle(os.path.join(results_path, "sim_stats.pickle"))
 
-	pd.Series(sim_general_conf).to_pickle\
-		(os.path.join(results_path,
-					  "sim_general_conf.pickle"))
+	pd.Series(sim_general_conf).to_pickle(os.path.join(results_path, "sim_general_conf.pickle"))
 
-	pd.Series(sim_scenario_conf).to_pickle\
-		(os.path.join(results_path,
-					  "sim_scenario_conf.pickle"))
+	pd.Series(sim_scenario_conf).to_pickle(os.path.join(results_path, "sim_scenario_conf.pickle"))
 
 	f_out = open(
 		os.path.join(

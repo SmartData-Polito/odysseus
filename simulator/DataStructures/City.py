@@ -84,6 +84,9 @@ class City:
 
 	def get_valid_zones(self):
 
+		if self.sim_general_conf["k_zones"] < 1:
+			self.sim_general_conf["k_zones"] = int(self.sim_general_conf["k_zones"] * len(self.grid))
+
 		return self.input_bookings.origin_id.value_counts().sort_values().tail(
 			self.sim_general_conf["k_zones"]
 		).index

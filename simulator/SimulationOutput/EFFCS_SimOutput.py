@@ -282,9 +282,10 @@ class EFFCS_SimOutput ():
 		self.grid[
 			"unsatisfied_demand_origins_fraction"
 		] = self.sim_unsatisfied_requests.origin_id.value_counts() / len(self.sim_unsatisfied_requests)
-		self.grid[
-			"not_enough_energy_origins_count"
-		] = self.sim_not_enough_energy_requests.origin_id.value_counts()
+		if len(self.sim_not_enough_energy_requests):
+			self.grid[
+				"not_enough_energy_origins_count"
+			] = self.sim_not_enough_energy_requests.origin_id.value_counts()
 		if len(self.sim_charge_deaths):
 			self.grid[
 				"charge_deaths_origins_count"
