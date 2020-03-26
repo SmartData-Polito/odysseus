@@ -36,7 +36,7 @@ class EFFCS_SimOutputPlotter ():
 
 		model_general_conf_string = "_".join([
 			str(v) for v in simOutput.sim_general_conf.values()]
-		).replace("'", "").replace(".", "-")
+		).replace("'", "").replace(".", "d")
 		model_conf_string = "_".join([
 			str(v) for v in simOutput.sim_scenario_conf.values()]
 		).replace("'", "").replace(".", "-")

@@ -30,7 +30,7 @@ class EFFCS_MultipleRunsPlotter:
         self.y_col = y_col
         self.param_col = param_col
 
-        model_general_conf_string = "_".join([str(v) for v in sim_general_conf.values()]).replace("'", "").replace(".", "-")
+        model_general_conf_string = "_".join([str(v) for v in sim_general_conf.values()]).replace("'", "").replace(".", "d")
         model_scenario_conf_grid_string = "_".join([
             str(v) for v in sim_scenario_conf_grid.values()
         ]).replace(" ", "-").replace("'", "").replace(".", "d").replace(",", "-").replace("[", "-").replace("]", "-")

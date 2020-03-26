@@ -16,7 +16,7 @@ from simulator.SimulationOutput.EFFCS_MultipleRunsPlotter import EFFCS_MultipleR
 
 def multiple_runs(city, sim_run_mode, sim_general_conf, sim_scenario_conf_grid, n_cores, sim_type, sim_scenario_name):
 
-	model_general_conf_string = "_".join([str(v) for v in sim_general_conf.values()]).replace("'", "").replace(".", "-")
+	model_general_conf_string = "_".join([str(v) for v in sim_general_conf.values()]).replace("'", "").replace(".", "d")
 	model_scenario_conf_grid_string = "_".join([
 		str(v) for v in sim_scenario_conf_grid.values()
 	]).replace(" ", "-").replace("'", "").replace(".", "d").replace(",", "-").replace("[", "-").replace("]", "-")

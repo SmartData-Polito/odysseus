@@ -128,7 +128,7 @@ class EFFCS_Sim ():
 		self.list_n_cars_dead += \
 			[self.chargingStrategy.n_dead_cars]
 		self.list_n_cars_available += \
-			[self.simInput.n_cars - \
+			[self.simInput.n_vehicles_sim - \
 			 self.chargingStrategy.n_cars_charging_system - \
 			 self.chargingStrategy.n_cars_charging_users - \
 			 self.n_booked_cars]
