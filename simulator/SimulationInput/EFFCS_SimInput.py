@@ -62,7 +62,6 @@ class EFFCS_SimInput ():
 			self.sim_scenario_conf["hub_n_charging_poles"] = \
 				self.hub_n_charging_poles
 
-		self.sim_scenario_conf.update(self.sim_general_conf)
 		self.sim_scenario_conf["n_vehicles_sim"] = self.n_vehicles_sim
 
 		if self.sim_scenario_conf["alpha"] == "auto":
