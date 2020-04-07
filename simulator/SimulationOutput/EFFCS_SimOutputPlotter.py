@@ -293,7 +293,7 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_events_hourly_mean_boxplot (self, which_df, start_or_end):
+	def plot_events_hourly_count_boxplot (self, which_df, start_or_end):
 
 		if which_df == "bookings":
 			df = self.sim_bookings

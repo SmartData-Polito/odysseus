@@ -41,8 +41,9 @@ def init_charge (booking_request, cars_soc_dict, car, beta):
 def init_charge_end (charge, beta):
 	charge["soc_delta"] = charge["end_soc"] - charge["start_soc"]
 	charge["soc_delta_kwh"] = soc_to_kwh(charge["soc_delta"])
-	charge["duration"] = \
-		(get_charging_time(beta - charge["start_soc"]))
+	charge["end_time"] = charge["start_time"] + datetime.timedelta(
+		seconds=charge["duration"] * 60 + 1
+	)
 	return charge
 
 
@@ -89,9 +90,6 @@ class EFFCS_ChargingPrimitives:
 				yield self.env.timeout(charge["timeout_return"])
 				self.cars_soc_dict[car] = charge["end_soc"]
 				charge["end_soc"] -= charge["cr_soc_delta"]
-				charge["end_time"] = charge["start_time"] + datetime.timedelta(
-					seconds=charge["duration"] * 60 + 1
-				)
 
 		elif operator == "users":
 			if resource.count < resource.capacity:
