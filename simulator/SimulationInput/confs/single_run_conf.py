@@ -23,7 +23,7 @@ sim_scenario_conf = {
 	"battery_swap": True,
 	"battery_swap_service_time": 600,
 
-	"n_workers": 1,
+	"n_workers": 1000,
 
 	"relocation": False,
 

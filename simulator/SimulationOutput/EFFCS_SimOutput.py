@@ -171,6 +171,7 @@ class EFFCS_SimOutput ():
 
 		self.sim_stats.loc["charging_time_avg"] = \
 			self.sim_charges.duration.mean() / 60
+		print(self.sim_stats.loc["charging_time_avg"])
 
 		self.sim_stats.loc["charging_time_med"] = \
 			self.sim_charges.duration.median() / 60
