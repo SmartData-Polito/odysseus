@@ -76,16 +76,17 @@ class EFFCS_SimOutput ():
 
 		# Sim Stats creation
 
-		self.sim_stats = \
-			pd.Series(name="sim_stats")
+		self.sim_stats = pd.Series(name="sim_stats")
 
-		self.sim_stats = pd.concat\
-			([self.sim_stats,
-			  pd.Series(sim.simInput.sim_general_conf)])
+		self.sim_stats = pd.concat([
+			self.sim_stats,
+			pd.Series(sim.simInput.sim_general_conf)
+		])
 
-		self.sim_stats = pd.concat\
-			([self.sim_stats,
-			  pd.Series(sim.simInput.sim_scenario_conf)])
+		self.sim_stats = pd.concat([
+			self.sim_stats,
+			pd.Series(sim.simInput.sim_scenario_conf)
+		])
 
 		self.sim_stats.loc["n_same_zone_trips"] = \
 			sim.n_same_zone_trips
@@ -287,6 +288,7 @@ class EFFCS_SimOutput ():
 				"not_enough_energy_origins_count"
 			] = self.sim_not_enough_energy_requests.origin_id.value_counts()
 		if len(self.sim_charge_deaths):
+			print(self.sim_charge_deaths)
 			self.grid[
 				"charge_deaths_origins_count"
-			] = self.sim_charge_deaths.zone_id.value_counts()
+			] = self.sim_charge_deaths.origin_id.value_counts()

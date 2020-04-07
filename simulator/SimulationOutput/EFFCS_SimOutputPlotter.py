@@ -39,7 +39,7 @@ class EFFCS_SimOutputPlotter ():
 		).replace("'", "").replace(".", "d")
 		model_conf_string = "_".join([
 			str(v) for v in simOutput.sim_scenario_conf.values()]
-		).replace("'", "").replace(".", "-")
+		).replace("'", "").replace(".", "d")
 		self.figures_path = os.path.join(
 			os.path.dirname(os.path.dirname(__file__)),
 			"Figures",
@@ -204,10 +204,9 @@ class EFFCS_SimOutputPlotter ():
 		]:
 			plt.figure(figsize=(15, 7))
 			self.sim_booking_requests.set_index("start_time")[col].plot(
-				label="available", linewidth=2, alpha=0.7
+				label=col, linewidth=2, alpha=0.7
 			)
 			plt.legend()
-			plt.title("number of available cars in time")
 			plt.xlabel("t")
 			plt.ylabel("n_cars")
 			plt.savefig(os.path.join(self.figures_path, col + "_profile.png"))
@@ -265,6 +264,36 @@ class EFFCS_SimOutputPlotter ():
 		plt.close()
 
 	def plot_events_hourly_count_boxplot (self, which_df, start_or_end):
+
+		if which_df == "bookings":
+			df = self.sim_bookings
+		if which_df == "charges":
+			df = self.sim_charges
+		if which_df == "unsatisfied":
+			df = self.sim_unsatisfied_requests
+		if which_df == "no_close_car":
+			df = self.sim_no_close_car_requests
+		if which_df == "not_enough_energy":
+			df = self.sim_not_enough_energy_requests
+
+		df = get_time_group_columns(df)
+		trips_df_norm_count = get_time_grouped_hourly_count(
+			df, start_or_end, which_df
+		)
+		trips_df_norm_count.hour = trips_df_norm_count.hour.astype(int)
+
+		plt.figure(figsize=(15, 7))
+		sns.boxplot(x="hour", y="_".join([which_df, "hourly", start_or_end, "count"]), data=trips_df_norm_count)
+		sns.swarmplot(x="hour", y="_".join([which_df, "hourly", start_or_end, "count"]), data=trips_df_norm_count, color="black")
+		plt.savefig(
+			os.path.join(
+				self.figures_path, "_".join([which_df, "hourly", start_or_end, "count", "boxplot.png"])
+			)
+		)
+		# plt.show()
+		plt.close()
+
+	def plot_events_hourly_mean_boxplot (self, which_df, start_or_end):
 
 		if which_df == "bookings":
 			df = self.sim_bookings

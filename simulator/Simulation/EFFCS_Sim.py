@@ -143,7 +143,7 @@ class EFFCS_Sim ():
 
 		def find_car (zone_id):
 			available_cars_soc_dict = \
-				{k:self.cars_soc_dict[k] for k in self.available_cars_dict[zone_id]}
+				{k: self.cars_soc_dict[k] for k in self.available_cars_dict[zone_id]}
 			max_soc = max(available_cars_soc_dict.values())
 			max_soc_car = \
 				max(available_cars_soc_dict,

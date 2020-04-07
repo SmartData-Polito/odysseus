@@ -37,6 +37,7 @@ def init_charge (booking_request, cars_soc_dict, car, beta):
 
 	return charge
 
+
 def init_charge_end (charge, beta):
 	charge["soc_delta"] = charge["end_soc"] - charge["start_soc"]
 	charge["soc_delta_kwh"] = soc_to_kwh(charge["soc_delta"])
@@ -44,7 +45,8 @@ def init_charge_end (charge, beta):
 		(get_charging_time(beta - charge["start_soc"]))
 	return charge
 
-class EFFCS_ChargingPrimitives ():
+
+class EFFCS_ChargingPrimitives:
 
 	def charge_car (self,
 					charge,
@@ -57,13 +59,6 @@ class EFFCS_ChargingPrimitives ():
 					cr_soc_delta = 0
 					):
 
-		charge["operator"] = operator
-		charge["zone_id"] = zone_id
-		charge["timeout_outward"] = timeout_outward
-		charge["timeout_return"] = timeout_return
-		charge["cr_soc_delta"] = cr_soc_delta
-		charge["cr_soc_delta_kwh"] = soc_to_kwh(cr_soc_delta)
-
 		def check_queuing ():
 			if self.simInput.sim_scenario_conf["queuing"]:
 				return True
@@ -73,14 +68,18 @@ class EFFCS_ChargingPrimitives ():
 				else:
 					return False
 
+		charge["operator"] = operator
+		charge["zone_id"] = zone_id
+		charge["timeout_outward"] = timeout_outward
+		charge["timeout_return"] = timeout_return
+		charge["cr_soc_delta"] = cr_soc_delta
+		charge["cr_soc_delta_kwh"] = soc_to_kwh(cr_soc_delta)
+
 		if operator == "system":
 			if check_queuing():
 				yield self.env.timeout(charge["timeout_outward"])
 				charge["start_soc"] -= charge["cr_soc_delta"]
-				charge = init_charge_end\
-					(charge, self.simInput.sim_scenario_conf["beta"])
-				if self.simInput.sim_scenario_conf["battery_swap"]:
-					charge["duration"] = 0
+				charge = init_charge_end(charge, self.simInput.sim_scenario_conf["beta"])
 				self.sim_charges += [charge]
 				with resource.request() as charging_request:
 					yield charging_request
@@ -89,12 +88,13 @@ class EFFCS_ChargingPrimitives ():
 				self.n_cars_charging_system -= 1
 				yield self.env.timeout(charge["timeout_return"])
 				self.cars_soc_dict[car] = charge["end_soc"]
-				charge["start_soc"] -= charge["cr_soc_delta"]
-				charge["end_time"] = charge["start_time"] + \
-					datetime.timedelta(seconds = charge["duration"] * 60 + 1)
+				charge["end_soc"] -= charge["cr_soc_delta"]
+				charge["end_time"] = charge["start_time"] + datetime.timedelta(
+					seconds=charge["duration"] * 60 + 1
+				)
 
 		elif operator == "users":
-			if resource.count < resource.capacity: # users never queue
+			if resource.count < resource.capacity:
 				charge = init_charge_end\
 					(charge, self.simInput.sim_scenario_conf["beta"])
 				self.sim_charges += [charge]
@@ -106,6 +106,118 @@ class EFFCS_ChargingPrimitives ():
 				self.n_cars_charging_users -= 1
 				charge["end_time"] = charge["start_time"] + \
 					datetime.timedelta(seconds = charge["duration"] * 60)
+
+	def compute_hub_charging_params (self, booking_request, car):
+
+		unfeasible_charge_flag = False
+
+		if self.simInput.sim_scenario_conf["time_estimation"]:
+
+			charging_zone_id = self.simInput.sim_scenario_conf["hub_zone"]
+			timeout_outward = self.get_timeout(
+				booking_request["destination_id"],
+				charging_zone_id
+			)
+
+			if not self.simInput.sim_scenario_conf["relocation"]:
+				timeout_return = 0
+			elif self.simInput.sim_scenario_conf["relocation"]:
+				timeout_return = timeout_outward
+
+			cr_soc_delta = self.get_cr_soc_delta(
+				booking_request["destination_id"],
+				charging_zone_id
+			)
+
+			if cr_soc_delta > booking_request["end_soc"]:
+				unfeasible_charge_flag = True
+				self.dead_cars.add(car)
+				self.n_dead_cars = len(self.dead_cars)
+				self.sim_unfeasible_charge_bookings.append(booking_request)
+
+		else:
+
+			charging_zone_id = -1
+			timeout_outward = 0
+			timeout_return = 0
+			cr_soc_delta = 0
+
+		return unfeasible_charge_flag, \
+				charging_zone_id, \
+				timeout_outward, \
+				timeout_return, \
+				cr_soc_delta
+
+	# Compute cp charging params
+
+	def compute_cp_charging_params (self, booking_request, car):
+
+		timeout_outward = 0
+		timeout_return = 0
+		cr_soc_delta = 0
+		unfeasible_charge_flag = False
+
+		zones_by_distance = self.simInput.zones_cp_distances.loc[
+			booking_request["destination_id"]
+		].sort_values()
+
+		free_pole_flag = 0
+		for zone in zones_by_distance.index:
+			if len(self.charging_poles_dict[zone].users) < self.charging_poles_dict[zone].capacity:
+				free_pole_flag = 1
+				charging_zone_id = zone
+				cr_soc_delta = self.get_cr_soc_delta \
+					(booking_request["destination_id"],
+					 charging_zone_id)
+				if cr_soc_delta > booking_request["end_soc"]:
+					free_pole_flag = 0
+				else:
+					break
+
+		if free_pole_flag == 0:
+			charging_zone_id = \
+				self.simInput.closest_cp_zone \
+					[booking_request["destination_id"]]
+
+		charging_station = \
+			self.charging_poles_dict\
+			[charging_zone_id]
+
+		if self.simInput.sim_scenario_conf["time_estimation"]:
+
+			timeout_outward = self.get_timeout\
+				(booking_request["destination_id"],
+				 charging_zone_id)
+
+			if not self.simInput.sim_scenario_conf["relocation"]:
+				timeout_return = 0
+			elif self.simInput.sim_scenario_conf["relocation"]:
+				timeout_return = timeout_outward
+
+			cr_soc_delta = self.get_cr_soc_delta\
+				(booking_request["destination_id"],
+				 charging_zone_id)
+
+			if cr_soc_delta > booking_request["end_soc"]:
+
+				unfeasible_charge_flag = True
+				self.dead_cars.add(car)
+				self.n_dead_cars = len(self.dead_cars)
+				self.sim_unfeasible_charge_bookings.append(booking_request)
+
+
+		else:
+
+			timeout_outward = 0
+			timeout_return = 0
+			cr_soc_delta = 0
+
+		return unfeasible_charge_flag, \
+				charging_station, \
+				charging_zone_id, \
+				timeout_outward, \
+				timeout_return, \
+				cr_soc_delta
 
 	def check_system_charge (self, booking_request, car):
 

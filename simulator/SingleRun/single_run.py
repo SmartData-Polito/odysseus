@@ -26,13 +26,14 @@ def single_run(conf_tuple):
 		conf_tuple[4]
 
 	city_obj = City(city, sim_general_conf)
+	print(sim_scenario_conf)
 
 	model_general_conf_string = "_".join([
 		str(v) for v in sim_general_conf.values()]
 	).replace("'", "").replace(".", "d")
 	model_conf_string = "_".join([
 		str(v) for v in sim_scenario_conf.values()]
-	).replace("'", "").replace(".", "-")
+	).replace("'", "").replace(".", "d")
 	results_path = os.path.join(
 		os.path.dirname(os.path.dirname(__file__)),
 		"Results",
@@ -159,10 +160,10 @@ def single_run(conf_tuple):
 	plotter.plot_events_profile_barh()
 	plotter.plot_events_profile_pies()
 
-	#plotter.plot_fleet_status_t()
-	#plotter.plot_tot_energy_t()
-	#plotter.plot_n_cars_charging_t()
-	#plotter.plot_relo_cost_t()
+	plotter.plot_fleet_status_t()
+	plotter.plot_tot_energy_t()
+	plotter.plot_n_cars_charging_t()
+	plotter.plot_relo_cost_t()
 
 	plotter.plot_events_hourly_count_boxplot("bookings", "start")
 	#plotter.plot_events_hourly_count_boxplot("bookings", "end")
@@ -172,7 +173,7 @@ def single_run(conf_tuple):
 	#plotter.plot_events_hourly_count_boxplot("no_close_car", "start")
 	#plotter.plot_events_hourly_count_boxplot("not_enough_energy", "start")
 
-	#plotter.plot_n_cars_charging_hourly_mean_boxplot()
+	plotter.plot_n_cars_charging_hourly_mean_boxplot()
 
 	for col in [
 		"origin_count",
@@ -180,8 +181,8 @@ def single_run(conf_tuple):
 		"charge_needed_system_zones_count",
 		#"charge_needed_users_zones_count",
 		"unsatisfied_demand_origins_fraction",
-		#"not_enough_energy_origins_count",
-		#"charge_deaths_origins_count",
+		"not_enough_energy_origins_count",
+		"charge_deaths_origins_count",
 	]:
 		if col in simOutput.grid:
 			plotter.plot_choropleth(col)

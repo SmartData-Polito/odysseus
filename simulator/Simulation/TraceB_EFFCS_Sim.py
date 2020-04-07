@@ -6,6 +6,7 @@ import numpy as np
 from simulator.utils.car_utils import *
 from simulator.Simulation.EFFCS_Sim import EFFCS_Sim
 
+
 class TraceB_EFFCS_Sim (EFFCS_Sim):
 
     def init_data_structures(self):

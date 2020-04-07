@@ -82,9 +82,19 @@ class City:
 
 	def get_valid_zones(self):
 
-		return self.input_bookings.origin_id.value_counts().sort_values().tail(
+		self.valid_zones = self.input_bookings.origin_id.value_counts().sort_values().tail(
 			int(self.sim_general_conf["k_zones_factor"] * len(self.grid))
 		).index
+		origin_zones_count = self.input_bookings.origin_id.value_counts()
+		dest_zones_count = self.input_bookings.destination_id.value_counts()
+		valid_origin_zones = origin_zones_count[(origin_zones_count > 30)]
+		valid_dest_zones = dest_zones_count[(dest_zones_count > 30)]
+		self.valid_zones = self.valid_zones.intersection(
+			valid_origin_zones.index.intersection(
+				valid_dest_zones.index
+			).astype(int)
+		)
+		return self.valid_zones
 
 	def get_od_distances(self):
 
@@ -160,7 +170,6 @@ class City:
 
 		if self.city_name == "Minneapolis":
 			tz = pytz.timezone("America/Chicago")
-
 
 		now_utc = datetime.datetime.utcnow()
 		now_local = pytz.utc.localize(now_utc, is_dst=None).astimezone(tz)

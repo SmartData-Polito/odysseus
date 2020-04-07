@@ -74,6 +74,7 @@ def get_time_grouped_hourly_mean(df_norm, start_or_end, which_df, mean_col):
 
 	return time_grouped_hourly_count
 
+
 def get_grouped_resampled_count (df, group_cols, freq):
 	grouped_resampled_df = pd.DataFrame(
 		index=df.set_index("start_time").iloc[:, 0].resample(freq).count().index
