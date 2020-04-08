@@ -10,23 +10,12 @@ class EFFCS_SimOutput ():
 
 	def __init__ (self, sim):
 
-#        self.sim_events = \
-#            pd.DataFrame(sim.events)
-#
-#        self.sim_events.columns = [
-#                    "ev_time",
-#                    "ev_seqno",
-#                    "ev_class",
-#                ]
-
 		self.sim_general_conf = sim.simInput.sim_general_conf
 		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
 
 		self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
-		#print(self.sim_booking_requests.shape)
 
 		self.sim_bookings = self.sim_booking_requests.dropna()
-		#print(self.sim_bookings.shape)
 
 		self.sim_charges = pd.DataFrame(sim.chargingStrategy.sim_charges)
 
@@ -69,8 +58,7 @@ class EFFCS_SimOutput ():
 		self.sim_booking_requests["n_cars_dead"] = \
 			pd.Series(sim.list_n_cars_dead)
 
-		self.sim_charge_deaths = \
-					pd.DataFrame(sim.chargingStrategy.sim_unfeasible_charge_bookings)
+		self.sim_charge_deaths = pd.DataFrame(sim.chargingStrategy.sim_unfeasible_charge_bookings)
 
 		self.grid = sim.simInput.grid
 
@@ -289,7 +277,6 @@ class EFFCS_SimOutput ():
 				"not_enough_energy_origins_count"
 			] = self.sim_not_enough_energy_requests.origin_id.value_counts()
 		if len(self.sim_charge_deaths):
-			print(self.sim_charge_deaths)
 			self.grid[
 				"charge_deaths_origins_count"
 			] = self.sim_charge_deaths.origin_id.value_counts()

@@ -47,13 +47,6 @@ def multiple_runs(city, sim_run_mode, sim_general_conf, sim_scenario_conf_grid, 
 					sim_scenario_conf,
 					city_obj
 				)]
-				conf_tuples += [(
-					sim_general_conf,
-					sim_scenario_conf,
-					city_obj,
-					sim_run_mode,
-					sim_scenario_name,
-				)]
 
 			if sim_type == "eventG":
 
@@ -76,33 +69,33 @@ def multiple_runs(city, sim_run_mode, sim_general_conf, sim_scenario_conf_grid, 
 	sim_stats_df = pd.concat([sim_stats for sim_stats in pool_stats_list], axis=1, ignore_index=True).T
 
 	sim_stats_df.to_csv(os.path.join(results_path, "sim_stats.csv"))
-	pd.Series(sim_general_conf).to_csv(os.path.join(results_path, "sim_general_conf.csv"))
-	pd.Series(sim_scenario_conf_grid).to_csv(os.path.join(results_path, "sim_scenario_conf_grid.csv"))
+	pd.Series(sim_general_conf).to_csv(os.path.join(results_path, "sim_general_conf.csv"), header=True)
+	pd.Series(sim_scenario_conf_grid).to_csv(os.path.join(results_path, "sim_scenario_conf_grid.csv"), header=True)
 
 	sim_stats_df.to_pickle(os.path.join(results_path, "sim_stats.pickle"))
 	pd.Series(sim_general_conf).to_pickle(os.path.join(results_path, "sim_general_conf.pickle"))
 	pd.Series(sim_scenario_conf_grid).to_pickle(os.path.join(results_path, "sim_scenario_conf_grid.pickle"))
 
-	plotter = EFFCS_MultipleRunsPlotter(
-		city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
-		"alpha", "fraction_unsatisfied", "beta"
-	)
-	plotter.plot_x_y_param()
-
-	plotter = EFFCS_MultipleRunsPlotter(
-		city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
-		"alpha", "fraction_not_same_zone_trips", "beta"
-	)
-	plotter.plot_x_y_param()
-
-	plotter = EFFCS_MultipleRunsPlotter(
-		city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
-		"alpha", "fraction_no_close_cars", "beta"
-	)
-	plotter.plot_x_y_param()
-
-	plotter = EFFCS_MultipleRunsPlotter(
-		city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
-		"alpha", "fraction_not_enough_energy", "beta"
-	)
-	plotter.plot_x_y_param()
+	# plotter = EFFCS_MultipleRunsPlotter(
+	# 	city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
+	# 	"alpha", "fraction_unsatisfied", "beta"
+	# )
+	# plotter.plot_x_y_param()
+	#
+	# plotter = EFFCS_MultipleRunsPlotter(
+	# 	city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
+	# 	"alpha", "fraction_not_same_zone_trips", "beta"
+	# )
+	# plotter.plot_x_y_param()
+	#
+	# plotter = EFFCS_MultipleRunsPlotter(
+	# 	city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
+	# 	"alpha", "fraction_no_close_cars", "beta"
+	# )
+	# plotter.plot_x_y_param()
+	#
+	# plotter = EFFCS_MultipleRunsPlotter(
+	# 	city, sim_scenario_name, sim_general_conf, sim_scenario_conf_grid,
+	# 	"alpha", "fraction_not_enough_energy", "beta"
+	# )
+	# plotter.plot_x_y_param()

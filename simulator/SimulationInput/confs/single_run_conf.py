@@ -8,10 +8,10 @@ sim_scenario_conf = {
 
 	"alpha": 40,
 	"beta": 100,
+	"n_poles_n_cars_factor": 0.1,
 
 	"hub": False,
 	"hub_zone_policy": "",
-	"n_poles_n_cars_factor": 0.1,
 
 	"distributed_cps": False,
 	"cps_placement_policy": "",
@@ -22,7 +22,6 @@ sim_scenario_conf = {
 
 	"battery_swap": True,
 	"battery_swap_service_time": 600,
-
 	"n_workers": 1000,
 
 	"relocation": False,
