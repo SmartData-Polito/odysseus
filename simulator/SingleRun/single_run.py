@@ -154,12 +154,12 @@ def single_run(conf_tuple):
 		)
 	)
 
-	# plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
+	plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
 	#
 	# plotter.plot_events_profile_barh()
 	# plotter.plot_events_profile_pies()
 	#
-	# plotter.plot_fleet_status_t()
+	plotter.plot_fleet_status_t()
 	# plotter.plot_tot_energy_t()
 	# plotter.plot_n_cars_charging_t()
 	# plotter.plot_relo_cost_t()
