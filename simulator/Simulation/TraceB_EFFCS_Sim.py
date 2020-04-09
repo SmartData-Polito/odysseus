@@ -96,5 +96,4 @@ class TraceB_EFFCS_Sim (EFFCS_Sim):
                       / self.current_arrival_rate))
 
             yield self.env.timeout(booking_request["ia_timeout"])
-            print(booking_request["start_time"], booking_request["end_time"])
             self.process_booking_request(booking_request)
