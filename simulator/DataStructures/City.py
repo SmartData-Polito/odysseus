@@ -66,7 +66,6 @@ class City:
 
 		self.input_bookings["city"] = self.city_name
 		self.request_rates = self.get_requests_rates()
-		print(self.request_rates)
 		self.trip_kdes = self.get_trip_kdes()
 
 	def get_squared_grid (self):
@@ -142,7 +141,6 @@ class City:
 		] + self.bookings.loc[self.bookings.start_time > self.bookings.end_time, "random_seconds_pos"].apply(
 			lambda sec: datetime.timedelta(seconds=sec)
 		)
-		print(self.bookings.start_time.iloc[:5], self.bookings.end_time.iloc[:5])
 		self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x/1000))
 		self.bookings["duration"] = self.bookings.duration / 60
 		#print(self.bookings.soc_delta)
