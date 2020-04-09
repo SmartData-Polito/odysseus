@@ -64,7 +64,7 @@ class City:
 
 		self.neighbors, self.neighbors_dict = self.get_neighbors_dicts()
 
-		self.input_bookings["city"] = self.city_name
+		self.input_bookings.loc[:, "city"] = self.city_name
 		self.request_rates = self.get_requests_rates()
 		self.trip_kdes = self.get_trip_kdes()
 
@@ -127,6 +127,9 @@ class City:
 
 		self.bookings["hour"] = self.bookings.start_hour
 		self.bookings["euclidean_distance"] = self.bookings.driving_distance
+		self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x/1000))
+		self.bookings["duration"] = self.bookings.duration / 60
+
 		self.bookings["random_seconds_start"] = np.random.uniform(-600, 600, len(self.bookings))
 		self.bookings["random_seconds_end"] = np.random.uniform(-600, 600, len(self.bookings))
 		self.bookings["random_seconds_pos"] = np.random.uniform(0, 300, len(self.bookings))
@@ -141,51 +144,30 @@ class City:
 		] + self.bookings.loc[self.bookings.start_time > self.bookings.end_time, "random_seconds_pos"].apply(
 			lambda sec: datetime.timedelta(seconds=sec)
 		)
-		self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x/1000))
-		self.bookings["duration"] = self.bookings.duration / 60
-		#print(self.bookings.soc_delta)
 
-		def filter_bookings_for_simulation(bookings):
+		self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
 
-			bookings["date"] = \
-				bookings.start_time.apply(lambda d: d.date())
-			date_hour_count = \
-				bookings.groupby("date").hour.apply(lambda h: len(h.unique()))
-			bad_data_dates = \
-				list(date_hour_count[date_hour_count < 24].index)
-
-			return bookings.loc[
-				(bookings.euclidean_distance > 0.)
-			].copy()
-
-		self.bookings = \
-			filter_bookings_for_simulation(self.bookings)
-		self.bookings.loc[:, "ia_timeout"] = \
-			(self.bookings.start_time - \
-			 self.bookings.start_time.shift()) \
-				.apply(lambda x: x.total_seconds()).abs()
-		#print(self.bookings.ia_timeout)
-		self.bookings = self.bookings \
-			.loc[self.bookings.ia_timeout >= 0]
-
-		self.bookings["avg_speed"] = \
-			(self.bookings["euclidean_distance"]) \
-			/ (self.bookings["duration"] / 60)
-
-		self.input_bookings = self.bookings.copy()
+		# check bad data dates
+		date_hour_count = self.bookings.groupby("date").hour.apply(lambda h: len(h.unique()))
+		bad_data_dates = list(date_hour_count[date_hour_count < 24].index)
 
 		if self.city_name == "Minneapolis":
 			tz = pytz.timezone("America/Chicago")
 
 		now_utc = datetime.datetime.utcnow()
 		now_local = pytz.utc.localize(now_utc, is_dst=None).astimezone(tz)
-		self.input_bookings.start_time = \
-			self.input_bookings.start_time + now_local.utcoffset()
-		self.input_bookings.end_time = \
-			self.input_bookings.end_time + now_local.utcoffset()
-		self.input_bookings = pre_process_time(self.input_bookings)
+		self.bookings.start_time = self.bookings.start_time + now_local.utcoffset()
+		self.bookings.end_time = self.bookings.end_time + now_local.utcoffset()
+		self.bookings = pre_process_time(self.bookings)
 
-		return self.input_bookings
+		self.bookings = self.bookings.sort_values("start_time")
+		self.bookings.loc[:, "ia_timeout"] = (
+				self.bookings.start_time - self.bookings.start_time.shift()
+		).apply(lambda x: x.total_seconds()).abs()
+		self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
+		self.bookings["avg_speed"] = (self.bookings["euclidean_distance"]) / (self.bookings["duration"] / 60)
+
+		return self.bookings
 
 	def get_hourly_ods(self):
 

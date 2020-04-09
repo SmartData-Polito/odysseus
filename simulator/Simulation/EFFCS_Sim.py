@@ -26,6 +26,7 @@ class EFFCS_Sim ():
 			simInput.sim_general_conf["month_end"],
 			1, tzinfo=pytz.UTC
 		)
+		print(self.start, self.end)
 		self.total_seconds = (self.end - self.start).total_seconds()
 		self.hours_spent = 0
 		self.current_datetime = self.start

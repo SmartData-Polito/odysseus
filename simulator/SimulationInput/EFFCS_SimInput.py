@@ -50,6 +50,7 @@ class EFFCS_SimInput ():
 
 	def get_booking_requests_list (self):
 
+		print(self.input_bookings.shape)
 		self.booking_requests_list = self.input_bookings[[
 			"origin_id",
 			"destination_id",
@@ -63,6 +64,7 @@ class EFFCS_SimInput ():
 			"duration",
 			"soc_delta"
 		]].dropna().to_dict("records")
+		print(len(self.booking_requests_list))
 		return self.booking_requests_list
 
 	def init_cars (self):
