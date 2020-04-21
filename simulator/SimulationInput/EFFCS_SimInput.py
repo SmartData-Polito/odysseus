@@ -124,8 +124,7 @@ class EFFCS_SimInput ():
 
 			assigned_cps = 0
 			for zone_id in self.n_charging_poles_by_zone:
-				zone_n_cps = int(np.floor\
-					(self.n_charging_poles_by_zone[zone_id]))
+				zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
 				assigned_cps += zone_n_cps
 				self.n_charging_poles_by_zone[zone_id] = \
 					zone_n_cps

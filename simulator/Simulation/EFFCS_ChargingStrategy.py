@@ -30,11 +30,10 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 						capacity=n
 					)
 
-		if self.simInput.sim_scenario_conf["battery_swap"]:
-			self.workers = simpy.Resource(
-				self.env,
-				capacity=self.simInput.sim_scenario_conf["n_workers"]
-			)
+		self.workers = simpy.Resource(
+			self.env,
+			capacity=self.simInput.sim_scenario_conf["n_workers"]
+		)
 
 		self.sim_charges = []
 		self.sim_unfeasible_charge_bookings = []
@@ -49,39 +48,107 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 
 	def check_charge (self, booking_request, car):
 
+		charge_flag = False
 		user_charge_flag = False
 
 		if self.simInput.sim_scenario_conf["battery_swap"]:
-			charge_flag, charge = self.check_system_charge(booking_request, car)
-			if charge_flag:
-				self.list_system_charging_bookings.append(booking_request)
-				unfeasible_charge_flag = False
-				charging_zone_id = booking_request["destination_id"]
-				charge["duration"] = np.random.exponential(
-					self.simInput.sim_scenario_conf[
-						"battery_swap_service_time"
-					] * 60
-				)
-				timeout_outward = np.random.exponential(
-					30 * 60
-				)
-				timeout_return = 0
-				cr_soc_delta = 0
 
-				yield self.env.process(
-					self.charge_car(
-						charge,
-						self.workers,
-						car,
-						"system",
-						charging_zone_id,
-						timeout_outward,
-						timeout_return,
-						cr_soc_delta
+			if self.simInput.sim_scenario_conf["user_contribution"]:
+				charge_flag, charge = self.check_user_charge(booking_request, car)
+
+				if charge_flag:
+					user_charge_flag = True
+					self.list_users_charging_bookings.append(booking_request)
+					charging_zone_id = booking_request["destination_id"]
+					charging_station = self.charging_poles_dict[charging_zone_id]
+					relocation_zone_id = booking_request["destination_id"]
+					timeout_outward = 0
+					timeout_return = 0
+					cr_soc_delta = 0
+					charge["duration"] = np.random.exponential(
+						120 * 60
 					)
-				)
+					charge_dict = {
+						"charge": charge,
+						"resource": charging_station,
+						"car": car,
+						"operator": "users",
+						"zone_id": charging_zone_id,
+						"timeout_outward": timeout_outward,
+						"timeout_return": timeout_return,
+						"cr_soc_delta": cr_soc_delta
+					}
+
+					yield self.env.process(self.charge_car(charge_dict))
+
+				else:
+
+					charge_flag, charge = self.check_system_charge(booking_request, car)
+					if charge_flag:
+						self.list_system_charging_bookings.append(booking_request)
+						unfeasible_charge_flag = False
+						charging_zone_id = booking_request["destination_id"]
+						charge["duration"] = np.random.exponential(
+							self.simInput.sim_scenario_conf[
+								"avg_service_time"
+							] * 60
+						)
+						timeout_outward = np.random.exponential(
+							self.simInput.sim_scenario_conf[
+								"avg_reach_time"
+							] * 60
+						)
+						timeout_return = 0
+						cr_soc_delta = 0
+
+						charge_dict = {
+							"charge": charge,
+							"resource": self.workers,
+							"car": car,
+							"operator": "system",
+							"zone_id": charging_zone_id,
+							"timeout_outward": timeout_outward,
+							"timeout_return": timeout_return,
+							"cr_soc_delta": cr_soc_delta
+						}
+
+						yield self.env.process(self.charge_car(charge_dict))
+
+			else:
+
+				charge_flag, charge = self.check_system_charge(booking_request, car)
+				if charge_flag:
+					self.list_system_charging_bookings.append(booking_request)
+					unfeasible_charge_flag = False
+					charging_zone_id = booking_request["destination_id"]
+					charge["duration"] = np.random.exponential(
+						self.simInput.sim_scenario_conf[
+							"avg_service_time"
+						] * 60
+					)
+					timeout_outward = np.random.exponential(
+						self.simInput.sim_scenario_conf[
+							"avg_reach_time"
+						] * 60
+					)
+					timeout_return = 0
+					cr_soc_delta = 0
+
+					charge_dict = {
+						"charge": charge,
+						"resource": self.workers,
+						"car": car,
+						"operator": "system",
+						"zone_id": charging_zone_id,
+						"timeout_outward": timeout_outward,
+						"timeout_return": timeout_return,
+						"cr_soc_delta": cr_soc_delta
+					}
+
+					yield self.env.process(self.charge_car(charge_dict))
 
 		elif self.simInput.sim_scenario_conf["user_contribution"]:
+
 			charge_flag, charge = self.check_user_charge(booking_request, car)
 			if charge_flag:
 				user_charge_flag = True

@@ -8,22 +8,25 @@ sim_scenario_conf = {
 
 	"alpha": 40,
 	"beta": 100,
-	"n_poles_n_cars_factor": 0.1,
+	"n_poles_n_cars_factor": 1,
 
 	"hub": False,
 	"hub_zone_policy": "",
 
-	"distributed_cps": False,
-	"cps_placement_policy": "",
-	"cps_zones_percentage": 0.1,
-	"user_contribution": False,
+	"distributed_cps": True,
+	"cps_placement_policy": "num_parkings",
+	"cps_zones_percentage": 1,
 	"system_cps": False,
-	"willingness": 0.0,
 
 	"battery_swap": True,
-	"battery_swap_service_time": 600,
-	"n_workers": 1000,
+	"avg_reach_time": 30,
+	"avg_service_time": 5,
 
+	"n_workers": 1000,
 	"relocation": False,
+
+	"user_contribution": True,
+	"willingness": 0.5,
+	"alpha_users": 40,
 
 }

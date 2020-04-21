@@ -49,16 +49,19 @@ def init_charge_end (charge, beta):
 
 class EFFCS_ChargingPrimitives:
 
-	def charge_car (self,
-					charge,
-					resource,
-					car,
-					operator,
-					zone_id,
-					timeout_outward = 0,
-					timeout_return = 0,
-					cr_soc_delta = 0
-					):
+	def charge_car (
+			self,
+			charge_dict
+	):
+
+		charge = charge_dict["charge"]
+		resource = charge_dict["resource"]
+		car = charge_dict["car"]
+		operator = charge_dict["operator"]
+		zone_id = charge_dict["zone_id"]
+		timeout_outward = charge_dict["timeout_outward"]
+		timeout_return = charge_dict["timeout_return"]
+		cr_soc_delta = charge_dict["cr_soc_delta"]
 
 		def check_queuing ():
 			if self.simInput.sim_scenario_conf["queuing"]:
@@ -99,11 +102,10 @@ class EFFCS_ChargingPrimitives:
 				with resource.request() as charging_request:
 					yield charging_request
 					self.n_cars_charging_users += 1
-					yield self.env.timeout(charge["duration"] * 60)
+					yield self.env.timeout(charge["duration"])
 				self.cars_soc_dict[car] = charge["end_soc"]
 				self.n_cars_charging_users -= 1
-				charge["end_time"] = charge["start_time"] + \
-					datetime.timedelta(seconds = charge["duration"] * 60)
+				charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds = charge["duration"] * 60)
 
 	def compute_hub_charging_params (self, booking_request, car):
 
@@ -232,18 +234,20 @@ class EFFCS_ChargingPrimitives:
 
 	def check_user_charge (self, booking_request, car):
 
-		if booking_request["end_soc"] < \
-		self.simInput.sim_scenario_conf["beta"]:
-			destination_id = booking_request["destination_id"]
-			if destination_id in self.charging_poles_dict.keys():
-				if np.random.binomial\
-				(1, self.simInput.sim_scenario_conf["willingness"]):
-					charge = init_charge\
-						(booking_request,
-						 self.cars_soc_dict,
-						 car,
-						 self.simInput.sim_scenario_conf["beta"])
-					return True, charge
+		if booking_request["end_soc"] < self.simInput.sim_scenario_conf["alpha_users"]:
+			if booking_request["end_soc"] < self.simInput.sim_scenario_conf["beta"]:
+				destination_id = booking_request["destination_id"]
+				if destination_id in self.charging_poles_dict.keys():
+					if np.random.binomial(1, self.simInput.sim_scenario_conf["willingness"]):
+						charge = init_charge(
+							booking_request,
+							self.cars_soc_dict,
+							car,
+							self.simInput.sim_scenario_conf["beta"]
+						)
+						return True, charge
+					else:
+						return False, None
 				else:
 					return False, None
 			else:

@@ -109,11 +109,10 @@ class City:
 
 		self.max_dist = self.od_distances.max().max()
 
-		self.neighbors = self.od_distances \
-			[self.od_distances < 1050].apply \
-			(lambda x: pd.Series \
-				(x.sort_values().dropna().iloc[1:].index.values),
-			 axis=1)
+		self.neighbors = self.od_distances[self.od_distances < 2*self.bin_side_length-1].apply(
+			lambda x: pd.Series(x.sort_values().dropna().iloc[1:].index.values),
+			axis=1
+		)
 		#print(self.neighbors)
 
 		self.neighbors_dict = {}
@@ -195,11 +194,9 @@ class City:
 
 		self.request_rates = {}
 
-		for daytype, daytype_bookings_gdf \
-				in self.input_bookings.groupby("daytype"):
+		for daytype, daytype_bookings_gdf in self.input_bookings.groupby("daytype"):
 			self.request_rates[daytype] = {}
-			for hour, hour_df \
-					in daytype_bookings_gdf.groupby("hour"):
+			for hour, hour_df in daytype_bookings_gdf.groupby("hour"):
 				self.request_rates[daytype][hour] = \
 					hour_df.city.count() \
 					/ (len(hour_df.day.unique())) \
@@ -215,17 +212,13 @@ class City:
 		self.kde_columns = [
 			"origin_id",
 			"destination_id",
-			# "duration"
 		]
 
-		for daytype, daytype_bookings_gdf \
-				in self.input_bookings.groupby("daytype"):
+		for daytype, daytype_bookings_gdf in self.input_bookings.groupby("daytype"):
 			self.trip_kdes[daytype] = {}
-			for hour, hour_df \
-					in daytype_bookings_gdf.groupby("hour"):
-				self.trip_kdes[daytype][hour] = \
-					KernelDensity(
-						bandwidth=self.kde_bw
-					).fit(hour_df[self.kde_columns].dropna())
+			for hour, hour_df in daytype_bookings_gdf.groupby("hour"):
+				self.trip_kdes[daytype][hour] = KernelDensity(
+					bandwidth=self.kde_bw
+				).fit(hour_df[self.kde_columns].dropna())
 
 		return self.trip_kdes

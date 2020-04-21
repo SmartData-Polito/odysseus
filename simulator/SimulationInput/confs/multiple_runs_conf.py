@@ -19,14 +19,17 @@ sim_scenario_conf_grid = {
     "distributed_cps": [False],
     "cps_placement_policy": [""],
     "cps_zones_percentage": [0.1],
-    "user_contribution": [False],
     "system_cps": [False],
-    "willingness": [0],
 
     "battery_swap": [True],
-    "battery_swap_service_time": [30, 60, 90, 120],
-    "n_workers": [1000],
+    "avg_reach_time": [30],
+    "avg_service_time": [5],
 
+    "n_workers": [1000],
     "relocation": [False],
+
+    "user_contribution": [False],
+    "willingness": [0],
+    "alpha_users": [40],
 
 }

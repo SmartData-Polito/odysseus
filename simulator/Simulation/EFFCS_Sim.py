@@ -91,20 +91,17 @@ class EFFCS_Sim ():
 
 		self.n_booked_cars += 1
 
-		self.available_cars_dict\
-			[zone_id].remove(car)
+		self.available_cars_dict[zone_id].remove(car)
 		del self.cars_zones[car]
-		booking_request["start_soc"] = \
-			self.cars_soc_dict[car]
+		booking_request["start_soc"] = self.cars_soc_dict[car]
 		del self.cars_soc_dict[car]
+
 		booking_request["plate"] = car
 
 		yield self.env.timeout(booking_request["duration"] * 60)
 
-		self.cars_soc_dict[car] = \
-			booking_request["start_soc"] + booking_request["soc_delta"]
-		booking_request["end_soc"] = \
-			self.cars_soc_dict[car]
+		self.cars_soc_dict[car] = booking_request["start_soc"] + booking_request["soc_delta"]
+		booking_request["end_soc"] = self.cars_soc_dict[car]
 		self.cars_zones[car] = booking_request["destination_id"]
 
 		self.n_booked_cars -= 1
@@ -155,8 +152,7 @@ class EFFCS_Sim ():
 			else:
 				return False, max_soc_car, max_soc
 
-		if len(self.available_cars_dict\
-				   [booking_request["origin_id"]]):
+		if len(self.available_cars_dict[booking_request["origin_id"]]):
 			available_car_flag = True
 			available_car_flag_same_zone = True
 			found_car_flag, max_soc_car_origin, max_soc_origin = \
@@ -175,9 +171,7 @@ class EFFCS_Sim ():
 			max_soc_car_neighbors = None
 			max_soc_neighbors = -1
 			max_neighbor = None
-			for neighbor in self.neighbors_dict\
-			[booking_request["origin_id"]].values():
-				#print(neighbor)
+			for neighbor in self.neighbors_dict[booking_request["origin_id"]].values():
 				if neighbor in self.available_cars_dict:
 					if len(self.available_cars_dict[neighbor]) and not found_car_flag:
 						available_car_flag = True
