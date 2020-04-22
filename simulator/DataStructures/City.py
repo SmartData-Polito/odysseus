@@ -105,15 +105,12 @@ class City:
 
 	def get_neighbors_dicts(self):
 
-		#print(self.od_distances)
-
 		self.max_dist = self.od_distances.max().max()
 
 		self.neighbors = self.od_distances[self.od_distances < 2*self.bin_side_length-1].apply(
 			lambda x: pd.Series(x.sort_values().dropna().iloc[1:].index.values),
 			axis=1
 		)
-		#print(self.neighbors)
 
 		self.neighbors_dict = {}
 		for zone in self.neighbors.index:

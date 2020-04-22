@@ -57,6 +57,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 				charge_flag, charge = self.check_user_charge(booking_request, car)
 
 				if charge_flag:
+
 					user_charge_flag = True
 					self.list_users_charging_bookings.append(booking_request)
 					charging_zone_id = booking_request["destination_id"]
@@ -87,31 +88,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 					if charge_flag:
 						self.list_system_charging_bookings.append(booking_request)
 						unfeasible_charge_flag = False
-						charging_zone_id = booking_request["destination_id"]
-						charge["duration"] = np.random.exponential(
-							self.simInput.sim_scenario_conf[
-								"avg_service_time"
-							] * 60
-						)
-						timeout_outward = np.random.exponential(
-							self.simInput.sim_scenario_conf[
-								"avg_reach_time"
-							] * 60
-						)
-						timeout_return = 0
-						cr_soc_delta = 0
-
-						charge_dict = {
-							"charge": charge,
-							"resource": self.workers,
-							"car": car,
-							"operator": "system",
-							"zone_id": charging_zone_id,
-							"timeout_outward": timeout_outward,
-							"timeout_return": timeout_return,
-							"cr_soc_delta": cr_soc_delta
-						}
-
+						charge_dict = self.get_charge_dict(car, charge, booking_request, operator="system")
 						yield self.env.process(self.charge_car(charge_dict))
 
 			else:
@@ -288,7 +265,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 		if charge_flag and not user_charge_flag:
 
 			if not self.simInput.sim_scenario_conf["relocation"]:
-				relocation_zone_id = charging_zone_id
+				relocation_zone_id = charge_dict["zone_id"]
 
 			elif self.simInput.sim_scenario_conf["relocation"]:
 				relocation_zone_id = booking_request["destination_id"]
