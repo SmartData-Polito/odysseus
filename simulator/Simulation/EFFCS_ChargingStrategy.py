@@ -14,6 +14,11 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 
 		self.cars_soc_dict = simInput.cars_soc_dict
 
+		self.workers = simpy.Resource(
+			self.env,
+			capacity=self.simInput.sim_scenario_conf["n_workers"]
+		)
+
 		if self.simInput.sim_scenario_conf["hub"]:
 			self.charging_hub = simpy.Resource(
 				self.env,
@@ -29,11 +34,6 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 						self.env,
 						capacity=n
 					)
-
-		self.workers = simpy.Resource(
-			self.env,
-			capacity=self.simInput.sim_scenario_conf["n_workers"]
-		)
 
 		self.sim_charges = []
 		self.sim_unfeasible_charge_bookings = []
@@ -88,7 +88,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 					if charge_flag:
 						self.list_system_charging_bookings.append(booking_request)
 						unfeasible_charge_flag = False
-						charge_dict = self.get_charge_dict(car, charge, booking_request, operator="system")
+						charge_dict = self.get_charge_dict(car, charge, booking_request, "system")
 						yield self.env.process(self.charge_car(charge_dict))
 
 			else:
@@ -97,31 +97,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 				if charge_flag:
 					self.list_system_charging_bookings.append(booking_request)
 					unfeasible_charge_flag = False
-					charging_zone_id = booking_request["destination_id"]
-					charge["duration"] = np.random.exponential(
-						self.simInput.sim_scenario_conf[
-							"avg_service_time"
-						] * 60
-					)
-					timeout_outward = np.random.exponential(
-						self.simInput.sim_scenario_conf[
-							"avg_reach_time"
-						] * 60
-					)
-					timeout_return = 0
-					cr_soc_delta = 0
-
-					charge_dict = {
-						"charge": charge,
-						"resource": self.workers,
-						"car": car,
-						"operator": "system",
-						"zone_id": charging_zone_id,
-						"timeout_outward": timeout_outward,
-						"timeout_return": timeout_return,
-						"cr_soc_delta": cr_soc_delta
-					}
-
+					charge_dict = self.get_charge_dict(car, charge, booking_request, "system")
 					yield self.env.process(self.charge_car(charge_dict))
 
 		elif self.simInput.sim_scenario_conf["user_contribution"]:

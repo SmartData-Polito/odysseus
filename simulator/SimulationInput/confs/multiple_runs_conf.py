@@ -30,6 +30,5 @@ sim_scenario_conf_grid = {
 
     "user_contribution": [False],
     "willingness": [0],
-    "alpha_users": [40],
 
 }

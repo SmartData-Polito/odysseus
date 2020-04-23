@@ -26,24 +26,15 @@ def init_charge (booking_request, cars_soc_dict, car, beta):
 
     charge = {}
     charge["plate"] = car
-    charge["start_time"] = \
-        booking_request["end_time"]
+    charge["start_time"] = booking_request["end_time"]
     charge["date"] = charge["start_time"].date()
     charge["hour"] = charge["start_time"].hour
     charge["day_hour"] = \
         charge["start_time"].replace(minute=0, second=0, microsecond=0)
     charge["start_soc"] = cars_soc_dict[car]
     charge["end_soc"] = beta
-
-    return charge
-
-
-def init_charge_end (charge, beta):
     charge["soc_delta"] = charge["end_soc"] - charge["start_soc"]
     charge["soc_delta_kwh"] = soc_to_kwh(charge["soc_delta"])
-    charge["end_time"] = charge["start_time"] + datetime.timedelta(
-        seconds=charge["duration"] * 60 + 1
-    )
     return charge
 
 
@@ -81,23 +72,22 @@ class EFFCS_ChargingPrimitives:
 
         if operator == "system":
             if check_queuing():
-                yield self.env.timeout(charge["timeout_outward"])
-                charge["start_soc"] -= charge["cr_soc_delta"]
-                charge = init_charge_end(charge, self.simInput.sim_scenario_conf["beta"])
-                self.sim_charges += [charge]
-                with resource.request() as charging_request:
-                    yield charging_request
-                    self.n_cars_charging_system += 1
-                    yield self.env.timeout(charge["duration"])
-                self.n_cars_charging_system -= 1
-                yield self.env.timeout(charge["timeout_return"])
-                self.cars_soc_dict[car] = charge["end_soc"]
-                charge["end_soc"] -= charge["cr_soc_delta"]
+                with self.workers.request() as worker_request:
+                    yield worker_request
+                    yield self.env.timeout(charge["timeout_outward"])
+                    charge["start_soc"] -= charge["cr_soc_delta"]
+                    self.sim_charges += [charge]
+                    with resource.request() as charging_request:
+                        yield charging_request
+                        self.n_cars_charging_system += 1
+                        yield self.env.timeout(charge["duration"])
+                    self.n_cars_charging_system -= 1
+                    yield self.env.timeout(charge["timeout_return"])
+                    self.cars_soc_dict[car] = charge["end_soc"]
+                    charge["end_soc"] -= charge["cr_soc_delta"]
 
         elif operator == "users":
             if resource.count < resource.capacity:
-                charge = init_charge_end\
-                    (charge, self.simInput.sim_scenario_conf["beta"])
                 self.sim_charges += [charge]
                 with resource.request() as charging_request:
                     yield charging_request
@@ -105,28 +95,29 @@ class EFFCS_ChargingPrimitives:
                     yield self.env.timeout(charge["duration"])
                 self.cars_soc_dict[car] = charge["end_soc"]
                 self.n_cars_charging_users -= 1
-                charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds = charge["duration"] * 60)
+
+        charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
 
     def get_charge_dict(self, car, charge, booking_request, operator):
 
         if self.simInput.sim_scenario_conf["battery_swap"]:
             charging_zone_id = booking_request["destination_id"]
             if self.simInput.sim_scenario_conf["time_estimation"]:
-                charge["duration"] = np.random.exponential(
-                    self.simInput.sim_scenario_conf[
-                        "avg_service_time"
-                    ] * 60
-                )
                 timeout_outward = np.random.exponential(
                     self.simInput.sim_scenario_conf[
                         "avg_reach_time"
                     ] * 60
                 )
+                charge["duration"] = np.random.exponential(
+                    self.simInput.sim_scenario_conf[
+                        "avg_service_time"
+                    ] * 60
+                )
                 timeout_return = 0
                 cr_soc_delta = 0
             else:
-                charge["duration"] = 0
                 timeout_outward = 0
+                charge["duration"] = 0
                 timeout_return = 0
                 cr_soc_delta = 0
 
@@ -270,8 +261,8 @@ class EFFCS_ChargingPrimitives:
 
     def check_user_charge (self, booking_request, car):
 
-        if booking_request["end_soc"] < self.simInput.sim_scenario_conf["alpha_users"]:
-            if booking_request["end_soc"] < self.simInput.sim_scenario_conf["beta"]:
+        if booking_request["end_soc"] < self.simInput.sim_scenario_conf["beta"]:
+            if booking_request["end_soc"] < self.simInput.sim_scenario_conf["alpha"]:
                 destination_id = booking_request["destination_id"]
                 if destination_id in self.charging_poles_dict.keys():
                     if np.random.binomial(1, self.simInput.sim_scenario_conf["willingness"]):

@@ -13,7 +13,6 @@ class EFFCS_Sim ():
 	def __init__ (
 					self,
 					simInput
-
 				 ):
 
 		self.start = datetime.datetime(
@@ -26,7 +25,6 @@ class EFFCS_Sim ():
 			simInput.sim_general_conf["month_end"],
 			1, tzinfo=pytz.UTC
 		)
-		print(self.start, self.end)
 		self.total_seconds = (self.end - self.start).total_seconds()
 		self.hours_spent = 0
 		self.current_datetime = self.start
@@ -38,27 +36,20 @@ class EFFCS_Sim ():
 		else:
 			self.current_daytype = "weekday"
 
-		self.simInput = \
-			simInput
+		self.simInput = simInput
 
-		self.simInputCopy = \
-			copy.deepcopy(simInput)
+		self.simInputCopy = copy.deepcopy(simInput)
 
-		self.available_cars_dict = \
-			self.simInput.available_cars_dict
+		self.available_cars_dict = self.simInput.available_cars_dict
 
-		self.neighbors_dict = \
-			self.simInput.neighbors_dict
+		self.neighbors_dict = self.simInput.neighbors_dict
 
 		if simInput.sim_scenario_conf["distributed_cps"]:
-			self.n_charging_poles_by_zone = \
-				self.simInput.n_charging_poles_by_zone
+			self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone
 
-		self.cars_soc_dict = \
-			self.simInput.cars_soc_dict
+		self.cars_soc_dict = self.simInput.cars_soc_dict
 
-		self.cars_zones = \
-			self.simInput.cars_zones
+		self.cars_zones = self.simInput.cars_zones
 
 		self.env = simpy.Environment()
 
@@ -82,10 +73,7 @@ class EFFCS_Sim ():
 		self.list_n_cars_available = []
 		self.list_n_cars_dead = []
 
-		self.chargingStrategy = \
-			EFFCS_ChargingStrategy\
-			(self.env,
-			simInput)
+		self.chargingStrategy = EFFCS_ChargingStrategy(self.env, simInput)
 
 	def schedule_booking (self, booking_request, car, zone_id):
 
@@ -106,10 +94,9 @@ class EFFCS_Sim ():
 
 		self.n_booked_cars -= 1
 
-		relocation_zone_id = \
-			yield self.env.process\
-				(self.chargingStrategy.check_charge\
-				(booking_request, car))
+		relocation_zone_id = yield self.env.process(
+			self.chargingStrategy.check_charge(booking_request, car)
+		)
 
 		self.available_cars_dict\
 			[relocation_zone_id].append(car)
@@ -117,19 +104,14 @@ class EFFCS_Sim ():
 
 	def process_booking_request(self, booking_request):
 
-		self.list_n_cars_booked += \
-			[self.n_booked_cars]
-		self.list_n_cars_charging_system += \
-			[self.chargingStrategy.n_cars_charging_system]
-		self.list_n_cars_charging_users += \
-			[self.chargingStrategy.n_cars_charging_users]
-		self.list_n_cars_dead += \
-			[self.chargingStrategy.n_dead_cars]
-		self.list_n_cars_available += \
-			[self.simInput.n_vehicles_sim - \
-			 self.chargingStrategy.n_cars_charging_system - \
-			 self.chargingStrategy.n_cars_charging_users - \
-			 self.n_booked_cars]
+		self.list_n_cars_booked += [self.n_booked_cars]
+		self.list_n_cars_charging_system += [self.chargingStrategy.n_cars_charging_system]
+		self.list_n_cars_charging_users += [self.chargingStrategy.n_cars_charging_users]
+		self.list_n_cars_dead += [self.chargingStrategy.n_dead_cars]
+		n_cars_charging = self.chargingStrategy.n_cars_charging_system + self.chargingStrategy.n_cars_charging_users
+		self.list_n_cars_available += [
+			self.simInput.n_vehicles_sim - n_cars_charging - self.n_booked_cars
+		]
 
 		self.sim_booking_requests += [booking_request]
 		self.n_booking_requests += 1
@@ -140,13 +122,9 @@ class EFFCS_Sim ():
 		available_car_flag_not_same_zone = False
 
 		def find_car (zone_id):
-			available_cars_soc_dict = \
-				{k: self.cars_soc_dict[k] for k in self.available_cars_dict[zone_id]}
+			available_cars_soc_dict = {k: self.cars_soc_dict[k] for k in self.available_cars_dict[zone_id]}
 			max_soc = max(available_cars_soc_dict.values())
-			max_soc_car = \
-				max(available_cars_soc_dict,
-				key=available_cars_soc_dict.get)
-			#print(booking_request)
+			max_soc_car = max(available_cars_soc_dict, key=available_cars_soc_dict.get)
 			if self.cars_soc_dict[max_soc_car] > abs(booking_request["soc_delta"]):
 				return True, max_soc_car, max_soc
 			else:
