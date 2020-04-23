@@ -87,8 +87,8 @@ class City:
 		).index
 		origin_zones_count = self.input_bookings.origin_id.value_counts()
 		dest_zones_count = self.input_bookings.destination_id.value_counts()
-		valid_origin_zones = origin_zones_count[(origin_zones_count > 30)]
-		valid_dest_zones = dest_zones_count[(dest_zones_count > 30)]
+		valid_origin_zones = origin_zones_count[(origin_zones_count > 1)]
+		valid_dest_zones = dest_zones_count[(dest_zones_count > 1)]
 		self.valid_zones = self.valid_zones.intersection(
 			valid_origin_zones.index.intersection(
 				valid_dest_zones.index
@@ -114,8 +114,7 @@ class City:
 
 		self.neighbors_dict = {}
 		for zone in self.neighbors.index:
-			self.neighbors_dict[int(zone)] = \
-				dict(self.neighbors.loc[zone].dropna())
+			self.neighbors_dict[int(zone)] = dict(self.neighbors.loc[zone].dropna())
 
 		return self.neighbors, self.neighbors_dict
 
