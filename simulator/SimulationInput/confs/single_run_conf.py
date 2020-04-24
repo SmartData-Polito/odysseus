@@ -1,14 +1,14 @@
 sim_scenario_conf = {
 
 	"requests_rate_factor": 1,
-	"n_cars_factor": 1,
+	"n_vehicles_factor": 1,
 
 	"time_estimation": True,
 	"queuing": True,
 
 	"alpha": 40,
 	"beta": 100,
-	"n_poles_n_cars_factor": 1,
+	"n_poles_n_vehicles_factor": 1,
 
 	"hub": False,
 	"hub_zone_policy": "",
@@ -22,7 +22,7 @@ sim_scenario_conf = {
 	"avg_reach_time": 30,
 	"avg_service_time": 5,
 
-	"n_workers": 1000,
+	"n_workers": 10,
 	"relocation": False,
 
 	"user_contribution": False,

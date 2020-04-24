@@ -40,16 +40,16 @@ class EFFCS_Sim ():
 
 		self.simInputCopy = copy.deepcopy(simInput)
 
-		self.available_cars_dict = self.simInput.available_cars_dict
+		self.available_vehicles_dict = self.simInput.available_vehicles_dict
 
 		self.neighbors_dict = self.simInput.neighbors_dict
 
 		if simInput.sim_scenario_conf["distributed_cps"]:
 			self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone
 
-		self.cars_soc_dict = self.simInput.cars_soc_dict
+		self.vehicles_soc_dict = self.simInput.vehicles_soc_dict
 
-		self.cars_zones = self.simInput.cars_zones
+		self.vehicles_zones = self.simInput.vehicles_zones
 
 		self.env = simpy.Environment()
 
@@ -57,136 +57,136 @@ class EFFCS_Sim ():
 		self.sim_booking_requests = []
 		self.sim_booking_requests_deaths = []
 		self.sim_unsatisfied_requests = []
-		self.sim_no_close_car_requests = []
+		self.sim_no_close_vehicle_requests = []
 
 		self.n_booking_requests = 0
 		self.n_same_zone_trips = 0
 		self.n_not_same_zone_trips = 0
-		self.n_no_close_cars = 0
+		self.n_no_close_vehicles = 0
 		self.n_deaths = 0
 
-		self.n_booked_cars = 0
+		self.n_booked_vehicles = 0
 
-		self.list_n_cars_charging_system = []
-		self.list_n_cars_charging_users = []
-		self.list_n_cars_booked = []
-		self.list_n_cars_available = []
-		self.list_n_cars_dead = []
+		self.list_n_vehicles_charging_system = []
+		self.list_n_vehicles_charging_users = []
+		self.list_n_vehicles_booked = []
+		self.list_n_vehicles_available = []
+		self.list_n_vehicles_dead = []
 
 		self.chargingStrategy = EFFCS_ChargingStrategy(self.env, simInput)
 
-	def schedule_booking (self, booking_request, car, zone_id):
+	def schedule_booking (self, booking_request, vehicle, zone_id):
 
-		self.n_booked_cars += 1
+		self.n_booked_vehicles += 1
 
-		self.available_cars_dict[zone_id].remove(car)
-		del self.cars_zones[car]
-		booking_request["start_soc"] = self.cars_soc_dict[car]
-		del self.cars_soc_dict[car]
+		self.available_vehicles_dict[zone_id].remove(vehicle)
+		del self.vehicles_zones[vehicle]
+		booking_request["start_soc"] = self.vehicles_soc_dict[vehicle]
+		del self.vehicles_soc_dict[vehicle]
 
-		booking_request["plate"] = car
+		booking_request["plate"] = vehicle
 
 		yield self.env.timeout(booking_request["duration"] * 60)
 
-		self.cars_soc_dict[car] = booking_request["start_soc"] + booking_request["soc_delta"]
-		booking_request["end_soc"] = self.cars_soc_dict[car]
-		self.cars_zones[car] = booking_request["destination_id"]
+		self.vehicles_soc_dict[vehicle] = booking_request["start_soc"] + booking_request["soc_delta"]
+		booking_request["end_soc"] = self.vehicles_soc_dict[vehicle]
+		self.vehicles_zones[vehicle] = booking_request["destination_id"]
 
-		self.n_booked_cars -= 1
+		self.n_booked_vehicles -= 1
 
 		relocation_zone_id = yield self.env.process(
-			self.chargingStrategy.check_charge(booking_request, car)
+			self.chargingStrategy.check_charge(booking_request, vehicle)
 		)
 
-		self.available_cars_dict\
-			[relocation_zone_id].append(car)
-		self.cars_zones[car] = relocation_zone_id
+		self.available_vehicles_dict\
+			[relocation_zone_id].append(vehicle)
+		self.vehicles_zones[vehicle] = relocation_zone_id
 
 	def process_booking_request(self, booking_request):
 
-		self.list_n_cars_booked += [self.n_booked_cars]
-		self.list_n_cars_charging_system += [self.chargingStrategy.n_cars_charging_system]
-		self.list_n_cars_charging_users += [self.chargingStrategy.n_cars_charging_users]
-		self.list_n_cars_dead += [self.chargingStrategy.n_dead_cars]
-		n_cars_charging = self.chargingStrategy.n_cars_charging_system + self.chargingStrategy.n_cars_charging_users
-		self.list_n_cars_available += [
-			self.simInput.n_vehicles_sim - n_cars_charging - self.n_booked_cars
+		self.list_n_vehicles_booked += [self.n_booked_vehicles]
+		self.list_n_vehicles_charging_system += [self.chargingStrategy.n_vehicles_charging_system]
+		self.list_n_vehicles_charging_users += [self.chargingStrategy.n_vehicles_charging_users]
+		self.list_n_vehicles_dead += [self.chargingStrategy.n_dead_vehicles]
+		n_vehicles_charging = self.chargingStrategy.n_vehicles_charging_system + self.chargingStrategy.n_vehicles_charging_users
+		self.list_n_vehicles_available += [
+			self.simInput.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
 		]
 
 		self.sim_booking_requests += [booking_request]
 		self.n_booking_requests += 1
 
-		available_car_flag = False
-		found_car_flag = False
-		available_car_flag_same_zone = False
-		available_car_flag_not_same_zone = False
+		available_vehicle_flag = False
+		found_vehicle_flag = False
+		available_vehicle_flag_same_zone = False
+		available_vehicle_flag_not_same_zone = False
 
-		def find_car (zone_id):
-			available_cars_soc_dict = {k: self.cars_soc_dict[k] for k in self.available_cars_dict[zone_id]}
-			max_soc = max(available_cars_soc_dict.values())
-			max_soc_car = max(available_cars_soc_dict, key=available_cars_soc_dict.get)
-			if self.cars_soc_dict[max_soc_car] > abs(booking_request["soc_delta"]):
-				return True, max_soc_car, max_soc
+		def find_vehicle (zone_id):
+			available_vehicles_soc_dict = {k: self.vehicles_soc_dict[k] for k in self.available_vehicles_dict[zone_id]}
+			max_soc = max(available_vehicles_soc_dict.values())
+			max_soc_vehicle = max(available_vehicles_soc_dict, key=available_vehicles_soc_dict.get)
+			if self.vehicles_soc_dict[max_soc_vehicle] > abs(booking_request["soc_delta"]):
+				return True, max_soc_vehicle, max_soc
 			else:
-				return False, max_soc_car, max_soc
+				return False, max_soc_vehicle, max_soc
 
-		if len(self.available_cars_dict[booking_request["origin_id"]]):
-			available_car_flag = True
-			available_car_flag_same_zone = True
-			found_car_flag, max_soc_car_origin, max_soc_origin = \
-				find_car(booking_request["origin_id"])
+		if len(self.available_vehicles_dict[booking_request["origin_id"]]):
+			available_vehicle_flag = True
+			available_vehicle_flag_same_zone = True
+			found_vehicle_flag, max_soc_vehicle_origin, max_soc_origin = \
+				find_vehicle(booking_request["origin_id"])
 
-		if found_car_flag:
+		if found_vehicle_flag:
 			self.env.process\
 				(self.schedule_booking\
-				(booking_request, max_soc_car_origin, booking_request["origin_id"]))
+				(booking_request, max_soc_vehicle_origin, booking_request["origin_id"]))
 			self.n_same_zone_trips += 1
 		else:
-			available_car_flag = False
-			found_car_flag = False
-			available_car_flag_same_zone = False
-			available_car_flag_not_same_zone = False
-			max_soc_car_neighbors = None
+			available_vehicle_flag = False
+			found_vehicle_flag = False
+			available_vehicle_flag_same_zone = False
+			available_vehicle_flag_not_same_zone = False
+			max_soc_vehicle_neighbors = None
 			max_soc_neighbors = -1
 			max_neighbor = None
 			for neighbor in self.neighbors_dict[booking_request["origin_id"]].values():
-				if neighbor in self.available_cars_dict:
-					if len(self.available_cars_dict[neighbor]) and not found_car_flag:
-						available_car_flag = True
-						available_car_flag_not_same_zone = True
-						found_car_flag, max_soc_car_neighbor, max_soc_neighbor = \
-							find_car(neighbor)
+				if neighbor in self.available_vehicles_dict:
+					if len(self.available_vehicles_dict[neighbor]) and not found_vehicle_flag:
+						available_vehicle_flag = True
+						available_vehicle_flag_not_same_zone = True
+						found_vehicle_flag, max_soc_vehicle_neighbor, max_soc_neighbor = \
+							find_vehicle(neighbor)
 						if max_soc_neighbors < max_soc_neighbor:
 							max_neighbor = neighbor
-							max_soc_car_neighbors = max_soc_car_neighbor
-			if found_car_flag:
+							max_soc_vehicle_neighbors = max_soc_vehicle_neighbor
+			if found_vehicle_flag:
 				self.env.process\
 					(self.schedule_booking\
-					(booking_request, max_soc_car_neighbors, max_neighbor))
+					(booking_request, max_soc_vehicle_neighbors, max_neighbor))
 				self.n_not_same_zone_trips += 1
 
-		if not available_car_flag:
-			self.n_no_close_cars += 1
+		if not available_vehicle_flag:
+			self.n_no_close_vehicles += 1
 			self.sim_unsatisfied_requests += [booking_request]
-			self.sim_no_close_car_requests += [booking_request]
+			self.sim_no_close_vehicle_requests += [booking_request]
 
-		if not found_car_flag and available_car_flag:
+		if not found_vehicle_flag and available_vehicle_flag:
 			self.n_deaths += 1
 			death = copy.deepcopy(booking_request)
 			death["hour"] = death["start_time"].hour
 			#print(death["hour"])
-			if available_car_flag_same_zone and available_car_flag_not_same_zone:
+			if available_vehicle_flag_same_zone and available_vehicle_flag_not_same_zone:
 				if max_soc_origin > max_soc_neighbor:
-					death["plate"] = max_soc_car_origin
+					death["plate"] = max_soc_vehicle_origin
 					death["zone_id"] = booking_request["origin_id"]
 				else:
-					death["plate"] = max_soc_car_neighbor
+					death["plate"] = max_soc_vehicle_neighbor
 					death["zone_id"] = max_neighbor
-			elif available_car_flag_same_zone:
-				death["plate"] = max_soc_car_origin
+			elif available_vehicle_flag_same_zone:
+				death["plate"] = max_soc_vehicle_origin
 				death["zone_id"] = booking_request["origin_id"]
-			elif available_car_flag_not_same_zone:
-				death["plate"] = max_soc_car_neighbor
+			elif available_vehicle_flag_not_same_zone:
+				death["plate"] = max_soc_vehicle_neighbor
 				death["zone_id"] = max_neighbor
 			self.sim_booking_requests_deaths += [death]
 

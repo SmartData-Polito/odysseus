@@ -10,7 +10,7 @@ from city_data_manager.city_data_source.utils.geospatial_utils import get_city_g
 
 from simulator.utils.bookings_utils import pre_process_time
 from simulator.Loading.Loader import Loader
-from simulator.utils.car_utils import get_soc_delta
+from simulator.utils.vehicle_utils import get_soc_delta
 
 
 class City:
@@ -87,8 +87,8 @@ class City:
 		).index
 		origin_zones_count = self.input_bookings.origin_id.value_counts()
 		dest_zones_count = self.input_bookings.destination_id.value_counts()
-		valid_origin_zones = origin_zones_count[(origin_zones_count > 10)]
-		valid_dest_zones = dest_zones_count[(dest_zones_count > 10)]
+		valid_origin_zones = origin_zones_count[(origin_zones_count > 30)]
+		valid_dest_zones = dest_zones_count[(dest_zones_count > 30)]
 		self.valid_zones = self.valid_zones.intersection(
 			valid_origin_zones.index.intersection(
 				valid_dest_zones.index

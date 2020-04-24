@@ -117,10 +117,10 @@ def single_run(conf_tuple):
 			"sim_unsatisfied_no-energy.pickle"
 		)
 	)
-	simOutput.sim_no_close_car_requests.to_pickle(
+	simOutput.sim_no_close_vehicle_requests.to_pickle(
 		os.path.join(
 			results_path,
-			"sim_unsatisfied_no_close_car.pickle"
+			"sim_unsatisfied_no_close_vehicle.pickle"
 		)
 	)
 	simOutput.sim_unsatisfied_requests.to_pickle(
@@ -161,7 +161,7 @@ def single_run(conf_tuple):
 	#
 	plotter.plot_fleet_status_t()
 	# plotter.plot_tot_energy_t()
-	# plotter.plot_n_cars_charging_t()
+	# plotter.plot_n_vehicles_charging_t()
 	# plotter.plot_relo_cost_t()
 	#
 	# plotter.plot_events_hourly_count_boxplot("bookings", "start")
@@ -169,10 +169,10 @@ def single_run(conf_tuple):
 	# plotter.plot_events_hourly_count_boxplot("charges", "start")
 	# #plotter.plot_events_hourly_count_boxplot("charges", "end")
 	# plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
-	# #plotter.plot_events_hourly_count_boxplot("no_close_car", "start")
+	# #plotter.plot_events_hourly_count_boxplot("no_close_vehicle", "start")
 	# #plotter.plot_events_hourly_count_boxplot("not_enough_energy", "start")
 	#
-	# plotter.plot_n_cars_charging_hourly_mean_boxplot()
+	# plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
 	#
 	# for col in [
 	# 	"origin_count",

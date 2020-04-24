@@ -12,8 +12,8 @@ def get_traceB_input (conf_tuple):
          (conf_tuple)
 
     simInput.get_booking_requests_list()
-    simInput.init_cars()
-    simInput.init_cars_dicts()
+    simInput.init_vehicles()
+    simInput.init_vehicles_dicts()
     simInput.init_hub()
     simInput.init_charging_poles()
 

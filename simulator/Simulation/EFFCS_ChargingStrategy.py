@@ -12,7 +12,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 
 		self.simInput = simInput
 
-		self.cars_soc_dict = simInput.cars_soc_dict
+		self.vehicles_soc_dict = simInput.vehicles_soc_dict
 
 		self.workers = simpy.Resource(
 			self.env,
@@ -38,15 +38,15 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 		self.sim_charges = []
 		self.sim_unfeasible_charge_bookings = []
 
-		self.n_cars_charging_system = 0
-		self.n_cars_charging_users = 0
-		self.dead_cars = set()
-		self.n_dead_cars = 0
+		self.n_vehicles_charging_system = 0
+		self.n_vehicles_charging_users = 0
+		self.dead_vehicles = set()
+		self.n_dead_vehicles = 0
 
 		self.list_system_charging_bookings = []
 		self.list_users_charging_bookings = []
 
-	def check_charge (self, booking_request, car):
+	def check_charge (self, booking_request, vehicle):
 
 		charge_flag = False
 		user_charge_flag = False
@@ -54,7 +54,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 		if self.simInput.sim_scenario_conf["battery_swap"]:
 
 			if self.simInput.sim_scenario_conf["user_contribution"]:
-				charge_flag, charge = self.check_user_charge(booking_request, car)
+				charge_flag, charge = self.check_user_charge(booking_request, vehicle)
 
 				if charge_flag:
 
@@ -72,7 +72,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 					charge_dict = {
 						"charge": charge,
 						"resource": charging_station,
-						"car": car,
+						"vehicle": vehicle,
 						"operator": "users",
 						"zone_id": charging_zone_id,
 						"timeout_outward": timeout_outward,
@@ -80,29 +80,29 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 						"cr_soc_delta": cr_soc_delta
 					}
 
-					yield self.env.process(self.charge_car(charge_dict))
+					yield self.env.process(self.charge_vehicle(charge_dict))
 
 				else:
 
-					charge_flag, charge = self.check_system_charge(booking_request, car)
+					charge_flag, charge = self.check_system_charge(booking_request, vehicle)
 					if charge_flag:
 						self.list_system_charging_bookings.append(booking_request)
 						unfeasible_charge_flag = False
-						charge_dict = self.get_charge_dict(car, charge, booking_request, "system")
-						yield self.env.process(self.charge_car(charge_dict))
+						charge_dict = self.get_charge_dict(vehicle, charge, booking_request, "system")
+						yield self.env.process(self.charge_vehicle(charge_dict))
 
 			else:
 
-				charge_flag, charge = self.check_system_charge(booking_request, car)
+				charge_flag, charge = self.check_system_charge(booking_request, vehicle)
 				if charge_flag:
 					self.list_system_charging_bookings.append(booking_request)
 					unfeasible_charge_flag = False
-					charge_dict = self.get_charge_dict(car, charge, booking_request, "system")
-					yield self.env.process(self.charge_car(charge_dict))
+					charge_dict = self.get_charge_dict(vehicle, charge, booking_request, "system")
+					yield self.env.process(self.charge_vehicle(charge_dict))
 
 		elif self.simInput.sim_scenario_conf["user_contribution"]:
 
-			charge_flag, charge = self.check_user_charge(booking_request, car)
+			charge_flag, charge = self.check_user_charge(booking_request, vehicle)
 			if charge_flag:
 				user_charge_flag = True
 				self.list_users_charging_bookings.append(booking_request)
@@ -116,10 +116,10 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 				cr_soc_delta = 0
 
 				yield self.env.process(
-					self.charge_car(
+					self.charge_vehicle(
 						charge,
 						charging_station,
-						car,
+						vehicle,
 						"users",
 						charging_zone_id,
 						timeout_outward,
@@ -131,7 +131,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 			else:
 
 				charge_flag, charge = \
-					self.check_system_charge(booking_request, car)
+					self.check_system_charge(booking_request, vehicle)
 
 				if charge_flag:
 
@@ -145,14 +145,14 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 						timeout_outward, \
 						timeout_return, \
 						cr_soc_delta = \
-							self.compute_hub_charging_params(booking_request, car)
+							self.compute_hub_charging_params(booking_request, vehicle)
 
 
 						yield self.env.process\
-						   (self.charge_car\
+						   (self.charge_vehicle\
 							(charge,
 							 self.charging_hub,
-							 car,
+							 vehicle,
 							 "system",
 							 charging_zone_id,
 							 timeout_outward,
@@ -171,13 +171,13 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 						timeout_outward, \
 						timeout_return, \
 						cr_soc_delta = \
-							self.compute_cp_charging_params(booking_request, car)
+							self.compute_cp_charging_params(booking_request, vehicle)
 
 						yield self.env.process\
-						   (self.charge_car\
+						   (self.charge_vehicle\
 							(charge,
 							 charging_station,
-							 car,
+							 vehicle,
 							 "system",
 							 charging_zone_id,
 							 timeout_outward,
@@ -187,7 +187,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 		elif not self.simInput.sim_scenario_conf["user_contribution"]:
 
 			charge_flag, charge = \
-				self.check_system_charge(booking_request, car)
+				self.check_system_charge(booking_request, vehicle)
 
 			if charge_flag:
 
@@ -201,13 +201,13 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 					timeout_outward, \
 					timeout_return, \
 					cr_soc_delta = \
-						self.compute_hub_charging_params(booking_request, car)
+						self.compute_hub_charging_params(booking_request, vehicle)
 
 					yield self.env.process\
-					   (self.charge_car\
+					   (self.charge_vehicle\
 						(charge,
 						 self.charging_hub,
-						 car,
+						 vehicle,
 						 "system",
 						 charging_zone_id,
 						 timeout_outward,
@@ -223,13 +223,13 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 					timeout_outward, \
 					timeout_return, \
 					cr_soc_delta = \
-						self.compute_cp_charging_params(booking_request, car)
+						self.compute_cp_charging_params(booking_request, vehicle)
 
 					yield self.env.process\
-					   (self.charge_car\
+					   (self.charge_vehicle\
 						(charge,
 						 charging_station,
-						 car,
+						 vehicle,
 						 "system",
 						 charging_zone_id,
 						 timeout_outward,

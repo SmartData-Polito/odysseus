@@ -3,7 +3,7 @@ import datetime
 
 import numpy as np
 
-from simulator.utils.car_utils import *
+from simulator.utils.vehicle_utils import *
 from simulator.Simulation.EFFCS_Sim import EFFCS_Sim
 
 

@@ -59,7 +59,7 @@ class EFFCS_SimOutputPlotter ():
 
 		self.sim_not_enough_energy_requests = pd.DataFrame(simOutput.sim_not_enough_energy_requests)
 
-		self.sim_no_close_car_requests = pd.DataFrame(simOutput.sim_no_close_car_requests)
+		self.sim_no_close_vehicle_requests = pd.DataFrame(simOutput.sim_no_close_vehicle_requests)
 
 		self.sim_unsatisfied_requests = simOutput.sim_unsatisfied_requests
 
@@ -67,7 +67,7 @@ class EFFCS_SimOutputPlotter ():
 
 		self.sim_users_charges_bookings = simOutput.sim_users_charges_bookings
 
-		self.sim_cars_events = pd.concat([
+		self.sim_vehicles_events = pd.concat([
 			self.sim_bookings, self.sim_charges
 		], ignore_index=True, sort=False).sort_values("start_time")
 
@@ -133,9 +133,9 @@ class EFFCS_SimOutputPlotter ():
 				self.simOutput.sim_stats["fraction_not_same_zone_trips_satisfied"]
 			], index=["same zone", "neighbor zone"], name="satisfied %"),
 			pd.Series([
-				self.simOutput.sim_stats["fraction_no_close_cars_unsatisfied"],
+				self.simOutput.sim_stats["fraction_no_close_vehicles_unsatisfied"],
 				self.simOutput.sim_stats["fraction_deaths_unsatisfied"]
-			], index=["no close car", "not enough energy"], name="unsatisfied %"),
+			], index=["no close vehicle", "not enough energy"], name="unsatisfied %"),
 			pd.Series([
 				self.simOutput.sim_stats["fraction_unsatisfied"],
 				self.simOutput.sim_stats["fraction_satisfied"]
@@ -167,9 +167,9 @@ class EFFCS_SimOutputPlotter ():
 
 		plt.figure(figsize=(10, 10))
 		pie_s = pd.Series([
-			self.simOutput.sim_stats["fraction_no_close_cars_unsatisfied"],
+			self.simOutput.sim_stats["fraction_no_close_vehicles_unsatisfied"],
 			self.simOutput.sim_stats["fraction_deaths_unsatisfied"]
-		], index=["no close car", "not enough energy"], name="unsatisfied %")
+		], index=["no close vehicle", "not enough energy"], name="unsatisfied %")
 		plt.pie(
 			pie_s.values,
 			colors=["grey", "yellow"],
@@ -200,7 +200,7 @@ class EFFCS_SimOutputPlotter ():
 	def plot_fleet_status_t (self):
 
 		for col in [
-			"n_cars_available", "n_cars_charging_system", "n_cars_charging_users", "n_cars_booked"
+			"n_vehicles_available", "n_vehicles_charging_system", "n_vehicles_charging_users", "n_vehicles_booked"
 		]:
 			plt.figure(figsize=(15, 7))
 			self.sim_booking_requests.set_index("start_time")[col].plot(
@@ -208,7 +208,7 @@ class EFFCS_SimOutputPlotter ():
 			)
 			plt.legend()
 			plt.xlabel("t")
-			plt.ylabel("n_cars")
+			plt.ylabel("n_vehicles")
 			plt.savefig(os.path.join(self.figures_path, col + "_profile.png"))
 			# plt.show()
 			plt.close()
@@ -227,23 +227,23 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_n_cars_charging_t (self):
+	def plot_n_vehicles_charging_t (self):
 
 		plt.figure(figsize=(15, 7))
 		self.sim_booking_requests\
 			.set_index("start_time")\
-			.n_cars_charging_system\
+			.n_vehicles_charging_system\
 			.plot(label="system charging", linewidth=2, alpha=0.7)
 		self.sim_booking_requests\
 			.set_index("start_time")\
-			.n_cars_charging_users\
+			.n_vehicles_charging_users\
 			.plot(label="users charging", linewidth=2, alpha=0.7)
 		plt.legend()
-		plt.title("number of cars charging in time")
+		plt.title("number of vehicles charging in time")
 		plt.xlabel("t")
-		plt.ylabel("n cars")
+		plt.ylabel("n vehicles")
 		plt.savefig(os.path.join(self.figures_path,
-			 "n_cars_charging_t.png"))
+			 "n_vehicles_charging_t.png"))
 		# plt.show()
 		plt.close()
 
@@ -252,7 +252,7 @@ class EFFCS_SimOutputPlotter ():
 		plt.figure(figsize=(15, 7))
 		self.sim_charges \
 			.set_index("start_time") \
-			.timeout_outward.apply(lambda x: x / 3600).resample("60Min").sum() \
+			.vehicle.apply(lambda x: x / 3600).resample("60Min").sum() \
 			.plot(label="relocation hours", linewidth=2, alpha=0.7)
 		plt.legend()
 		plt.title("Relocation hours needed every 60 minutes")
@@ -271,8 +271,8 @@ class EFFCS_SimOutputPlotter ():
 			df = self.sim_charges
 		if which_df == "unsatisfied":
 			df = self.sim_unsatisfied_requests
-		if which_df == "no_close_car":
-			df = self.sim_no_close_car_requests
+		if which_df == "no_close_vehicle":
+			df = self.sim_no_close_vehicle_requests
 		if which_df == "not_enough_energy":
 			df = self.sim_not_enough_energy_requests
 
@@ -301,8 +301,8 @@ class EFFCS_SimOutputPlotter ():
 			df = self.sim_charges
 		if which_df == "unsatisfied":
 			df = self.sim_unsatisfied_requests
-		if which_df == "no_close_car":
-			df = self.sim_no_close_car_requests
+		if which_df == "no_close_vehicle":
+			df = self.sim_no_close_vehicle_requests
 		if which_df == "not_enough_energy":
 			df = self.sim_not_enough_energy_requests
 
@@ -323,34 +323,34 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_n_cars_charging_hourly_mean_boxplot(self):
+	def plot_n_vehicles_charging_hourly_mean_boxplot(self):
 
 		df = get_time_group_columns(self.sim_booking_requests)
 		trips_df_norm_count = get_time_grouped_hourly_mean(
-			df, "start", "n_cars_charging_system", "n_cars_charging_system"
+			df, "start", "n_vehicles_charging_system", "n_vehicles_charging_system"
 		)
 		trips_df_norm_count.hour = trips_df_norm_count.hour.astype(int)
 
 		plt.figure(figsize=(15, 7))
 		sns.boxplot(
-			x="hour", y="_".join(["n_cars_charging_system", "hourly", "mean"]),
+			x="hour", y="_".join(["n_vehicles_charging_system", "hourly", "mean"]),
 			data=trips_df_norm_count
 		)
 		sns.swarmplot(
-			x="hour", y="_".join(["n_cars_charging_system", "hourly", "mean"]),
+			x="hour", y="_".join(["n_vehicles_charging_system", "hourly", "mean"]),
 			data=trips_df_norm_count, color="black"
 		)
 		plt.savefig(
 			os.path.join(
-				self.figures_path, "_".join(["n_cars_charging_system", "hourly", "mean", "boxplot.png"])
+				self.figures_path, "_".join(["n_vehicles_charging_system", "hourly", "mean", "boxplot.png"])
 			)
 		)
 
 	def plot_hourly_relocost_boxplot (self):
 
 		table = self.sim_charges.pivot_table\
-			(index=["date"], columns=["hour"], values=["timeout_outward"], aggfunc=np.sum)\
-			.fillna(0.0).loc[:, "timeout_outward"] / 3600
+			(index=["date"], columns=["hour"], values=["vehicle"], aggfunc=np.sum)\
+			.fillna(0.0).loc[:, "vehicle"] / 3600
 
 		# print(table)
 

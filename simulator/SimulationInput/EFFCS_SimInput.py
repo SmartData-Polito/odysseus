@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.neighbors import KernelDensity
 
-from simulator.utils.car_utils import get_soc_delta
+from simulator.utils.vehicle_utils import get_soc_delta
 
 
 class EFFCS_SimInput ():
@@ -26,24 +26,24 @@ class EFFCS_SimInput ():
 		self.neighbors_dict = self.city_obj.neighbors_dict
 
 		self.n_vehicles_original = self.sim_general_conf["n_vehicles_original"]
-		self.n_vehicles_sim = int(abs(self.n_vehicles_original * self.sim_scenario_conf["n_cars_factor"]))
+		self.n_vehicles_sim = int(abs(self.n_vehicles_original * self.sim_scenario_conf["n_vehicles_factor"]))
 		self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
 
 		if self.sim_scenario_conf["hub"] and not self.sim_scenario_conf["distributed_cps"]:
-			self.hub_n_charging_poles = int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_cars_factor"]))
+			self.hub_n_charging_poles = int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"]))
 			self.n_charging_poles = self.hub_n_charging_poles
 
 		elif not self.sim_scenario_conf["hub"] and self.sim_scenario_conf["distributed_cps"]:
 			self.hub_n_charging_poles = 0
-			self.n_charging_poles = int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_cars_factor"]))
+			self.n_charging_poles = int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"]))
 
 		elif self.sim_scenario_conf["hub"] and self.sim_scenario_conf["distributed_cps"]:
 
 			self.n_charging_poles = \
-				int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_cars_factor"])) / 2
+				int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"])) / 2
 
 			self.hub_n_charging_poles = \
-				int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_cars_factor"])) / 2
+				int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"])) / 2
 
 		if self.sim_scenario_conf["alpha"] == "auto":
 			self.sim_scenario_conf["alpha"] = np.ceil(get_soc_delta(self.od_distances.max().max() / 1000))
@@ -65,43 +65,43 @@ class EFFCS_SimInput ():
 		]].dropna().to_dict("records")
 		return self.booking_requests_list
 
-	def init_cars (self):
+	def init_vehicles (self):
 
-		cars_random_soc = list(
+		vehicles_random_soc = list(
 			np.random.uniform(25, 100, self.n_vehicles_sim).astype(int)
 		)
 
-		self.cars_soc_dict = {
-			i: cars_random_soc[i] for i in range(self.n_vehicles_sim)
+		self.vehicles_soc_dict = {
+			i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
 		}
 
 		top_o_zones = self.input_bookings .origin_id.value_counts().iloc[:50].index
 
-		cars_random_zones = list(
+		vehicles_random_zones = list(
 			np.random.uniform(0, 50, self.n_vehicles_sim).astype(int)
 		)
 
-		self.cars_zones = [
+		self.vehicles_zones = [
 			self.grid.loc[top_o_zones[i]].zone_id
-			for i in cars_random_zones
+			for i in vehicles_random_zones
 		]
 
-		self.cars_zones = {
-			i: self.cars_zones[i] for i in range(self.n_vehicles_sim)
+		self.vehicles_zones = {
+			i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)
 		}
 
-		return self.cars_soc_dict, self.cars_zones
+		return self.vehicles_soc_dict, self.vehicles_zones
 
-	def init_cars_dicts (self):
+	def init_vehicles_dicts (self):
 
-		self.available_cars_dict = \
+		self.available_vehicles_dict = \
 			{int(zone):[] for zone in self.grid.zone_id}
 
-		for car in range(len(self.cars_zones)):
-			zone = self.cars_zones[car]
-			self.available_cars_dict[zone] += [car]
+		for car in range(len(self.vehicles_zones)):
+			zone = self.vehicles_zones[car]
+			self.available_vehicles_dict[zone] += [car]
 
-		return self.available_cars_dict
+		return self.available_vehicles_dict
 
 	def init_hub (self):
 

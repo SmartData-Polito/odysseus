@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from simulator.Simulation.EFFCS_ChargingPrimitives import get_charging_soc
-from simulator.utils.car_utils import soc_to_kwh
+from simulator.utils.vehicle_utils import soc_to_kwh
 
 
 class EFFCS_SimOutput ():
@@ -21,7 +21,7 @@ class EFFCS_SimOutput ():
 
 		self.sim_not_enough_energy_requests = pd.DataFrame(sim.sim_booking_requests_deaths)
 
-		self.sim_no_close_car_requests = pd.DataFrame(sim.sim_no_close_car_requests)
+		self.sim_no_close_vehicle_requests = pd.DataFrame(sim.sim_no_close_vehicle_requests)
 
 		self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 
@@ -43,20 +43,20 @@ class EFFCS_SimOutput ():
 			sim.chargingStrategy.sim_unfeasible_charge_bookings
 		)
 
-		self.sim_booking_requests["n_cars_charging_system"] = \
-			pd.Series(sim.list_n_cars_charging_system)
+		self.sim_booking_requests["n_vehicles_charging_system"] = \
+			pd.Series(sim.list_n_vehicles_charging_system)
 
-		self.sim_booking_requests["n_cars_charging_users"] = \
-			pd.Series(sim.list_n_cars_charging_users).fillna(0)
+		self.sim_booking_requests["n_vehicles_charging_users"] = \
+			pd.Series(sim.list_n_vehicles_charging_users).fillna(0)
 
-		self.sim_booking_requests["n_cars_available"] = \
-			pd.Series(sim.list_n_cars_available)
+		self.sim_booking_requests["n_vehicles_available"] = \
+			pd.Series(sim.list_n_vehicles_available)
 
-		self.sim_booking_requests["n_cars_booked"] = \
-			pd.Series(sim.list_n_cars_booked)
+		self.sim_booking_requests["n_vehicles_booked"] = \
+			pd.Series(sim.list_n_vehicles_booked)
 
-		self.sim_booking_requests["n_cars_dead"] = \
-			pd.Series(sim.list_n_cars_dead)
+		self.sim_booking_requests["n_vehicles_dead"] = \
+			pd.Series(sim.list_n_vehicles_dead)
 
 		self.sim_charge_deaths = pd.DataFrame(sim.chargingStrategy.sim_unfeasible_charge_bookings)
 
@@ -82,8 +82,8 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["n_not_same_zone_trips"] = \
 			sim.n_not_same_zone_trips
 
-		self.sim_stats.loc["n_no_close_cars"] = \
-			sim.n_no_close_cars
+		self.sim_stats.loc["n_no_close_vehicles"] = \
+			sim.n_no_close_vehicles
 
 		self.sim_stats.loc["n_deaths"] = \
 			sim.n_deaths
@@ -91,7 +91,7 @@ class EFFCS_SimOutput ():
 		self.sim_stats["n_booking_reqs"] = \
 			self.sim_stats["n_same_zone_trips"]\
 			+ self.sim_stats["n_not_same_zone_trips"]\
-			+ self.sim_stats["n_no_close_cars"]\
+			+ self.sim_stats["n_no_close_vehicles"]\
 			+ self.sim_stats["n_deaths"]
 
 		self.sim_stats["n_bookings"] = \
@@ -99,7 +99,7 @@ class EFFCS_SimOutput ():
 			+ self.sim_stats["n_not_same_zone_trips"]
 
 		self.sim_stats["n_unsatisfied"] = \
-			self.sim_stats["n_no_close_cars"]\
+			self.sim_stats["n_no_close_vehicles"]\
 			+ self.sim_stats["n_deaths"]
 
 		self.sim_stats.loc["fraction_satisfied"] = \
@@ -114,8 +114,8 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["fraction_not_same_zone_trips"] = \
 			sim.n_not_same_zone_trips / self.sim_stats["n_booking_reqs"]
 
-		self.sim_stats.loc["fraction_no_close_cars"] = \
-			sim.n_no_close_cars / self.sim_stats["n_booking_reqs"]
+		self.sim_stats.loc["fraction_no_close_vehicles"] = \
+			sim.n_no_close_vehicles / self.sim_stats["n_booking_reqs"]
 
 		self.sim_stats.loc["fraction_not_enough_energy"] = \
 			sim.n_deaths / self.sim_stats["n_booking_reqs"]
@@ -126,8 +126,8 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["fraction_not_same_zone_trips_satisfied"] = \
 			sim.n_not_same_zone_trips / self.sim_stats["n_bookings"]
 
-		self.sim_stats.loc["fraction_no_close_cars_unsatisfied"] = \
-			sim.n_no_close_cars / self.sim_stats["n_unsatisfied"]
+		self.sim_stats.loc["fraction_no_close_vehicles_unsatisfied"] = \
+			sim.n_no_close_vehicles / self.sim_stats["n_unsatisfied"]
 
 		self.sim_stats.loc["fraction_deaths_unsatisfied"] = \
 			sim.n_deaths / self.sim_stats["n_unsatisfied"]
@@ -159,24 +159,23 @@ class EFFCS_SimOutput ():
 
 		self.sim_stats.loc["charging_time_avg"] = \
 			self.sim_charges.duration.mean() / 60
-		print(self.sim_stats.loc["charging_time_avg"])
 
 		self.sim_stats.loc["charging_time_med"] = \
 			self.sim_charges.duration.median() / 60
 
-		self.sim_stats.loc["n_charges_by_car_avg"] = \
+		self.sim_stats.loc["n_charges_by_vehicle_avg"] = \
 			self.sim_charges.groupby("plate").date.count().mean()
 
-		self.sim_stats.loc["n_charges_by_car_system_avg"] = \
+		self.sim_stats.loc["n_charges_by_vehicle_system_avg"] = \
 			self.sim_charges[self.sim_charges.operator == "system"]\
 				.groupby("plate").date.count().mean()
 
 		if len(self.sim_users_charges_bookings):
-			self.sim_stats.loc["n_charges_by_car_users_avg"] = \
+			self.sim_stats.loc["n_charges_by_vehicle_users_avg"] = \
 				self.sim_charges[self.sim_charges.operator == "users"]\
 					.groupby("plate").date.count().mean()
 		else:
-			self.sim_stats.loc["n_charges_by_car_users_avg"] = 0
+			self.sim_stats.loc["n_charges_by_vehicle_users_avg"] = 0
 
 		self.sim_stats["sim_duration"] = (sim.end - sim.start).total_seconds()
 
