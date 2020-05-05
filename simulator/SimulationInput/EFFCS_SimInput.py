@@ -94,12 +94,11 @@ class EFFCS_SimInput ():
 
 	def init_vehicles_dicts (self):
 
-		self.available_vehicles_dict = \
-			{int(zone):[] for zone in self.grid.zone_id}
+		self.available_vehicles_dict = {int(zone):[] for zone in self.grid.zone_id}
 
-		for car in range(len(self.vehicles_zones)):
-			zone = self.vehicles_zones[car]
-			self.available_vehicles_dict[zone] += [car]
+		for vehicle in range(len(self.vehicles_zones)):
+			zone = self.vehicles_zones[vehicle]
+			self.available_vehicles_dict[zone] += [vehicle]
 
 		return self.available_vehicles_dict
 

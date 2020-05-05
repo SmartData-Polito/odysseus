@@ -13,8 +13,8 @@ sim_scenario_conf = {
 	"hub": False,
 	"hub_zone_policy": "",
 
-	"distributed_cps": True,
-	"cps_placement_policy": "num_parkings",
+	"distributed_cps": False,
+	"cps_placement_policy": "",
 	"cps_zones_percentage": 1,
 	"system_cps": False,
 
@@ -25,7 +25,7 @@ sim_scenario_conf = {
 	"n_workers": 10,
 	"relocation": False,
 
-	"user_contribution": False,
+	"user_contribution": True,
 	"willingness": 0.5,
 
 }

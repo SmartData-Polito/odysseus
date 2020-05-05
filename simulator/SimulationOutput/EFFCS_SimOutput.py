@@ -14,17 +14,11 @@ class EFFCS_SimOutput ():
 		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
 
 		self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
-
 		self.sim_bookings = self.sim_booking_requests.dropna()
-
 		self.sim_charges = pd.DataFrame(sim.chargingStrategy.sim_charges)
-
 		self.sim_not_enough_energy_requests = pd.DataFrame(sim.sim_booking_requests_deaths)
-
 		self.sim_no_close_vehicle_requests = pd.DataFrame(sim.sim_no_close_vehicle_requests)
-
 		self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
-
 		self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
 
 		self.sim_system_charges_bookings["end_hour"] = self.sim_system_charges_bookings["end_time"].apply(

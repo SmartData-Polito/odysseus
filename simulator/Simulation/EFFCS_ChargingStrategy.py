@@ -1,50 +1,10 @@
-import simpy
+
 import numpy as np
 
 from simulator.Simulation.EFFCS_ChargingPrimitives import EFFCS_ChargingPrimitives
 
 
 class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
-
-	def __init__(self, env, simInput):
-
-		self.env = env
-
-		self.simInput = simInput
-
-		self.vehicles_soc_dict = simInput.vehicles_soc_dict
-
-		self.workers = simpy.Resource(
-			self.env,
-			capacity=self.simInput.sim_scenario_conf["n_workers"]
-		)
-
-		if self.simInput.sim_scenario_conf["hub"]:
-			self.charging_hub = simpy.Resource(
-				self.env,
-				capacity=self.simInput.hub_n_charging_poles
-			)
-
-		if self.simInput.sim_scenario_conf["distributed_cps"]:
-			self.n_charging_poles_by_zone = simInput.n_charging_poles_by_zone
-			self.charging_poles_dict = {}
-			for zone, n in self.n_charging_poles_by_zone.items():
-				if n > 0:
-					self.charging_poles_dict[zone] = simpy.Resource(
-						self.env,
-						capacity=n
-					)
-
-		self.sim_charges = []
-		self.sim_unfeasible_charge_bookings = []
-
-		self.n_vehicles_charging_system = 0
-		self.n_vehicles_charging_users = 0
-		self.dead_vehicles = set()
-		self.n_dead_vehicles = 0
-
-		self.list_system_charging_bookings = []
-		self.list_users_charging_bookings = []
 
 	def check_charge (self, booking_request, vehicle):
 
@@ -54,32 +14,14 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 		if self.simInput.sim_scenario_conf["battery_swap"]:
 
 			if self.simInput.sim_scenario_conf["user_contribution"]:
+
 				charge_flag, charge = self.check_user_charge(booking_request, vehicle)
 
 				if charge_flag:
 
 					user_charge_flag = True
 					self.list_users_charging_bookings.append(booking_request)
-					charging_zone_id = booking_request["destination_id"]
-					charging_station = self.charging_poles_dict[charging_zone_id]
-					relocation_zone_id = booking_request["destination_id"]
-					timeout_outward = 0
-					timeout_return = 0
-					cr_soc_delta = 0
-					charge["duration"] = np.random.exponential(
-						120 * 60
-					)
-					charge_dict = {
-						"charge": charge,
-						"resource": charging_station,
-						"vehicle": vehicle,
-						"operator": "users",
-						"zone_id": charging_zone_id,
-						"timeout_outward": timeout_outward,
-						"timeout_return": timeout_return,
-						"cr_soc_delta": cr_soc_delta
-					}
-
+					charge_dict = self.get_charge_dict(vehicle, charge, booking_request, "users")
 					yield self.env.process(self.charge_vehicle(charge_dict))
 
 				else:
@@ -103,7 +45,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 		elif self.simInput.sim_scenario_conf["user_contribution"]:
 
 			charge_flag, charge = self.check_user_charge(booking_request, vehicle)
-			if charge_flag:
+			if charge_flag and booking_request["destination_id"] in self.charging_poles_dict.keys():
 				user_charge_flag = True
 				self.list_users_charging_bookings.append(booking_request)
 				charging_zone_id = \
