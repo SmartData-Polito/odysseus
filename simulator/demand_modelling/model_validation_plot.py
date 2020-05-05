@@ -38,7 +38,7 @@ def plot_ia_validation(ia_threshold, city, sim_reqs_eventG, trace_timeouts):
              eventG_ia_samples.sort_values())
     plt.xlabel("sim ia times")
     plt.ylabel("trace ia times [s]")
-    plt.savefig("./Figures/" + city + "/validation/qq-" + str(ia_threshold))
+    plt.savefig("./figures/" + city + "/validation/qq-" + str(ia_threshold))
     # plt.show()
     plt.close()
 
@@ -65,7 +65,7 @@ def plot_tot_reqs_count(group_col, normed, city, sim_reqs_eventG, sim_reqs_trace
     plt.xlabel(group_col)
     plt.ylabel("fraction of booking requests")
     plt.legend()
-    plt.savefig("./Figures/" + city + "/validation/" + figfilename)
+    plt.savefig("./figures/" + city + "/validation/" + figfilename)
     # plt.show()
     plt.close()
 
@@ -100,7 +100,7 @@ def plot_tot_reqs_count_err(group_col, normed, city, sim_reqs_eventG, sim_reqs_t
     plt.title(title + " count error by " + group_col)
     plt.xlabel(group_col)
     plt.ylabel("% booking requests")
-    plt.savefig("./Figures/" + city + "/validation/" + figfilename)
+    plt.savefig("./figures/" + city + "/validation/" + figfilename)
     # plt.show()
     plt.close()
 
@@ -142,7 +142,7 @@ def plot_tot_reqs_count_err_agg(group_col, normed, city, sim_reqs_eventG, sim_re
     plt.title(title + " count error by hour and daytype")
     plt.xlabel("hour")
     plt.ylabel("% booking requests")
-    plt.savefig("./Figures/" + city + "/validation/" + figfilename)
+    plt.savefig("./figures/" + city + "/validation/" + figfilename)
     # plt.show()
     plt.close()
 
@@ -161,7 +161,7 @@ def plot_regr_qq_sns(city, sim_reqs_eventG, trace_timeouts):
     plt.plot(eventG_ia_samples, eventG_ia_samples, color="black", label="bisector")
     plt.title("Regression and Q-Q plots for ia times model, with sample distributions")
     plt.legend()
-    plt.savefig("Figures/" + city + "/validation/reg1000_sns.png")
+    plt.savefig("figures/" + city + "/validation/reg1000_sns.png")
     sns.despine()
     # plt.show()
     plt.close()
@@ -190,7 +190,7 @@ def plot_od_err (city, grid, sim_reqs_eventG, sim_reqs_traceB):
             i = (i + 1) % 2
         j = (j + 1) % 2
 
-    plt.savefig("./Figures/" + city + "/validation/sp_err_daymoments.png")
+    plt.savefig("./figures/" + city + "/validation/sp_err_daymoments.png")
     # plt.show()
     plt.close()
 
@@ -198,6 +198,6 @@ def plot_od_err (city, grid, sim_reqs_eventG, sim_reqs_traceB):
     fig, ax = plt.subplots(1, 1, figsize=(12, 12))
     grid.plot(column="od_count_diff", ax=ax, legend=True)
 
-    plt.savefig("./Figures/" + city + "/validation/sp_err.png")
+    plt.savefig("./figures/" + city + "/validation/sp_err.png")
     # plt.show()
     plt.close()

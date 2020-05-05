@@ -3,13 +3,13 @@ import pickle
 
 import pandas as pd
 
-from simulator.DataStructures.City import City
-from simulator.SingleRun.get_traceB_input import get_traceB_input
-from simulator.SingleRun.get_eventG_input import get_eventG_input
-from simulator.SingleRun.run_traceB_sim import run_traceB_sim
-from simulator.SingleRun.run_eventG_sim import run_eventG_sim
-from simulator.SimulationOutput.EFFCS_SimOutput import EFFCS_SimOutput
-from simulator.SimulationOutput.EFFCS_SimOutputPlotter import EFFCS_SimOutputPlotter
+from simulator.data_structures.City import City
+from simulator.single_run.get_traceB_input import get_traceB_input
+from simulator.single_run.get_eventG_input import get_eventG_input
+from simulator.single_run.run_traceB_sim import run_traceB_sim
+from simulator.single_run.run_eventG_sim import run_eventG_sim
+from simulator.simulation_output.sim_output import EFFCS_SimOutput
+from simulator.simulation_output.sim_output_plotter import EFFCS_SimOutputPlotter
 
 
 def single_run(conf_tuple):
@@ -36,7 +36,7 @@ def single_run(conf_tuple):
 	).replace("'", "").replace(".", "d")
 	results_path = os.path.join(
 		os.path.dirname(os.path.dirname(__file__)),
-		"Results",
+		"results",
 		city,
 		"single_run",
 		sim_scenario_name,

@@ -37,7 +37,7 @@ class EFFCS_MultipleRunsPlotter:
 
         self.results_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            "Results",
+            "results",
             city,
             "multiple_runs",
             sim_scenario_name,
@@ -46,7 +46,7 @@ class EFFCS_MultipleRunsPlotter:
         )
         self.figures_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            "Figures",
+            "figures",
             city,
             "multiple_runs",
             sim_scenario_name,

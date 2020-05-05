@@ -5,13 +5,13 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 
-from simulator.DataStructures.City import City
-from simulator.SimulationInput.EFFCS_SimConfGrid import EFFCS_SimConfGrid
-from simulator.SingleRun.get_traceB_input import get_traceB_input
-from simulator.SingleRun.get_eventG_input import get_eventG_input
-from simulator.SingleRun.run_eventG_sim import get_eventG_sim_stats
-from simulator.SingleRun.run_traceB_sim import get_traceB_sim_stats
-from simulator.SimulationOutput.EFFCS_MultipleRunsPlotter import EFFCS_MultipleRunsPlotter
+from simulator.data_structures.City import City
+from simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
+from simulator.single_run.get_traceB_input import get_traceB_input
+from simulator.single_run.get_eventG_input import get_eventG_input
+from simulator.single_run.run_eventG_sim import get_eventG_sim_stats
+from simulator.single_run.run_traceB_sim import get_traceB_sim_stats
+from simulator.simulation_output.multiple_runs_plotter import EFFCS_MultipleRunsPlotter
 
 
 def multiple_runs(city, sim_run_mode, sim_general_conf, sim_scenario_conf_grid, n_cores, sim_type, sim_scenario_name):
@@ -22,7 +22,7 @@ def multiple_runs(city, sim_run_mode, sim_general_conf, sim_scenario_conf_grid, 
 	]).replace(" ", "-").replace("'", "").replace(".", "d").replace(",", "-").replace("[", "-").replace("]", "-")
 	results_path = os.path.join(
 		os.path.dirname(os.path.dirname(__file__)),
-		"Results",
+		"results",
 		city,
 		sim_run_mode,
 		sim_scenario_name,

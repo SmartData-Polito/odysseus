@@ -2,7 +2,7 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from simulator.Simulation.EFFCS_ChargingPrimitives import get_charging_soc
+from simulator.simulation.charging_primitives import get_charging_soc
 from simulator.utils.vehicle_utils import soc_to_kwh
 
 

@@ -1,7 +1,7 @@
 
 import numpy as np
 
-from simulator.Simulation.EFFCS_ChargingPrimitives import EFFCS_ChargingPrimitives
+from simulator.simulation.charging_primitives import EFFCS_ChargingPrimitives
 
 
 class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
