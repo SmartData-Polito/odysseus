@@ -1,3 +1,6 @@
+from simulator.simulation_input.confs.vehicle_config import vehicle_conf
+
+
 def remap_plates (events):
     ass_dict = {
         sorted(events.plate.unique())[i]: i
@@ -11,8 +14,9 @@ def soc_to_kwh(soc, a=0., b=0.25):
     return (b - a) / (100) * (soc - 100) + b
 
 
-def get_soc_delta (distance, 
-                   battery_capacity = 0.25,
-                   vehicle_energy_efficiency = 0.011):
-    return (vehicle_energy_efficiency * distance * 100)\
-    / (battery_capacity)
+def get_soc_delta (
+        distance,
+        battery_capacity=vehicle_conf["battery_capacity"],
+        vehicle_energy_efficiency=vehicle_conf["energy_efficiency"]
+):
+    return (vehicle_energy_efficiency * distance * 100) / battery_capacity

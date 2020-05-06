@@ -20,11 +20,20 @@ class EFFCS_Sim ():
 			simInput.sim_general_conf["month_start"],
 			1, tzinfo=pytz.UTC
 		)
-		self.end = datetime.datetime(
-			simInput.sim_general_conf["year"],
-			simInput.sim_general_conf["month_end"],
-			1, tzinfo=pytz.UTC
-		)
+
+		if simInput.sim_general_conf["month_end"] == 13:
+			self.end = datetime.datetime(
+				simInput.sim_general_conf["year"] + 1,
+				1,
+				1, tzinfo=pytz.UTC
+			)
+		else:
+			self.end = datetime.datetime(
+				simInput.sim_general_conf["year"],
+				simInput.sim_general_conf["month_end"],
+				1, tzinfo=pytz.UTC
+			)
+
 		self.total_seconds = (self.end - self.start).total_seconds()
 		self.hours_spent = 0
 		self.current_datetime = self.start
@@ -72,35 +81,36 @@ class EFFCS_Sim ():
 		self.list_n_vehicles_booked = []
 		self.list_n_vehicles_available = []
 		self.list_n_vehicles_dead = []
+		self.vehicles_zones_history = []
+		self.n_vehicles_per_zones_history = []
 
 		self.chargingStrategy = EFFCS_ChargingStrategy(self.env, simInput)
 
 	def schedule_booking (self, booking_request, vehicle, zone_id):
-
-		self.n_booked_vehicles += 1
 
 		self.available_vehicles_dict[zone_id].remove(vehicle)
 		del self.vehicles_zones[vehicle]
 		booking_request["start_soc"] = self.vehicles_soc_dict[vehicle]
 		del self.vehicles_soc_dict[vehicle]
 
+		self.n_booked_vehicles += 1
+
 		booking_request["plate"] = vehicle
 
-		yield self.env.timeout(booking_request["duration"] * 60)
+		yield self.env.timeout(booking_request["duration"])
 
 		self.vehicles_soc_dict[vehicle] = booking_request["start_soc"] + booking_request["soc_delta"]
 		booking_request["end_soc"] = self.vehicles_soc_dict[vehicle]
 		self.vehicles_zones[vehicle] = booking_request["destination_id"]
 
-		self.n_booked_vehicles -= 1
-
 		relocation_zone_id = yield self.env.process(
 			self.chargingStrategy.check_charge(booking_request, vehicle)
 		)
 
-		self.available_vehicles_dict\
-			[relocation_zone_id].append(vehicle)
+		self.available_vehicles_dict[relocation_zone_id].append(vehicle)
 		self.vehicles_zones[vehicle] = relocation_zone_id
+
+		self.n_booked_vehicles -= 1
 
 	def process_booking_request(self, booking_request):
 
@@ -112,6 +122,7 @@ class EFFCS_Sim ():
 		self.list_n_vehicles_available += [
 			self.simInput.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
 		]
+
 
 		self.sim_booking_requests += [booking_request]
 		self.n_booking_requests += 1

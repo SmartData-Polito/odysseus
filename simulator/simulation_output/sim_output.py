@@ -20,6 +20,7 @@ class EFFCS_SimOutput ():
 		self.sim_no_close_vehicle_requests = pd.DataFrame(sim.sim_no_close_vehicle_requests)
 		self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 		self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
+		self.n_vehicles_per_zones_history = pd.DataFrame(sim.n_vehicles_per_zones_history)
 
 		self.sim_system_charges_bookings["end_hour"] = self.sim_system_charges_bookings["end_time"].apply(
 			lambda d: d.hour
@@ -152,10 +153,10 @@ class EFFCS_SimOutput ():
 			self.sim_bookings.start_soc.median()
 
 		self.sim_stats.loc["charging_time_avg"] = \
-			self.sim_charges.duration.mean() / 60
+			self.sim_charges.duration.mean() / 3600
 
 		self.sim_stats.loc["charging_time_med"] = \
-			self.sim_charges.duration.median() / 60
+			self.sim_charges.duration.median() / 3600
 
 		self.sim_stats.loc["n_charges_by_vehicle_avg"] = \
 			self.sim_charges.groupby("plate").date.count().mean()
@@ -273,3 +274,5 @@ class EFFCS_SimOutput ():
 			self.grid[
 				"charge_deaths_origins_count"
 			] = self.sim_charge_deaths.origin_id.value_counts()
+
+		self.sim_stats.loc["hub_zone"] = sim.simInput.hub_zone

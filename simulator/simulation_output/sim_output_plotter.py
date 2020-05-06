@@ -53,7 +53,7 @@ class EFFCS_SimOutputPlotter ():
 
 		self.sim_booking_requests = simOutput.sim_booking_requests
 
-		self.sim_bookings = simOutput.sim_booking_requests
+		self.sim_bookings = simOutput.sim_bookings
 
 		self.sim_charges = simOutput.sim_charges
 
@@ -147,54 +147,26 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_events_profile_pies(self):
+	def plot_events_t (self):
 
-		plt.figure(figsize=(10, 10))
-		pie_s = pd.Series([
-			self.simOutput.sim_stats["fraction_same_zone_trips_satisfied"],
-			self.simOutput.sim_stats["fraction_not_same_zone_trips_satisfied"]
-		], index=["same zone", "neighbor zone"], name="events %")
-		plt.pie(
-			pie_s.values,
-			colors=["yellowgreen", "olivedrab"],
-			labels=pie_s.index,
-			autopct="%1.1f%%",
+		plt.figure(figsize=(15, 7))
+		self.sim_booking_requests.fillna(0).set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
+			label="requests", linewidth=2, alpha=0.7
 		)
-		plt.tight_layout()
-		plt.savefig(os.path.join(self.figures_path, "events_profile_satisfied_pie.png"), transparent=True)
-#        plt.show()
-		plt.close()
-
-		plt.figure(figsize=(10, 10))
-		pie_s = pd.Series([
-			self.simOutput.sim_stats["fraction_no_close_vehicles_unsatisfied"],
-			self.simOutput.sim_stats["fraction_deaths_unsatisfied"]
-		], index=["no close vehicle", "not enough energy"], name="unsatisfied %")
-		plt.pie(
-			pie_s.values,
-			colors=["grey", "yellow"],
-			labels=pie_s.index,
-			autopct="%1.1f%%",
+		self.sim_bookings.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
+			label="bookings", linewidth=2, alpha=0.7
 		)
-		plt.tight_layout()
-		plt.savefig(os.path.join(self.figures_path, "events_profile_unsatisfied_pie.png"), transparent=True)
-		#        plt.show()
-		plt.close()
-
-		plt.figure(figsize=(10, 10))
-		pie_s = pd.Series([
-			self.simOutput.sim_stats["fraction_satisfied"],
-			self.simOutput.sim_stats["fraction_unsatisfied"]
-		], index=["satisfied", "unsatisfied"], name="satisfied %")
-		plt.pie(
-			pie_s.values,
-			colors=["green", "red"],
-			labels=pie_s.index,
-			autopct="%1.1f%%",
+		self.sim_unsatisfied_requests.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
+			label="unsatisfied", linewidth=2, alpha=0.7
 		)
-		plt.tight_layout()
-		plt.savefig(os.path.join(self.figures_path, "events_profile_sat_unsat_pie.png"), transparent=True)
-		#plt.show()
+		self.sim_charges.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
+			label="charges", linewidth=2, alpha=0.7
+		)
+		plt.legend()
+		plt.xlabel("t")
+		plt.ylabel("n_events")
+		plt.savefig(os.path.join(self.figures_path, "events_profile_t.png"))
+		# plt.show()
 		plt.close()
 
 	def plot_fleet_status_t (self):
@@ -212,56 +184,6 @@ class EFFCS_SimOutputPlotter ():
 			plt.savefig(os.path.join(self.figures_path, col + "_profile.png"))
 			# plt.show()
 			plt.close()
-
-	def plot_tot_energy_t (self):
-
-		plt.figure(figsize=(15, 7))
-		self.sim_charges.sort_values\
-		   ("start_time").groupby\
-		   ("day_hour").soc_delta_kwh.sum().plot()
-		plt.title("charging energy sum by hour in time")
-		plt.xlabel("t")
-		plt.ylabel("E [kwh]")
-		plt.savefig(os.path.join(self.figures_path,
-			 "charging_energy_t.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_n_vehicles_charging_t (self):
-
-		plt.figure(figsize=(15, 7))
-		self.sim_booking_requests\
-			.set_index("start_time")\
-			.n_vehicles_charging_system\
-			.plot(label="system charging", linewidth=2, alpha=0.7)
-		self.sim_booking_requests\
-			.set_index("start_time")\
-			.n_vehicles_charging_users\
-			.plot(label="users charging", linewidth=2, alpha=0.7)
-		plt.legend()
-		plt.title("number of vehicles charging in time")
-		plt.xlabel("t")
-		plt.ylabel("n vehicles")
-		plt.savefig(os.path.join(self.figures_path,
-			 "n_vehicles_charging_t.png"))
-		# plt.show()
-		plt.close()
-
-	def plot_relo_cost_t (self):
-
-		plt.figure(figsize=(15, 7))
-		self.sim_charges \
-			.set_index("start_time") \
-			.vehicle.apply(lambda x: x / 3600).resample("60Min").sum() \
-			.plot(label="relocation hours", linewidth=2, alpha=0.7)
-		plt.legend()
-		plt.title("Relocation hours needed every 60 minutes")
-		plt.xlabel("t")
-		plt.ylabel("relocation hours")
-		plt.savefig(os.path.join(self.figures_path,
-			 "relo_cost_t.png"))
-		# plt.show()
-		plt.close()
 
 	def plot_events_hourly_count_boxplot (self, which_df, start_or_end):
 

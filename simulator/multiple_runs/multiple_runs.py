@@ -5,7 +5,7 @@ import multiprocessing as mp
 import numpy as np
 import pandas as pd
 
-from simulator.data_structures.City import City
+from simulator.data_structures.city import City
 from simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 from simulator.single_run.get_traceB_input import get_traceB_input
 from simulator.single_run.get_eventG_input import get_eventG_input
@@ -14,7 +14,10 @@ from simulator.single_run.run_traceB_sim import get_traceB_sim_stats
 from simulator.simulation_output.multiple_runs_plotter import EFFCS_MultipleRunsPlotter
 
 
-def multiple_runs(city, sim_run_mode, sim_general_conf, sim_scenario_conf_grid, n_cores, sim_type, sim_scenario_name):
+def multiple_runs(sim_run_conf, sim_run_mode, sim_general_conf, sim_scenario_conf_grid, sim_type, sim_scenario_name):
+
+	city = sim_run_conf["city"]
+	n_cores = sim_run_conf["n_cores"]
 
 	model_general_conf_string = "_".join([str(v) for v in sim_general_conf.values()]).replace("'", "").replace(".", "d")
 	model_scenario_conf_grid_string = "_".join([

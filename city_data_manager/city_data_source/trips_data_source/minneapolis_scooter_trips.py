@@ -30,7 +30,6 @@ class MinneapolisScooterTrips(TripsDataSource):
 
 		self.trips_df.StartTime = self.trips_df.StartTime.dt.tz_convert('America/Chicago')
 		self.trips_df.EndTime = self.trips_df.EndTime.dt.tz_convert('America/Chicago')
-		self.trips_df = self.trips_df
 
 		return self.trips_df
 

@@ -3,7 +3,7 @@ import pickle
 
 import pandas as pd
 
-from simulator.data_structures.City import City
+from simulator.data_structures.city import City
 from simulator.single_run.get_traceB_input import get_traceB_input
 from simulator.single_run.get_eventG_input import get_eventG_input
 from simulator.single_run.run_traceB_sim import run_traceB_sim
@@ -14,18 +14,14 @@ from simulator.simulation_output.sim_output_plotter import EFFCS_SimOutputPlotte
 
 def single_run(conf_tuple):
 
-	city = \
-		conf_tuple[0]
-	sim_general_conf = \
-		conf_tuple[1]
-	sim_scenario_conf = \
-		conf_tuple[2]
-	sim_type = \
-		conf_tuple[3]
-	sim_scenario_name = \
-		conf_tuple[4]
+	city = conf_tuple[0]["city"]
+	data_source_id = conf_tuple[0]["data_source_id"]
+	sim_general_conf = conf_tuple[1]
+	sim_scenario_conf = conf_tuple[2]
+	sim_type = conf_tuple[3]
+	sim_scenario_name = conf_tuple[4]
 
-	city_obj = City(city, sim_general_conf)
+	city_obj = City(city, data_source_id, sim_general_conf)
 	print(sim_scenario_conf)
 
 	model_general_conf_string = "_".join([
@@ -87,10 +83,10 @@ def single_run(conf_tuple):
 		f_out
 	)
 
-	simOutput.grid.to_csv(
+	simOutput.grid.to_pickle(
 		os.path.join(
 			results_path,
-			"grid.csv"
+			"grid.pickle"
 		)
 	)
 	simOutput.sim_booking_requests.to_csv(
@@ -153,37 +149,34 @@ def single_run(conf_tuple):
 			"sim_unfeasible_charges.csv"
 		)
 	)
+	simOutput.n_vehicles_per_zones_history.to_csv(
+		os.path.join(
+			results_path,
+			"n_vehicles_per_zones_history.csv"
+		)
+	)
+	print(sim_stats.loc[["n_bookings", "n_charges"]])
 
 	plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
 
 	plotter.plot_events_profile_barh()
-	# plotter.plot_events_profile_pies()
-	#
+	plotter.plot_events_t()
 	plotter.plot_fleet_status_t()
-	# plotter.plot_tot_energy_t()
-	# plotter.plot_n_vehicles_charging_t()
-	# plotter.plot_relo_cost_t()
-	#
-	# plotter.plot_events_hourly_count_boxplot("bookings", "start")
-	# #plotter.plot_events_hourly_count_boxplot("bookings", "end")
-	# plotter.plot_events_hourly_count_boxplot("charges", "start")
-	# #plotter.plot_events_hourly_count_boxplot("charges", "end")
-	# plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
-	# #plotter.plot_events_hourly_count_boxplot("no_close_vehicle", "start")
-	# #plotter.plot_events_hourly_count_boxplot("not_enough_energy", "start")
-	#
-	# plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
-	#
-	# for col in [
-	# 	"origin_count",
-	# 	#"destination_count",
-	# 	"charge_needed_system_zones_count",
-	# 	#"charge_needed_users_zones_count",
-	# 	"unsatisfied_demand_origins_fraction",
-	# 	"not_enough_energy_origins_count",
-	# 	"charge_deaths_origins_count",
-	# ]:
-	# 	if col in simOutput.grid:
-	# 		plotter.plot_choropleth(col)
+	plotter.plot_events_hourly_count_boxplot("bookings", "start")
+	plotter.plot_events_hourly_count_boxplot("charges", "start")
+	plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
+	plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
+
+	for col in [
+		"origin_count",
+		#"destination_count",
+		#"charge_needed_system_zones_count",
+		#"charge_needed_users_zones_count",
+		"unsatisfied_demand_origins_fraction",
+		#"not_enough_energy_origins_count",
+		#"charge_deaths_origins_count",
+	]:
+		if col in simOutput.grid:
+			plotter.plot_choropleth(col)
 
 	return sim_stats

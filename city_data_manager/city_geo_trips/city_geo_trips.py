@@ -67,7 +67,7 @@ class CityGeoTrips:
 		locations = pd.concat([
 				self.trips_origins.geometry, self.trips_destinations.geometry
 		], ignore_index=True)
-		locations.crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+		locations.crs = "epsg:4326"
 		self.squared_grid = get_city_grid(
 			locations,
 			self.bin_side_length

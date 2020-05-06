@@ -37,27 +37,29 @@ class TripsDataSource:
 
 	def normalise(self):
 		self.trips_df_norm = get_time_group_columns(self.trips_df_norm)
-		for year in self.trips_df_norm.year.unique():
-			for month in self.trips_df_norm.month.unique():
-				self.save_norm(year, month)
+		self.save_norm()
 		return self.trips_df_norm
 
-	def save_norm(self, year, month):
-		trips_df_norm_year_month = self.trips_df_norm[
-			(self.trips_df_norm.year == year) & (self.trips_df_norm.month == month)
-		]
-		trips_df_norm_year_month.to_csv(
-			os.path.join(
-				self.norm_data_path,
-				"_".join([str(year), str(month)]) + ".csv"
-			)
-		)
-		trips_df_norm_year_month.to_pickle(
-			os.path.join(
-				self.norm_data_path,
-				"_".join([str(year), str(month)]) + ".pickle"
-			)
-		)
+	def save_norm(self):
+		for year in self.trips_df_norm.year.unique():
+			for month in self.trips_df_norm.month.unique():
+
+				trips_df_norm_year_month = self.trips_df_norm[
+					(self.trips_df_norm.year == year) & (self.trips_df_norm.month == month)
+				]
+				if len(trips_df_norm_year_month):
+					trips_df_norm_year_month.to_csv(
+						os.path.join(
+							self.norm_data_path,
+							"_".join([str(year), str(month)]) + ".csv"
+						)
+					)
+					trips_df_norm_year_month.to_pickle(
+						os.path.join(
+							self.norm_data_path,
+							"_".join([str(year), str(month)]) + ".pickle"
+						)
+					)
 
 	def load_norm(self, year, month):
 		data_path = os.path.join(

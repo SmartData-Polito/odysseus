@@ -15,7 +15,7 @@ from simulator.utils.vehicle_utils import get_soc_delta
 
 class City:
 
-	def __init__(self, city_name, sim_general_conf, kde_bw=1):
+	def __init__(self, city_name, data_source_id, sim_general_conf, kde_bw=1):
 
 		self.city_name = city_name
 		self.sim_general_conf = sim_general_conf
@@ -30,7 +30,7 @@ class City:
 		self.trips_origins = pd.DataFrame()
 		self.trips_destinations = pd.DataFrame()
 		for month in range(start_month, end_month):
-			loader = Loader(self.city_name, year, month, self.bin_side_length)
+			loader = Loader(self.city_name, data_source_id, year, month, self.bin_side_length)
 			bookings = loader.read_trips()
 			origins, destinations = loader.read_origins_destinations()
 			self.bookings = pd.concat([self.bookings, bookings], ignore_index=True)
@@ -121,9 +121,8 @@ class City:
 	def get_input_bookings_filtered(self):
 
 		self.bookings["hour"] = self.bookings.start_hour
-		self.bookings["euclidean_distance"] = self.bookings.driving_distance
+		self.bookings["driving_distance"] = self.bookings.euclidean_distance * 1.4
 		self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x/1000))
-		self.bookings["duration"] = self.bookings.duration / 60
 
 		self.bookings["random_seconds_start"] = np.random.uniform(-600, 600, len(self.bookings))
 		self.bookings["random_seconds_end"] = np.random.uniform(-600, 600, len(self.bookings))
@@ -148,6 +147,8 @@ class City:
 
 		if self.city_name == "Minneapolis":
 			tz = pytz.timezone("America/Chicago")
+		elif self.city_name == "Torino":
+			tz = pytz.timezone("Europe/Rome")
 
 		now_utc = datetime.datetime.utcnow()
 		now_local = pytz.utc.localize(now_utc, is_dst=None).astimezone(tz)
@@ -160,7 +161,7 @@ class City:
 				self.bookings.start_time - self.bookings.start_time.shift()
 		).apply(lambda x: x.total_seconds()).abs()
 		self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
-		self.bookings["avg_speed"] = (self.bookings["euclidean_distance"]) / (self.bookings["duration"] / 60)
+		self.bookings["avg_speed"] = (self.bookings["euclidean_distance"]) / (self.bookings["duration"] / 3600)
 
 		return self.bookings
 
@@ -168,8 +169,7 @@ class City:
 
 		self.hourly_ods = {}
 
-		for hour, hour_df \
-				in self.input_bookings.groupby("hour"):
+		for hour, hour_df in self.input_bookings.groupby("hour"):
 			self.hourly_ods[hour] = pd.DataFrame(
 				index=self.valid_zones,
 				columns=self.valid_zones
@@ -193,10 +193,9 @@ class City:
 		for daytype, daytype_bookings_gdf in self.input_bookings.groupby("daytype"):
 			self.request_rates[daytype] = {}
 			for hour, hour_df in daytype_bookings_gdf.groupby("hour"):
-				self.request_rates[daytype][hour] = \
-					hour_df.city.count() \
-					/ (len(hour_df.day.unique())) \
-					/ 3600
+				self.request_rates[daytype][hour] = hour_df.city.count() / (
+					len(hour_df.day.unique())
+				) / 3600
 
 		self.avg_request_rate = pd.DataFrame(self.request_rates.values()).mean().mean()
 

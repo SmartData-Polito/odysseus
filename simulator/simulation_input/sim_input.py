@@ -29,6 +29,8 @@ class EFFCS_SimInput ():
 		self.n_vehicles_sim = int(abs(self.n_vehicles_original * self.sim_scenario_conf["n_vehicles_factor"]))
 		self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
 
+		self.hub_zone = -1
+
 		if self.sim_scenario_conf["hub"] and not self.sim_scenario_conf["distributed_cps"]:
 			self.hub_n_charging_poles = int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"]))
 			self.n_charging_poles = self.hub_n_charging_poles
@@ -103,6 +105,7 @@ class EFFCS_SimInput ():
 		return self.available_vehicles_dict
 
 	def init_hub (self):
+
 
 		if self.sim_scenario_conf["hub_zone_policy"] == "manual":
 			pass

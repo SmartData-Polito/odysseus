@@ -4,31 +4,34 @@ import numpy as np
 
 def get_time_group_columns (trips_df_norm):
 
-	trips_df_norm.sort_values(by=["start_time"], inplace=True)
+	trips_df_norm = trips_df_norm.sort_values(by=["start_time"])
 
 	trips_df_norm.start_time = pd.to_datetime(trips_df_norm.start_time, utc=True)
 	trips_df_norm.end_time = pd.to_datetime(trips_df_norm.end_time, utc=True)
-	trips_df_norm["year"] = trips_df_norm.start_time.apply(
+	trips_df_norm["duration"] = (trips_df_norm.end_time - trips_df_norm.start_time).apply(
+		lambda dt: dt.total_seconds()
+	)
+	trips_df_norm.loc[:, "year"] = trips_df_norm.start_time.apply(
 		lambda dt: dt.year
 	)
-	trips_df_norm["month"] = trips_df_norm.start_time.apply(
+	trips_df_norm.loc[:, "month"] = trips_df_norm.start_time.apply(
 		lambda dt: dt.month
 	)
-	trips_df_norm["start_hour"] = trips_df_norm.start_time.apply(lambda d: d.hour).astype(int)
-	trips_df_norm["end_hour"] = trips_df_norm.end_time.apply(lambda d: d.hour).astype(int)
+	trips_df_norm.loc[:, "start_hour"] = trips_df_norm.start_time.apply(lambda d: d.hour).astype(int)
+	trips_df_norm.loc[:, "end_hour"] = trips_df_norm.end_time.apply(lambda d: d.hour).astype(int)
 
-	trips_df_norm["start_weekday"] = trips_df_norm.start_time.apply(lambda d: d.weekday)
-	trips_df_norm["end_weekday"] = trips_df_norm.end_time.apply(lambda d: d.weekday)
+	trips_df_norm.loc[:, "start_weekday"] = trips_df_norm.start_time.apply(lambda d: d.weekday)
+	trips_df_norm.loc[:, "end_weekday"] = trips_df_norm.end_time.apply(lambda d: d.weekday)
 
-	trips_df_norm["start_weekend"] = trips_df_norm.start_weekday.apply(lambda w: w in [5, 6]).fillna(False)
-	trips_df_norm["end_weekend"] = trips_df_norm.end_weekday.apply(lambda w: w in [5, 6]).fillna(False)
+	trips_df_norm.loc[:, "start_weekend"] = trips_df_norm.start_weekday.apply(lambda w: w in [5, 6]).fillna(False)
+	trips_df_norm.loc[:, "end_weekend"] = trips_df_norm.end_weekday.apply(lambda w: w in [5, 6]).fillna(False)
 
-	trips_df_norm["start_daymoment"] = pd.Series()
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(0,7)), "start_daymoment"] = "night"
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(7,13)), "start_daymoment"] = "morning"
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(13,19)), "start_daymoment"] = "afternoon"
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(19,24)), "start_daymoment"] = "evening"
-	trips_df_norm["end_daymoment"] = pd.Series()
+	trips_df_norm.loc[:, "start_daymoment"] = pd.Series()
+	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(0, 7)), "start_daymoment"] = "night"
+	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(7, 13)), "start_daymoment"] = "morning"
+	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(13, 19)), "start_daymoment"] = "afternoon"
+	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(19, 24)), "start_daymoment"] = "evening"
+	trips_df_norm.loc[:, "end_daymoment"] = pd.Series()
 	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(0, 7)), "end_daymoment"] = "night"
 	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(7, 13)), "end_daymoment"] = "morning"
 	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(13, 19)), "end_daymoment"] = "afternoon"

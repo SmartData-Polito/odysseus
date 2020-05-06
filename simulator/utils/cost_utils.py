@@ -8,6 +8,8 @@ def insert_administrative_costs(df,administrative_cost_conf):
             administrative_cost_conf['customer_service_specialist_ral'])
     df['administrative_costs'] = (df.office_cost + df.manager_salary + df.it_salary
                                   + df.customer_service_cost + df.marketing_cost)
+
+
 def insert_scenario_costs(df, vehicles_cost_conf, poles_cost_conf):
     df['cars_cost'] = (df.n_cars) * (
                 vehicles_cost_conf['car_annual_cost'] + vehicles_cost_conf['car_annual_insurance_cost'] +
@@ -15,6 +17,7 @@ def insert_scenario_costs(df, vehicles_cost_conf, poles_cost_conf):
     df['poles_cost'] = df.n_charging_poles * (
                 poles_cost_conf['pole_installation_cost'] + poles_cost_conf['pole_annual_mantenaince_cost'] +
                 poles_cost_conf['cosap_annual_tax'])
+
 
 def insert_sim_costs(df, scenario_costs_conf, administrative_cost_conf, vehicles_cost_conf):
     df['relocation_cost'] = round((scenario_costs_conf['utilization_relocation_workers']*2*df.cum_relo_t/ \
