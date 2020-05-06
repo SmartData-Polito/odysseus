@@ -53,7 +53,7 @@ def run_model_validation (city):
 
     results_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
-            "Results",
+            "results",
             city,
             "validation",
         )
@@ -61,7 +61,7 @@ def run_model_validation (city):
 
     figures_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
-            "Figures",
+            "figures",
             city,
             "validation",
         )

@@ -4,7 +4,7 @@ import datetime
 import numpy as np
 
 from simulator.utils.vehicle_utils import *
-from simulator.Simulation.EFFCS_Sim import EFFCS_Sim
+from simulator.simulation.simulator import EFFCS_Sim
 
 
 class TraceB_EFFCS_Sim (EFFCS_Sim):

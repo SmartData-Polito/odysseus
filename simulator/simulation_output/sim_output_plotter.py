@@ -42,7 +42,7 @@ class EFFCS_SimOutputPlotter ():
 		).replace("'", "").replace(".", "d")
 		self.figures_path = os.path.join(
 			os.path.dirname(os.path.dirname(__file__)),
-			"Figures",
+			"figures",
 			city,
 			"single_run",
 			sim_scenario_name,

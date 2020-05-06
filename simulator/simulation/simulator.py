@@ -5,7 +5,7 @@ import pytz
 
 import simpy
 
-from simulator.Simulation.EFFCS_ChargingStrategy import EFFCS_ChargingStrategy
+from simulator.simulation.charging_strategies import EFFCS_ChargingStrategy
 
 
 class EFFCS_Sim ():

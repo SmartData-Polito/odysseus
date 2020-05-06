@@ -1,6 +1,6 @@
 import datetime
 
-from simulator.SimulationInput.EFFCS_SimInput import EFFCS_SimInput
+from simulator.simulation_input.sim_input import EFFCS_SimInput
 
 
 def get_eventG_input (conf_tuple):

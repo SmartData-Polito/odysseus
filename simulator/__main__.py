@@ -1,18 +1,18 @@
 import sys
 import datetime
 
-from simulator.SingleRun.single_run import single_run
-from simulator.MultipleRun.multiple_runs import multiple_runs
-from simulator.SimulationInput.EFFCS_SimConfGrid import EFFCS_SimConfGrid
+from simulator.single_run.single_run import single_run
+from simulator.multiple_runs.multiple_runs import multiple_runs
+from simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 
 confs_dict = {}
 
-from simulator.SimulationInput.confs.sim_general_conf import sim_general_conf_grid
+from simulator.simulation_input.confs.sim_general_conf import sim_general_conf_grid
 
-from simulator.SimulationInput.confs.multiple_runs_conf import sim_scenario_conf_grid
+from simulator.simulation_input.confs.multiple_runs_conf import sim_scenario_conf_grid
 confs_dict["multiple_runs"] = sim_scenario_conf_grid
 
-from simulator.SimulationInput.confs.single_run_conf import sim_scenario_conf
+from simulator.simulation_input.confs.single_run_conf import sim_scenario_conf
 confs_dict["single_run"] = sim_scenario_conf
 
 
