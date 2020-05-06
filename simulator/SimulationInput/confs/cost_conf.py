@@ -2,10 +2,11 @@ scenario_costs_conf = {
 
     "real_bookings_percentage": 75,
     "price_per_minute": 0.25,
-
+    "utilization_relocation_workers" : 1.25,
     "tow_truck_cost_per_call": 120,
 
     "kwh_cost": 0.2,
+
 
 }
 administrative_costs_conf = {
@@ -23,6 +24,7 @@ administrative_costs_conf = {
 
     "relocation_workers_hourly_cost": 23.43,
 
+    "marketing_costs": 100000,
     "marketing_on_revenues_percentage": 5,
 }
 
