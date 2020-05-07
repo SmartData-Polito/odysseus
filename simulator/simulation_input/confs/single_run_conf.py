@@ -10,13 +10,13 @@ sim_scenario_conf = {
 	"beta": 100,
 	"n_poles_n_vehicles_factor": 1,
 
-	"hub": True,
-	"hub_zone_policy": "num_parkings",
+	"hub": False,
+	"hub_zone_policy": "",
 
-	"distributed_cps": False,
-	"cps_placement_policy": "",
-	"cps_zones_percentage": 1,
-	"system_cps": False,
+	"distributed_cps": True,
+	"system_cps": True,
+	"cps_placement_policy": "num_parkings",
+	"cps_zones_percentage": 0.1,
 
 	"battery_swap": False,
 	"avg_reach_time": 0,
