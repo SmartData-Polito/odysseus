@@ -40,34 +40,31 @@ def multiple_runs(sim_run_conf, sim_run_mode, sim_general_conf, sim_scenario_con
 		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 
 		pool_stats_list = []
-		for i in np.arange(0, len(sim_conf_grid.conf_list), n_cores):
 
-			conf_tuples = []
+		conf_tuples = []
 
-			for sim_scenario_conf in sim_conf_grid.conf_list[i: i + n_cores]:
-				conf_tuples += [(
-					sim_general_conf,
-					sim_scenario_conf,
-					city_obj
-				)]
+		for sim_scenario_conf in sim_conf_grid.conf_list:
+			conf_tuples += [(
+				sim_general_conf,
+				sim_scenario_conf,
+				city_obj
+			)]
 
-			if sim_type == "eventG":
+		if sim_type == "eventG":
 
-				sim_inputs = pool.map\
-					(get_eventG_input, conf_tuples)
+			sim_inputs = pool.map\
+				(get_eventG_input, conf_tuples)
 
-				pool_stats_list += pool.map\
-					(get_eventG_sim_stats, sim_inputs)
+			pool_stats_list += pool.map\
+				(get_eventG_sim_stats, sim_inputs)
 
-			elif sim_type == "traceB":
+		elif sim_type == "traceB":
 
-				sim_inputs = pool.map \
-					(get_traceB_input, conf_tuples)
+			sim_inputs = pool.map \
+				(get_traceB_input, conf_tuples)
 
-				pool_stats_list += pool.map \
-					(get_traceB_sim_stats, sim_inputs)
-
-			print ("Batch", i / n_cores, datetime.datetime.now())
+			pool_stats_list += pool.map \
+				(get_traceB_sim_stats, sim_inputs)
 
 	sim_stats_df = pd.concat([sim_stats for sim_stats in pool_stats_list], axis=1, ignore_index=True).T
 
