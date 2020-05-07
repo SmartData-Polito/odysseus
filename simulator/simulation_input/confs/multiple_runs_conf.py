@@ -11,7 +11,7 @@ sim_scenario_conf_grid = {
 
     "alpha": [40],
     "beta": [100],
-    "n_poles_n_vehicles_factor": [0.1],
+    "n_poles_n_vehicles_factor": [0],
 
     "hub": [False],
     "hub_zone_policy": [""],
@@ -22,10 +22,10 @@ sim_scenario_conf_grid = {
     "system_cps": [False],
 
     "battery_swap": [True],
-    "avg_reach_time": [30],
+    "avg_reach_time": [10, 30, 50],
     "avg_service_time": [5],
 
-    "n_workers": [1000],
+    "n_workers": np.arange(1, 20, 1),
     "relocation": [False],
 
     "user_contribution": [False],
