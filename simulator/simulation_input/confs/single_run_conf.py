@@ -22,7 +22,7 @@ sim_scenario_conf = {
 	"avg_reach_time": 0,
 	"avg_service_time": 0,
 
-	"n_workers": 1000,
+	"n_workers": 1,
 	"relocation": False,
 
 	"user_contribution": False,

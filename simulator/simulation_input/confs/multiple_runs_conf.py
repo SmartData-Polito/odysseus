@@ -25,7 +25,7 @@ sim_scenario_conf_grid = {
     "avg_reach_time": [10, 30, 50],
     "avg_service_time": [5],
 
-    "n_workers": np.arange(1, 20, 1),
+    "n_workers": np.arange(1, 20, 5),
     "relocation": [False],
 
     "user_contribution": [False],

@@ -118,14 +118,12 @@ class EFFCS_ChargingPrimitives:
                         self.n_vehicles_charging_system += 1
                         yield self.env.timeout(charge["timeout_outward"])
                         charge["start_soc"] -= charge["cr_soc_delta"]
-                        self.sim_charges += [charge]
                         yield self.env.timeout(charge["duration"])
                         self.n_vehicles_charging_system -= 1
                         yield self.env.timeout(charge["timeout_return"])
                         self.vehicles_soc_dict[vehicle] = charge["end_soc"]
                         charge["end_soc"] -= charge["cr_soc_delta"]
             elif operator == "users":
-                self.sim_charges += [charge]
                 self.n_vehicles_charging_users += 1
                 yield self.env.timeout(charge["duration"])
                 self.vehicles_soc_dict[vehicle] = charge["end_soc"]
@@ -138,7 +136,6 @@ class EFFCS_ChargingPrimitives:
                         yield worker_request
                         yield self.env.timeout(charge["timeout_outward"])
                         charge["start_soc"] -= charge["cr_soc_delta"]
-                        self.sim_charges += [charge]
                         with resource.request() as charging_request:
                             yield charging_request
                             self.n_vehicles_charging_system += 1
@@ -147,10 +144,8 @@ class EFFCS_ChargingPrimitives:
                         yield self.env.timeout(charge["timeout_return"])
                         self.vehicles_soc_dict[vehicle] = charge["end_soc"]
                         charge["end_soc"] -= charge["cr_soc_delta"]
-
             elif operator == "users":
                 if resource.count < resource.capacity:
-                    self.sim_charges += [charge]
                     with resource.request() as charging_request:
                         yield charging_request
                         self.n_vehicles_charging_users += 1
@@ -158,6 +153,7 @@ class EFFCS_ChargingPrimitives:
                     self.vehicles_soc_dict[vehicle] = charge["end_soc"]
                     self.n_vehicles_charging_users -= 1
 
+        self.sim_charges += [charge]
         charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
 
     def check_system_charge (self, booking_request, vehicle):
