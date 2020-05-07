@@ -36,7 +36,7 @@ def multiple_runs(sim_run_conf, sim_run_mode, sim_general_conf, sim_scenario_con
 
 	with mp.Pool(n_cores) as pool:
 
-		city_obj = City(city, sim_general_conf)
+		city_obj = City(city, sim_run_conf["data_source_id"], sim_general_conf)
 		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 
 		pool_stats_list = []

@@ -155,7 +155,6 @@ def single_run(conf_tuple):
 			"n_vehicles_per_zones_history.csv"
 		)
 	)
-	print(sim_stats.loc[["n_bookings", "n_charges"]])
 
 	plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
 

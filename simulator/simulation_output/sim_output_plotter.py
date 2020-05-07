@@ -274,8 +274,6 @@ class EFFCS_SimOutputPlotter ():
 			(index=["date"], columns=["hour"], values=["vehicle"], aggfunc=np.sum)\
 			.fillna(0.0).loc[:, "vehicle"] / 3600
 
-		# print(table)
-
 		plt.figure()
 		table.reset_index().boxplot(column=list(table.columns))
 		plt.title("relocation cost hourly boxplot")

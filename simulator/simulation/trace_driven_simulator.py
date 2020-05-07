@@ -79,4 +79,4 @@ class TraceB_EFFCS_Sim (EFFCS_Sim):
             yield self.env.timeout(booking_request["ia_timeout"])
             self.process_booking_request(booking_request)
         self.n_vehicles_per_zones_history = pd.DataFrame(self.n_vehicles_per_zones_history, index=sim_timestamps)
-        print(self.n_vehicles_per_zones_history)
+
