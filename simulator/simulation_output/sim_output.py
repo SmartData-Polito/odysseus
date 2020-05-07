@@ -222,6 +222,9 @@ class EFFCS_SimOutput ():
 			self.sim_stats.loc["fraction_duration_system"] = 1
 			self.sim_stats.loc["fraction_duration_users"] = 0
 
+		self.sim_stats.loc["charging_duration_avg"] = \
+			self.sim_charges.duration.mean()
+
 		self.sim_stats.loc["charging_energy_event_avg"] = \
 			self.sim_charges.soc_delta_kwh.mean()
 
