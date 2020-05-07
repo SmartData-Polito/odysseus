@@ -58,7 +58,7 @@ class EFFCS_SimInput ():
 			"start_time",
 			"end_time",
 			"ia_timeout",
-			"euclidean_distance",
+			"driving_distance",
 			"day",
 			"hour",
 			"minute",
@@ -105,7 +105,6 @@ class EFFCS_SimInput ():
 		return self.available_vehicles_dict
 
 	def init_hub (self):
-
 
 		if self.sim_scenario_conf["hub_zone_policy"] == "manual":
 			pass

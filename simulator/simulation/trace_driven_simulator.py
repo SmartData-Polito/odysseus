@@ -53,7 +53,7 @@ class TraceB_EFFCS_Sim (EFFCS_Sim):
 
     def fuel_to_electric (self, booking_request):
 
-        booking_request["soc_delta"] = -get_soc_delta(booking_request["euclidean_distance"] / 1000)
+        booking_request["soc_delta"] = -get_soc_delta(booking_request["driving_distance"] / 1000)
         booking_request["soc_delta_kwh"] = soc_to_kwh(booking_request["soc_delta"])
         return booking_request
     

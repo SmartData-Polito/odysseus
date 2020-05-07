@@ -121,7 +121,8 @@ class City:
 	def get_input_bookings_filtered(self):
 
 		self.bookings["hour"] = self.bookings.start_hour
-		self.bookings["driving_distance"] = self.bookings.euclidean_distance * 1.4
+		if "driving_distance" not in self.bookings.columns:
+			self.bookings["driving_distance"] = self.bookings.euclidean_distance * 1.4
 		self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x/1000))
 
 		self.bookings["random_seconds_start"] = np.random.uniform(-600, 600, len(self.bookings))
@@ -161,7 +162,7 @@ class City:
 				self.bookings.start_time - self.bookings.start_time.shift()
 		).apply(lambda x: x.total_seconds()).abs()
 		self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
-		self.bookings["avg_speed"] = (self.bookings["euclidean_distance"]) / (self.bookings["duration"] / 3600)
+		self.bookings["avg_speed"] = (self.bookings["driving_distance"]) / (self.bookings["duration"] / 3600)
 
 		return self.bookings
 
