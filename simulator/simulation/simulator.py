@@ -185,7 +185,6 @@ class EFFCS_Sim ():
 			self.n_deaths += 1
 			death = copy.deepcopy(booking_request)
 			death["hour"] = death["start_time"].hour
-			#print(death["hour"])
 			if available_vehicle_flag_same_zone and available_vehicle_flag_not_same_zone:
 				if max_soc_origin > max_soc_neighbor:
 					death["plate"] = max_soc_vehicle_origin

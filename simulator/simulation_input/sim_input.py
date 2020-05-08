@@ -82,8 +82,6 @@ class EFFCS_SimInput ():
 		vehicles_random_zones = list(
 			np.random.uniform(0, 50, self.n_vehicles_sim).astype(int).round()
 		)
-		print(vehicles_random_zones)
-		print(self.grid)
 
 		self.vehicles_zones = [
 			self.grid.iloc[int(vehicles_random_zones[i])].zone_id

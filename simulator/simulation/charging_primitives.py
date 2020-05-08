@@ -153,8 +153,8 @@ class EFFCS_ChargingPrimitives:
                     self.vehicles_soc_dict[vehicle] = charge["end_soc"]
                     self.n_vehicles_charging_users -= 1
 
-        self.sim_charges += [charge]
         charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
+        self.sim_charges += [charge]
 
     def check_system_charge (self, booking_request, vehicle):
 
