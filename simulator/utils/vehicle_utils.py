@@ -10,8 +10,8 @@ def remap_plates (events):
     return ass_dict, events
 
 
-def soc_to_kwh(soc, a=0., b=0.25):
-    return (b - a) / (100) * (soc - 100) + b
+def soc_to_kwh(soc, a=0., b=vehicle_conf["battery_capacity"]):
+    return (b - a) / 100 * (soc - 100) + b
 
 
 def get_soc_delta (

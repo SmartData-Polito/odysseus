@@ -100,7 +100,9 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 						break
 
 			if free_pole_flag == 0:
-				charging_zone_id = self.simInput.closest_cp_zone[booking_request["destination_id"]]
+				charging_zone_id = self.simInput.closest_cp_zone[
+					int(booking_request["destination_id"])
+				]
 
 			charging_station = self.charging_poles_dict[charging_zone_id]
 			resource = charging_station
