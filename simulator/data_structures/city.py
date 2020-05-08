@@ -2,6 +2,7 @@ import os
 import datetime
 import pytz
 
+import geopandas as gpd
 import pandas as pd
 import numpy as np
 from sklearn.neighbors import KernelDensity
@@ -34,13 +35,17 @@ class City:
 			bookings = loader.read_trips()
 			origins, destinations = loader.read_origins_destinations()
 			self.bookings = pd.concat([self.bookings, bookings], ignore_index=True)
-			self.trips_origins = pd.concat([self.trips_origins, origins], ignore_index=True)
-			self.trips_destinations = pd.concat([self.trips_destinations, destinations], ignore_index=True)
+			self.trips_origins = pd.concat([
+				self.trips_origins, origins.drop(["index_right", "zone_id"], axis=1)
+			], ignore_index=True)
+			self.trips_destinations = pd.concat([
+				self.trips_destinations, destinations.drop(["index_right", "zone_id"], axis=1)
+			], ignore_index=True)
 
 		self.grid = self.get_squared_grid()
-		self.grid = self.grid.to_crs("epsg:3857")
-
+		self.grid["zone_id"] = self.grid.index.values
 		self.input_bookings = self.get_input_bookings_filtered()
+		self.map_zones_on_trips(self.grid)
 
 		self.valid_zones = self.get_valid_zones()
 		self.grid = self.grid.loc[self.valid_zones]
@@ -49,16 +54,17 @@ class City:
 				self.input_bookings.destination_id.isin(self.grid.index)
 			)
 		]
-		self.grid = self.grid.reset_index()
-		self.grid["zone_id"] = self.grid.index.values
-		self.original_valid_zones = self.valid_zones.copy()
-		self.zones_replace_dict = {}
-		for i in range(len(self.original_valid_zones)):
-			self.zones_replace_dict[self.original_valid_zones[i]] = i
-		self.input_bookings.loc[:, ["origin_id", "destination_id"]] = \
-			self.input_bookings.loc[:, ["origin_id", "destination_id"]].replace(
-				self.zones_replace_dict
-			)
+
+		# self.grid = self.grid.reset_index()
+		# self.grid["zone_id"] = self.grid.index.values
+		# self.original_valid_zones = self.valid_zones.copy()
+		# self.zones_replace_dict = {}
+		# for i in range(len(self.original_valid_zones)):
+		# 	self.zones_replace_dict[self.original_valid_zones[i]] = i
+		# self.input_bookings.loc[:, ["origin_id", "destination_id"]] = \
+		# 	self.input_bookings.loc[:, ["origin_id", "destination_id"]].replace(
+		# 		self.zones_replace_dict
+		# 	)
 
 		self.od_distances = self.get_od_distances()
 
@@ -73,12 +79,28 @@ class City:
 		locations = pd.concat([
 				self.trips_origins.geometry, self.trips_destinations.geometry
 		], ignore_index=True)
-		locations.crs = "epsg:4236"
+		locations.crs = "epsg:4326"
 		squared_grid = get_city_grid(
 			locations,
 			self.bin_side_length
 		)
 		return squared_grid
+
+	def map_zones_on_trips(self, zones):
+		self.trips_origins = gpd.sjoin(
+			self.trips_origins,
+			zones,
+			how='left',
+			op='within'
+		)
+		self.trips_destinations = gpd.sjoin(
+			self.trips_destinations,
+			zones,
+			how='left',
+			op='within'
+		)
+		self.input_bookings["origin_id"] = self.trips_origins.zone_id
+		self.input_bookings["destination_id"] = self.trips_destinations.zone_id
 
 	def get_valid_zones(self):
 
@@ -87,8 +109,8 @@ class City:
 		).index
 		origin_zones_count = self.input_bookings.origin_id.value_counts()
 		dest_zones_count = self.input_bookings.destination_id.value_counts()
-		valid_origin_zones = origin_zones_count[(origin_zones_count > 30)]
-		valid_dest_zones = dest_zones_count[(dest_zones_count > 30)]
+		valid_origin_zones = origin_zones_count[(origin_zones_count >= 0)]
+		valid_dest_zones = dest_zones_count[(dest_zones_count >= 0)]
 		self.valid_zones = self.valid_zones.intersection(
 			valid_origin_zones.index.intersection(
 				valid_dest_zones.index
@@ -98,7 +120,7 @@ class City:
 
 	def get_od_distances(self):
 
-		points = self.grid.centroid.geometry
+		points = self.grid.to_crs("epsg:3857").centroid.geometry
 		od_distances = points.apply(lambda p: points.distance(p))
 		od_distances = pd.DataFrame(od_distances, index=self.grid.zone_id.values, columns=self.grid.zone_id.values)
 		return od_distances

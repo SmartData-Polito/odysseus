@@ -85,7 +85,7 @@ class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
 		if self.simInput.sim_scenario_conf["distributed_cps"]:
 
 			zones_by_distance = self.simInput.zones_cp_distances.loc[
-				booking_request["destination_id"]
+				int(booking_request["destination_id"])
 			].sort_values()
 
 			free_pole_flag = 0

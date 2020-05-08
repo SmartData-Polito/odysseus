@@ -77,14 +77,16 @@ class EFFCS_SimInput ():
 			i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
 		}
 
-		top_o_zones = self.input_bookings .origin_id.value_counts().iloc[:50].index
+		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:50].index
 
 		vehicles_random_zones = list(
-			np.random.uniform(0, 50, self.n_vehicles_sim).astype(int)
+			np.random.uniform(0, 50, self.n_vehicles_sim).astype(int).round()
 		)
+		print(vehicles_random_zones)
+		print(self.grid)
 
 		self.vehicles_zones = [
-			self.grid.loc[top_o_zones[i]].zone_id
+			self.grid.iloc[int(vehicles_random_zones[i])].zone_id
 			for i in vehicles_random_zones
 		]
 
