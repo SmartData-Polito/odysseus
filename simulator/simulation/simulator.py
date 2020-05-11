@@ -123,7 +123,6 @@ class EFFCS_Sim ():
 			self.simInput.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
 		]
 
-
 		self.sim_booking_requests += [booking_request]
 		self.n_booking_requests += 1
 

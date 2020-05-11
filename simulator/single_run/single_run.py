@@ -66,22 +66,11 @@ def single_run(conf_tuple):
 		sim_stats = simOutput_traceB.sim_stats
 		simOutput = simOutput_traceB
 
-	sim_stats.to_csv(os.path.join(results_path, "sim_stats.csv"))
+	sim_stats.to_pickle(os.path.join(results_path, "sim_stats.pickle"))
 
-	pd.Series(sim_general_conf).to_csv(os.path.join(results_path, "sim_general_conf.csv"))
+	pd.Series(sim_general_conf).to_pickle(os.path.join(results_path, "sim_general_conf.pickle"))
 
-	pd.Series(sim_scenario_conf).to_csv(os.path.join(results_path, "sim_scenario_conf.csv"))
-
-	f_out = open(
-		os.path.join(
-			results_path,
-			"sim_output.csv"
-		), "wb"
-	)
-	pickle.dump(
-		simOutput,
-		f_out
-	)
+	pd.Series(sim_scenario_conf).to_pickle(os.path.join(results_path, "sim_scenario_conf.pickle"))
 
 	simOutput.grid.to_pickle(
 		os.path.join(
@@ -89,70 +78,70 @@ def single_run(conf_tuple):
 			"grid.pickle"
 		)
 	)
-	simOutput.sim_booking_requests.to_csv(
+	simOutput.sim_booking_requests.to_pickle(
 		os.path.join(
 			results_path,
-			"sim_booking_requests.csv"
+			"sim_booking_requests.pickle"
 		)
 	)
-	simOutput.sim_bookings.to_csv(
+	simOutput.sim_bookings.to_pickle(
 		os.path.join(
 			results_path,
-			"sim_bookings.csv"
+			"sim_bookings.pickle"
 		)
 	)
-	simOutput.sim_charges.to_csv(
+	simOutput.sim_charges.to_pickle(
 		os.path.join(
 			results_path,
-			"sim_charges.csv"
+			"sim_charges.pickle"
 		)
 	)
-	simOutput.sim_not_enough_energy_requests.to_csv(
+	simOutput.sim_not_enough_energy_requests.to_pickle(
 		os.path.join(
 			results_path,
-			"sim_unsatisfied_no-energy.csv"
+			"sim_unsatisfied_no-energy.pickle"
 		)
 	)
-	simOutput.sim_no_close_vehicle_requests.to_csv(
+	simOutput.sim_no_close_vehicle_requests.to_pickle(
 		os.path.join(
 			results_path,
-			"sim_unsatisfied_no_close_vehicle.csv"
+			"sim_unsatisfied_no_close_vehicle.pickle"
 		)
 	)
-	simOutput.sim_unsatisfied_requests.to_csv(
+	simOutput.sim_unsatisfied_requests.to_pickle(
 		os.path.join(
 			results_path,
-			"sim_unsatisfied_requests.csv"
+			"sim_unsatisfied_requests.pickle"
 		)
 	)
-	simOutput.sim_system_charges_bookings.to_csv(
+	simOutput.sim_system_charges_bookings.to_pickle(
 		os.path.join(
 			results_path,
-			"sim_system_charges_bookings.csv"
+			"sim_system_charges_bookings.pickle"
 		)
 	)
-	simOutput.sim_users_charges_bookings.to_csv(
+	simOutput.sim_users_charges_bookings.to_pickle(
 		os.path.join(
 			results_path,
-			"sim_users_charges_bookings.csv"
+			"sim_users_charges_bookings.pickle"
 		)
 	)
-	simOutput.sim_unfeasible_charge_bookings.to_csv(
+	simOutput.sim_unfeasible_charge_bookings.to_pickle(
 		os.path.join(
 			results_path,
-			"sim_unfeasible_charge_bookings.csv"
+			"sim_unfeasible_charge_bookings.pickle"
 		)
 	)
-	simOutput.sim_charge_deaths.to_csv(
+	simOutput.sim_charge_deaths.to_pickle(
 		os.path.join(
 			results_path,
-			"sim_unfeasible_charges.csv"
+			"sim_unfeasible_charges.pickle"
 		)
 	)
-	simOutput.n_vehicles_per_zones_history.to_csv(
+	simOutput.n_vehicles_per_zones_history.to_pickle(
 		os.path.join(
 			results_path,
-			"n_vehicles_per_zones_history.csv"
+			"n_vehicles_per_zones_history.pickle"
 		)
 	)
 

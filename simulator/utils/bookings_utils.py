@@ -42,7 +42,7 @@ def pre_process_time(df, col="start_time"):
 	df.loc[:, "hour"] = df[col].apply(lambda d: d.hour)
 	df.loc[:, "minute"] = df[col].apply(lambda d: d.minute)
 	df.loc[:, "duration"] = (df.end_time - df.start_time).apply(
-		lambda x: float(x.seconds) / 60.0
+		lambda x: x.total_seconds()
 	)
 	df.loc[df.weekday.isin([5, 6]), "daytype"] = "weekend"
 	df.loc[~df.weekday.isin([5, 6]), "daytype"] = "weekday"

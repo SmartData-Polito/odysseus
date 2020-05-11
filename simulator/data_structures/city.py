@@ -44,9 +44,10 @@ class City:
 
 		self.grid = self.get_squared_grid()
 		self.grid["zone_id"] = self.grid.index.values
-		self.input_bookings = self.get_input_bookings_filtered()
-		self.map_zones_on_trips(self.grid)
 
+		self.input_bookings = self.get_input_bookings_filtered()
+
+		self.map_zones_on_trips(self.grid)
 		self.valid_zones = self.get_valid_zones()
 		self.grid = self.grid.loc[self.valid_zones]
 		self.input_bookings = self.input_bookings.loc[
@@ -54,6 +55,17 @@ class City:
 				self.input_bookings.destination_id.isin(self.grid.index)
 			)
 		]
+
+		self.grid = self.grid.loc[self.valid_zones]
+		self.grid["new_zone_id"] = range(len(self.grid))
+		self.input_bookings[["origin_id", "destination_id"]] = \
+			self.input_bookings[["origin_id", "destination_id"]] \
+				.astype(int).replace(self.grid.new_zone_id.to_dict())
+		self.grid["zone_id"] = self.grid.new_zone_id
+		self.grid = self.grid.reset_index()
+
+		self.original_valid_zones = self.valid_zones.copy()
+		self.valid_zones = self.grid.index
 
 		# self.grid = self.grid.reset_index()
 		# self.grid["zone_id"] = self.grid.index.values
@@ -205,8 +217,7 @@ class City:
 				aggfunc=len,
 				fill_value=0
 			)
-			self.hourly_ods[hour].loc\
-				[hourly_od.index, hourly_od.columns] = hourly_od
+			self.hourly_ods[hour].loc[hourly_od.index, hourly_od.columns] = hourly_od
 			self.hourly_ods[hour].fillna(0, inplace=True)
 
 	def get_requests_rates(self):

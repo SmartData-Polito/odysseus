@@ -70,21 +70,23 @@ class EFFCS_SimInput ():
 	def init_vehicles (self):
 
 		vehicles_random_soc = list(
-			np.random.uniform(25, 100, self.n_vehicles_sim).astype(int)
+			np.random.uniform(self.sim_scenario_conf["alpha"], 100, self.n_vehicles_sim).astype(int)
 		)
 
 		self.vehicles_soc_dict = {
 			i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
 		}
 
-		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:50].index
+		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:11]
+		print(top_o_zones)
 
 		vehicles_random_zones = list(
-			np.random.uniform(0, 50, self.n_vehicles_sim).astype(int).round()
+			np.random.uniform(0, 10, self.n_vehicles_sim).astype(int).round()
 		)
+		#print(vehicles_random_zones)
 
 		self.vehicles_zones = [
-			self.grid.iloc[int(vehicles_random_zones[i])].zone_id
+			self.grid.loc[int(top_o_zones.index[vehicles_random_zones[i]])].zone_id
 			for i in vehicles_random_zones
 		]
 
@@ -96,7 +98,9 @@ class EFFCS_SimInput ():
 
 	def init_vehicles_dicts (self):
 
-		self.available_vehicles_dict = {int(zone):[] for zone in self.grid.zone_id}
+		self.available_vehicles_dict = {
+			int(zone): [] for zone in self.grid.zone_id
+		}
 
 		for vehicle in range(len(self.vehicles_zones)):
 			zone = self.vehicles_zones[vehicle]
@@ -132,21 +136,15 @@ class EFFCS_SimInput ():
 					self.n_charging_poles_by_zone[zone_id] += 1
 					assigned_cps += 1
 
-			self.n_charging_poles_by_zone = \
-				dict(pd.Series\
-				(self.n_charging_poles_by_zone)\
-				.replace({0:np.NaN}).dropna())
+			self.n_charging_poles_by_zone = dict(pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
 
-			zones_with_cps = pd.Series\
-				(self.n_charging_poles_by_zone).index
+			zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
 
-			self.zones_cp_distances = \
-				self.grid.centroid.apply\
-				(lambda x: self.grid.loc[zones_with_cps]\
-				 .centroid.distance(x))
+			self.zones_cp_distances = self.grid.centroid.apply(
+				lambda x: self.grid.loc[zones_with_cps].centroid.distance(x)
+			)
 
-			self.closest_cp_zone = \
-				self.zones_cp_distances.idxmin(axis=1)
+			self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
 
 			return self.n_charging_poles_by_zone
 

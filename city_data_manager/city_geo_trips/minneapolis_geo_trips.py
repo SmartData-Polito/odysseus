@@ -79,7 +79,7 @@ class MinneapolisGeoTrips(CityGeoTrips):
 		self.trips_origins.geometry = self.trips_origins.geometry.apply(
 			get_random_point_from_linestring
 		)
-		self.trips_origins.crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+		self.trips_origins.crs = "epsg:4326"
 
 		trips_destinations_centerlines = gpd.GeoDataFrame(pd.merge(
 			trips_destinations_centerlines,
@@ -99,5 +99,4 @@ class MinneapolisGeoTrips(CityGeoTrips):
 		self.trips_destinations.geometry = self.trips_destinations.geometry.apply(
 			get_random_point_from_linestring
 		)
-		self.trips_destinations.crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-
+		self.trips_destinations.crs = "epsg:4326"

@@ -52,19 +52,13 @@ def multiple_runs(sim_run_conf, sim_run_mode, sim_general_conf, sim_scenario_con
 
 		if sim_type == "eventG":
 
-			sim_inputs = pool.map\
-				(get_eventG_input, conf_tuples)
-
-			pool_stats_list += pool.map\
-				(get_eventG_sim_stats, sim_inputs)
+			sim_inputs = pool.map(get_eventG_input, conf_tuples)
+			pool_stats_list += pool.map(get_eventG_sim_stats, sim_inputs)
 
 		elif sim_type == "traceB":
 
-			sim_inputs = pool.map \
-				(get_traceB_input, conf_tuples)
-
-			pool_stats_list += pool.map \
-				(get_traceB_sim_stats, sim_inputs)
+			sim_inputs = pool.map(get_traceB_input, conf_tuples)
+			pool_stats_list += pool.map(get_traceB_sim_stats, sim_inputs)
 
 	sim_stats_df = pd.concat([sim_stats for sim_stats in pool_stats_list], axis=1, ignore_index=True).T
 
