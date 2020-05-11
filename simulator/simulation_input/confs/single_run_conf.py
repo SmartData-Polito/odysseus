@@ -15,7 +15,7 @@ sim_scenario_conf = {
 
 	"distributed_cps": False,
 	"cps_placement_policy": "",
-	"cps_zones_percentage": 0.1,
+	"cps_zones_percentage": 0,
 	"system_cps": False,
 
 	"battery_swap": True,

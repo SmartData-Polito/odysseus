@@ -44,45 +44,29 @@ class City:
 
 		self.grid = self.get_squared_grid()
 		self.grid["zone_id"] = self.grid.index.values
-
-		self.input_bookings = self.get_input_bookings_filtered()
-
+		self.bookings = self.get_input_bookings_filtered()
 		self.map_zones_on_trips(self.grid)
+
 		self.valid_zones = self.get_valid_zones()
 		self.grid = self.grid.loc[self.valid_zones]
-		self.input_bookings = self.input_bookings.loc[
-			(self.input_bookings.origin_id.isin(self.grid.index)) & (
-				self.input_bookings.destination_id.isin(self.grid.index)
+		self.bookings = self.bookings.loc[
+			(self.bookings.origin_id.isin(self.grid.index)) & (
+				self.bookings.destination_id.isin(self.grid.index)
 			)
 		]
-
-		self.grid = self.grid.loc[self.valid_zones]
-		self.grid["new_zone_id"] = range(len(self.grid))
-		self.input_bookings[["origin_id", "destination_id"]] = \
-			self.input_bookings[["origin_id", "destination_id"]] \
-				.astype(int).replace(self.grid.new_zone_id.to_dict())
+		self.grid["initial_zone_id"] = self.grid.zone_id
+		self.bookings[["origin_id", "destination_id"]] = self.bookings[[
+			"origin_id", "destination_id"
+		]].astype(int).replace(self.grid.new_zone_id.to_dict())
 		self.grid["zone_id"] = self.grid.new_zone_id
 		self.grid = self.grid.reset_index()
-
 		self.original_valid_zones = self.valid_zones.copy()
 		self.valid_zones = self.grid.index
 
-		# self.grid = self.grid.reset_index()
-		# self.grid["zone_id"] = self.grid.index.values
-		# self.original_valid_zones = self.valid_zones.copy()
-		# self.zones_replace_dict = {}
-		# for i in range(len(self.original_valid_zones)):
-		# 	self.zones_replace_dict[self.original_valid_zones[i]] = i
-		# self.input_bookings.loc[:, ["origin_id", "destination_id"]] = \
-		# 	self.input_bookings.loc[:, ["origin_id", "destination_id"]].replace(
-		# 		self.zones_replace_dict
-		# 	)
-
 		self.od_distances = self.get_od_distances()
-
 		self.neighbors, self.neighbors_dict = self.get_neighbors_dicts()
 
-		self.input_bookings.loc[:, "city"] = self.city_name
+		self.bookings.loc[:, "city"] = self.city_name
 		self.request_rates = self.get_requests_rates()
 		self.trip_kdes = self.get_trip_kdes()
 
@@ -111,18 +95,18 @@ class City:
 			how='left',
 			op='within'
 		)
-		self.input_bookings["origin_id"] = self.trips_origins.zone_id
-		self.input_bookings["destination_id"] = self.trips_destinations.zone_id
+		self.bookings["origin_id"] = self.trips_origins.zone_id
+		self.bookings["destination_id"] = self.trips_destinations.zone_id
 
 	def get_valid_zones(self):
 
-		self.valid_zones = self.input_bookings.origin_id.value_counts().sort_values().tail(
+		self.valid_zones = self.bookings.origin_id.value_counts().sort_values().tail(
 			int(self.sim_general_conf["k_zones_factor"] * len(self.grid))
 		).index
-		origin_zones_count = self.input_bookings.origin_id.value_counts()
-		dest_zones_count = self.input_bookings.destination_id.value_counts()
-		valid_origin_zones = origin_zones_count[(origin_zones_count > 30)]
-		valid_dest_zones = dest_zones_count[(dest_zones_count > 30)]
+		origin_zones_count = self.bookings.origin_id.value_counts()
+		dest_zones_count = self.bookings.destination_id.value_counts()
+		valid_origin_zones = origin_zones_count[(origin_zones_count > 10)]
+		valid_dest_zones = dest_zones_count[(dest_zones_count > 10)]
 		self.valid_zones = self.valid_zones.intersection(
 			valid_origin_zones.index.intersection(
 				valid_dest_zones.index
@@ -156,7 +140,7 @@ class City:
 
 		self.bookings["hour"] = self.bookings.start_hour
 		if "driving_distance" not in self.bookings.columns:
-			self.bookings["driving_distance"] = self.bookings.euclidean_distance * 1.4
+			self.bookings["driving_distance"] = self.bookings.euclidean_distance
 		self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x/1000))
 
 		self.bookings["random_seconds_start"] = np.random.uniform(-600, 600, len(self.bookings))
@@ -190,11 +174,14 @@ class City:
 		self.bookings.start_time = self.bookings.start_time + now_local.utcoffset()
 		self.bookings.end_time = self.bookings.end_time + now_local.utcoffset()
 		self.bookings = pre_process_time(self.bookings)
+		self.bookings = self.bookings[self.bookings.duration > 3 * 60]
+		self.bookings = self.bookings[self.bookings.duration < 60 * 60]
 
 		self.bookings = self.bookings.sort_values("start_time")
 		self.bookings.loc[:, "ia_timeout"] = (
 				self.bookings.start_time - self.bookings.start_time.shift()
 		).apply(lambda x: x.total_seconds()).abs()
+		print(self.bookings.ia_timeout)
 		self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
 		self.bookings["avg_speed"] = (self.bookings["driving_distance"]) / (self.bookings["duration"] / 3600)
 
@@ -204,7 +191,7 @@ class City:
 
 		self.hourly_ods = {}
 
-		for hour, hour_df in self.input_bookings.groupby("hour"):
+		for hour, hour_df in self.bookings.groupby("hour"):
 			self.hourly_ods[hour] = pd.DataFrame(
 				index=self.valid_zones,
 				columns=self.valid_zones
@@ -224,7 +211,7 @@ class City:
 
 		self.request_rates = {}
 
-		for daytype, daytype_bookings_gdf in self.input_bookings.groupby("daytype"):
+		for daytype, daytype_bookings_gdf in self.bookings.groupby("daytype"):
 			self.request_rates[daytype] = {}
 			for hour, hour_df in daytype_bookings_gdf.groupby("hour"):
 				self.request_rates[daytype][hour] = hour_df.city.count() / (
@@ -243,7 +230,7 @@ class City:
 			"destination_id",
 		]
 
-		for daytype, daytype_bookings_gdf in self.input_bookings.groupby("daytype"):
+		for daytype, daytype_bookings_gdf in self.bookings.groupby("daytype"):
 			self.trip_kdes[daytype] = {}
 			for hour, hour_df in daytype_bookings_gdf.groupby("hour"):
 				self.trip_kdes[daytype][hour] = KernelDensity(

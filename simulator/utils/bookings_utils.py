@@ -44,6 +44,7 @@ def pre_process_time(df, col="start_time"):
 	df.loc[:, "duration"] = (df.end_time - df.start_time).apply(
 		lambda x: x.total_seconds()
 	)
+	print(df["duration"].describe())
 	df.loc[df.weekday.isin([5, 6]), "daytype"] = "weekend"
 	df.loc[~df.weekday.isin([5, 6]), "daytype"] = "weekday"
 	df.dropna(how="all", axis=1, inplace=True)

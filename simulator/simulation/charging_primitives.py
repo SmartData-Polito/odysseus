@@ -117,12 +117,10 @@ class EFFCS_ChargingPrimitives:
                         yield worker_request
                         self.n_vehicles_charging_system += 1
                         yield self.env.timeout(charge["timeout_outward"])
-                        charge["start_soc"] -= charge["cr_soc_delta"]
                         yield self.env.timeout(charge["duration"])
                         self.n_vehicles_charging_system -= 1
                         yield self.env.timeout(charge["timeout_return"])
                         self.vehicles_soc_dict[vehicle] = charge["end_soc"]
-                        charge["end_soc"] -= charge["cr_soc_delta"]
             elif operator == "users":
                 self.n_vehicles_charging_users += 1
                 yield self.env.timeout(charge["duration"])

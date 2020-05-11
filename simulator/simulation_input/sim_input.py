@@ -16,8 +16,7 @@ class EFFCS_SimInput ():
 
 		self.city = self.city_obj.city_name
 		self.grid = self.city_obj.grid
-		self.bookings = self.city_obj.bookings
-		self.input_bookings = self.city_obj.input_bookings
+		self.input_bookings = self.city_obj.bookings
 		self.request_rates = self.city_obj.request_rates
 		self.trip_kdes = self.city_obj.trip_kdes
 		self.valid_zones = self.city_obj.valid_zones
@@ -77,11 +76,11 @@ class EFFCS_SimInput ():
 			i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
 		}
 
-		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:11]
+		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:31]
 		print(top_o_zones)
 
 		vehicles_random_zones = list(
-			np.random.uniform(0, 10, self.n_vehicles_sim).astype(int).round()
+			np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()
 		)
 		#print(vehicles_random_zones)
 
@@ -93,6 +92,7 @@ class EFFCS_SimInput ():
 		self.vehicles_zones = {
 			i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)
 		}
+		#print(self.vehicles_zones)
 
 		return self.vehicles_soc_dict, self.vehicles_zones
 
