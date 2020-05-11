@@ -31,7 +31,6 @@ for sim_general_conf in sim_general_conf_list:
             sim_run_conf,
             sim_general_conf,
             confs_dict[sim_run_mode],
-            sim_run_mode["sim_technique"],
             sim_scenario_name
         ))
     elif sim_run_mode == "multiple_runs":
@@ -40,7 +39,6 @@ for sim_general_conf in sim_general_conf_list:
             "multiple_runs",
             sim_general_conf,
             confs_dict[sim_run_mode],
-            sim_run_mode["sim_technique"],
             sim_scenario_name
         )
 

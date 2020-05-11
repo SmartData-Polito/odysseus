@@ -54,6 +54,7 @@ class City:
 				self.bookings.destination_id.isin(self.grid.index)
 			)
 		]
+		self.grid["new_zone_id"] = range(len(self.grid))
 		self.grid["initial_zone_id"] = self.grid.zone_id
 		self.bookings[["origin_id", "destination_id"]] = self.bookings[[
 			"origin_id", "destination_id"
@@ -181,7 +182,6 @@ class City:
 		self.bookings.loc[:, "ia_timeout"] = (
 				self.bookings.start_time - self.bookings.start_time.shift()
 		).apply(lambda x: x.total_seconds()).abs()
-		print(self.bookings.ia_timeout)
 		self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
 		self.bookings["avg_speed"] = (self.bookings["driving_distance"]) / (self.bookings["duration"] / 3600)
 

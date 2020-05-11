@@ -18,8 +18,8 @@ def single_run(conf_tuple):
 	data_source_id = conf_tuple[0]["data_source_id"]
 	sim_general_conf = conf_tuple[1]
 	sim_scenario_conf = conf_tuple[2]
-	sim_type = conf_tuple[3]
-	sim_scenario_name = conf_tuple[4]
+	sim_scenario_name = conf_tuple[3]
+	sim_type = conf_tuple[0]["sim_technique"]
 
 	city_obj = City(city, data_source_id, sim_general_conf)
 	print(sim_scenario_conf)

@@ -14,10 +14,11 @@ from simulator.single_run.run_traceB_sim import get_traceB_sim_stats
 from simulator.simulation_output.multiple_runs_plotter import EFFCS_MultipleRunsPlotter
 
 
-def multiple_runs(sim_run_conf, sim_run_mode, sim_general_conf, sim_scenario_conf_grid, sim_type, sim_scenario_name):
+def multiple_runs(sim_run_conf, sim_run_mode, sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 
 	city = sim_run_conf["city"]
 	n_cores = sim_run_conf["n_cores"]
+	sim_type = sim_run_conf["sim_technique"]
 
 	model_general_conf_string = "_".join([str(v) for v in sim_general_conf.values()]).replace("'", "").replace(".", "d")
 	model_scenario_conf_grid_string = "_".join([

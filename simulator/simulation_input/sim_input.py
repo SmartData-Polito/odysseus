@@ -77,7 +77,7 @@ class EFFCS_SimInput ():
 		}
 
 		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:31]
-		print(top_o_zones)
+		#print(top_o_zones)
 
 		vehicles_random_zones = list(
 			np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()
