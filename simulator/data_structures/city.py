@@ -19,6 +19,7 @@ class City:
 	def __init__(self, city_name, data_source_id, sim_general_conf, kde_bw=0.1):
 
 		self.city_name = city_name
+		self.data_source_id = data_source_id
 		self.sim_general_conf = sim_general_conf
 		self.kde_bw = kde_bw
 
@@ -164,6 +165,10 @@ class City:
 		# check bad data dates
 		date_hour_count = self.bookings.groupby("date").hour.apply(lambda h: len(h.unique()))
 		bad_data_dates = list(date_hour_count[date_hour_count < 24].index)
+
+		if self.data_source_id == "big_data_db":
+			self.bookings.start_time = self.bookings.start_time - datetime.timedelta(hours=2)
+			self.bookings.end_time = self.bookings.end_time - datetime.timedelta(hours=2)
 
 		if self.city_name == "Minneapolis":
 			tz = pytz.timezone("America/Chicago")

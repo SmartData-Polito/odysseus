@@ -4,7 +4,6 @@ import shapely
 
 from city_data_manager.city_data_source.trips_data_source.big_data_db_trips import BigDataDBTrips
 
-from city_data_manager.city_data_source.utils.geospatial_utils import get_random_point_from_linestring
 from city_data_manager.city_geo_trips.city_geo_trips import CityGeoTrips
 
 
