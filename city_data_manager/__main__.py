@@ -3,14 +3,14 @@ print(datetime.datetime.now())
 
 from city_data_manager.city_geo_trips.big_data_db_geo_trips import BigDataDBGeoTrips
 
-# big_data_db_geo_trips = BigDataDBGeoTrips("Torino", "big_data_db", 2016, 12, 500)
-# big_data_db_geo_trips.get_trips_od_gdfs()
-# big_data_db_geo_trips.get_squared_grid()
-# big_data_db_geo_trips.map_zones_on_trips(big_data_db_geo_trips.squared_grid)
-# big_data_db_geo_trips.squared_grid = big_data_db_geo_trips.map_trips_on_zones(big_data_db_geo_trips.squared_grid)
-# big_data_db_geo_trips.save_points_data()
-# big_data_db_geo_trips.save_squared_grid()
-# big_data_db_geo_trips.save_od_trips(big_data_db_geo_trips.od_trips_df, "od_trips")
+big_data_db_geo_trips = BigDataDBGeoTrips("Torino", "big_data_db", 2016, 12, 500)
+big_data_db_geo_trips.get_trips_od_gdfs()
+big_data_db_geo_trips.get_squared_grid()
+big_data_db_geo_trips.map_zones_on_trips(big_data_db_geo_trips.squared_grid)
+big_data_db_geo_trips.squared_grid = big_data_db_geo_trips.map_trips_on_zones(big_data_db_geo_trips.squared_grid)
+big_data_db_geo_trips.save_points_data()
+big_data_db_geo_trips.save_squared_grid()
+big_data_db_geo_trips.save_od_trips(big_data_db_geo_trips.od_trips_df, "od_trips")
 
 from city_data_manager.city_geo_trips.minneapolis_geo_trips import MinneapolisGeoTrips
 
