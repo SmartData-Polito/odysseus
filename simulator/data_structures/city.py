@@ -189,7 +189,7 @@ class City:
 		self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
 		self.bookings["avg_speed"] = (self.bookings["driving_distance"] / 1000) / (self.bookings["duration"] / 3600)
 
-		print(self.bookings[["driving_distance", "duration", "soc_delta", "avg_speed"]])
+		#print(self.bookings[["driving_distance", "duration", "soc_delta", "avg_speed"]])
 
 		return self.bookings
 
