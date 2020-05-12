@@ -107,8 +107,8 @@ class City:
 		).index
 		origin_zones_count = self.bookings.origin_id.value_counts()
 		dest_zones_count = self.bookings.destination_id.value_counts()
-		valid_origin_zones = origin_zones_count[(origin_zones_count > 1)]
-		valid_dest_zones = dest_zones_count[(dest_zones_count > 1)]
+		valid_origin_zones = origin_zones_count[(origin_zones_count > 30)]
+		valid_dest_zones = dest_zones_count[(dest_zones_count > 30)]
 		self.valid_zones = self.valid_zones.intersection(
 			valid_origin_zones.index.intersection(
 				valid_dest_zones.index
@@ -118,9 +118,14 @@ class City:
 
 	def get_od_distances(self):
 
-		points = self.grid.to_crs("epsg:3857").centroid.geometry
-		od_distances = points.apply(lambda p: points.distance(p))
-		od_distances = pd.DataFrame(od_distances, index=self.grid.zone_id.values, columns=self.grid.zone_id.values)
+		points = self.grid.centroid.geometry
+		od_distances = points.apply(lambda p: points.distance(p)) * 111.32 / 0.001
+		od_distances = pd.DataFrame(
+			od_distances,
+			index=self.grid.zone_id.values,
+			columns=self.grid.zone_id.values
+		)
+		#print(od_distances[od_distances > 0].min())
 		return od_distances
 
 	def get_neighbors_dicts(self):
@@ -162,10 +167,6 @@ class City:
 
 		self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
 
-		# check bad data dates
-		date_hour_count = self.bookings.groupby("date").hour.apply(lambda h: len(h.unique()))
-		bad_data_dates = list(date_hour_count[date_hour_count < 24].index)
-
 		if self.data_source_id == "big_data_db":
 			self.bookings.start_time = self.bookings.start_time - datetime.timedelta(hours=2)
 			self.bookings.end_time = self.bookings.end_time - datetime.timedelta(hours=2)
@@ -180,15 +181,15 @@ class City:
 		self.bookings.start_time = self.bookings.start_time + now_local.utcoffset()
 		self.bookings.end_time = self.bookings.end_time + now_local.utcoffset()
 		self.bookings = pre_process_time(self.bookings)
-		self.bookings = self.bookings[self.bookings.duration > 3 * 60]
-		self.bookings = self.bookings[self.bookings.duration < 60 * 60]
 
 		self.bookings = self.bookings.sort_values("start_time")
 		self.bookings.loc[:, "ia_timeout"] = (
 				self.bookings.start_time - self.bookings.start_time.shift()
 		).apply(lambda x: x.total_seconds()).abs()
 		self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
-		self.bookings["avg_speed"] = (self.bookings["driving_distance"]) / (self.bookings["duration"] / 3600)
+		self.bookings["avg_speed"] = (self.bookings["driving_distance"] / 1000) / (self.bookings["duration"] / 3600)
+
+		print(self.bookings[["driving_distance", "duration", "soc_delta", "avg_speed"]])
 
 		return self.bookings
 
