@@ -124,11 +124,12 @@ class Zone(object):
 CHARGING_SPEED = 100
 
 class Station(object):
-        def __init__(self, env, num_poles):
+        def __init__(self, env, num_poles, zone):
             self._env = env
             self._num_poles = num_poles
             self.pole = simpy.Resource(env)
             self.vehicles = []
+            self._zone = zone
 
         def charge(self, car):
             start = self.env.now
