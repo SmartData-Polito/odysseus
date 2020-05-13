@@ -92,7 +92,15 @@ class EFFCS_SimInput ():
 		self.vehicles_zones = {
 			i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)
 		}
+
 		#print(self.vehicles_zones)
+
+		#import Vehicle, vehicle_config, vehicle_cost_conf
+		#vehicles = []
+		#for i in range(self.n_vehicles_sim)
+		#v = Vehicle(env
+		#v = Vehicle(env, i, self.vehicle_zone[i], vehicle_config, vehicle_cost_conf)
+		#vehicles.append(v)
 
 		return self.vehicles_soc_dict, self.vehicles_zones
 

@@ -88,6 +88,8 @@ class EFFCS_Sim ():
 
 	def schedule_booking (self, booking_request, vehicle, zone_id):
 
+		#vehicle.booking(booking_request, zones[zone_id])
+
 		self.available_vehicles_dict[zone_id].remove(vehicle)
 		del self.vehicles_zones[vehicle]
 		booking_request["start_soc"] = self.vehicles_soc_dict[vehicle]
