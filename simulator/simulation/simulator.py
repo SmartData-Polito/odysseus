@@ -103,6 +103,8 @@ class EFFCS_Sim ():
 		booking_request["end_soc"] = self.vehicles_soc_dict[vehicle]
 		self.vehicles_zones[vehicle] = booking_request["destination_id"]
 
+		self.n_booked_vehicles -= 1
+
 		relocation_zone_id = yield self.env.process(
 			self.chargingStrategy.check_charge(booking_request, vehicle)
 		)
@@ -110,7 +112,6 @@ class EFFCS_Sim ():
 		self.available_vehicles_dict[relocation_zone_id].append(vehicle)
 		self.vehicles_zones[vehicle] = relocation_zone_id
 
-		self.n_booked_vehicles -= 1
 
 	def process_booking_request(self, booking_request):
 

@@ -55,6 +55,7 @@ class TraceB_EFFCS_Sim (EFFCS_Sim):
 
         booking_request["soc_delta"] = -get_soc_delta(booking_request["driving_distance"] / 1000)
         booking_request["soc_delta_kwh"] = soc_to_kwh(booking_request["soc_delta"])
+        #print(booking_request["soc_delta"], booking_request["soc_delta_kwh"])
         return booking_request
     
     def mobility_requests_generator(self):
@@ -78,6 +79,7 @@ class TraceB_EFFCS_Sim (EFFCS_Sim):
             # )
             yield self.env.timeout(booking_request["ia_timeout"])
             self.process_booking_request(booking_request)
+
         self.n_vehicles_per_zones_history = pd.DataFrame(
             self.n_vehicles_per_zones_history,
             index=pd.DataFrame(self.sim_booking_requests)["start_time"]

@@ -104,22 +104,19 @@ class EventG_EFFCS_Sim (EFFCS_Sim):
 	def mobility_requests_generator(self):
 
 		for i in itertools.count():
-
-			timeout_sec = \
-				(np.random.exponential\
-				 (1 / self.simInput.sim_scenario_conf\
-					  ["requests_rate_factor"]\
-				  / self.current_arrival_rate))
+			self.n_vehicles_per_zones_history += [{
+				zone: len(self.available_vehicles_dict[zone]) for zone in self.available_vehicles_dict
+			}]
+			timeout_sec = (
+				np.random.exponential(
+					1 / self.simInput.sim_scenario_conf["requests_rate_factor"] / self.current_arrival_rate
+				)
+			)
 
 			yield self.env.timeout(timeout_sec)
 			self.create_booking_request(timeout_sec)
 
-#            if (self.current_datetime\
-#            + datetime.timedelta(seconds = timeout_sec))\
-#                .hour == self.current_hour:
-#                    yield self.env.timeout(timeout_sec)
-#                    self.create_booking_request(timeout_sec)
-#            else:
-#                yield self.env.timeout(timeout_sec)
-#                self.update_time_info()
-#                self.update_data_structures()
+		self.n_vehicles_per_zones_history = pd.DataFrame(
+			self.n_vehicles_per_zones_history,
+			index=pd.DataFrame(self.sim_booking_requests)["start_time"]
+		)

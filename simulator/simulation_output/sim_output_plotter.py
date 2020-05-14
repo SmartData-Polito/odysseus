@@ -125,7 +125,7 @@ class EFFCS_SimOutputPlotter ():
 
 	def plot_events_profile_barh (self):
 
-		fig, ax = plt.subplots(figsize=(15, 7))
+		fig, ax = plt.subplots(figsize=(15, 5))
 		plt.title("fraction of events, single simulation")
 		pd.DataFrame([
 			pd.Series([
@@ -143,13 +143,13 @@ class EFFCS_SimOutputPlotter ():
 		]).plot.barh(stacked=True, ax=ax)
 
 		plt.tight_layout()
-		plt.savefig(os.path.join(self.figures_path, "events_profile.png"))
+		plt.savefig(os.path.join(self.figures_path, "events_profile.png"), transparent=True)
 		# plt.show()
 		plt.close()
 
 	def plot_events_t (self):
 
-		plt.figure(figsize=(15, 7))
+		plt.figure(figsize=(15, 5))
 		self.sim_booking_requests.fillna(0).set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
 			label="requests", linewidth=2, alpha=0.7
 		)
@@ -165,7 +165,7 @@ class EFFCS_SimOutputPlotter ():
 		plt.legend()
 		plt.xlabel("t")
 		plt.ylabel("n_events")
-		plt.savefig(os.path.join(self.figures_path, "events_profile_t.png"))
+		plt.savefig(os.path.join(self.figures_path, "events_profile_t.png"), transparent=True)
 		# plt.show()
 		plt.close()
 
@@ -174,14 +174,14 @@ class EFFCS_SimOutputPlotter ():
 		for col in [
 			"n_vehicles_available", "n_vehicles_charging_system", "n_vehicles_charging_users", "n_vehicles_booked"
 		]:
-			plt.figure(figsize=(15, 7))
+			plt.figure(figsize=(15, 5))
 			self.sim_booking_requests.set_index("start_time")[col].plot(
 				label=col, linewidth=2, alpha=0.7
 			)
 			plt.legend()
 			plt.xlabel("t")
 			plt.ylabel("n_vehicles")
-			plt.savefig(os.path.join(self.figures_path, col + "_profile.png"))
+			plt.savefig(os.path.join(self.figures_path, col + "_profile.png"), transparent=True)
 			# plt.show()
 			plt.close()
 
@@ -204,13 +204,13 @@ class EFFCS_SimOutputPlotter ():
 		)
 		trips_df_norm_count.hour = trips_df_norm_count.hour.astype(int)
 
-		plt.figure(figsize=(15, 7))
+		plt.figure(figsize=(15, 5))
 		sns.boxplot(x="hour", y="_".join([which_df, "hourly", start_or_end, "count"]), data=trips_df_norm_count)
 		sns.swarmplot(x="hour", y="_".join([which_df, "hourly", start_or_end, "count"]), data=trips_df_norm_count, color="black")
 		plt.savefig(
 			os.path.join(
 				self.figures_path, "_".join([which_df, "hourly", start_or_end, "count", "boxplot.png"])
-			)
+			), transparent=True
 		)
 		# plt.show()
 		plt.close()
@@ -234,13 +234,13 @@ class EFFCS_SimOutputPlotter ():
 		)
 		trips_df_norm_count.hour = trips_df_norm_count.hour.astype(int)
 
-		plt.figure(figsize=(15, 7))
+		plt.figure(figsize=(15, 5))
 		sns.boxplot(x="hour", y="_".join([which_df, "hourly", start_or_end, "count"]), data=trips_df_norm_count)
 		sns.swarmplot(x="hour", y="_".join([which_df, "hourly", start_or_end, "count"]), data=trips_df_norm_count, color="black")
 		plt.savefig(
 			os.path.join(
 				self.figures_path, "_".join([which_df, "hourly", start_or_end, "count", "boxplot.png"])
-			)
+			), transparent=True
 		)
 		# plt.show()
 		plt.close()
@@ -253,7 +253,7 @@ class EFFCS_SimOutputPlotter ():
 		)
 		trips_df_norm_count.hour = trips_df_norm_count.hour.astype(int)
 
-		plt.figure(figsize=(15, 7))
+		plt.figure(figsize=(15, 5))
 		sns.boxplot(
 			x="hour", y="_".join(["n_vehicles_charging_system", "hourly", "mean"]),
 			data=trips_df_norm_count
@@ -265,7 +265,7 @@ class EFFCS_SimOutputPlotter ():
 		plt.savefig(
 			os.path.join(
 				self.figures_path, "_".join(["n_vehicles_charging_system", "hourly", "mean", "boxplot.png"])
-			)
+			), transparent=True
 		)
 
 	def plot_hourly_relocost_boxplot (self):
@@ -279,8 +279,7 @@ class EFFCS_SimOutputPlotter ():
 		plt.title("relocation cost hourly boxplot")
 		plt.xlabel("hour")
 		plt.ylabel("relocation cost [hours]")
-		plt.savefig(os.path.join\
-			(self.figures_path, "relocost_hourly_boxplot.png"))
+		plt.savefig(os.path.join(self.figures_path, "relocost_hourly_boxplot.png"), transparent=True)
 		# plt.show()
 		plt.close()
 
@@ -297,6 +296,6 @@ class EFFCS_SimOutputPlotter ():
 			os.path.join(
 				self.figures_path,
 				"_".join([col, "clorophlet", "map.png"])
-			)
+			), transparent=True
 		)
 		plt.close()
