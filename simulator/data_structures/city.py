@@ -16,7 +16,7 @@ from simulator.utils.vehicle_utils import get_soc_delta
 
 class City:
 
-	def __init__(self, city_name, data_source_id, sim_general_conf, kde_bw=0.1):
+	def __init__(self, city_name, data_source_id, sim_general_conf, kde_bw=1):
 
 		self.city_name = city_name
 		self.data_source_id = data_source_id
@@ -107,8 +107,8 @@ class City:
 		).index
 		origin_zones_count = self.bookings.origin_id.value_counts()
 		dest_zones_count = self.bookings.destination_id.value_counts()
-		valid_origin_zones = origin_zones_count[(origin_zones_count > 30)]
-		valid_dest_zones = dest_zones_count[(dest_zones_count > 30)]
+		valid_origin_zones = origin_zones_count[(origin_zones_count > 0)]
+		valid_dest_zones = dest_zones_count[(dest_zones_count > 0)]
 		self.valid_zones = self.valid_zones.intersection(
 			valid_origin_zones.index.intersection(
 				valid_dest_zones.index

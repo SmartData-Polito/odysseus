@@ -138,15 +138,21 @@ def single_run(conf_tuple):
 			"sim_unfeasible_charges.pickle"
 		)
 	)
+
 	simOutput.n_vehicles_per_zones_history.to_pickle(
 		os.path.join(
 			results_path,
 			"n_vehicles_per_zones_history.pickle"
 		)
 	)
+	simOutput.n_vehicles_per_zones_history.to_csv(
+		os.path.join(
+			results_path,
+			"n_vehicles_per_zones_history.csv"
+		)
+	)
 
 	plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
-
 	plotter.plot_events_profile_barh()
 	plotter.plot_events_t()
 	plotter.plot_fleet_status_t()
