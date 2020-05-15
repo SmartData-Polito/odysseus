@@ -9,6 +9,8 @@ class Station(object):
             self._zone = zone
 
         def charge(self, car):
+            request = resource.request() #generate a request event
+            yield request #wait for access
             start = self.env.now
             self.add_vehicle(car)
             try:
@@ -17,7 +19,9 @@ class Station(object):
             except simpy.Interrupt:
                 # a customer takes the car before soc reaches 100
                 car.soc += (self.env.now-start)*CHARGING_SPEED
+            resource.release(request) #Release the resource
             self.remove_vehicle(car)
+            self._zone.add_vehicle(car)
 
         def add_vehicle(self,v):
             self.vehicles.append(v)

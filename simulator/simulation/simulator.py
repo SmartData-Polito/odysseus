@@ -88,7 +88,7 @@ class EFFCS_Sim ():
 
 	def schedule_booking (self, booking_request, vehicle, zone_id):
 
-		#vehicle.booking(booking_request, zones[zone_id])
+		vehicle.booking(env, booking_request)
 
 		self.available_vehicles_dict[zone_id].remove(vehicle)
 		del self.vehicles_zones[vehicle]
