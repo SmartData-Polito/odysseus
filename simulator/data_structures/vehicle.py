@@ -29,7 +29,7 @@ class Vehicle(object):
                 if self._soc.level < ALPHA:
                     env.process(charging_trip(env, self))
 
-        def charging_trip(vehicle, station_dest):
+        def charging_trip(self, station_dest):
             #yield --> supponiamo subito! oppure TODO
             self._zone.remove_vehicle(vehicle)
             try:
