@@ -12,6 +12,7 @@ class Station(object):
             request = resource.request() #generate a request event
             yield request #wait for access
             start = self.env.now
+            start_soc = car.soc
             self.add_vehicle(car)
             try:
                 yield self.env.timeout(car.soc*coefficientediricarica)
@@ -22,6 +23,7 @@ class Station(object):
             resource.release(request) #Release the resource
             self.remove_vehicle(car)
             self._zone.add_vehicle(car)
+            car.change_status(self, status_dict[-1].get("end_time"), env.now(), "charging", start_soc)
 
         def add_vehicle(self,v):
             self.vehicles.append(v)
