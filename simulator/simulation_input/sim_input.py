@@ -3,7 +3,9 @@ import pandas as pd
 from sklearn.neighbors import KernelDensity
 
 from simulator.utils.vehicle_utils import get_soc_delta
-
+from simulator.data_structures.vehicle import vehicle
+from simulator.simulation_input.confs.cost_conf import vehicles_cost_conf
+from simulator.simulation_input.confs.vehicle_config import vehicle_config
 
 class EFFCS_SimInput ():
 
@@ -27,6 +29,7 @@ class EFFCS_SimInput ():
 		self.n_vehicles_original = self.sim_general_conf["n_vehicles_original"]
 		self.n_vehicles_sim = int(abs(self.n_vehicles_original * self.sim_scenario_conf["n_vehicles_factor"]))
 		self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
+		self.vehicles = []
 
 		self.hub_zone = -1
 
@@ -92,11 +95,6 @@ class EFFCS_SimInput ():
 		self.vehicles_zones = {
 			i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)
 		}
-		#print(self.vehicles_zones)
-
-		return self.vehicles_soc_dict, self.vehicles_zones
-
-	def init_vehicles_dicts (self):
 
 		self.available_vehicles_dict = {
 			int(zone): [] for zone in self.grid.zone_id
@@ -106,7 +104,15 @@ class EFFCS_SimInput ():
 			zone = self.vehicles_zones[vehicle]
 			self.available_vehicles_dict[zone] += [vehicle]
 
-		return self.available_vehicles_dict
+		#print(self.vehicles_zones)
+
+
+		for i in range(self.n_vehicles_sim):
+			v = Vehicle(env, i, self.vehicles_zones[i], vehicle_config, vehicles_cost_conf, self.sim_scenario_conf)
+			vehicles.append(v)
+
+		return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
+
 
 	def init_hub (self):
 
