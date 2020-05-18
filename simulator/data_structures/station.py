@@ -1,6 +1,8 @@
+import simpy
 CHARGING_SPEED = 100
 
 class Station(object):
+
         def __init__(self, env, num_poles, zone):
             self._env = env
             self._num_poles = num_poles
@@ -9,7 +11,7 @@ class Station(object):
             self._zone = zone
 
         def charge(self, car):
-            request = resource.request() #generate a request event
+            request = pole.request() #generate a request event
             yield request #wait for access
             start = self.env.now
             start_soc = car.soc
