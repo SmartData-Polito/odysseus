@@ -86,33 +86,32 @@ class EFFCS_Sim ():
 
 		self.chargingStrategy = EFFCS_ChargingStrategy(self.env, simInput)
 
-	def schedule_booking (self, booking_request, vehicle, zone_id):
+	def schedule_booking (self, booking_request, vehicle_id, zone_id):
 
-		vehicle.booking(env, booking_request)
 
-		self.available_vehicles_dict[zone_id].remove(vehicle)
-		del self.vehicles_zones[vehicle]
-		booking_request["start_soc"] = self.vehicles_soc_dict[vehicle]
-		del self.vehicles_soc_dict[vehicle]
+		self.available_vehicles_dict[zone_id].remove(vehicle_id)
+		del self.vehicles_zones[vehicle_id]
+		booking_request["start_soc"] = self.vehicles_soc_dict[vehicle_id]
+		del self.vehicles_soc_dict[vehicle_id]
 
 		self.n_booked_vehicles += 1
 
-		booking_request["plate"] = vehicle
+		booking_request["plate"] = vehicle_id
 
 		yield self.env.timeout(booking_request["duration"])
 
-		self.vehicles_soc_dict[vehicle] = booking_request["start_soc"] + booking_request["soc_delta"]
-		booking_request["end_soc"] = self.vehicles_soc_dict[vehicle]
-		self.vehicles_zones[vehicle] = booking_request["destination_id"]
+		self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
+		booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
+		self.vehicles_zones[vehicle_id] = booking_request["destination_id"]
 
 		self.n_booked_vehicles -= 1
 
 		relocation_zone_id = yield self.env.process(
-			self.chargingStrategy.check_charge(booking_request, vehicle)
+			self.chargingStrategy.check_charge(booking_request, vehicle_id)
 		)
 
-		self.available_vehicles_dict[relocation_zone_id].append(vehicle)
-		self.vehicles_zones[vehicle] = relocation_zone_id
+		self.available_vehicles_dict[relocation_zone_id].append(vehicle_id)
+		self.vehicles_zones[vehicle_id] = relocation_zone_id
 
 
 	def process_booking_request(self, booking_request):
@@ -150,9 +149,9 @@ class EFFCS_Sim ():
 				find_vehicle(booking_request["origin_id"])
 
 		if found_vehicle_flag:
-			self.env.process\
-				(self.schedule_booking\
-				(booking_request, max_soc_vehicle_origin, booking_request["origin_id"]))
+			self.env.process(
+				self.schedule_booking(booking_request, max_soc_vehicle_origin, booking_request["origin_id"])
+			)
 			self.n_same_zone_trips += 1
 		else:
 			available_vehicle_flag = False
@@ -167,15 +166,14 @@ class EFFCS_Sim ():
 					if len(self.available_vehicles_dict[neighbor]) and not found_vehicle_flag:
 						available_vehicle_flag = True
 						available_vehicle_flag_not_same_zone = True
-						found_vehicle_flag, max_soc_vehicle_neighbor, max_soc_neighbor = \
-							find_vehicle(neighbor)
+						found_vehicle_flag, max_soc_vehicle_neighbor, max_soc_neighbor = find_vehicle(neighbor)
 						if max_soc_neighbors < max_soc_neighbor:
 							max_neighbor = neighbor
 							max_soc_vehicle_neighbors = max_soc_vehicle_neighbor
 			if found_vehicle_flag:
-				self.env.process\
-					(self.schedule_booking\
-					(booking_request, max_soc_vehicle_neighbors, max_neighbor))
+				self.env.process(
+					self.schedule_booking(booking_request, max_soc_vehicle_neighbors, max_neighbor)
+				)
 				self.n_not_same_zone_trips += 1
 
 		if not available_vehicle_flag:
@@ -202,24 +200,6 @@ class EFFCS_Sim ():
 				death["zone_id"] = max_neighbor
 			self.sim_booking_requests_deaths += [death]
 
-	def trace(self, env, callback):
-
-		def get_wrapper(env_step, callback):
-			@wraps(env_step)
-			def tracing_step():
-				if len(env._queue):
-					t, prio, eid, event = self.env._queue[0]
-					callback(t, prio, eid, event)
-				return env_step()
-			return tracing_step
-
-		self.env.step = get_wrapper(self.env.step, callback)
-
-	def monitor(self, data, t, prio, eid, event):
-		data.append((t, eid, type(event)))
-
 	def run (self):
-#        self.monitor = partial(self.monitor, self.events)
-#        self.trace(self.env, self.monitor)
 		self.env.process(self.mobility_requests_generator())
 		self.env.run(until=self.total_seconds)

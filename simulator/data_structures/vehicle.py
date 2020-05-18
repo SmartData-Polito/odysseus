@@ -16,10 +16,9 @@ class Vehicle(object):
             self._annual_leasing_cost = vehicle_cost_conf.annual_leasing_cost
             self._annual_insurance_cost = vehicle_cost_conf.annual_insurance_cost
             self._annual_mantenaince_cost = vehicle_cost_conf.annual_mantenaince_cost
-            self._soc = simpy.Container(env, init = random.randint(*100), capacity=100)
+            self._soc = simpy.Container(env, init=random.randint(*100), capacity=100)
             self.mon_proc = env.process(self.monitor_soc(env))
             self.alpha = sim_scenario_conf["alpha"]
-
 
         def monitor_soc(self, env):
             while True:
