@@ -22,7 +22,6 @@ def single_run(conf_tuple):
 	sim_type = conf_tuple[0]["sim_technique"]
 
 	city_obj = City(city, data_source_id, sim_general_conf)
-	print(sim_scenario_conf)
 
 	model_general_conf_string = "_".join([
 		str(v) for v in sim_general_conf.values()]

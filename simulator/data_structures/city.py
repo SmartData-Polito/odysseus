@@ -107,8 +107,8 @@ class City:
 		).index
 		origin_zones_count = self.bookings.origin_id.value_counts()
 		dest_zones_count = self.bookings.destination_id.value_counts()
-		valid_origin_zones = origin_zones_count[(origin_zones_count > 0)]
-		valid_dest_zones = dest_zones_count[(dest_zones_count > 0)]
+		valid_origin_zones = origin_zones_count[(origin_zones_count > 5)]
+		valid_dest_zones = dest_zones_count[(dest_zones_count > 5)]
 		self.valid_zones = self.valid_zones.intersection(
 			valid_origin_zones.index.intersection(
 				valid_dest_zones.index
@@ -187,7 +187,7 @@ class City:
 				self.bookings.start_time - self.bookings.start_time.shift()
 		).apply(lambda x: x.total_seconds()).abs()
 		self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
-		self.bookings["avg_speed"] = (self.bookings["driving_distance"] / 1000) / (self.bookings["duration"] / 3600)
+		self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"] * 3.6
 
 		#self.bookings = self.bookings[self.bookings.avg_speed < 30]
 		#self.bookings = self.bookings[self.bookings.duration < 120 * 60]

@@ -1,4 +1,4 @@
-from simulator.simulation_input.confs.vehicle_config import vehicle_conf
+from simulator.simulation_input.sim_configs.vehicle_config import vehicle_conf
 
 
 def remap_plates (events):

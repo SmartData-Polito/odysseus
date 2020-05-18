@@ -1,9 +1,9 @@
 import os
 
-simulator_path = os.path.dirname(__file__)
+sim_input_path = os.path.dirname(__file__)
 
-simulation_input_paths={
-    'confs_target': os.path.join(simulator_path, 'simulation_input', 'confs_target.json'),
-    'confs_versioned': os.path.join(simulator_path, 'simulation_input', 'confs_versioned'),
-    'confs': os.path.join(simulator_path, 'simulation_input', 'confs')
+simulation_input_paths = {
+    'sim_configs_target': os.path.join(sim_input_path, 'sim_configs_target.json'),
+    'sim_configs_versioned': os.path.join(sim_input_path, 'sim_configs_versioned'),
+    'sim_configs': os.path.join(sim_input_path, 'sim_configs')
 }

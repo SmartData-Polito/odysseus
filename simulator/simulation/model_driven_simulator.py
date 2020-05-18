@@ -59,7 +59,7 @@ class EventG_EFFCS_Sim (EFFCS_Sim):
 												] / 1000
 		booking_request["driving_distance"] = booking_request["euclidean_distance"] * 1.4
 		booking_request["duration"] = abs(booking_request["driving_distance"] / (15 + np.random.normal(5, 2.5))) * 3600
-		booking_request["end_time"] = self.current_datetime + datetime.timedelta(minutes=booking_request["duration"])
+		booking_request["end_time"] = self.current_datetime + datetime.timedelta(seconds=booking_request["duration"])
 		booking_request["soc_delta"] = -get_soc_delta(booking_request["driving_distance"])
 		booking_request["soc_delta_kwh"] = soc_to_kwh(booking_request["soc_delta"])
 
@@ -68,9 +68,10 @@ class EventG_EFFCS_Sim (EFFCS_Sim):
 	def mobility_requests_generator(self):
 
 		for i in itertools.count():
-			self.n_vehicles_per_zones_history += [{
-				zone: len(self.available_vehicles_dict[zone]) for zone in self.available_vehicles_dict
-			}]
+			# self.n_vehicles_per_zones_history.append({
+			# 	zone: len(self.available_vehicles_dict[zone]) for zone in self.available_vehicles_dict
+			# })
+
 			timeout_sec = (
 				np.random.exponential(
 					1 / self.simInput.sim_scenario_conf["requests_rate_factor"] / self.current_arrival_rate

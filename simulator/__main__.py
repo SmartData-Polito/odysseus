@@ -1,15 +1,15 @@
-import sys
+import os
+import json
 import datetime
-import argparse
 
 from simulator.single_run.single_run import single_run
 from simulator.multiple_runs.multiple_runs import multiple_runs
 from simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 
-from simulator.simulation_input.confs.sim_run_conf import sim_run_conf
-from simulator.simulation_input.confs.sim_general_conf import sim_general_conf_grid
-from simulator.simulation_input.confs.multiple_runs_conf import sim_scenario_conf_grid
-from simulator.simulation_input.confs.single_run_conf import sim_scenario_conf
+from simulator.simulation_input.sim_configs.sim_run_conf import sim_run_conf
+from simulator.simulation_input.sim_configs.sim_general_conf import sim_general_conf_grid
+from simulator.simulation_input.sim_configs.multiple_runs_conf import sim_scenario_conf_grid
+from simulator.simulation_input.sim_configs.single_run_conf import sim_scenario_conf
 
 confs_dict = {}
 confs_dict["multiple_runs"] = sim_scenario_conf_grid
@@ -24,6 +24,7 @@ print (datetime.datetime.now(), city_name, sim_scenario_name, "starting..")
 
 sim_general_conf_list = EFFCS_SimConfGrid(sim_general_conf_grid).conf_list
 
+print(sim_run_conf)
 for sim_general_conf in sim_general_conf_list:
     print(sim_general_conf)
     if sim_run_mode == "single_run":
@@ -36,7 +37,6 @@ for sim_general_conf in sim_general_conf_list:
     elif sim_run_mode == "multiple_runs":
         multiple_runs(
             sim_run_conf,
-            "multiple_runs",
             sim_general_conf,
             confs_dict[sim_run_mode],
             sim_scenario_name

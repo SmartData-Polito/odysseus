@@ -65,18 +65,18 @@ class TraceB_EFFCS_Sim (EFFCS_Sim):
         sim_timestamps = []
 
         for booking_request in self.simInput.booking_requests_list:
-            self.vehicles_zones_history += [self.vehicles_zones]
-            self.n_vehicles_per_zones_history += [{
-                zone: len(self.available_vehicles_dict[zone]) for zone in self.available_vehicles_dict
-            }]
-            sim_timestamps += [self.current_datetime]
+
+            # self.vehicles_zones_history += [self.vehicles_zones]
+            # self.n_vehicles_per_zones_history += [{
+            #     zone: len(self.available_vehicles_dict[zone]) for zone in self.available_vehicles_dict
+            # }]
+            # sim_timestamps += [self.current_datetime]
+
             self.update_time_info()
             self.update_data_structures()
             booking_request = self.update_req_time_info(booking_request)
             booking_request = self.fuel_to_electric(booking_request)
-            # timeout_sec = np.random.exponential(
-            #     1 / self.simInput.sim_scenario_conf["requests_rate_factor"] / self.current_arrival_rate
-            # )
+
             yield self.env.timeout(booking_request["ia_timeout"])
             self.process_booking_request(booking_request)
 
@@ -84,4 +84,3 @@ class TraceB_EFFCS_Sim (EFFCS_Sim):
             self.n_vehicles_per_zones_history,
             index=pd.DataFrame(self.sim_booking_requests)["start_time"]
         )
-
