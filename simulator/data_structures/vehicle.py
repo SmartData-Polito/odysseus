@@ -16,40 +16,46 @@ class Vehicle(object):
             self._annual_leasing_cost = vehicle_cost_conf.annual_leasing_cost
             self._annual_insurance_cost = vehicle_cost_conf.annual_insurance_cost
             self._annual_mantenaince_cost = vehicle_cost_conf.annual_mantenaince_cost
-            self._soc = simpy.Container(env, init=random.randint(*100), capacity=100)
-            self.mon_proc = env.process(self.monitor_soc(env))
+            self._soc = simpy.Container(env, init = random.randint(50,100), capacity=100)
+            self.mon_proc = env.process(self.monitor_soc())
             self.alpha = sim_scenario_conf["alpha"]
+            self.status = [
+                {"start_time": env.now, "end_time": env.now, "status":"available", "start_soc": self.alpha, "zone": self._zone}
+            ]
 
-        def monitor_soc(self, env):
+        def monitor_soc(self):
+
             while True:
                 if self._soc.level < ALPHA:
-                    print(f'Starting relocation to charging pole at {env.now}')
                     env.process(charging_trip(env, self))
 
-        def charging_trip(env, vehicle, station_dest):
+        def charging_trip(vehicle, station_dest):
             #yield --> supponiamo subito! oppure TODO
-            print(f'Charging trip starting at {env.now} ')
             self._zone.remove_vehicle(vehicle)
             try:
                 yield env.timeout(15) # il tempo che ci vuole a raggiungere una station ??
             except simpy.Interrupt:
                 yield env.timeout(45) # CHARGE DEATH - 45 = 30 per far venire il carro attrezzi + 15 per raggiungere il pole
-            station_dest.env.process(charging(env, self))
+            station_dest.env.process(charge(env, self))
 
-        def booking(self, env, booking_request):
+        def booking(self, booking_request):
             request = resource.request()
             if self.available:
-                self._env = env
                 self._zone.remove_vehicle(self)
-                try:
-                    self._available = False
-                    yield vehicle._soc.get(booking_request["soc_delta"])
-                    yield self.env.timeout(booking_request["duration"])
-                except simpy.Interrupt:
-                    yield self.env.timeout(30) #30 min per far venire il carro attrezzi, DEATH TODO
+                self._available = False
+                change_status(self, status[-1].get("end_time"), env.now(), "available", self._soc)
+                start_soc = self._soc
+                yield vehicle._soc.get(booking_request["soc_delta"])
+                yield self.env.timeout(booking_request["duration"])
                 self._zone = zone[booking_request["destination_id"]]
                 self._zone.add_vehicle(self)
+                change_status(self, status[-1].get("end_time"), env.now(), "booked", start_soc)
                 if self._soc < self.alpha:
                    yield env.process(charging_trip(env, self, station_dest))
                 else:
                     self._available = True
+
+
+        def change_status(self, start_time, end_time, status, start_soc):
+            dict = {"start_time": start_time, "end_time": end_time, "status": status, "start_soc": start_soc, "end_soc": self._soc, "zone": self._zone}
+            self.status.append(dict)
