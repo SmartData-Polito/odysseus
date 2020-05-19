@@ -83,11 +83,15 @@ class EFFCS_Sim ():
 		self.list_n_vehicles_dead = []
 		self.vehicles_zones_history = []
 		self.n_vehicles_per_zones_history = []
+		
+		self.vehicles = self.simInput.vehicles_dict_list
+		self.stations = self.simInput.charging_stations_dict_list
 
 		self.chargingStrategy = EFFCS_ChargingStrategy(self.env, simInput)
 
 	def schedule_booking (self, booking_request, vehicle_id, zone_id):
 
+		self.vehicles[vehicle_id].booking(self.env, booking_request)
 
 		self.available_vehicles_dict[zone_id].remove(vehicle_id)
 		del self.vehicles_zones[vehicle_id]

@@ -48,6 +48,9 @@ class EFFCS_ChargingPrimitives:
 
         self.vehicles_soc_dict = simInput.vehicles_soc_dict
 
+        self.vehicles_dict_list = simInput.vehicles_dict_list
+        self.charging_stations_dict_list = simInput.charging_stations_dict_list
+
         self.workers = simpy.Resource(
             self.env,
             capacity=self.simInput.sim_scenario_conf["n_workers"]
@@ -68,6 +71,8 @@ class EFFCS_ChargingPrimitives:
                         self.env,
                         capacity=n
                     )
+                    charging_station = {zone: Station(env, n, zone)}
+                    stations.append(charging_station)
 
         self.sim_charges = []
         self.sim_unfeasible_charge_bookings = []
@@ -85,6 +90,7 @@ class EFFCS_ChargingPrimitives:
             charge_dict
     ):
 
+
         charge = charge_dict["charge"]
         resource = charge_dict["resource"]
         vehicle = charge_dict["vehicle"]
@@ -93,6 +99,8 @@ class EFFCS_ChargingPrimitives:
         timeout_outward = charge_dict["timeout_outward"]
         timeout_return = charge_dict["timeout_return"]
         cr_soc_delta = charge_dict["cr_soc_delta"]
+
+        self.charging_stations_dict_list[zone_id].charge(env, vehicles_dict_list[vehicle])
 
         def check_queuing ():
             if self.simInput.sim_scenario_conf["queuing"]:
