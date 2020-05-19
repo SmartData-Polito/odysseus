@@ -279,3 +279,9 @@ class EFFCS_SimOutput ():
 			] = self.sim_charge_deaths.origin_id.value_counts()
 
 		self.sim_stats.loc["hub_zone"] = sim.simInput.hub_zone
+
+		self.vehicles_history = pd.DataFrame()
+		for vehicle in sim.vehicles_list:
+			vehicle_df = pd.DataFrame(vehicle.status_dict_list)
+			vehicle_df["plate"] = vehicle.plate
+			self.vehicles_history = pd.concat([self.vehicles_history, vehicle_df], ignore_index=True)

@@ -30,9 +30,10 @@ administrative_costs_conf = {
 
 vehicles_cost_conf = {
 
-    "car_annual_cost": 15000,
-    "car_annual_insurance_cost": 450,
-    "car_annual_mantenaince_cost": 160,
+    "purchase_cost": 15000,
+    "annual_leasing_cost": 2000,
+    "annual_insurance_cost": 450,
+    "annual_mantenaince_cost": 160,
 
     "washing_cost": 8,
     "disinfection_cost": 15,

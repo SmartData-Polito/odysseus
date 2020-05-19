@@ -1,6 +1,6 @@
 import datetime
 
-from simulator.simulation_input.sim_input import EFFCS_SimInput
+from simulator.simulation_input.sim_input import SimInput
 
 
 def get_traceB_input (conf_tuple):
@@ -8,7 +8,7 @@ def get_traceB_input (conf_tuple):
     # print ("Creating traceB simulation input ..")
     # t0 = datetime.datetime.now()
 
-    simInput = EFFCS_SimInput\
+    simInput = SimInput\
          (conf_tuple)
 
     simInput.get_booking_requests_list()

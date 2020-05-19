@@ -1,15 +1,20 @@
+import simpy
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import KernelDensity
+import copy
+import datetime
+from functools import partial, wraps
+import pytz
 
 from simulator.utils.vehicle_utils import get_soc_delta
-from simulator.data_structures.vehicle import vehicle
-from simulator.data_structures.station import station
-from simulator.simulation_input.confs.cost_conf import vehicles_cost_conf
-from simulator.simulation_input.confs.vehicle_config import vehicle_config
+from simulator.data_structures.vehicle import Vehicle
+from simulator.data_structures.station import Station
+from simulator.simulation_input.sim_configs.cost_conf import vehicles_cost_conf
+from simulator.simulation_input.sim_configs.vehicle_config import vehicle_conf
 
 
-class EFFCS_SimInput():
+class SimInput:
 
     def __init__(self,
                  conf_tuple):
@@ -31,8 +36,8 @@ class EFFCS_SimInput():
         self.n_vehicles_original = self.sim_general_conf["n_vehicles_original"]
         self.n_vehicles_sim = int(abs(self.n_vehicles_original * self.sim_scenario_conf["n_vehicles_factor"]))
         self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
-        self.vehicles_dict_list = []
-        self.charging_stations_dict_list = []
+        self.vehicles_list = []
+        self.charging_stations_dict = {}
 
         self.hub_zone = -1
 
@@ -55,6 +60,8 @@ class EFFCS_SimInput():
 
         if self.sim_scenario_conf["alpha"] == "auto":
             self.sim_scenario_conf["alpha"] = np.ceil(get_soc_delta(self.od_distances.max().max() / 1000))
+
+        self.env = simpy.Environment()
 
     def get_booking_requests_list(self):
 
@@ -108,12 +115,19 @@ class EFFCS_SimInput():
             zone = self.vehicles_zones[vehicle]
             self.available_vehicles_dict[zone] += [vehicle]
 
-        # print(self.vehicles_zones)
+        self.start = datetime.datetime(
+            self.sim_general_conf["year"],
+            self.sim_general_conf["month_start"],
+            1, tzinfo=pytz.UTC
+        )
+        self.vehicles_list = []
         for i in range(self.n_vehicles_sim):
-            vehicle_object = Vehicle(self.env, i, self.vehicles_zones[i], vehicle_config, vehicles_cost_conf,
-                                     self.sim_scenario_conf)
-            v = {i: vehicle_object}
-            vehicles_dict_list.append(v)
+            vehicle_object = Vehicle(
+                self.env, i, self.vehicles_zones[i],
+                vehicle_conf, vehicles_cost_conf, self.sim_scenario_conf,
+                self.start
+            )
+            self.vehicles_list.append(vehicle_object)
 
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
 
@@ -127,8 +141,9 @@ class EFFCS_SimInput():
 
     def init_charging_poles(self):
 
-        if self.sim_scenario_conf["distributed_cps"] \
-                and self.sim_scenario_conf["cps_placement_policy"] == "num_parkings":
+        if self.sim_scenario_conf["distributed_cps"] and self.sim_scenario_conf[
+            "cps_placement_policy"
+        ] == "num_parkings":
 
             top_dest_zones = self.input_bookings.destination_id.value_counts().iloc[:self.n_charging_zones]
 
@@ -137,11 +152,9 @@ class EFFCS_SimInput():
             assigned_cps = 0
             for zone_id in self.n_charging_poles_by_zone:
                 zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
-                charging_station = {zone_id: Station(env, zone_n_cps, zone_id)}
-                self.charging_stations_dict_list.append(charging_station)
+                self.charging_stations_dict[zone_id] = Station(self.env, zone_n_cps, zone_id)
                 assigned_cps += zone_n_cps
-                self.n_charging_poles_by_zone[zone_id] = \
-                    zone_n_cps
+                self.n_charging_poles_by_zone[zone_id] = zone_n_cps
             for zone_id in self.n_charging_poles_by_zone:
                 if assigned_cps < self.n_charging_poles:
                     self.n_charging_poles_by_zone[zone_id] += 1

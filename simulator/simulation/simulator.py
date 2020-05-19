@@ -60,7 +60,7 @@ class EFFCS_Sim ():
 
 		self.vehicles_zones = self.simInput.vehicles_zones
 
-		self.env = simpy.Environment()
+		self.env = self.simInput.env
 
 		self.events = []
 		self.sim_booking_requests = []
@@ -84,14 +84,12 @@ class EFFCS_Sim ():
 		self.vehicles_zones_history = []
 		self.n_vehicles_per_zones_history = []
 		
-		self.vehicles = self.simInput.vehicles_dict_list
-		self.stations = self.simInput.charging_stations_dict_list
+		self.vehicles_list = self.simInput.vehicles_list
+		self.charging_stations_dict = self.simInput.charging_stations_dict
 
 		self.chargingStrategy = EFFCS_ChargingStrategy(self.env, simInput)
 
 	def schedule_booking (self, booking_request, vehicle_id, zone_id):
-
-		self.vehicles[vehicle_id].booking(self.env, booking_request)
 
 		self.available_vehicles_dict[zone_id].remove(vehicle_id)
 		del self.vehicles_zones[vehicle_id]
@@ -102,7 +100,8 @@ class EFFCS_Sim ():
 
 		booking_request["plate"] = vehicle_id
 
-		yield self.env.timeout(booking_request["duration"])
+		yield self.env.process(self.vehicles_list[vehicle_id].booking(booking_request))
+		#yield self.env.timeout(booking_request["duration"])
 
 		self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
 		booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
@@ -116,7 +115,6 @@ class EFFCS_Sim ():
 
 		self.available_vehicles_dict[relocation_zone_id].append(vehicle_id)
 		self.vehicles_zones[vehicle_id] = relocation_zone_id
-
 
 	def process_booking_request(self, booking_request):
 
