@@ -1,6 +1,6 @@
 import datetime
 
-from simulator.simulation_input.sim_input import EFFCS_SimInput
+from simulator.simulation_input.sim_input import SimInput
 
 
 def get_eventG_input (conf_tuple):
@@ -8,10 +8,9 @@ def get_eventG_input (conf_tuple):
     # print ("Creating eventG simulation input ..")
     # t0 = datetime.datetime.now()
 
-    simInput = EFFCS_SimInput(conf_tuple)
+    simInput = SimInput(conf_tuple)
 
     simInput.init_vehicles()
-    simInput.init_vehicles_dicts()
     simInput.init_hub()
     simInput.init_charging_poles()
 

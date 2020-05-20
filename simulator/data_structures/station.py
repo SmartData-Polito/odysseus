@@ -1,30 +1,35 @@
-CHARGING_SPEED = 100
+import datetime
+
+import simpy
+from simulator.simulation.charging_primitives import get_charging_time
+
 
 class Station(object):
-        def __init__(self, env, num_poles, zone):
-            self._env = env
-            self._num_poles = num_poles
-            self.pole = simpy.Resource(env)
-            self.vehicles = []
-            self._zone = zone
 
-        def charge(self, car):
-            request = resource.request() #generate a request event
-            yield request #wait for access
-            start = self.env.now
-            self.add_vehicle(car)
-            try:
-                yield self.env.timeout(car.soc*coefficientediricarica)
-                car.soc = 100
-            except simpy.Interrupt:
-                # a customer takes the car before soc reaches 100
-                car.soc += (self.env.now-start)*CHARGING_SPEED
-            resource.release(request) #Release the resource
-            self.remove_vehicle(car)
-            self._zone.add_vehicle(car)
+    def __init__(self, env, num_poles, zone):
+        self.env = env
+        self.charging_station = simpy.Resource(env, num_poles)
+        self.zone = zone
 
-        def add_vehicle(self,v):
-            self.vehicles.append(v)
-
-        def remove_vehicle(self,v):
-            self.vehicles.remove(v)
+    def charge(self, vehicle, start_time):
+        with self.charging_station.request() as req:
+            vehicle.zone = self.zone
+            vehicle.current_status = {
+                "time": start_time,
+                "status": "charging",
+                "soc": vehicle.soc.level,
+                "zone": self.zone
+            }
+            vehicle.status_dict_list.append(vehicle.current_status)
+            yield req
+            amount = vehicle.soc.capacity - vehicle.soc.level
+            yield self.env.timeout(get_charging_time(amount))
+            vehicle.soc.put(amount)
+        vehicle.available = True
+        vehicle.current_status = {
+            "time": start_time + datetime.timedelta(seconds=get_charging_time(amount)),
+            "status": "charging",
+            "soc": vehicle.soc.level,
+            "zone": self.zone
+        }
+        vehicle.status_dict_list.append(vehicle.current_status)

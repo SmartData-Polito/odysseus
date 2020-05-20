@@ -48,6 +48,10 @@ class EFFCS_ChargingPrimitives:
 
         self.vehicles_soc_dict = simInput.vehicles_soc_dict
 
+        self.vehicles_list = simInput.vehicles_list
+
+        self.charging_stations_dict = simInput.charging_stations_dict
+
         self.workers = simpy.Resource(
             self.env,
             capacity=self.simInput.sim_scenario_conf["n_workers"]
@@ -87,7 +91,7 @@ class EFFCS_ChargingPrimitives:
 
         charge = charge_dict["charge"]
         resource = charge_dict["resource"]
-        vehicle = charge_dict["vehicle"]
+        vehicle_id = charge_dict["vehicle"]
         operator = charge_dict["operator"]
         zone_id = charge_dict["zone_id"]
         timeout_outward = charge_dict["timeout_outward"]
@@ -120,11 +124,11 @@ class EFFCS_ChargingPrimitives:
                         yield self.env.timeout(charge["duration"])
                         self.n_vehicles_charging_system -= 1
                         yield self.env.timeout(charge["timeout_return"])
-                        self.vehicles_soc_dict[vehicle] = charge["end_soc"]
+                        self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
             elif operator == "users":
                 self.n_vehicles_charging_users += 1
                 yield self.env.timeout(charge["duration"])
-                self.vehicles_soc_dict[vehicle] = charge["end_soc"]
+                self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
                 self.n_vehicles_charging_users -= 1
 
         else:
@@ -134,13 +138,16 @@ class EFFCS_ChargingPrimitives:
                         yield worker_request
                         yield self.env.timeout(charge["timeout_outward"])
                         charge["start_soc"] -= charge["cr_soc_delta"]
-                        with resource.request() as charging_request:
-                            yield charging_request
-                            self.n_vehicles_charging_system += 1
-                            yield self.env.timeout(charge["duration"])
+                        yield self.env.process(self.charging_stations_dict[zone_id].charge(
+                            self.vehicles_list[vehicle_id], charge["start_time"]
+                        ))
+                        # with resource.request() as charging_request:
+                        #     yield charging_request
+                        #     self.n_vehicles_charging_system += 1
+                        #     yield self.env.timeout(charge["duration"])
                         self.n_vehicles_charging_system -= 1
                         yield self.env.timeout(charge["timeout_return"])
-                        self.vehicles_soc_dict[vehicle] = charge["end_soc"]
+                        self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
                         charge["end_soc"] -= charge["cr_soc_delta"]
             elif operator == "users":
                 if resource.count < resource.capacity:
@@ -148,7 +155,7 @@ class EFFCS_ChargingPrimitives:
                         yield charging_request
                         self.n_vehicles_charging_users += 1
                         yield self.env.timeout(charge["duration"])
-                    self.vehicles_soc_dict[vehicle] = charge["end_soc"]
+                    self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
                     self.n_vehicles_charging_users -= 1
 
         charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])

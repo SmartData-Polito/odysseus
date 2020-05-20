@@ -56,7 +56,7 @@ class EventG_EFFCS_Sim (EFFCS_Sim):
 		booking_request["euclidean_distance"] = self.od_distances.loc[
 													booking_request["origin_id"],
 													booking_request["destination_id"]
-												] / 1000
+												] / 1000 + 0.001
 		booking_request["driving_distance"] = booking_request["euclidean_distance"] * 1.4
 		booking_request["duration"] = abs(booking_request["driving_distance"] / (15 + np.random.normal(5, 2.5))) * 3600
 		booking_request["end_time"] = self.current_datetime + datetime.timedelta(seconds=booking_request["duration"])

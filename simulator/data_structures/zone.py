@@ -5,7 +5,6 @@ class Zone(object):
         self._n_poles = n_poles
         self.vehicles = []
 
-
     def add_vehicle(self, v):
         self.vehicles.append(v)
 

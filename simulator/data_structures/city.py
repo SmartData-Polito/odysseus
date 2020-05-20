@@ -189,6 +189,7 @@ class City:
 		self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
 		self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"] * 3.6
 
+		self.bookings = self.bookings[self.bookings.driving_distance > 0].iloc[:10000]
 		#self.bookings = self.bookings[self.bookings.avg_speed < 30]
 		#self.bookings = self.bookings[self.bookings.duration < 120 * 60]
 
