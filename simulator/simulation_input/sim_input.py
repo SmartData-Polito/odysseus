@@ -3,9 +3,9 @@ import pandas as pd
 from sklearn.neighbors import KernelDensity
 
 from simulator.utils.vehicle_utils import get_soc_delta
-from simulator.data_structures.vehicle import vehicle
-from simulator.simulation_input.confs.cost_conf import vehicles_cost_conf
-from simulator.simulation_input.confs.vehicle_config import vehicle_config
+from simulator.data_structures.vehicle import Vehicle
+from simulator.simulation_input.sim_configs.cost_conf import vehicles_cost_conf
+
 
 class EFFCS_SimInput ():
 

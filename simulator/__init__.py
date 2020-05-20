@@ -12,7 +12,6 @@ versioned_conf_path = os.path.join(
     conf_name
 )
 conf_path = simulation_input_paths['sim_configs']
-print(versioned_conf_path, conf_path)
 try:
     for f in os.listdir(versioned_conf_path):
         if os.path.isfile(os.path.join(versioned_conf_path, f)):
@@ -20,7 +19,6 @@ try:
                 os.path.join(versioned_conf_path, f),
                 os.path.join(conf_path)
             )
-    #print('Configuration Loaded')
 
 except FileNotFoundError:
     print('Error %s conf not present' % conf_path + f)

@@ -10,7 +10,7 @@ from sklearn.neighbors import KernelDensity
 from city_data_manager.city_data_source.utils.geospatial_utils import get_city_grid
 
 from simulator.utils.bookings_utils import pre_process_time
-from simulator.loading.Loader import Loader
+from simulator.loading.loader import Loader
 from simulator.utils.vehicle_utils import get_soc_delta
 
 
