@@ -66,11 +66,11 @@ class TraceB_EFFCS_Sim (EFFCS_Sim):
 
         for booking_request in self.simInput.booking_requests_list:
 
-            # self.vehicles_zones_history += [self.vehicles_zones]
-            # self.n_vehicles_per_zones_history += [{
-            #     zone: len(self.available_vehicles_dict[zone]) for zone in self.available_vehicles_dict
-            # }]
-            # sim_timestamps += [self.current_datetime]
+            self.vehicles_zones_history += [self.vehicles_zones]
+            self.n_vehicles_per_zones_history += [{
+                zone: len(self.available_vehicles_dict[zone]) for zone in self.available_vehicles_dict
+            }]
+            sim_timestamps += [self.current_datetime]
 
             self.update_time_info()
             self.update_data_structures()

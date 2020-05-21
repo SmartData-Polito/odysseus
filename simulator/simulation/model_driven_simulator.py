@@ -68,9 +68,10 @@ class EventG_EFFCS_Sim (EFFCS_Sim):
 	def mobility_requests_generator(self):
 
 		for i in itertools.count():
-			# self.n_vehicles_per_zones_history.append({
-			# 	zone: len(self.available_vehicles_dict[zone]) for zone in self.available_vehicles_dict
-			# })
+
+			self.n_vehicles_per_zones_history.append({
+				zone: len(self.available_vehicles_dict[zone]) for zone in self.available_vehicles_dict
+			})
 
 			timeout_sec = (
 				np.random.exponential(
