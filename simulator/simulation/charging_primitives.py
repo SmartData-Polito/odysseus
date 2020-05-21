@@ -138,13 +138,16 @@ class EFFCS_ChargingPrimitives:
                         yield worker_request
                         yield self.env.timeout(charge["timeout_outward"])
                         charge["start_soc"] -= charge["cr_soc_delta"]
-                        yield self.env.process(self.charging_stations_dict[zone_id].charge(
-                            self.vehicles_list[vehicle_id], charge["start_time"]
-                        ))
-                        # with resource.request() as charging_request:
-                        #     yield charging_request
-                        #     self.n_vehicles_charging_system += 1
-                        #     yield self.env.timeout(charge["duration"])
+
+                        # yield self.env.process(self.charging_stations_dict[zone_id].charge(
+                        #     self.vehicles_list[vehicle_id], charge["start_time"]
+                        # ))
+
+                        with resource.request() as charging_request:
+                            yield charging_request
+                            self.n_vehicles_charging_system += 1
+                            yield self.env.timeout(charge["duration"])
+
                         self.n_vehicles_charging_system -= 1
                         yield self.env.timeout(charge["timeout_return"])
                         self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]

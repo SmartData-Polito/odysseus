@@ -107,8 +107,11 @@ class City:
 		).index
 		origin_zones_count = self.bookings.origin_id.value_counts()
 		dest_zones_count = self.bookings.destination_id.value_counts()
-		valid_origin_zones = origin_zones_count[(origin_zones_count > 5)]
-		valid_dest_zones = dest_zones_count[(dest_zones_count > 5)]
+
+		if self.city_name == "Minneapolis":
+			valid_origin_zones = origin_zones_count[(origin_zones_count > 60)]
+			valid_dest_zones = dest_zones_count[(dest_zones_count > 60)]
+
 		self.valid_zones = self.valid_zones.intersection(
 			valid_origin_zones.index.intersection(
 				valid_dest_zones.index
@@ -189,9 +192,10 @@ class City:
 		self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
 		self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"] * 3.6
 
-		self.bookings = self.bookings[self.bookings.driving_distance > 0].iloc[:10000]
-		#self.bookings = self.bookings[self.bookings.avg_speed < 30]
-		#self.bookings = self.bookings[self.bookings.duration < 120 * 60]
+		self.bookings = self.bookings[self.bookings.driving_distance > 0]
+		if self.city_name == "Minneapolis":
+			self.bookings = self.bookings[self.bookings.avg_speed < 30]
+			self.bookings = self.bookings[self.bookings.duration < 180 * 60]
 
 		print(self.bookings[["driving_distance", "duration", "soc_delta", "avg_speed"]].describe())
 

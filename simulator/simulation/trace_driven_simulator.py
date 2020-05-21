@@ -73,6 +73,7 @@ class TraceB_EFFCS_Sim (EFFCS_Sim):
             sim_timestamps += [self.current_datetime]
 
             self.update_time_info()
+            self.update_data_structures()
             booking_request = self.update_req_time_info(booking_request)
             booking_request = self.fuel_to_electric(booking_request)
 

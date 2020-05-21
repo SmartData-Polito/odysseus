@@ -13,7 +13,8 @@ def run_traceB_sim (simInput):
                 simInput=simInput,
     
             )
-    
+
+    sim_traceB.init_data_structures()
     # t0 = datetime.datetime.now()
     sim_traceB.run()
     # t1 = datetime.datetime.now()

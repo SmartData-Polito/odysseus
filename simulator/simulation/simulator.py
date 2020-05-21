@@ -38,15 +38,13 @@ class EFFCS_Sim ():
 		self.hours_spent = 0
 		self.current_datetime = self.start
 		self.current_hour = self.current_datetime.hour
-		self.current_weekday = \
-			self.current_datetime.weekday()
+		self.current_weekday = self.current_datetime.weekday()
 		if self.start.weekday() in [5, 6]:
 			self.current_daytype = "weekend"
 		else:
 			self.current_daytype = "weekday"
 
 		self.simInput = simInput
-
 		self.simInputCopy = copy.deepcopy(simInput)
 
 		self.available_vehicles_dict = self.simInput.available_vehicles_dict
@@ -100,8 +98,8 @@ class EFFCS_Sim ():
 
 		booking_request["plate"] = vehicle_id
 
-		yield self.env.process(self.vehicles_list[vehicle_id].booking(booking_request))
-		#yield self.env.timeout(booking_request["duration"])
+		#yield self.env.process(self.vehicles_list[vehicle_id].booking(booking_request))
+		yield self.env.timeout(booking_request["duration"])
 
 		self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
 		booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]

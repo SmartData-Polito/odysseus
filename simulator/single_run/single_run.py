@@ -42,33 +42,22 @@ def single_run(conf_tuple):
 
 	if sim_type == "eventG":
 
-		simInput_eventG = get_eventG_input((
-			sim_general_conf,
-			sim_scenario_conf,
-			city_obj
-		))
-		sim_eventG = run_eventG_sim\
-			(simInput = simInput_eventG)
+		simInput_eventG = get_eventG_input((sim_general_conf, sim_scenario_conf, city_obj))
+		sim_eventG = run_eventG_sim(simInput=simInput_eventG)
 		simOutput_eventG = EFFCS_SimOutput(sim_eventG)
 		sim_stats = simOutput_eventG.sim_stats
 		simOutput = simOutput_eventG
 
 	elif sim_type == "traceB":
 
-		simInput_traceB = get_traceB_input \
-			((sim_general_conf,
-			  sim_scenario_conf,
-			  city_obj))
-		sim_traceB = run_traceB_sim \
-			(simInput=simInput_traceB)
+		simInput_traceB = get_traceB_input((sim_general_conf, sim_scenario_conf, city_obj))
+		sim_traceB = run_traceB_sim (simInput=simInput_traceB)
 		simOutput_traceB = EFFCS_SimOutput(sim_traceB)
 		sim_stats = simOutput_traceB.sim_stats
 		simOutput = simOutput_traceB
 
 	sim_stats.to_pickle(os.path.join(results_path, "sim_stats.pickle"))
-
 	pd.Series(sim_general_conf).to_pickle(os.path.join(results_path, "sim_general_conf.pickle"))
-
 	pd.Series(sim_scenario_conf).to_pickle(os.path.join(results_path, "sim_scenario_conf.pickle"))
 
 	simOutput.grid.to_pickle(
@@ -77,6 +66,7 @@ def single_run(conf_tuple):
 			"grid.pickle"
 		)
 	)
+
 	simOutput.sim_booking_requests.to_pickle(
 		os.path.join(
 			results_path,
