@@ -105,12 +105,17 @@ class City:
 		self.valid_zones = self.bookings.origin_id.value_counts().sort_values().tail(
 			int(self.sim_general_conf["k_zones_factor"] * len(self.grid))
 		).index
+
 		origin_zones_count = self.bookings.origin_id.value_counts()
 		dest_zones_count = self.bookings.destination_id.value_counts()
 
-		if self.city_name == "Minneapolis":
-			valid_origin_zones = origin_zones_count[(origin_zones_count > 60)]
-			valid_dest_zones = dest_zones_count[(dest_zones_count > 60)]
+		if self.bin_side_length == 200:
+			threshold = 30
+		elif self.bin_side_length == 500:
+			threshold = 0
+
+		valid_origin_zones = origin_zones_count[(origin_zones_count > threshold)]
+		valid_dest_zones = dest_zones_count[(dest_zones_count > threshold)]
 
 		self.valid_zones = self.valid_zones.intersection(
 			valid_origin_zones.index.intersection(
