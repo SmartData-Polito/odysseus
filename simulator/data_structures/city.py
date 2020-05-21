@@ -112,7 +112,7 @@ class City:
 		if self.bin_side_length == 200:
 			threshold = 30
 		elif self.bin_side_length == 500:
-			threshold = 0
+			threshold = 5
 
 		valid_origin_zones = origin_zones_count[(origin_zones_count > threshold)]
 		valid_dest_zones = dest_zones_count[(dest_zones_count > threshold)]
@@ -198,9 +198,12 @@ class City:
 		self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"] * 3.6
 
 		self.bookings = self.bookings[self.bookings.driving_distance > 0]
+		#self.bookings = self.bookings[self.bookings.duration < 180 * 60]
+
 		if self.city_name == "Minneapolis":
 			self.bookings = self.bookings[self.bookings.avg_speed < 30]
-			self.bookings = self.bookings[self.bookings.duration < 180 * 60]
+		elif self.city_name == "Torino":
+			self.bookings = self.bookings[self.bookings.avg_speed < 120]
 
 		print(self.bookings[["driving_distance", "duration", "soc_delta", "avg_speed"]].describe())
 

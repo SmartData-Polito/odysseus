@@ -38,19 +38,19 @@ def init_charge (booking_request, vehicles_soc_dict, vehicle, beta):
     return charge
 
 
-class EFFCS_ChargingPrimitives:
+class ChargingPrimitives:
 
-    def __init__(self, env, simInput):
+    def __init__(self, env, sim):
 
         self.env = env
 
-        self.simInput = simInput
+        self.simInput = sim.simInput
 
-        self.vehicles_soc_dict = simInput.vehicles_soc_dict
+        self.vehicles_soc_dict = sim.vehicles_soc_dict
 
-        self.vehicles_list = simInput.vehicles_list
+        self.vehicles_list = sim.vehicles_list
 
-        self.charging_stations_dict = simInput.charging_stations_dict
+        self.charging_stations_dict = sim.charging_stations_dict
 
         self.workers = simpy.Resource(
             self.env,
@@ -64,7 +64,7 @@ class EFFCS_ChargingPrimitives:
             )
 
         if self.simInput.sim_scenario_conf["distributed_cps"]:
-            self.n_charging_poles_by_zone = simInput.n_charging_poles_by_zone
+            self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone
             self.charging_poles_dict = {}
             for zone, n in self.n_charging_poles_by_zone.items():
                 if n > 0:

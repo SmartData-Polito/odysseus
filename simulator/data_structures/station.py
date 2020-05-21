@@ -8,7 +8,7 @@ class Station(object):
 
     def __init__(self, env, num_poles, zone):
         self.env = env
-        self.charging_station = simpy.Resource(env, num_poles)
+        self.charging_station = simpy.Resource(self.env, num_poles)
         self.zone = zone
 
     def charge(self, vehicle, start_time):

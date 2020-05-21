@@ -5,15 +5,17 @@ import pytz
 
 import simpy
 
-from simulator.simulation.charging_strategies import EFFCS_ChargingStrategy
+from simulator.simulation.charging_strategies import ChargingStrategy
+from simulator.data_structures.vehicle import Vehicle
+
+from simulator.data_structures.station import Station
+from simulator.simulation_input.sim_configs.cost_conf import vehicles_cost_conf
+from simulator.simulation_input.sim_configs.vehicle_config import vehicle_conf
 
 
-class EFFCS_Sim ():
+class SharedMobilitySim:
 
-	def __init__ (
-					self,
-					simInput
-				 ):
+	def __init__(self, simInput):
 
 		self.start = datetime.datetime(
 			simInput.sim_general_conf["year"],
@@ -55,10 +57,9 @@ class EFFCS_Sim ():
 			self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone
 
 		self.vehicles_soc_dict = self.simInput.vehicles_soc_dict
-
 		self.vehicles_zones = self.simInput.vehicles_zones
 
-		self.env = self.simInput.env
+		self.env = simpy.Environment()
 
 		self.events = []
 		self.sim_booking_requests = []
@@ -81,11 +82,25 @@ class EFFCS_Sim ():
 		self.list_n_vehicles_dead = []
 		self.vehicles_zones_history = []
 		self.n_vehicles_per_zones_history = []
-		
-		self.vehicles_list = self.simInput.vehicles_list
-		self.charging_stations_dict = self.simInput.charging_stations_dict
 
-		self.chargingStrategy = EFFCS_ChargingStrategy(self.env, simInput)
+		self.vehicles_list = []
+		self.charging_stations_dict = {}
+
+		for zone_id in self.simInput.n_charging_poles_by_zone:
+			zone_n_cps = self.simInput.n_charging_poles_by_zone[zone_id]
+			if zone_n_cps > 0:
+				self.charging_stations_dict[zone_id] = Station(self.env, zone_n_cps, zone_id)
+
+		self.vehicles_list = []
+		for i in range(self.simInput.n_vehicles_sim):
+			vehicle_object = Vehicle(
+				self.env, i, self.vehicles_zones[i],
+				vehicle_conf, vehicles_cost_conf, self.simInput.sim_scenario_conf,
+				self.start
+			)
+			self.vehicles_list.append(vehicle_object)
+
+		self.chargingStrategy = ChargingStrategy(self.env, self)
 
 	def schedule_booking (self, booking_request, vehicle_id, zone_id):
 

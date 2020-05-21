@@ -5,10 +5,10 @@ import pandas as pd
 import numpy as np
 
 from simulator.utils.vehicle_utils import *
-from simulator.simulation.simulator import EFFCS_Sim
+from simulator.simulation.simulator import SharedMobilitySim
 
 
-class TraceB_EFFCS_Sim (EFFCS_Sim):
+class TraceDrivenSim (SharedMobilitySim):
 
     def init_data_structures(self):
 

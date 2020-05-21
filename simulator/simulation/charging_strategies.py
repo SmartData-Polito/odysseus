@@ -3,7 +3,7 @@ import numpy as np
 from simulator.simulation.charging_primitives import *
 
 
-class EFFCS_ChargingStrategy (EFFCS_ChargingPrimitives):
+class ChargingStrategy (ChargingPrimitives):
 
 	def get_charge_dict(self, vehicle, charge, booking_request, operator):
 

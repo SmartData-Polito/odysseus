@@ -8,7 +8,7 @@ sim_scenario_conf = {
 
 	"alpha": 25,
 	"beta": 100,
-	"n_poles_n_vehicles_factor": 1,
+	"n_poles_n_vehicles_factor": 0.1,
 
 	"hub": False,
 	"hub_zone_policy": "",

@@ -1,6 +1,6 @@
 import datetime
 
-from simulator.simulation.trace_driven_simulator import TraceB_EFFCS_Sim
+from simulator.simulation.trace_driven_simulator import TraceDrivenSim
 from simulator.simulation_output.sim_output import EFFCS_SimOutput
 
 
@@ -8,7 +8,7 @@ def run_traceB_sim (simInput):
 
     # print ("Running trace based simulation ..")
         
-    sim_traceB = TraceB_EFFCS_Sim(
+    sim_traceB = TraceDrivenSim(
     
                 simInput=simInput,
     

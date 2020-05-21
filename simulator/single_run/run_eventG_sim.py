@@ -1,6 +1,6 @@
 import datetime
 
-from simulator.simulation.model_driven_simulator import EventG_EFFCS_Sim
+from simulator.simulation.model_driven_simulator import ModelDrivenSim
 from simulator.simulation_output.sim_output import EFFCS_SimOutput
 
 
@@ -8,7 +8,7 @@ def run_eventG_sim (simInput):
 
     # print ("Running event generation based simulation ..")
         
-    sim_eventG = EventG_EFFCS_Sim(
+    sim_eventG = ModelDrivenSim(
     
                 simInput=simInput
     
