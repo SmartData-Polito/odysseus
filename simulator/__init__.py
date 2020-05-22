@@ -12,6 +12,7 @@ versioned_conf_path = os.path.join(
     conf_name
 )
 conf_path = simulation_input_paths['sim_configs']
+os.makedirs(conf_path, exist_ok=True)
 try:
     for f in os.listdir(versioned_conf_path):
         if os.path.isfile(os.path.join(versioned_conf_path, f)):
