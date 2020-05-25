@@ -8,5 +8,5 @@ def get_traceB_input (conf_tuple):
     simInput.init_vehicles()
     simInput.init_hub()
     simInput.init_charging_poles()
-
+    print("A simulation input was created!")
     return simInput
