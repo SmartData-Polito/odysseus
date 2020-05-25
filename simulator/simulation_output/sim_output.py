@@ -294,3 +294,9 @@ class EFFCS_SimOutput ():
 			station_df = pd.DataFrame(sim.chargingStrategy.charging_stations_dict[key].status_dict_list)
 			station_df["id"] = key
 			self.stations_history = pd.concat([self.stations_history, station_df], ignore_index=True)
+
+		self.zones_history = pd.DataFrame()
+		for key in sim.chargingStrategy.zone_dict:
+			zone_df = pd.DataFrame(sim.chargingStrategy.zone_dict[key].status_dict_list)
+			zone_df["id"] = key
+			self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)

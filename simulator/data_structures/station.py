@@ -3,16 +3,15 @@ import datetime
 import simpy
 from simulator.simulation.charging_primitives import get_charging_time
 
-
 class Station(object):
 
-    def __init__(self, env, num_poles, zone):
+    def __init__(self, env, num_poles, zone_id, sim_start_time):
         self.env = env
         self.charging_station = simpy.Resource(self.env, capacity=num_poles)
-        self.zone = zone
+        self.zone_id = zone_id
         self.current_status = {
-            "time": 0,
-            "zone": self.zone,
+            "time": sim_start_time,
+            "zone_id": self.zone_id,
             "queue": 0,
             "charging": 0
         }
@@ -25,10 +24,10 @@ class Station(object):
         if soc_delta_charging_trip > 0:
             vehicle.soc.get(soc_delta_charging_trip)
         with self.charging_station.request() as req:
-            vehicle.zone = self.zone
+            vehicle.zone = self.zone_id
             self.current_status = {
                 "time": start_time,
-                "zone": self.zone,
+                "zone": self.zone_id,
                 "queue": len(self.charging_station.queue),
                 "charging": self.charging_station.count
             }
@@ -37,7 +36,7 @@ class Station(object):
                 "time": start_time,
                 "status": "charging",
                 "soc": vehicle.soc.level,
-                "zone": self.zone
+                "zone": self.zone_id
             }
             vehicle.status_dict_list.append(vehicle.current_status)
             yield req
@@ -49,7 +48,7 @@ class Station(object):
             "time": start_time + datetime.timedelta(seconds=get_charging_time(amount)),
             "status": "available",
             "soc": vehicle.soc.level,
-            "zone": self.zone
+            "zone": self.zone_id
         }
         vehicle.status_dict_list.append(vehicle.current_status)
 

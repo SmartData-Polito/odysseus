@@ -154,6 +154,13 @@ def single_run(conf_tuple):
         )
     )
 
+    simOutput.zones_history.to_csv(
+        os.path.join(
+            results_path,
+            "zones_history.csv"
+        )
+    )
+
     plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
     plotter.plot_events_profile_barh()
     plotter.plot_events_t()

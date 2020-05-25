@@ -5,7 +5,9 @@ import datetime
 
 class Vehicle(object):
 
-    def __init__(self, env, plate, start_zone, start_soc, vehicle_config, vehicle_cost_conf, sim_scenario_conf, sim_start_time):
+    def __init__(self, env, plate, start_zone, start_soc,
+                 vehicle_config, vehicle_cost_conf,
+                 sim_scenario_conf, sim_start_time):
         self.env = env
         self.plate = plate
         self.zone = start_zone
@@ -27,7 +29,7 @@ class Vehicle(object):
             self.current_status
         ]
 
-    def booking(self, booking_request):
+    def booking(self, booking_request, zone_dict):
 
         self.available = False
         self.current_status = {
@@ -48,4 +50,3 @@ class Vehicle(object):
             "zone": booking_request["destination_id"]
         }
         self.status_dict_list.append(self.current_status)
-

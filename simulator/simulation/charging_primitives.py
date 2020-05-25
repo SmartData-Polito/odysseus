@@ -49,6 +49,8 @@ class ChargingPrimitives:
 
         self.charging_stations_dict = sim.charging_stations_dict
 
+        self.zone_dict = sim.zone_dict
+
         self.workers = simpy.Resource(
             self.env,
             capacity=self.simInput.sim_scenario_conf["n_workers"]
@@ -133,18 +135,22 @@ class ChargingPrimitives:
                 if check_queuing():
                     with self.workers.request() as worker_request:
                         yield worker_request
+                        # TODO self.zone_dict["origin_zone_id"].add_vehicle(self.vehicles_list[vehicle_id])
                         yield self.env.timeout(charge["timeout_outward"])
                         charge["start_soc"] -= charge["cr_soc_delta"]
 
                         self.n_vehicles_charging_system += 1
                         yield self.env.process(self.charging_stations_dict[zone_id].charge(
-                           self.vehicles_list[vehicle_id], charge["start_time"], charge["cr_soc_delta"], charge["duration"]
+                            self.vehicles_list[vehicle_id], charge["start_time"], charge["cr_soc_delta"],
+                            charge["duration"]
                         ))
+                        self.zone_dict[charge["zone_id"]].add_vehicle(charge["start_time"] +
+                                                                      datetime.timedelta(seconds=charge["duration"]))
 
-                      #  with resource.request() as charging_request:
-                       #     yield charging_request
+                        #  with resource.request() as charging_request:
+                        #     yield charging_request
                         #    self.n_vehicles_charging_system += 1
-                         #   yield self.env.timeout(charge["duration"])
+                        #   yield self.env.timeout(charge["duration"])
 
                         self.n_vehicles_charging_system -= 1
                         yield self.env.timeout(charge["timeout_return"])
@@ -171,6 +177,7 @@ class ChargingPrimitives:
                 vehicle,
                 self.simInput.sim_scenario_conf["beta"]
             )
+            self.zone_dict[booking_request["destination_id"]].remove_vehicle(booking_request["end_time"])
             return True, charge
         else:
             return False, None
