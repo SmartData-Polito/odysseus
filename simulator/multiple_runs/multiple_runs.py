@@ -30,8 +30,6 @@ def multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, sim_sc
 		city,
 		"multiple_runs",
 		sim_scenario_name,
-		model_general_conf_string,
-		model_scenario_conf_grid_string
 	)
 	os.makedirs(results_path, exist_ok=True)
 
