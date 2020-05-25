@@ -59,7 +59,7 @@ class EFFCS_SimOutputPlotter ():
 
 		self.sim_not_enough_energy_requests = pd.DataFrame(simOutput.sim_not_enough_energy_requests)
 
-		self.sim_no_close_vehicle_requests = pd.DataFrame(simOutput.sim_no_close_vehicle_requests)
+		self.sim_no_close_vvehicle_requests = pd.DataFrame(simOutput.sim_no_close_vehicle_requests)
 
 		self.sim_unsatisfied_requests = simOutput.sim_unsatisfied_requests
 

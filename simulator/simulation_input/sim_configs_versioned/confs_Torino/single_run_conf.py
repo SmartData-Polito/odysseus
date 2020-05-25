@@ -1,14 +1,14 @@
 sim_scenario_conf = {
 
-	"requests_rate_factor": 1,
-	"n_vehicles_factor": 1,
+	"requests_rate_factor": 0.5,
+	"n_vehicles_factor": 0.5,
 
 	"time_estimation": True,
 	"queuing": True,
 
 	"alpha": 25,
 	"beta": 100,
-	"n_poles_n_vehicles_factor": 0.1,
+	"n_poles_n_vehicles_factor": 0.15,
 
 	"hub": False,
 	"hub_zone_policy": "",

@@ -82,6 +82,7 @@ class SharedMobilitySim:
 		self.list_n_vehicles_dead = []
 		self.vehicles_zones_history = []
 		self.n_vehicles_per_zones_history = []
+		self.list_n_vehicles_charging_new = []
 
 		self.vehicles_list = []
 		self.charging_stations_dict = {}
@@ -94,7 +95,7 @@ class SharedMobilitySim:
 		self.vehicles_list = []
 		for i in range(self.simInput.n_vehicles_sim):
 			vehicle_object = Vehicle(
-				self.env, i, self.vehicles_zones[i],
+				self.env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
 				vehicle_conf, vehicles_cost_conf, self.simInput.sim_scenario_conf,
 				self.start
 			)
@@ -113,8 +114,8 @@ class SharedMobilitySim:
 
 		booking_request["plate"] = vehicle_id
 
-		#yield self.env.process(self.vehicles_list[vehicle_id].booking(booking_request))
-		yield self.env.timeout(booking_request["duration"])
+		yield self.env.process(self.vehicles_list[vehicle_id].booking(booking_request))
+		#yield self.env.timeout(booking_request["duration"])
 
 		self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
 		booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
@@ -136,6 +137,15 @@ class SharedMobilitySim:
 		self.list_n_vehicles_charging_users += [self.chargingStrategy.n_vehicles_charging_users]
 		self.list_n_vehicles_dead += [self.chargingStrategy.n_dead_vehicles]
 		n_vehicles_charging = self.chargingStrategy.n_vehicles_charging_system + self.chargingStrategy.n_vehicles_charging_users
+
+		self.n_vehicles_charging_new = 0
+		for zone in self.chargingStrategy.charging_stations_dict:
+			station = self.chargingStrategy.charging_stations_dict[zone]
+			n_vehicles_station = 0
+			station.monitor(n_vehicles_station, station.charging_station)
+			self.n_vehicles_charging_new += n_vehicles_station
+		self.list_n_vehicles_charging_new += [self.n_vehicles_charging_new]
+
 		self.list_n_vehicles_available += [
 			self.simInput.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
 		]
