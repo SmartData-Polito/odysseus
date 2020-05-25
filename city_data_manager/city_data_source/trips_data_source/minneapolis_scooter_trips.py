@@ -19,6 +19,7 @@ class MinneapolisScooterTrips(TripsDataSource):
 			6: "June",
 			7: "July",
 			8: "August",
+			9: "September",
 		}
 		month = months_dict[month]
 
@@ -26,8 +27,10 @@ class MinneapolisScooterTrips(TripsDataSource):
 			self.raw_data_path,
 			"_".join(["Motorized", "Foot", "Scooter", "Trips", month, year]) + ".csv"
 		)
-		self.trips_df = pd.read_csv(raw_trips_data_path, parse_dates=[3, 4])
+		self.trips_df = pd.read_csv(raw_trips_data_path, parse_dates=["StartTime", "EndTime"])
 
+		self.trips_df.StartTime = pd.to_datetime(self.trips_df.StartTime, utc=True)
+		self.trips_df.EndTime = pd.to_datetime(self.trips_df.EndTime, utc=True)
 		self.trips_df.StartTime = self.trips_df.StartTime.dt.tz_convert('America/Chicago')
 		self.trips_df.EndTime = self.trips_df.EndTime.dt.tz_convert('America/Chicago')
 

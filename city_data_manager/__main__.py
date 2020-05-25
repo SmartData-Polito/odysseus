@@ -16,8 +16,12 @@ from city_data_manager.city_geo_trips.minneapolis_geo_trips import MinneapolisGe
 
 print(datetime.datetime.now())
 
-for month in [5, 6]:
-    for bin_side_length in [200, 500]:
+for month in [9]:
+
+    print(datetime.datetime.now())
+    print(month)
+
+    for bin_side_length in [200]:
 
         minneapolis = MinneapolisGeoTrips("city_of_minneapolis", 2019, month, bin_side_length)
         minneapolis.get_trips_od_gdfs()

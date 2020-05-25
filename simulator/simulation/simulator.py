@@ -86,10 +86,11 @@ class SharedMobilitySim:
 		self.vehicles_list = []
 		self.charging_stations_dict = {}
 
-		for zone_id in self.simInput.n_charging_poles_by_zone:
-			zone_n_cps = self.simInput.n_charging_poles_by_zone[zone_id]
-			if zone_n_cps > 0:
-				self.charging_stations_dict[zone_id] = Station(self.env, zone_n_cps, zone_id)
+		if self.simInput.sim_scenario_conf["distributed_cps"]:
+			for zone_id in self.simInput.n_charging_poles_by_zone:
+				zone_n_cps = self.simInput.n_charging_poles_by_zone[zone_id]
+				if zone_n_cps > 0:
+					self.charging_stations_dict[zone_id] = Station(self.env, zone_n_cps, zone_id)
 
 		self.vehicles_list = []
 		for i in range(self.simInput.n_vehicles_sim):

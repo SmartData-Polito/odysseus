@@ -144,12 +144,12 @@ class City:
 			lambda x: pd.Series(x.sort_values().dropna().iloc[1:].index.values),
 			axis=1
 		)
-		print(self.neighbors)
+		#print(self.neighbors)
 
 		self.neighbors_dict = {}
 		for zone in self.neighbors.index:
 			self.neighbors_dict[int(zone)] = dict(self.neighbors.loc[zone].dropna())
-		print(self.neighbors_dict)
+		#print(self.neighbors_dict)
 
 		return self.neighbors, self.neighbors_dict
 
