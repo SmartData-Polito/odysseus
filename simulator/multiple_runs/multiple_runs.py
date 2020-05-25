@@ -33,7 +33,8 @@ def multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, sim_sc
 	)
 	os.makedirs(results_path, exist_ok=True)
 
-	with mp.Pool(n_cores) as pool:
+	print("Number of cores:", mp.cpu_count())
+	with mp.Pool(mp.cpu_count()) as pool:
 
 		city_obj = City(city, sim_run_conf["data_source_id"], sim_general_conf)
 		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)

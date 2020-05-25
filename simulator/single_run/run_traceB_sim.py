@@ -31,4 +31,5 @@ def get_traceB_sim_output(simInput):
 def get_traceB_sim_stats(simInput):
     sim_traceB = run_traceB_sim(simInput)
     simOutput_traceB = EFFCS_SimOutput(sim_traceB)
+    print("A simulation finished!")
     return simOutput_traceB.sim_stats
