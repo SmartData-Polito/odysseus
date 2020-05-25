@@ -35,8 +35,6 @@ def single_run(conf_tuple):
 		city,
 		"single_run",
 		sim_scenario_name,
-		model_general_conf_string,
-		model_conf_string
 	)
 	os.makedirs(results_path, exist_ok=True)
 

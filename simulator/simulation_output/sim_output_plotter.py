@@ -46,8 +46,6 @@ class EFFCS_SimOutputPlotter ():
 			city,
 			"single_run",
 			sim_scenario_name,
-			model_general_conf_string,
-			model_conf_string
 		)
 		os.makedirs(self.figures_path, exist_ok=True)
 
