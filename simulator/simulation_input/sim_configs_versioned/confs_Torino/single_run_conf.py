@@ -1,7 +1,7 @@
 sim_scenario_conf = {
 
-	"requests_rate_factor": 0.5,
-	"n_vehicles_factor": 0.5,
+	"requests_rate_factor": 2,
+	"n_vehicles_factor": 2,
 
 	"time_estimation": True,
 	"queuing": True,
