@@ -144,12 +144,12 @@ class City:
 			lambda x: pd.Series(x.sort_values().dropna().iloc[1:].index.values),
 			axis=1
 		)
-		print(self.neighbors)
+		#print(self.neighbors)
 
 		self.neighbors_dict = {}
 		for zone in self.neighbors.index:
 			self.neighbors_dict[int(zone)] = dict(self.neighbors.loc[zone].dropna())
-		print(self.neighbors_dict)
+		#print(self.neighbors_dict)
 
 		return self.neighbors, self.neighbors_dict
 
@@ -185,6 +185,8 @@ class City:
 			tz = pytz.timezone("America/Chicago")
 		elif self.city_name == "Torino":
 			tz = pytz.timezone("Europe/Rome")
+		elif self.city_name == "Berlin":
+			tz = pytz.timezone("Europe/Berlin")
 
 		now_utc = datetime.datetime.utcnow()
 		now_local = pytz.utc.localize(now_utc, is_dst=None).astimezone(tz)
@@ -204,10 +206,10 @@ class City:
 
 		if self.city_name == "Minneapolis":
 			self.bookings = self.bookings[self.bookings.avg_speed < 30]
-		elif self.city_name == "Torino":
+		elif self.city_name in ["Torino", "Berlin"]:
 			self.bookings = self.bookings[self.bookings.avg_speed < 120]
 
-		print(self.bookings[["driving_distance", "duration", "soc_delta", "avg_speed"]].describe())
+		#print(self.bookings[["driving_distance", "duration", "soc_delta", "avg_speed"]].describe())
 
 		return self.bookings
 
