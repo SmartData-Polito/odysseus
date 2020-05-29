@@ -5,6 +5,7 @@ import pytz
 
 import simpy
 
+from simulator.data_structures.zone import Zone
 from simulator.simulation.charging_strategies import ChargingStrategy
 from simulator.data_structures.vehicle import Vehicle
 
@@ -15,6 +16,7 @@ from simulator.simulation_input.sim_configs.vehicle_config import vehicle_conf
 
 class SharedMobilitySim:
 
+<<<<<<< HEAD
 	def __init__(self, simInput):
 
 		self.start = datetime.datetime(

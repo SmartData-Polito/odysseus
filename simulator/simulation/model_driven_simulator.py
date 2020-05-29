@@ -69,11 +69,6 @@ class ModelDrivenSim (SharedMobilitySim):
 
 		for i in itertools.count():
 
-			# TODO -> find faster alternative
-			self.n_vehicles_per_zones_history += [{
-				zone: len(self.available_vehicles_dict[zone]) for zone in self.available_vehicles_dict
-			}]
-
 			timeout_sec = (
 				np.random.exponential(
 					1 / self.simInput.sim_scenario_conf["requests_rate_factor"] / self.current_arrival_rate
@@ -82,8 +77,3 @@ class ModelDrivenSim (SharedMobilitySim):
 
 			yield self.env.timeout(timeout_sec)
 			self.create_booking_request(timeout_sec)
-
-		self.n_vehicles_per_zones_history = pd.DataFrame(
-			self.n_vehicles_per_zones_history,
-			index=pd.DataFrame(self.sim_booking_requests)["start_time"]
-		)

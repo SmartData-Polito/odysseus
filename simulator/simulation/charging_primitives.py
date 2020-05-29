@@ -6,24 +6,21 @@ import numpy as np
 from simulator.utils.vehicle_utils import *
 
 
-def get_charging_time (soc_delta,
-                       battery_capacity=vehicle_conf["battery_capacity"],
-                       charging_efficiency=0.92,
-                       charger_rated_power=3.7):
-
+def get_charging_time(soc_delta,
+                      battery_capacity=vehicle_conf["battery_capacity"],
+                      charging_efficiency=0.92,
+                      charger_rated_power=3.7):
     return (soc_delta * 3600 * battery_capacity) / (charging_efficiency * charger_rated_power * 100)
 
 
-def get_charging_soc (duration,
-                    battery_capacity=vehicle_conf["battery_capacity"],
-                    charging_efficiency=0.92,
-                    charger_rated_power=3.7):
-
+def get_charging_soc(duration,
+                     battery_capacity=vehicle_conf["battery_capacity"],
+                     charging_efficiency=0.92,
+                     charger_rated_power=3.7):
     return (charging_efficiency * charger_rated_power * 100 * duration) / (3600 * battery_capacity)
 
 
-def init_charge (booking_request, vehicles_soc_dict, vehicle, beta):
-
+def init_charge(booking_request, vehicles_soc_dict, vehicle, beta):
     charge = {}
     charge["plate"] = vehicle
     charge["start_time"] = booking_request["end_time"]
@@ -51,6 +48,8 @@ class ChargingPrimitives:
         self.vehicles_list = sim.vehicles_list
 
         self.charging_stations_dict = sim.charging_stations_dict
+
+        self.zone_dict = sim.zone_dict
 
         self.workers = simpy.Resource(
             self.env,
@@ -84,7 +83,7 @@ class ChargingPrimitives:
         self.list_system_charging_bookings = []
         self.list_users_charging_bookings = []
 
-    def charge_vehicle (
+    def charge_vehicle(
             self,
             charge_dict
     ):
@@ -98,7 +97,7 @@ class ChargingPrimitives:
         timeout_return = charge_dict["timeout_return"]
         cr_soc_delta = charge_dict["cr_soc_delta"]
 
-        def check_queuing ():
+        def check_queuing():
             if self.simInput.sim_scenario_conf["queuing"]:
                 return True
             else:
@@ -136,17 +135,22 @@ class ChargingPrimitives:
                 if check_queuing():
                     with self.workers.request() as worker_request:
                         yield worker_request
+                        # TODO self.zone_dict["origin_zone_id"].add_vehicle(self.vehicles_list[vehicle_id])
                         yield self.env.timeout(charge["timeout_outward"])
                         charge["start_soc"] -= charge["cr_soc_delta"]
 
-                        # yield self.env.process(self.charging_stations_dict[zone_id].charge(
-                        #     self.vehicles_list[vehicle_id], charge["start_time"]
-                        # ))
+                        self.n_vehicles_charging_system += 1
+                        yield self.env.process(self.charging_stations_dict[zone_id].charge(
+                            self.vehicles_list[vehicle_id], charge["start_time"], charge["cr_soc_delta"],
+                            charge["duration"]
+                        ))
+                        self.zone_dict[charge["zone_id"]].add_vehicle(charge["start_time"] +
+                                                                      datetime.timedelta(seconds=charge["duration"]))
 
-                        with resource.request() as charging_request:
-                            yield charging_request
-                            self.n_vehicles_charging_system += 1
-                            yield self.env.timeout(charge["duration"])
+                        #  with resource.request() as charging_request:
+                        #     yield charging_request
+                        #    self.n_vehicles_charging_system += 1
+                        #   yield self.env.timeout(charge["duration"])
 
                         self.n_vehicles_charging_system -= 1
                         yield self.env.timeout(charge["timeout_return"])
@@ -164,7 +168,7 @@ class ChargingPrimitives:
         charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
         self.sim_charges += [charge]
 
-    def check_system_charge (self, booking_request, vehicle):
+    def check_system_charge(self, booking_request, vehicle):
 
         if self.vehicles_soc_dict[vehicle] < self.simInput.sim_scenario_conf["alpha"]:
             charge = init_charge(
@@ -173,11 +177,12 @@ class ChargingPrimitives:
                 vehicle,
                 self.simInput.sim_scenario_conf["beta"]
             )
+            self.zone_dict[booking_request["destination_id"]].remove_vehicle(booking_request["end_time"])
             return True, charge
         else:
             return False, None
 
-    def check_user_charge (self, booking_request, vehicle):
+    def check_user_charge(self, booking_request, vehicle):
 
         if booking_request["end_soc"] < self.simInput.sim_scenario_conf["beta"]:
             if booking_request["end_soc"] < self.simInput.sim_scenario_conf["alpha"]:
@@ -196,10 +201,10 @@ class ChargingPrimitives:
         else:
             return False, None
 
-    def get_timeout (self, origin_id, destination_id):
+    def get_timeout(self, origin_id, destination_id):
         distance = self.simInput.od_distances.loc[origin_id, destination_id] / 1000
         return distance / 15 * 3600
 
-    def get_cr_soc_delta (self, origin_id, destination_id):
+    def get_cr_soc_delta(self, origin_id, destination_id):
         distance = self.simInput.od_distances.loc[origin_id, destination_id] / 1000
         return get_soc_delta(distance)

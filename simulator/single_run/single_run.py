@@ -23,12 +23,6 @@ def single_run(conf_tuple):
 
 	city_obj = City(city, data_source_id, sim_general_conf)
 
-	model_general_conf_string = "_".join([
-		str(v) for v in sim_general_conf.values()]
-	).replace("'", "").replace(".", "d")
-	model_conf_string = "_".join([
-		str(v) for v in sim_scenario_conf.values()]
-	).replace("'", "").replace(".", "d")
 	results_path = os.path.join(
 		os.path.dirname(os.path.dirname(__file__)),
 		"results",

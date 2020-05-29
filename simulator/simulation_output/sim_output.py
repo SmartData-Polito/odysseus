@@ -41,6 +41,9 @@ class EFFCS_SimOutput ():
 		self.sim_booking_requests["n_vehicles_charging_system"] = \
 			pd.Series(sim.list_n_vehicles_charging_system)
 
+		self.sim_booking_requests["n_vehicles_charging_new"] = \
+			pd.Series(sim.list_n_vehicles_charging_new)
+
 		self.sim_booking_requests["n_vehicles_charging_users"] = \
 			pd.Series(sim.list_n_vehicles_charging_users).fillna(0)
 
@@ -285,3 +288,15 @@ class EFFCS_SimOutput ():
 			vehicle_df = pd.DataFrame(vehicle.status_dict_list)
 			vehicle_df["plate"] = vehicle.plate
 			self.vehicles_history = pd.concat([self.vehicles_history, vehicle_df], ignore_index=True)
+
+		self.stations_history = pd.DataFrame()
+		for key in sim.chargingStrategy.charging_stations_dict:
+			station_df = pd.DataFrame(sim.chargingStrategy.charging_stations_dict[key].status_dict_list)
+			station_df["id"] = key
+			self.stations_history = pd.concat([self.stations_history, station_df], ignore_index=True)
+
+		self.zones_history = pd.DataFrame()
+		for key in sim.chargingStrategy.zone_dict:
+			zone_df = pd.DataFrame(sim.chargingStrategy.zone_dict[key].status_dict_list)
+			zone_df["id"] = key
+			self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)

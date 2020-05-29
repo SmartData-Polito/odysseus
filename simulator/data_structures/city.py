@@ -187,6 +187,8 @@ class City:
 			tz = pytz.timezone("America/Kentucky/Louisville")
 		elif self.city_name == "Torino":
 			tz = pytz.timezone("Europe/Rome")
+		elif self.city_name == "Berlin":
+			tz = pytz.timezone("Europe/Berlin")
 
 		now_utc = datetime.datetime.utcnow()
 		now_local = pytz.utc.localize(now_utc, is_dst=None).astimezone(tz)
@@ -205,10 +207,10 @@ class City:
 
 		if self.city_name in ["Minneapolis", "Louisville"]:
 			self.bookings = self.bookings[self.bookings.avg_speed < 30]
-		elif self.city_name == "Torino":
+		elif self.city_name in ["Torino", "Berlin"]:
 			self.bookings = self.bookings[self.bookings.avg_speed < 120]
 
-		print(self.bookings[["driving_distance", "duration", "soc_delta", "avg_speed"]].describe())
+		#print(self.bookings[["driving_distance", "duration", "soc_delta", "avg_speed"]].describe())
 
 		return self.bookings
 

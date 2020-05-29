@@ -1,12 +1,28 @@
 class Zone(object):
-    def __init__(self, env, key, n_poles):
-        self._env = env
-        self._key = key
-        self._n_poles = n_poles
+    def __init__(self, env, id, sim_start_time):
+        self.env = env
+        self.id = id
         self.vehicles = []
+        self.current_status = {
+            "time": sim_start_time,
+            "vehicles_parked": 0,
+        }
+        self.status_dict_list = [
+            self.current_status
+        ]
 
-    def add_vehicle(self, v):
-        self.vehicles.append(v)
+    def add_vehicle(self, time):
+        self.current_status = {
+            "time": time,
+            "vehicles_parked": self.current_status["vehicles_parked"] +1,
+        }
+        self.status_dict_list.append(self.current_status)
 
-    def remove_vehicle(self, v):
-        self.vehicles.remove(v)
+    def remove_vehicle(self, time):
+        self.current_status = {
+            "time": time,
+            "vehicles_parked": self.current_status["vehicles_parked"] -1,
+        }
+        self.status_dict_list.append(self.current_status)
+
+
