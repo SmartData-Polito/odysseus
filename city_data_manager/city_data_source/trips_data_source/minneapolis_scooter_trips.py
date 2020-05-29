@@ -49,6 +49,10 @@ class MinneapolisScooterTrips(TripsDataSource):
 			"StartCenterlineID": "start_centerline_id",
 			"EndCenterlineID": "end_centerline_id",
 		}, axis=1)
+		self.trips_df_norm.start_time = pd.to_datetime(self.trips_df_norm.start_time, utc=True)
+		self.trips_df_norm.end_time = pd.to_datetime(self.trips_df_norm.end_time, utc=True)
+		self.trips_df_norm.start_time = self.trips_df_norm.start_time.dt.tz_convert('America/Chicago')
+		self.trips_df_norm.end_time = self.trips_df_norm.end_time.dt.tz_convert('America/Chicago')
 		self.trips_df_norm = self.trips_df_norm[[
 			"start_time",
 			"end_time",

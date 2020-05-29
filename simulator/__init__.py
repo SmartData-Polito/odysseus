@@ -11,7 +11,7 @@ versioned_conf_path = os.path.join(
     simulation_input_paths["sim_configs_versioned"],
     conf_name
 )
-conf_path = simulation_input_paths['sim_configs']
+conf_path = simulation_input_paths['sim_current_config']
 os.makedirs(conf_path, exist_ok=True)
 try:
     for f in os.listdir(versioned_conf_path):

@@ -1,3 +1,4 @@
+import datetime
 import os
 import pickle
 
@@ -22,6 +23,7 @@ def single_run(conf_tuple):
 	sim_type = conf_tuple[0]["sim_technique"]
 
 	city_obj = City(city, data_source_id, sim_general_conf)
+	print(datetime.datetime.now(), "City initialised!")
 
 	results_path = os.path.join(
 		os.path.dirname(os.path.dirname(__file__)),

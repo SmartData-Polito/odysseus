@@ -10,8 +10,8 @@ from simulator.simulation.charging_strategies import ChargingStrategy
 from simulator.data_structures.vehicle import Vehicle
 
 from simulator.data_structures.station import Station
-from simulator.simulation_input.sim_configs.cost_conf import vehicles_cost_conf
-from simulator.simulation_input.sim_configs.vehicle_config import vehicle_conf
+from simulator.simulation_input.sim_current_config.cost_conf import vehicles_cost_conf
+from simulator.simulation_input.sim_current_config.vehicle_config import vehicle_conf
 
 
 class SharedMobilitySim:
@@ -86,17 +86,21 @@ class SharedMobilitySim:
 
 		self.vehicles_list = []
 		self.charging_stations_dict = {}
+		self.zone_dict = {}
+
+		for zone_id in self.simInput.valid_zones:
+			self.zone_dict[zone_id] = Zone(self.env, zone_id, self.start)
 
 		if self.simInput.sim_scenario_conf["distributed_cps"]:
 			for zone_id in self.simInput.n_charging_poles_by_zone:
 				zone_n_cps = self.simInput.n_charging_poles_by_zone[zone_id]
 				if zone_n_cps > 0:
-					self.charging_stations_dict[zone_id] = Station(self.env, zone_n_cps, zone_id)
+					self.charging_stations_dict[zone_id] = Station(self.env, zone_n_cps, zone_id, self.start)
 
 		self.vehicles_list = []
 		for i in range(self.simInput.n_vehicles_sim):
 			vehicle_object = Vehicle(
-				self.env, i, self.vehicles_zones[i],
+				self.env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
 				vehicle_conf, vehicles_cost_conf, self.simInput.sim_scenario_conf,
 				self.start
 			)
@@ -115,8 +119,12 @@ class SharedMobilitySim:
 
 		booking_request["plate"] = vehicle_id
 
-		#yield self.env.process(self.vehicles_list[vehicle_id].booking(booking_request))
+		#self.zone_dict[booking_request["origin_id"]].remove_vehicle(booking_request["start_time"])
+		#yield self.env.process(self.vehicles_list[vehicle_id].booking(booking_request, self.zone_dict))
 		yield self.env.timeout(booking_request["duration"])
+		#self.zone_dict[booking_request["destination_id"]].add_vehicle(
+		#	booking_request["start_time"]+ datetime.timedelta(seconds=booking_request['duration'])
+		#)
 
 		self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
 		booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]

@@ -41,9 +41,6 @@ class EFFCS_SimOutput ():
 		self.sim_booking_requests["n_vehicles_charging_system"] = \
 			pd.Series(sim.list_n_vehicles_charging_system)
 
-		self.sim_booking_requests["n_vehicles_charging_new"] = \
-			pd.Series(sim.list_n_vehicles_charging_new)
-
 		self.sim_booking_requests["n_vehicles_charging_users"] = \
 			pd.Series(sim.list_n_vehicles_charging_users).fillna(0)
 

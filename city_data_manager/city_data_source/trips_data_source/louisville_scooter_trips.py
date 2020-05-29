@@ -57,6 +57,11 @@ class LouisvilleScooterTrips(TripsDataSource):
 		self.trips_df_norm.end_time = pd.to_datetime(
 			self.trips_df_norm.end_date + " " + self.trips_df_norm.end_time
 		)
+		self.trips_df_norm.start_time = pd.to_datetime(self.trips_df_norm.start_time, utc=True)
+		self.trips_df_norm.end_time = pd.to_datetime(self.trips_df_norm.end_time, utc=True)
+		self.trips_df_norm.start_time = self.trips_df_norm.start_time.dt.tz_convert('America/Kentucky/Louisville')
+		self.trips_df_norm.end_time = self.trips_df_norm.end_time.dt.tz_convert('America/Kentucky/Louisville')
+
 		self.trips_df_norm.driving_distance *= 1000
 		self.trips_df_norm = self.trips_df_norm[[
 			"start_time",

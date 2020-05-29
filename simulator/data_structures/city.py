@@ -69,6 +69,7 @@ class City:
 		self.neighbors, self.neighbors_dict = self.get_neighbors_dicts()
 
 		self.bookings.loc[:, "city"] = self.city_name
+
 		self.request_rates = self.get_requests_rates()
 		self.trip_kdes = self.get_trip_kdes()
 
@@ -109,13 +110,8 @@ class City:
 		origin_zones_count = self.bookings.origin_id.value_counts()
 		dest_zones_count = self.bookings.destination_id.value_counts()
 
-		if self.bin_side_length == 200:
-			threshold = 30
-		elif self.bin_side_length == 500:
-			threshold = 5
-
-		valid_origin_zones = origin_zones_count[(origin_zones_count > threshold)]
-		valid_dest_zones = dest_zones_count[(dest_zones_count > threshold)]
+		valid_origin_zones = origin_zones_count[(origin_zones_count > 0)]
+		valid_dest_zones = dest_zones_count[(dest_zones_count > 0)]
 
 		self.valid_zones = self.valid_zones.intersection(
 			valid_origin_zones.index.intersection(
@@ -156,13 +152,15 @@ class City:
 	def get_input_bookings_filtered(self):
 
 		self.bookings["hour"] = self.bookings.start_hour
+		self.bookings["daytype"] = self.bookings.start_daytype
+
 		if "driving_distance" not in self.bookings.columns:
 			self.bookings["driving_distance"] = self.bookings.euclidean_distance
-		self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x/1000))
+		self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x / 1000))
 
-		self.bookings["random_seconds_start"] = np.random.uniform(-600, 600, len(self.bookings))
-		self.bookings["random_seconds_end"] = np.random.uniform(-600, 600, len(self.bookings))
-		self.bookings["random_seconds_pos"] = np.random.uniform(0, 300, len(self.bookings))
+		self.bookings["random_seconds_start"] = np.random.uniform(-900, 900, len(self.bookings))
+		self.bookings["random_seconds_end"] = np.random.uniform(-900, 900, len(self.bookings))
+		self.bookings["random_seconds_pos"] = np.random.uniform(0, 450, len(self.bookings))
 		self.bookings.start_time = pd.to_datetime(self.bookings.start_time) + self.bookings.random_seconds_start.apply(
 			lambda sec: datetime.timedelta(seconds=sec)
 		)
@@ -176,31 +174,14 @@ class City:
 		)
 
 		self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
-
-		if self.data_source_id == "big_data_db":
-			self.bookings.start_time = self.bookings.start_time - datetime.timedelta(hours=2)
-			self.bookings.end_time = self.bookings.end_time - datetime.timedelta(hours=2)
-
-		if self.city_name == "Minneapolis":
-			tz = pytz.timezone("America/Chicago")
-		elif self.city_name == "Louisville":
-			tz = pytz.timezone("America/Kentucky/Louisville")
-		elif self.city_name == "Torino":
-			tz = pytz.timezone("Europe/Rome")
-		elif self.city_name == "Berlin":
-			tz = pytz.timezone("Europe/Berlin")
-
-		now_utc = datetime.datetime.utcnow()
-		now_local = pytz.utc.localize(now_utc, is_dst=None).astimezone(tz)
-		self.bookings.start_time = self.bookings.start_time + now_local.utcoffset()
-		self.bookings.end_time = self.bookings.end_time + now_local.utcoffset()
-		self.bookings = pre_process_time(self.bookings)
-
 		self.bookings = self.bookings.sort_values("start_time")
 		self.bookings.loc[:, "ia_timeout"] = (
 				self.bookings.start_time - self.bookings.start_time.shift()
 		).apply(lambda x: x.total_seconds()).abs()
 		self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
+		self.bookings.loc[:, "duration"] = (
+				self.bookings.end_time - self.bookings.start_time
+		).apply(lambda x: x.total_seconds())
 		self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"] * 3.6
 
 		self.bookings = self.bookings[self.bookings.driving_distance > 0]
@@ -210,7 +191,7 @@ class City:
 		elif self.city_name in ["Torino", "Berlin"]:
 			self.bookings = self.bookings[self.bookings.avg_speed < 120]
 
-		#print(self.bookings[["driving_distance", "duration", "soc_delta", "avg_speed"]].describe())
+		print(self.bookings[["driving_distance", "duration", "soc_delta", "avg_speed"]].describe())
 
 		return self.bookings
 
@@ -240,10 +221,16 @@ class City:
 
 		for daytype, daytype_bookings_gdf in self.bookings.groupby("daytype"):
 			self.request_rates[daytype] = {}
-			for hour, hour_df in daytype_bookings_gdf.groupby("hour"):
-				self.request_rates[daytype][hour] = hour_df.city.count() / (
-					len(hour_df.day.unique())
-				) / 3600
+			for hour in range(24):
+				hour_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
+				if len(hour_df):
+					self.request_rates[daytype][hour] = hour_df.city.count() / (
+						len(hour_df.date.unique())
+					) / 3600
+			# for hour in range(24):
+			# 	hour_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
+			# 	if len(hour_df) == 0:
+			# 		self.request_rates[daytype][hour] = pd.Series(self.request_rates[daytype]).min()
 
 		self.avg_request_rate = pd.DataFrame(self.request_rates.values()).mean().mean()
 
@@ -259,9 +246,16 @@ class City:
 
 		for daytype, daytype_bookings_gdf in self.bookings.groupby("daytype"):
 			self.trip_kdes[daytype] = {}
-			for hour, hour_df in daytype_bookings_gdf.groupby("hour"):
-				self.trip_kdes[daytype][hour] = KernelDensity(
-					bandwidth=self.kde_bw
-				).fit(hour_df[self.kde_columns].dropna())
+			for hour in range(24):
+				hour_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
+				if len(hour_df):
+					self.trip_kdes[daytype][hour] = KernelDensity(
+						bandwidth=self.kde_bw
+					).fit(hour_df[self.kde_columns].dropna())
+			# hours_list = list(range(7, 24)) + list(range(7))
+			# for hour in hours_list:
+			# 	hour_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
+			# 	if len(hour_df) == 0:
+			# 		self.trip_kdes[daytype][hour] = self.trip_kdes[daytype][(hour - 1) % 24]
 
 		return self.trip_kdes

@@ -61,9 +61,8 @@ class SimInput:
             "end_time",
             "ia_timeout",
             "driving_distance",
-            "day",
+            "date",
             "hour",
-            "minute",
             "duration",
             "soc_delta"
         ]].dropna().to_dict("records")
@@ -79,13 +78,11 @@ class SimInput:
             i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
         }
 
-        top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:1001]
-        # print(top_o_zones)
+        top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:31]
 
         vehicles_random_zones = list(
-            np.random.uniform(0, 1000, self.n_vehicles_sim).astype(int).round()
+            np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()
         )
-        # print(vehicles_random_zones)
 
         self.vehicles_zones = [
             self.grid.loc[int(top_o_zones.index[vehicles_random_zones[i]])].zone_id

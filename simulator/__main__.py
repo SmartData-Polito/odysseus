@@ -6,10 +6,10 @@ from simulator.single_run.single_run import single_run
 from simulator.multiple_runs.multiple_runs import multiple_runs
 from simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 
-from simulator.simulation_input.sim_configs.sim_run_conf import sim_run_conf
-from simulator.simulation_input.sim_configs.sim_general_conf import sim_general_conf_grid
-from simulator.simulation_input.sim_configs.multiple_runs_conf import sim_scenario_conf_grid
-from simulator.simulation_input.sim_configs.single_run_conf import sim_scenario_conf
+from simulator.simulation_input.sim_current_config.sim_run_conf import sim_run_conf
+from simulator.simulation_input.sim_current_config.sim_general_conf import sim_general_conf_grid
+from simulator.simulation_input.sim_current_config.multiple_runs_conf import sim_scenario_conf_grid
+from simulator.simulation_input.sim_current_config.single_run_conf import sim_scenario_conf
 
 confs_dict = {}
 confs_dict["multiple_runs"] = sim_scenario_conf_grid

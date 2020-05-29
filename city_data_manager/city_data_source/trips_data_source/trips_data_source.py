@@ -9,22 +9,22 @@ from city_data_manager.city_data_source.utils.time_utils import get_time_group_c
 
 class TripsDataSource:
 
-	def __init__(self, city_id, data_source_id, vehicles_type_id):
+	def __init__(self, city_name, data_source_id, vehicles_type_id):
 
-		self.city_id = city_id
+		self.city_name = city_name
 		self.data_source_id = data_source_id
 		self.vehicles_type_id = vehicles_type_id
 		self.data_type_id = "trips"
 
 		self.raw_data_path = os.path.join(
 			data_paths_dict["raw"][self.data_type_id],
-			self.city_id,
+			self.city_name,
 			self.data_source_id,
 		)
 
 		self.norm_data_path = os.path.join(
 			data_paths_dict["norm"][self.data_type_id],
-			self.city_id,
+			self.city_name,
 			self.data_source_id
 		)
 		check_create_path(self.norm_data_path)
@@ -63,7 +63,7 @@ class TripsDataSource:
 	def load_norm(self, year, month):
 		data_path = os.path.join(
 			data_paths_dict["norm"][self.data_type_id],
-			self.city_id,
+			self.city_name,
 			self.data_source_id,
 			"_".join([str(year), str(month)]) + ".csv"
 		)

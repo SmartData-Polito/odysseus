@@ -135,22 +135,22 @@ class ChargingPrimitives:
                 if check_queuing():
                     with self.workers.request() as worker_request:
                         yield worker_request
-                        # TODO self.zone_dict["origin_zone_id"].add_vehicle(self.vehicles_list[vehicle_id])
-                        yield self.env.timeout(charge["timeout_outward"])
-                        charge["start_soc"] -= charge["cr_soc_delta"]
+                        # # TODO self.zone_dict["origin_zone_id"].add_vehicle(self.vehicles_list[vehicle_id])
+                        # yield self.env.timeout(charge["timeout_outward"])
+                        # charge["start_soc"] -= charge["cr_soc_delta"]
+                        #
+                        # self.n_vehicles_charging_system += 1
+                        # yield self.env.process(self.charging_stations_dict[zone_id].charge(
+                        #     self.vehicles_list[vehicle_id], charge["start_time"], charge["cr_soc_delta"],
+                        #     charge["duration"]
+                        # ))
+                        # self.zone_dict[charge["zone_id"]].add_vehicle(charge["start_time"] +
+                        #                                               datetime.timedelta(seconds=charge["duration"]))
 
-                        self.n_vehicles_charging_system += 1
-                        yield self.env.process(self.charging_stations_dict[zone_id].charge(
-                            self.vehicles_list[vehicle_id], charge["start_time"], charge["cr_soc_delta"],
-                            charge["duration"]
-                        ))
-                        self.zone_dict[charge["zone_id"]].add_vehicle(charge["start_time"] +
-                                                                      datetime.timedelta(seconds=charge["duration"]))
-
-                        #  with resource.request() as charging_request:
-                        #     yield charging_request
-                        #    self.n_vehicles_charging_system += 1
-                        #   yield self.env.timeout(charge["duration"])
+                        with resource.request() as charging_request:
+                            yield charging_request
+                            self.n_vehicles_charging_system += 1
+                            yield self.env.timeout(charge["duration"])
 
                         self.n_vehicles_charging_system -= 1
                         yield self.env.timeout(charge["timeout_return"])
