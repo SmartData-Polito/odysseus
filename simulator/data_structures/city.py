@@ -183,6 +183,8 @@ class City:
 
 		if self.city_name == "Minneapolis":
 			tz = pytz.timezone("America/Chicago")
+		elif self.city_name == "Louisville":
+			tz = pytz.timezone("America/Kentucky/Louisville")
 		elif self.city_name == "Torino":
 			tz = pytz.timezone("Europe/Rome")
 
@@ -200,9 +202,8 @@ class City:
 		self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"] * 3.6
 
 		self.bookings = self.bookings[self.bookings.driving_distance > 0]
-		#self.bookings = self.bookings[self.bookings.duration < 180 * 60]
 
-		if self.city_name == "Minneapolis":
+		if self.city_name in ["Minneapolis", "Louisville"]:
 			self.bookings = self.bookings[self.bookings.avg_speed < 30]
 		elif self.city_name == "Torino":
 			self.bookings = self.bookings[self.bookings.avg_speed < 120]

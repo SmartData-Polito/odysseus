@@ -36,7 +36,7 @@ class MinneapolisScooterTrips(TripsDataSource):
 
 		return self.trips_df
 
-	def normalise(self):
+	def normalise(self, year, month):
 
 		self.trips_df_norm = self.trips_df
 		self.trips_df_norm = self.trips_df_norm.rename({
@@ -61,5 +61,8 @@ class MinneapolisScooterTrips(TripsDataSource):
 		self.trips_df_norm.end_centerline_id = self.trips_df_norm.end_centerline_id.astype(str)
 		self.trips_df_norm.dropna(inplace=True)
 		self.trips_df_norm = super().normalise()
-
+		self.trips_df_norm = self.trips_df_norm[
+			(self.trips_df_norm.year == year) & (self.trips_df_norm.month == month)
+		]
+		self.save_norm()
 		return self.trips_df_norm

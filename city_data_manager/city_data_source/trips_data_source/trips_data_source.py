@@ -37,7 +37,6 @@ class TripsDataSource:
 
 	def normalise(self):
 		self.trips_df_norm = get_time_group_columns(self.trips_df_norm)
-		self.save_norm()
 		return self.trips_df_norm
 
 	def save_norm(self):

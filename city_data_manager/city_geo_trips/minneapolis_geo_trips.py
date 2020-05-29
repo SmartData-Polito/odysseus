@@ -30,7 +30,7 @@ class MinneapolisGeoTrips(CityGeoTrips):
 	def get_trips_od_gdfs(self):
 
 		self.trips_ds_dict[self.trips_data_source_id].load_raw(self.year, self.month)
-		self.trips_ds_dict[self.trips_data_source_id].normalise()
+		self.trips_ds_dict[self.trips_data_source_id].normalise(self.year, self.month)
 
 		self.trips_df_norm = self.trips_ds_dict[self.trips_data_source_id].load_norm(
 			self.year, self.month

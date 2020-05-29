@@ -7,4 +7,5 @@ root_data_path = os.path.join(
 data_paths_dict = {
 	"Minneapolis": os.path.join(root_data_path, "Minneapolis"),
 	"Torino": os.path.join(root_data_path, "Torino"),
+	"Louisville": os.path.join(root_data_path, "Louisville"),
 }
