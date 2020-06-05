@@ -71,7 +71,7 @@ class SimInput:
     def init_vehicles(self):
 
         vehicles_random_soc = list(
-            np.random.uniform(self.sim_scenario_conf["alpha"], 100, self.n_vehicles_sim).astype(int)
+            np.random.uniform(90, 100, self.n_vehicles_sim).astype(int)
         )
 
         self.vehicles_soc_dict = {

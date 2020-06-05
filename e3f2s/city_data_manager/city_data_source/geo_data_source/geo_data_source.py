@@ -3,7 +3,7 @@ import os
 import geopandas as gpd
 
 from e3f2s.city_data_manager.city_data_source.config.config import data_paths_dict
-from e3f2s.utils import check_create_path
+from e3f2s.utils.path_utils import check_create_path
 
 
 class GeoDataSource:

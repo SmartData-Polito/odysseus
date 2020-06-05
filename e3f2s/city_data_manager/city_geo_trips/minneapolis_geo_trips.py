@@ -4,8 +4,8 @@ import geopandas as gpd
 from e3f2s.city_data_manager.city_data_source.trips_data_source.minneapolis_scooter_trips import MinneapolisScooterTrips
 from e3f2s.city_data_manager.city_data_source.geo_data_source.minneapolis_centerlines import MinneapolisCenterlines
 from e3f2s.city_data_manager.city_data_source.geo_data_source.minneapolis_trails_bikes import MinneapolisTrailsBikes
-from e3f2s.utils import get_random_point_from_linestring
 from e3f2s.city_data_manager.city_geo_trips.city_geo_trips import CityGeoTrips
+from e3f2s.utils.geospatial_utils import get_random_point_from_linestring
 
 
 class MinneapolisGeoTrips(CityGeoTrips):

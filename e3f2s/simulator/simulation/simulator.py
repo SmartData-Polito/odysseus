@@ -1,6 +1,7 @@
 import copy
 import datetime
 import pytz
+from random import sample
 
 import simpy
 
@@ -123,7 +124,7 @@ class SharedMobilitySim:
 		self.zone_dict[booking_request["origin_id"]].remove_vehicle(booking_request["start_time"])
 		yield self.env.process(self.vehicles_list[vehicle_id].booking(booking_request))
 		self.zone_dict[booking_request["destination_id"]].add_vehicle(
-			booking_request["start_time"]+ datetime.timedelta(seconds=booking_request['duration'])
+			booking_request["start_time"] + datetime.timedelta(seconds=booking_request['duration'])
 		)
 
 		self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
@@ -152,6 +153,18 @@ class SharedMobilitySim:
 
 		self.sim_booking_requests += [booking_request]
 		self.n_booking_requests += 1
+
+		if self.n_booking_requests < self.simInput.n_vehicles_sim:
+			vehicle = sample(self.vehicles_soc_dict.keys(), 1)[0]
+			#print(self.n_booking_requests, vehicle)
+			self.available_vehicles_dict[self.vehicles_zones[vehicle]].remove(vehicle)
+			self.zone_dict[self.vehicles_zones[vehicle]].remove_vehicle(booking_request["start_time"])
+			del self.vehicles_zones[vehicle]
+			self.zone_dict[booking_request["origin_id"]].add_vehicle(
+				booking_request["start_time"] + datetime.timedelta(seconds=booking_request['duration'])
+			)
+			self.vehicles_zones[vehicle] = booking_request["origin_id"]
+			self.available_vehicles_dict[booking_request["origin_id"]].append(vehicle)
 
 		available_vehicle_flag = False
 		found_vehicle_flag = False
@@ -224,6 +237,9 @@ class SharedMobilitySim:
 				death["plate"] = max_soc_vehicle_neighbor
 				death["zone_id"] = max_neighbor
 			self.sim_booking_requests_deaths += [death]
+
+		#if self.n_booking_requests < self.simInput.n_vehicles_sim:
+			#print(self.n_booking_requests, vehicle, found_vehicle_flag)
 
 	def run (self):
 		self.env.process(self.mobility_requests_generator())

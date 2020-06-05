@@ -1,4 +1,5 @@
 import os
+import datetime
 import multiprocessing as mp
 
 import pandas as pd
@@ -55,6 +56,8 @@ def multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, sim_sc
 
 			sim_inputs = pool.map(get_traceB_input, conf_tuples)
 			pool_stats_list += pool.map(get_traceB_sim_stats, sim_inputs)
+
+	print(datetime.datetime.now(), city, "multiple runs finished!")
 
 	sim_stats_df = pd.concat([sim_stats for sim_stats in pool_stats_list], axis=1, ignore_index=True).T
 
