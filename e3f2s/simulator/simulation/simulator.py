@@ -154,17 +154,17 @@ class SharedMobilitySim:
 		self.sim_booking_requests += [booking_request]
 		self.n_booking_requests += 1
 
-		if self.n_booking_requests < self.simInput.n_vehicles_sim:
-			vehicle = sample(self.vehicles_soc_dict.keys(), 1)[0]
+		#if self.n_booking_requests < self.simInput.n_vehicles_sim:
+			#vehicle = sample(self.vehicles_soc_dict.keys(), 1)[0]
 			#print(self.n_booking_requests, vehicle)
-			self.available_vehicles_dict[self.vehicles_zones[vehicle]].remove(vehicle)
-			self.zone_dict[self.vehicles_zones[vehicle]].remove_vehicle(booking_request["start_time"])
-			del self.vehicles_zones[vehicle]
-			self.zone_dict[booking_request["origin_id"]].add_vehicle(
-				booking_request["start_time"] + datetime.timedelta(seconds=booking_request['duration'])
-			)
-			self.vehicles_zones[vehicle] = booking_request["origin_id"]
-			self.available_vehicles_dict[booking_request["origin_id"]].append(vehicle)
+			#self.available_vehicles_dict[self.vehicles_zones[vehicle]].remove(vehicle)
+			#self.zone_dict[self.vehicles_zones[vehicle]].remove_vehicle(booking_request["start_time"])
+			#del self.vehicles_zones[vehicle]
+			#self.zone_dict[booking_request["origin_id"]].add_vehicle(
+			#	booking_request["start_time"] + datetime.timedelta(seconds=booking_request['duration'])
+			#)
+			#self.vehicles_zones[vehicle] = booking_request["origin_id"]
+			#self.available_vehicles_dict[booking_request["origin_id"]].append(vehicle)
 
 		available_vehicle_flag = False
 		found_vehicle_flag = False
