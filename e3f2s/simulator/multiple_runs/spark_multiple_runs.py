@@ -8,7 +8,7 @@ from pyspark import SparkConf, SparkContext
 broadcastVar = ""
 
 
-def multiple_runs_spark(sim_run_conf, sim_general_conf, sim_scenario_conf_grid):
+def spark_multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid):
 
     conf = (SparkConf().setAppName("Spark trial for e3f2s"))
     sc = SparkContext(conf=conf)
