@@ -109,7 +109,12 @@ class ChargingStrategy (ChargingPrimitives):
 
 				if operator == "system":
 
-					timeout_outward = self.get_timeout(booking_request["destination_id"], charging_zone_id)
+					timeout_outward = np.random.exponential(
+						self.simInput.sim_scenario_conf[
+							"avg_reach_time"
+						] * 60
+					)
+					timeout_return = self.get_timeout(booking_request["destination_id"], charging_zone_id)
 					charge["duration"] = get_charging_time(
 						charge["soc_delta"]
 					)

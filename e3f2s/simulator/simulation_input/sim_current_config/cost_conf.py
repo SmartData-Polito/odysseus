@@ -30,15 +30,14 @@ administrative_costs_conf = {
 
 vehicles_cost_conf = {
 
-    "purchase_cost": 500,
-    "annual_leasing_cost": 0,
-    "annual_insurance_cost": 50,
-    "annual_mantenaince_cost": 50,
+    "purchase_cost": 15000,
+    "annual_leasing_cost": 2000,
+    "annual_insurance_cost": 450,
+    "annual_mantenaince_cost": 160,
 
     "washing_cost": 8,
     "disinfection_cost": 15,
 }
-
 poles_cost_conf = {
 
     "pole_installation_cost": 10000,

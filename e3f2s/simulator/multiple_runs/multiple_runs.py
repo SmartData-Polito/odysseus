@@ -48,13 +48,8 @@ def multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, sim_sc
 			)]
 
 		if sim_type == "eventG":
-
-			sim_inputs = pool.map(get_eventG_input, conf_tuples)
-			pool_stats_list += pool.map(get_eventG_sim_stats, sim_inputs)
-
+			pool_stats_list += pool.map(get_eventG_sim_stats, conf_tuples)
 		elif sim_type == "traceB":
-
-			#sim_inputs = pool.map(get_traceB_input, conf_tuples)
 			pool_stats_list += pool.map(get_traceB_sim_stats, conf_tuples)
 
 	print(datetime.datetime.now(), city, "multiple runs finished!")
