@@ -4,9 +4,9 @@ import pandas as pd
 from e3f2s.city_data_manager.config.config import root_data_path
 
 
-class Loader ():
+class Loader:
     
-    def __init__ (self, city, data_source_id, year, month, bin_side_length):
+    def __init__(self, city, data_source_id, year, month, bin_side_length):
         
         self.city = city
         self.year = year
