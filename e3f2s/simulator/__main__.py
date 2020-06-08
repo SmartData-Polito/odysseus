@@ -13,6 +13,7 @@ from e3f2s.simulator.simulation_input.sim_current_config.single_run_conf import 
 
 
 confs_dict = {}
+confs_dict["spark"] = sim_scenario_conf_grid
 confs_dict["multiple_runs"] = sim_scenario_conf_grid
 confs_dict["single_run"] = sim_scenario_conf
 
