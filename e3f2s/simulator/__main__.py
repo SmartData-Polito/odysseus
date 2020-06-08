@@ -49,6 +49,7 @@ for sim_general_conf in sim_general_conf_list:
             sim_run_conf,
             sim_general_conf,
             confs_dict[sim_run_mode],
+            sim_scenario_name
         )
 
 # plot_multiple_runs (city_name, sim_scenario_name)
