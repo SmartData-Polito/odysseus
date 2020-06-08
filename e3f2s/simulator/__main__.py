@@ -1,4 +1,6 @@
+import os
 import datetime
+import pandas as pd
 
 from e3f2s.simulator.single_run.single_run import single_run
 from e3f2s.simulator.multiple_runs.multiple_runs import multiple_runs
@@ -11,9 +13,26 @@ from e3f2s.simulator.simulation_input.sim_current_config.single_run_conf import 
 from e3f2s.simulator.data_structures.city import City
 from e3f2s.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 from e3f2s.simulator.simulation_input.sim_input import SimInput
+from e3f2s.simulator.simulation_output.sim_output import EFFCS_SimOutput
 from pyspark import SparkConf, SparkContext
 
 broadcastVar = ""
+
+
+def run_eventG_sim(simInput):
+    sim_eventG = ModelDrivenSim(
+
+        simInput=simInput
+
+    )
+    sim_eventG.init_data_structures()
+    sim_eventG.run()
+    return sim_eventG
+
+
+def get_eventG_sim_output(simInput):
+    sim_eventG = run_eventG_sim(simInput)
+    return EFFCS_SimOutput(sim_eventG)
 
 
 def get_eventG_sim_stats_spark (conf_tuple):
