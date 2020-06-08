@@ -11,6 +11,7 @@ from e3f2s.simulator.simulation_input.sim_current_config.sim_general_conf import
 from e3f2s.simulator.simulation_input.sim_current_config.multiple_runs_conf import sim_scenario_conf_grid
 from e3f2s.simulator.simulation_input.sim_current_config.single_run_conf import sim_scenario_conf
 
+broadcastVar = ""
 
 confs_dict = {}
 confs_dict["spark"] = sim_scenario_conf_grid
