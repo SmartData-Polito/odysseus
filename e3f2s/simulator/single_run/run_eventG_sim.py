@@ -30,4 +30,4 @@ def get_eventG_sim_stats (conf_tuple):
     simInput.init_charging_poles()
     sim_eventG = run_eventG_sim(simInput)
     simOutput_eventG = EFFCS_SimOutput(sim_eventG)
-    return (simOutput_eventG.sim_stats)
+    return simOutput_eventG.sim_stats
