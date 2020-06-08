@@ -24,6 +24,8 @@ def get_eventG_sim_stats_spark (conf_tuple):
 
 def spark_multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 
+    city = sim_run_conf["city"]
+
     results_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
         "results",
@@ -36,7 +38,6 @@ def spark_multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, 
     conf = (SparkConf().setAppName("Spark trial for e3f2s"))
     sc = SparkContext(conf=conf)
 
-    city = sim_run_conf["city"]
     city_obj = City(city, sim_run_conf["data_source_id"], sim_general_conf)
 
     global broadcastVar
