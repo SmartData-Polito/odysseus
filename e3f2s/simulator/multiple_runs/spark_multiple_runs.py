@@ -31,5 +31,5 @@ def spark_multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid):
         )]
 
     bs_rdd = sc.parallelize(conf_tuples, numSlices=len(conf_tuples))
-    sim_stats_list = bs_rdd.map(get_eventG_sim_stats).collectAsMap()
+    sim_stats_list = bs_rdd.map(get_eventG_sim_stats).collect()
     print(sim_stats_list)
