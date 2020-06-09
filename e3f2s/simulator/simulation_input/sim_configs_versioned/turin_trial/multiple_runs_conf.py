@@ -3,8 +3,8 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "requests_rate_factor": [1],
-    "n_vehicles_factor": [0.5, 0.625],
+    "requests_rate_factor": [2, 3, 4, 5],
+    "n_vehicles_factor": [1],
 
     "time_estimation": [True],
     "queuing": [True],

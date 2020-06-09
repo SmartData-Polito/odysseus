@@ -119,11 +119,6 @@ class ChargingStrategy (ChargingPrimitives):
 						charge["soc_delta"]
 					)
 
-					if not self.simInput.sim_scenario_conf["relocation"]:
-						timeout_return = 0
-					elif self.simInput.sim_scenario_conf["relocation"]:
-						timeout_return = timeout_outward
-
 					cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)
 
 					if cr_soc_delta > booking_request["end_soc"]:
