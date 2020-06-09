@@ -5,6 +5,6 @@ sim_run_conf = {
     "n_cores": 72,
     "sim_run_mode": "multiple_runs",
     "sim_technique": "traceB",
-    "sim_scenario_name": "n_scooters",
+    "sim_scenario_name": "users",
 
 }

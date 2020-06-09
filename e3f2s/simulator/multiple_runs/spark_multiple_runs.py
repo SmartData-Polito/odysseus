@@ -62,10 +62,16 @@ def spark_multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, 
     conf = (SparkConf().setAppName("Spark trial for e3f2s"))
     sc = SparkContext(conf=conf)
 
+    print("Here 1!")
+
     city_obj = City(city, sim_run_conf["data_source_id"], sim_general_conf)
+    return
 
     global broadcastVar
     broadcastVar = sc.broadcast(city_obj)
+
+    print("Here 2!")
+
 
     sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 
@@ -78,6 +84,7 @@ def spark_multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, 
         )]
 
     bs_rdd = sc.parallelize(conf_tuples, numSlices=len(conf_tuples))
+    print("Here!", len(conf_tuples))
     sim_stats_list = bs_rdd.map(get_eventG_sim_stats_spark).collect()
 
     sim_stats_df = pd.concat([sim_stats for sim_stats in sim_stats_list], axis=1, ignore_index=True).T
