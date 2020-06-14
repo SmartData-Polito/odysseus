@@ -8,13 +8,7 @@ e3f2s/simulator/figures/*
 e3f2s/simulator/results/*
 e3f2s/simulator/simulation_input/sim_configs/*
 
-# trips_count_predictor/data/*
-# trips_count_predictor/results/*
-# trips_count_predictor/figures/*
-
-# *scratch.py
-# trips_count_predictor/config/trainer_single_run/scratch.json
-# trips_count_predictor/config/trainer_multiple_runs/scratch.json
+*.pickle
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -140,5 +134,3 @@ venv.bak/
 *.pyc
 
 *.secret
-
-bfcom_certs/
