@@ -65,10 +65,6 @@ def multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, sim_sc
 					city_obj
 				)]
 
-		for i in range(len(conf_tuples)):
-			print(conf_tuples[i][1])
-		exit(-1)
-
 		if sim_type == "eventG":
 			pool_stats_list += pool.map(get_eventG_sim_stats, conf_tuples)
 		elif sim_type == "traceB":
