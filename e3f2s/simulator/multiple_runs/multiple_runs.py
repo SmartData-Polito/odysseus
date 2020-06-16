@@ -39,11 +39,19 @@ def multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, sim_sc
 		pool_stats_list = []
 		conf_tuples = []
 
-		if sim_general_conf["const_load_factor"] != False:
-			for sim_scenario_conf in sim_conf_grid.conf_list:
-				round_lambda = round(sim_scenario_conf["requests_rate_factor"], 2)
-				round_vehicles_factor = round(sim_scenario_conf["n_vehicles_factor"], 2)
-				if round(round_lambda / round_vehicles_factor, 2) == sim_general_conf["const_load_factor"]:
+		if "const_load_factor" in sim_general_conf.keys():
+			if sim_general_conf["const_load_factor"] != False:
+				for sim_scenario_conf in sim_conf_grid.conf_list:
+					round_lambda = round(sim_scenario_conf["requests_rate_factor"], 2)
+					round_vehicles_factor = round(sim_scenario_conf["n_vehicles_factor"], 2)
+					if round(round_lambda / round_vehicles_factor, 2) == sim_general_conf["const_load_factor"]:
+						conf_tuples += [(
+							sim_general_conf,
+							sim_scenario_conf,
+							city_obj
+						)]
+			else:
+				for sim_scenario_conf in sim_conf_grid.conf_list:
 					conf_tuples += [(
 						sim_general_conf,
 						sim_scenario_conf,
