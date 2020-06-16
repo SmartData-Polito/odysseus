@@ -1,5 +1,6 @@
 import datetime
 import os
+import pickle
 
 import pandas as pd
 
@@ -21,9 +22,6 @@ def single_run(conf_tuple):
 	sim_scenario_name = conf_tuple[3]
 	sim_type = conf_tuple[0]["sim_technique"]
 
-	city_obj = City(city, data_source_id, sim_general_conf)
-	print(datetime.datetime.now(), "City initialised!")
-
 	results_path = os.path.join(
 		os.path.dirname(os.path.dirname(__file__)),
 		"results",
@@ -32,6 +30,19 @@ def single_run(conf_tuple):
 		sim_scenario_name,
 	)
 	os.makedirs(results_path, exist_ok=True)
+
+	if not os.path.exists(os.path.join(results_path, "city_obj.pickle")):
+		city_obj = City(city, data_source_id, sim_general_conf)
+		pickle.dump(
+			city_obj,
+			open(os.path.join(results_path, "city_obj.pickle"), "wb")
+		)
+	else:
+		city_obj = pickle.Unpickler(open(os.path.join(results_path, "city_obj.pickle"), "rb")).load()
+
+	print(datetime.datetime.now(), "City initialised!")
+	print(city_obj.bookings.shape)
+	#exit(-1)
 
 	if sim_type == "eventG":
 
@@ -143,6 +154,8 @@ def single_run(conf_tuple):
 		)
 	)
 
+	print(datetime.datetime.now(), city, sim_scenario_name, "results saved!")
+
 	plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
 	plotter.plot_events_profile_barh()
 	plotter.plot_events_t()
@@ -157,7 +170,7 @@ def single_run(conf_tuple):
 		#"destination_count",
 		#"charge_needed_system_zones_count",
 		#"charge_needed_users_zones_count",
-		"unsatisfied_demand_origins_fraction",
+		#"unsatisfied_demand_origins_fraction",
 		#"not_enough_energy_origins_count",
 		#"charge_deaths_origins_count",
 	]:

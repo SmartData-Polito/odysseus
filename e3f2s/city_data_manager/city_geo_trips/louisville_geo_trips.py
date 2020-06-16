@@ -14,4 +14,3 @@ class LouisvilleGeoTrips(CityGeoTrips):
 			"city_of_louisville": LouisvilleScooterTrips()
 		}
 		self.trips_df_norm = pd.DataFrame()
-

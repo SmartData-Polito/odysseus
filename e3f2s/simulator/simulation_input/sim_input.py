@@ -18,12 +18,13 @@ class SimInput:
 
         self.city = self.city_obj.city_name
         self.grid = self.city_obj.grid
+        self.grid_matrix = self.city_obj.grid_matrix
         self.input_bookings = self.city_obj.bookings
         self.request_rates = self.city_obj.request_rates
         self.trip_kdes = self.city_obj.trip_kdes
         self.valid_zones = self.city_obj.valid_zones
-        self.od_distances = self.city_obj.od_distances
-        self.neighbors = self.city_obj.neighbors
+        #self.od_distances = self.city_obj.od_distances
+        #self.neighbors = self.city_obj.neighbors
         self.neighbors_dict = self.city_obj.neighbors_dict
 
         self.n_vehicles_original = self.sim_general_conf["n_vehicles_original"]
@@ -34,7 +35,8 @@ class SimInput:
 
         if self.sim_scenario_conf["hub"] and not self.sim_scenario_conf["distributed_cps"]:
             self.hub_n_charging_poles = int(
-                abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"]))
+                abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"])
+            )
             self.n_charging_poles = self.hub_n_charging_poles
 
         elif not self.sim_scenario_conf["hub"] and self.sim_scenario_conf["distributed_cps"]:
@@ -50,7 +52,13 @@ class SimInput:
                 int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"])) / 2
 
         if self.sim_scenario_conf["alpha"] == "auto":
-            self.sim_scenario_conf["alpha"] = np.ceil(get_soc_delta(self.od_distances.max().max() / 1000))
+            self.sim_scenario_conf["alpha"] = self.input_bookings.driving_distance.max()
+
+        self.avg_speed_mean = self.input_bookings.avg_speed.mean()
+        self.avg_speed_std = self.input_bookings.avg_speed.std()
+        self.avg_speed_kmh_mean = self.input_bookings.avg_speed_kmh.mean()
+        self.avg_speed_kmh_std = self.input_bookings.avg_speed_kmh.std()
+        print(self.avg_speed_mean, self.avg_speed_std, self.avg_speed_kmh_mean, self.avg_speed_kmh_std)
 
     def get_booking_requests_list(self):
 

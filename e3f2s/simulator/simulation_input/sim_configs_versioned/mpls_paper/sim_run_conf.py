@@ -5,6 +5,6 @@ sim_run_conf = {
     "n_cores": 1,
     "sim_run_mode": "single_run",
     "sim_technique": "traceB",
-    "sim_scenario_name": "trial",
+    "sim_scenario_name": "trial_trace",
 
 }

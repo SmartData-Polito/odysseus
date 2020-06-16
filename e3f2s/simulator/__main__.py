@@ -9,6 +9,7 @@ from e3f2s.simulator.simulation_input.sim_current_config.sim_general_conf import
 from e3f2s.simulator.simulation_input.sim_current_config.multiple_runs_conf import sim_scenario_conf_grid
 from e3f2s.simulator.simulation_input.sim_current_config.single_run_conf import sim_scenario_conf
 
+
 confs_dict = {}
 confs_dict["multiple_runs"] = sim_scenario_conf_grid
 confs_dict["single_run"] = sim_scenario_conf
@@ -42,3 +43,4 @@ for sim_general_conf in sim_general_conf_list:
 
 # plot_multiple_runs (city_name, sim_scenario_name)
 
+print (datetime.datetime.now(), city_name, sim_scenario_name, "successfully finished!")

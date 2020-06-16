@@ -92,7 +92,7 @@ class CityGeoTrips:
 				self.trips_origins.geometry, self.trips_destinations.geometry
 		], ignore_index=True)
 		locations.crs = "epsg:4326"
-		self.squared_grid = get_city_grid(
+		self.squared_grid = get_city_grid_as_gdf(
 			locations,
 			self.bin_side_length
 		)

@@ -14,7 +14,6 @@ class ModelDrivenSim (SharedMobilitySim):
 
 		self.booking_request_arrival_rates = self.simInput.request_rates
 		self.trip_kdes = self.simInput.trip_kdes
-		self.od_distances = self.simInput.od_distances
 		self.valid_zones = self.simInput.valid_zones
 		self.update_data_structures()
 
@@ -37,9 +36,6 @@ class ModelDrivenSim (SharedMobilitySim):
 
 	def create_booking_request(self, timeout):
 
-		self.update_time_info()
-		self.update_data_structures()
-
 		booking_request = {}
 
 		booking_request["ia_timeout"] = timeout
@@ -48,24 +44,46 @@ class ModelDrivenSim (SharedMobilitySim):
 		booking_request["weekday"] = self.current_weekday
 		booking_request["daytype"] = self.current_daytype
 		booking_request["hour"] = self.current_hour
+
+		def base_round(x, base):
+			if x < 0:
+				return 0
+			elif x > base:
+				return base
+			else:
+				return round(x)
+
 		trip_sample = self.current_trip_kde.sample()
+		origin_i = base_round(trip_sample[0][0], len(self.simInput.grid_matrix.index) - 1)
+		origin_j = base_round(trip_sample[0][1], len(self.simInput.grid_matrix.columns) - 1)
+		destination_i = base_round(trip_sample[0][2], len(self.simInput.grid_matrix.index) - 1)
+		destination_j = base_round(trip_sample[0][3], len(self.simInput.grid_matrix.columns) - 1)
 
-		booking_request["origin_id"] = abs(trip_sample.astype(int)[0][0]) % len(self.valid_zones)
-		booking_request["destination_id"] = abs(trip_sample.astype(int)[0][1]) % len(self.valid_zones)
-		booking_request["euclidean_distance"] = self.od_distances.loc[
-													booking_request["origin_id"],
-													booking_request["destination_id"]
-												] / 1000
+		booking_request["origin_id"] = self.simInput.grid_matrix.loc[origin_i, origin_j]
+		booking_request["destination_id"] = self.simInput.grid_matrix.loc[destination_i, destination_j]
+		if booking_request["origin_id"] in self.valid_zones and booking_request["destination_id"] in self.valid_zones:
+			booking_request["euclidean_distance"] = self.simInput.grid.loc[
+				booking_request["origin_id"], "geometry"
+			].distance(
+				self.simInput.grid.loc[booking_request["destination_id"], "geometry"]
+			) * 111.32 / 0.001
+			if booking_request["euclidean_distance"] == 0:
+				booking_request["euclidean_distance"] = self.simInput.sim_general_conf["bin_side_length"]
 
-		if 0 < booking_request["euclidean_distance"] < 100:
 			booking_request["driving_distance"] = booking_request["euclidean_distance"] * 1.4
-			booking_request["duration"] = abs(booking_request["driving_distance"] / (15 + np.random.normal(5, 2.5))) * 3600
-			booking_request["end_time"] = self.current_datetime + datetime.timedelta(seconds=booking_request["duration"])
-			booking_request["soc_delta"] = -get_soc_delta(booking_request["driving_distance"])
-			if booking_request["soc_delta"] > 0:
-				print(booking_request)
+			booking_request["duration"] = abs(booking_request["driving_distance"] / (
+				(self.simInput.avg_speed_kmh_mean + np.random.normal(
+					self.simInput.avg_speed_kmh_std, self.simInput.avg_speed_kmh_std / 2
+				)) / 3.6
+			))
+			booking_request["end_time"] = self.current_datetime + datetime.timedelta(
+				seconds=booking_request["duration"]
+			)
+			booking_request["soc_delta"] = -get_soc_delta(booking_request["driving_distance"] / 1000)
 			booking_request["soc_delta_kwh"] = soc_to_kwh(booking_request["soc_delta"])
 			self.process_booking_request(booking_request)
+		else:
+			self.create_booking_request(timeout)
 
 	def mobility_requests_generator(self):
 
@@ -78,4 +96,6 @@ class ModelDrivenSim (SharedMobilitySim):
 			)
 
 			yield self.env.timeout(timeout_sec)
+			self.update_time_info()
+			self.update_data_structures()
 			self.create_booking_request(timeout_sec)

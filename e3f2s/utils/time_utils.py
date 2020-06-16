@@ -18,11 +18,13 @@ def get_time_group_columns (trips_df_norm):
 
 	trips_df_norm.loc[:, "start_time"] = pd.to_datetime(trips_df_norm.start_time)
 	trips_df_norm.loc[:, "end_time"] = pd.to_datetime(trips_df_norm.end_time)
-	trips_df_norm.loc[:, "duration"] = (
-			trips_df_norm.end_time - trips_df_norm.start_time
-	).apply(lambda dt: dt.total_seconds())
 
-	if "t_parking_before" not in trips_df_norm.columns and "vehicle_id" in trips_df_norm.columns:
+	if "duration" not in trips_df_norm:
+		trips_df_norm.loc[:, "duration"] = (
+				trips_df_norm.end_time - trips_df_norm.start_time
+		).apply(lambda dt: dt.total_seconds())
+
+	if "vehicle_id" in trips_df_norm.columns and "t_parking_before" not in trips_df_norm.columns:
 		for vehicle, vehicle_df in trips_df_norm.groupby("vehicle_id"):
 			trips_df_norm.loc[vehicle_df.index, "t_parking_before"] = (
 					vehicle_df.start_time - vehicle_df.end_time.shift(1)
@@ -44,12 +46,12 @@ def get_time_group_columns (trips_df_norm):
 	trips_df_norm.loc[:, "start_weekday"] = trips_df_norm.start_time.apply(lambda d: get_weekday_string_from_int(d.weekday()))
 	trips_df_norm.loc[:, "end_weekday"] = trips_df_norm.end_time.apply(lambda d: get_weekday_string_from_int(d.weekday()))
 
-	trips_df_norm.loc[:, "start_weekday_hour"] = trips_df_norm.start_time.apply(
-		lambda d: "_".join([str(get_weekday_string_from_int(d.weekday())), str(d.hour)])
-	)
-	trips_df_norm.loc[:, "end_weekday_hour"] = trips_df_norm.end_time.apply(
-		lambda d: "_".join([str(get_weekday_string_from_int(d.weekday())), str(d.hour)])
-	)
+	# trips_df_norm.loc[:, "start_weekday_hour"] = trips_df_norm.start_time.apply(
+	# 	lambda d: "_".join([str(get_weekday_string_from_int(d.weekday())), str(d.hour)])
+	# )
+	# trips_df_norm.loc[:, "end_weekday_hour"] = trips_df_norm.end_time.apply(
+	# 	lambda d: "_".join([str(get_weekday_string_from_int(d.weekday())), str(d.hour)])
+	# )
 
 	trips_df_norm.loc[:, "start_daytype"] = trips_df_norm.start_weekday.apply(
 		lambda w: "weekend" if get_weekday_int_from_string(w) in [5, 6] else "weekday"
@@ -71,20 +73,20 @@ def get_time_group_columns (trips_df_norm):
 	#     ])
 	# )
 
-	trips_df_norm.loc[:, "start_daymoment"] = pd.Series()
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(0, 6)), "start_daymoment"] = "night"
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(6, 12)), "start_daymoment"] = "morning"
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(12, 18)), "start_daymoment"] = "afternoon"
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(18, 24)), "start_daymoment"] = "evening"
-	trips_df_norm.loc[:, "end_daymoment"] = pd.Series()
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(0, 6)), "end_daymoment"] = "night"
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(6, 12)), "end_daymoment"] = "morning"
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(12, 18)), "end_daymoment"] = "afternoon"
-	trips_df_norm.loc[trips_df_norm.start_hour.isin(range(18, 24)), "end_daymoment"] = "evening"
-
-	trips_df_norm.loc[:, "start_daytype_daymoment"] = trips_df_norm.loc[:, ["start_daytype", "start_daymoment"]].apply(
-		lambda x: "_".join([x[0], x[1]]), axis=1
-	)
+	# trips_df_norm.loc[:, "start_daymoment"] = pd.Series()
+	# trips_df_norm.loc[trips_df_norm.start_hour.isin(range(0, 6)), "start_daymoment"] = "night"
+	# trips_df_norm.loc[trips_df_norm.start_hour.isin(range(6, 12)), "start_daymoment"] = "morning"
+	# trips_df_norm.loc[trips_df_norm.start_hour.isin(range(12, 18)), "start_daymoment"] = "afternoon"
+	# trips_df_norm.loc[trips_df_norm.start_hour.isin(range(18, 24)), "start_daymoment"] = "evening"
+	# trips_df_norm.loc[:, "end_daymoment"] = pd.Series()
+	# trips_df_norm.loc[trips_df_norm.start_hour.isin(range(0, 6)), "end_daymoment"] = "night"
+	# trips_df_norm.loc[trips_df_norm.start_hour.isin(range(6, 12)), "end_daymoment"] = "morning"
+	# trips_df_norm.loc[trips_df_norm.start_hour.isin(range(12, 18)), "end_daymoment"] = "afternoon"
+	# trips_df_norm.loc[trips_df_norm.start_hour.isin(range(18, 24)), "end_daymoment"] = "evening"
+    #
+	# trips_df_norm.loc[:, "start_daytype_daymoment"] = trips_df_norm.loc[:, ["start_daytype", "start_daymoment"]].apply(
+	# 	lambda x: "_".join([x[0], x[1]]), axis=1
+	# )
 
 	return trips_df_norm
 
@@ -311,7 +313,7 @@ def get_time_grouped_hourly_count(df_norm, start_or_end, which_df):
 
 	time_grouped_hourly_count = pd.DataFrame()
 
-	for time_categorial_col in ["hour", "weekday", "daymoment", "daytype"]:
+	for time_categorial_col in ["hour", "weekday"]:
 
 		time_grouped_hourly_count[time_categorial_col] = df_norm.set_index(
 			"_".join([start_or_end, "time"])
@@ -330,7 +332,7 @@ def get_time_grouped_hourly_mean(df_norm, start_or_end, which_df, mean_col):
 
 	time_grouped_hourly_count = pd.DataFrame()
 
-	for time_categorial_col in ["hour", "weekday", "daymoment", "daytype"]:
+	for time_categorial_col in ["hour", "weekday"]:
 
 		time_grouped_hourly_count[time_categorial_col] = df_norm.set_index(
 			"_".join([start_or_end, "time"])

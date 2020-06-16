@@ -13,7 +13,6 @@ class TraceDrivenSim (SharedMobilitySim):
 
         self.booking_request_arrival_rates = self.simInput.request_rates
         self.trip_kdes = self.simInput.trip_kdes
-        self.od_distances = self.simInput.od_distances
         self.valid_zones = self.simInput.valid_zones
 
     def update_time_info(self):
