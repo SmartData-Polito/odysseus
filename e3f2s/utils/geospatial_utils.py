@@ -77,3 +77,11 @@ def add_grouped_count_to_grid(grid, trips_locations, group_col, od_key, aggfunc=
         grid["_".join([od_key, aggfunc, str(group)])] = \
             group_df.groupby("index_right").geometry.count()
     return grid
+
+
+def get_od_distance(grid, origin_id, destination_id):
+    return grid.loc[
+                origin_id, "geometry"
+            ].distance(
+                grid.loc[destination_id, "geometry"]
+            ) * 111.32 / 0.001

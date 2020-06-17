@@ -58,7 +58,6 @@ class SimInput:
         self.avg_speed_std = self.input_bookings.avg_speed.std()
         self.avg_speed_kmh_mean = self.input_bookings.avg_speed_kmh.mean()
         self.avg_speed_kmh_std = self.input_bookings.avg_speed_kmh.std()
-        print(self.avg_speed_mean, self.avg_speed_std, self.avg_speed_kmh_mean, self.avg_speed_kmh_std)
 
     def get_booking_requests_list(self):
 

@@ -5,6 +5,7 @@ import numpy as np
 
 from e3f2s.utils.vehicle_utils import get_soc_delta
 from e3f2s.utils.vehicle_utils import soc_to_kwh
+from e3f2s.utils.geospatial_utils import get_od_distance
 from e3f2s.simulator.simulation.simulator import SharedMobilitySim
 
 
@@ -62,11 +63,11 @@ class ModelDrivenSim (SharedMobilitySim):
 		booking_request["origin_id"] = self.simInput.grid_matrix.loc[origin_i, origin_j]
 		booking_request["destination_id"] = self.simInput.grid_matrix.loc[destination_i, destination_j]
 		if booking_request["origin_id"] in self.valid_zones and booking_request["destination_id"] in self.valid_zones:
-			booking_request["euclidean_distance"] = self.simInput.grid.loc[
-				booking_request["origin_id"], "geometry"
-			].distance(
-				self.simInput.grid.loc[booking_request["destination_id"], "geometry"]
-			) * 111.32 / 0.001
+			booking_request["euclidean_distance"] = get_od_distance(
+				self.simInput.grid,
+				booking_request["origin_id"],
+				booking_request["destination_id"]
+			)
 			if booking_request["euclidean_distance"] == 0:
 				booking_request["euclidean_distance"] = self.simInput.sim_general_conf["bin_side_length"]
 

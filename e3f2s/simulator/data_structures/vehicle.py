@@ -39,8 +39,8 @@ class Vehicle(object):
             "zone": self.zone
         }
         self.status_dict_list.append(self.current_status)
-        self.soc.get(abs(booking_request["soc_delta"]))
         yield self.env.timeout(booking_request["duration"])
+        self.soc.get(abs(booking_request["soc_delta"]))
         self.zone = booking_request["destination_id"]
         self.available = True
         self.current_status = {

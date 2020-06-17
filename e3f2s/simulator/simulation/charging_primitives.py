@@ -5,6 +5,7 @@ import numpy as np
 
 from e3f2s.simulator.simulation_input.sim_current_config.vehicle_config import vehicle_conf
 from e3f2s.utils.vehicle_utils import *
+from e3f2s.utils.geospatial_utils import get_od_distance
 
 
 def get_charging_time(soc_delta,
@@ -27,8 +28,7 @@ def init_charge(booking_request, vehicles_soc_dict, vehicle, beta):
     charge["start_time"] = booking_request["end_time"]
     charge["date"] = charge["start_time"].date()
     charge["hour"] = charge["start_time"].hour
-    charge["day_hour"] = \
-        charge["start_time"].replace(minute=0, second=0, microsecond=0)
+    charge["day_hour"] = charge["start_time"].replace(minute=0, second=0, microsecond=0)
     charge["start_soc"] = vehicles_soc_dict[vehicle]
     charge["end_soc"] = beta
     charge["soc_delta"] = charge["end_soc"] - charge["start_soc"]
@@ -145,16 +145,21 @@ class ChargingPrimitives:
                         self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
                         charge["end_soc"] -= charge["cr_soc_delta"]
 
-                    self.n_vehicles_charging_system += 1
-                    self.zone_dict[charge["zone_id"]].add_vehicle(
-                        charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
-                    )
-                    yield self.env.process(
-                        self.charging_stations_dict[zone_id].charge(
-                            self.vehicles_list[vehicle_id], charge["start_time"], charge["cr_soc_delta"],
-                            charge["duration"]
-                        )
-                    )
+                    with resource.request() as charging_request:
+                        yield charging_request
+                        self.n_vehicles_charging_system += 1
+                        yield self.env.timeout(charge["duration"])
+                    # self.zone_dict[charge["zone_id"]].add_vehicle(
+                    #     charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
+                    # )
+                    # yield self.env.process(
+                    #     self.charging_stations_dict[zone_id].charge(
+                    #         self.vehicles_list[vehicle_id],
+                    #         charge["start_time"],
+                    #         charge["cr_soc_delta"],
+                    #         charge["duration"]
+                    #     )
+                    # )
                     self.n_vehicles_charging_system -= 1
 
             elif operator == "users":
@@ -178,7 +183,6 @@ class ChargingPrimitives:
                 vehicle,
                 self.simInput.sim_scenario_conf["beta"]
             )
-            self.zone_dict[booking_request["destination_id"]].remove_vehicle(booking_request["end_time"])
             return True, charge
         else:
             return False, None
@@ -203,9 +207,21 @@ class ChargingPrimitives:
             return False, None
 
     def get_timeout(self, origin_id, destination_id):
-        distance = self.simInput.od_distances.loc[origin_id, destination_id] / 1000
+        distance = get_od_distance(
+                self.simInput.grid,
+                origin_id,
+                destination_id
+        )
+        if distance == 0:
+            distance = self.simInput.sim_general_conf["bin_side_length"]
         return distance / 15 * 3600
 
     def get_cr_soc_delta(self, origin_id, destination_id):
-        distance = self.simInput.od_distances.loc[origin_id, destination_id] / 1000
+        distance = get_od_distance(
+                self.simInput.grid,
+                origin_id,
+                destination_id
+        )
+        if distance == 0:
+            distance = self.simInput.sim_general_conf["bin_side_length"]
         return get_soc_delta(distance)

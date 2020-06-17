@@ -118,7 +118,6 @@ class ChargingStrategy (ChargingPrimitives):
 					charge["duration"] = get_charging_time(
 						charge["soc_delta"]
 					)
-
 					cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)
 
 					if cr_soc_delta > booking_request["end_soc"]:
@@ -173,6 +172,7 @@ class ChargingStrategy (ChargingPrimitives):
 			else:
 				charge_flag, charge = self.check_system_charge(booking_request, vehicle)
 				if charge_flag:
+					print(charge)
 					self.list_system_charging_bookings.append(booking_request)
 					charge_dict = self.get_charge_dict(vehicle, charge, booking_request, "system")
 					yield self.env.process(self.charge_vehicle(charge_dict))

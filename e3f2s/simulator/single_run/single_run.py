@@ -37,12 +37,19 @@ def single_run(conf_tuple):
 			city_obj,
 			open(os.path.join(results_path, "city_obj.pickle"), "wb")
 		)
+		city_obj.grid_matrix.to_pickle(
+			os.path.join(results_path, "grid_matrix.pickle")
+		)
+		pd.DataFrame(city_obj.neighbors_dict).to_pickle(
+			os.path.join(results_path, "neighbors_dict.pickle")
+		)
+
 	else:
 		city_obj = pickle.Unpickler(open(os.path.join(results_path, "city_obj.pickle"), "rb")).load()
 
 	print(datetime.datetime.now(), "City initialised!")
 	print(city_obj.bookings.shape)
-	#exit(-1)
+	#print(city_obj.neighbors_dict)
 
 	if sim_type == "eventG":
 
