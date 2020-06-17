@@ -7,6 +7,6 @@ sim_general_conf_grid = {
 
     "year": [2019],
     "month_start": [7],
-    "month_end": [8],
+    "month_end": [10],
 
 }

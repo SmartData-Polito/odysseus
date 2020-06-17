@@ -96,7 +96,10 @@ class ModelDrivenSim (SharedMobilitySim):
 				)
 			)
 
-			yield self.env.timeout(timeout_sec)
+			if timeout_sec < 60 * 60:
+				yield self.env.timeout(timeout_sec)
+				self.create_booking_request(timeout_sec)
+			else:
+				yield self.env.timeout(60 * 60)
 			self.update_time_info()
 			self.update_data_structures()
-			self.create_booking_request(timeout_sec)

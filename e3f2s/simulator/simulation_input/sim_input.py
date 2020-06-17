@@ -23,8 +23,6 @@ class SimInput:
         self.request_rates = self.city_obj.request_rates
         self.trip_kdes = self.city_obj.trip_kdes
         self.valid_zones = self.city_obj.valid_zones
-        #self.od_distances = self.city_obj.od_distances
-        #self.neighbors = self.city_obj.neighbors
         self.neighbors_dict = self.city_obj.neighbors_dict
 
         self.n_vehicles_original = self.sim_general_conf["n_vehicles_original"]
