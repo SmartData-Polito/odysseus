@@ -172,7 +172,6 @@ class ChargingStrategy (ChargingPrimitives):
 			else:
 				charge_flag, charge = self.check_system_charge(booking_request, vehicle)
 				if charge_flag:
-					print(charge)
 					self.list_system_charging_bookings.append(booking_request)
 					charge_dict = self.get_charge_dict(vehicle, charge, booking_request, "system")
 					yield self.env.process(self.charge_vehicle(charge_dict))
