@@ -1,4 +1,5 @@
 import os
+import pickle
 import datetime
 import multiprocessing as mp
 
@@ -33,7 +34,22 @@ def multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, sim_sc
 
 	with mp.Pool(n_cores) as pool:
 
-		city_obj = City(city, sim_run_conf["data_source_id"], sim_general_conf)
+		if not os.path.exists(os.path.join(results_path, "city_obj.pickle")):
+			city_obj = City(city, sim_run_conf["data_source_id"], sim_general_conf)
+			pickle.dump(
+				city_obj,
+				open(os.path.join(results_path, "city_obj.pickle"), "wb")
+			)
+			city_obj.grid_matrix.to_pickle(
+				os.path.join(results_path, "grid_matrix.pickle")
+			)
+			pd.DataFrame(city_obj.neighbors_dict).to_pickle(
+				os.path.join(results_path, "neighbors_dict.pickle")
+			)
+
+		else:
+			city_obj = pickle.Unpickler(open(os.path.join(results_path, "city_obj.pickle"), "rb")).load()
+
 		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 
 		pool_stats_list = []
