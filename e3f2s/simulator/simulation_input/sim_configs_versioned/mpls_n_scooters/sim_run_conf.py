@@ -5,6 +5,6 @@ sim_run_conf = {
     "n_cores": 72,
     "sim_run_mode": "multiple_runs",
     "sim_technique": "eventG",
-    "sim_scenario_name": "n_workers",
+    "sim_scenario_name": "n_scooters",
 
 }
