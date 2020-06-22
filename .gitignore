@@ -6,7 +6,7 @@ e3f2s/city_data_manager/city_data_source/data/*
 e3f2s/simulator/data/*
 e3f2s/simulator/figures/*
 e3f2s/simulator/results/*
-e3f2s/simulator/simulation_input/sim_configs/*
+e3f2s/simulator/simulation_input/sim_current_config/*
 
 *.pickle
 
