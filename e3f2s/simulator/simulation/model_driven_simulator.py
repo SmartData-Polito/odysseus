@@ -9,6 +9,9 @@ from e3f2s.utils.geospatial_utils import get_od_distance
 from e3f2s.simulator.simulation.simulator import SharedMobilitySim
 
 
+np.random.seed(44)
+
+
 class ModelDrivenSim (SharedMobilitySim):
 
 	def init_data_structures (self):
