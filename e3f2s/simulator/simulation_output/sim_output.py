@@ -131,12 +131,17 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["n_charges"] = \
 			len(self.sim_charges)
 
-		self.sim_stats.loc["n_charging_requests_system"] = \
-			len(self.sim_system_charges_bookings)
+		self.sim_stats.loc["n_charging_requests_system"] = len(self.sim_system_charges_bookings)
 
-		self.sim_stats.loc["n_charges_system"] = \
-			self.sim_charges.groupby("operator")\
-				.date.count().loc["system"]
+		if "system" in self.sim_charges.operator:
+			self.sim_stats.loc["n_charges_system"] = self.sim_charges.groupby("operator").date.count().loc["system"]
+		else:
+			self.sim_stats.loc["n_charges_system"] = 0
+
+		if "users" in self.sim_charges.operator:
+			self.sim_stats.loc["n_charges_users"] = self.sim_charges.groupby("operator").date.count().loc["users"]
+		else:
+			self.sim_stats.loc["n_charges_users"] = 0
 
 		self.sim_stats.loc["n_charge_deaths"] = \
 			len(self.sim_charge_deaths)
