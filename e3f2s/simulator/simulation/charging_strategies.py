@@ -32,7 +32,7 @@ class ChargingStrategy (ChargingPrimitives):
 					timeout_return = 0
 					cr_soc_delta = 0
 					charge["duration"] = np.random.exponential(
-						120 * 60
+						240 * 60
 					)
 					resource = self.workers
 
