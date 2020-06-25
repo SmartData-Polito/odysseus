@@ -22,13 +22,13 @@ sim_scenario_conf_grid = {
     "system_cps": [False],
 
     "battery_swap": [True],
-    "avg_reach_time": [15, 30, 45, 60],
+    "avg_reach_time": [30],
     "avg_service_time": [5],
 
     "n_workers": np.arange(1, 10, 1),
     "relocation": [False],
 
-    "user_contribution": [False],
-    "willingness": [0],
+    "user_contribution": [True],
+    "willingness": [0, 0.25, 0.5, 0.75],
 
 }

@@ -9,7 +9,7 @@ sim_scenario_conf_grid = {
     "time_estimation": [True],
     "queuing": [True],
 
-    "alpha": [20],
+    "alpha": [30],
     "beta": [100],
     "n_poles_n_vehicles_factor": [0],
 
@@ -25,7 +25,7 @@ sim_scenario_conf_grid = {
     "avg_reach_time": [15, 30, 45, 60],
     "avg_service_time": [5],
 
-    "n_workers": np.arange(1, 10, 1),
+    "n_workers": np.arange(1, 15, 1),
     "relocation": [False],
 
     "user_contribution": [False],
