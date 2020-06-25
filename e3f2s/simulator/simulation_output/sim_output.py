@@ -260,12 +260,24 @@ class EFFCS_SimOutput ():
 		self.grid[
 			"destination_count"
 		] = self.sim_booking_requests.destination_id.value_counts()
-		self.grid[
-			"charge_needed_system_zones_count"
-		] = self.sim_system_charges_bookings.destination_id.value_counts()
-		self.grid[
-			"charge_needed_users_zones_count"
-		] = self.sim_users_charges_bookings.destination_id.value_counts()
+
+		if len(self.sim_system_charges_bookings):
+			self.grid[
+				"charge_needed_system_zones_count"
+			] = self.sim_system_charges_bookings.destination_id.value_counts()
+		else:
+			self.grid[
+				"charge_needed_system_zones_count"
+			] = 0
+		if len(self.sim_users_charges_bookings):
+			self.grid[
+				"charge_needed_users_zones_count"
+			] = self.sim_users_charges_bookings.destination_id.value_counts()
+		else:
+			self.grid[
+				"charge_needed_users_zones_count"
+			] = 0
+
 		self.grid[
 			"unsatisfied_demand_origins_fraction"
 		] = self.sim_unsatisfied_requests.origin_id.value_counts() / len(self.sim_unsatisfied_requests)
