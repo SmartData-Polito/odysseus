@@ -149,9 +149,6 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["fraction_charge_deaths"] = \
 			len(self.sim_charge_deaths) / self.sim_stats.loc["n_charges"]
 
-		self.sim_stats.loc["fraction_charge_deaths_system"] = \
-			len(self.sim_charge_deaths) / self.sim_stats.loc["n_charges_system"]
-
 		self.sim_stats.loc["soc_avg"] = \
 			self.sim_bookings.start_soc.mean()
 
