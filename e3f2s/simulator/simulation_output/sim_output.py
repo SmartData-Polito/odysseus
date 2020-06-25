@@ -17,19 +17,18 @@ class EFFCS_SimOutput ():
 		self.sim_no_close_vehicle_requests = pd.DataFrame(sim.sim_no_close_vehicle_requests)
 		self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 		self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
+		self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
 		self.n_vehicles_per_zones_history = pd.DataFrame(sim.n_vehicles_per_zones_history)
 
-		self.sim_system_charges_bookings["end_hour"] = self.sim_system_charges_bookings["end_time"].apply(
-			lambda d: d.hour
-		)
+		if len(self.sim_system_charges_bookings["end_hour"]):
+			self.sim_system_charges_bookings["end_hour"] = self.sim_system_charges_bookings["end_time"].apply(
+				lambda d: d.hour
+			)
 
-		self.sim_users_charges_bookings = pd.DataFrame\
-			(sim.chargingStrategy.list_users_charging_bookings,
-			 columns = self.sim_system_charges_bookings.columns)
-
-		self.sim_users_charges_bookings["end_hour"] = \
-			self.sim_users_charges_bookings["end_time"].apply\
-			(lambda d: d.hour)
+		if len(self.sim_users_charges_bookings["end_hour"]):
+			self.sim_users_charges_bookings["end_hour"] = self.sim_users_charges_bookings["end_time"].apply(
+				lambda d: d.hour
+			)
 
 		self.sim_unfeasible_charge_bookings = pd.DataFrame(
 			sim.chargingStrategy.sim_unfeasible_charge_bookings
