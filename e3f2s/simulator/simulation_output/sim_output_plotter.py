@@ -85,36 +85,30 @@ class EFFCS_SimOutputPlotter ():
 
 	def plot_charging_infrastructure(self):
 
-		if self.simOutput.sim_scenario_conf["hub"]:
+		fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+		plt.title("")
+		plt.xlabel(None)
+		plt.xticks([])
+		plt.ylabel(None)
+		plt.yticks([])
+		self.grid.plot(color="white", edgecolor="black", ax=ax)
+		self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 
-			fig, ax = plt.subplots(1, 1, figsize=(15, 15))
-			plt.title("")
-			plt.xlabel(None)
-			plt.xticks([])
-			plt.ylabel(None)
-			plt.yticks([])
+		if self.simOutput.sim_scenario_conf["hub"]:
 			self.grid.plot(color="white", edgecolor="black", ax=ax)
 			self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 			self.grid.iloc[self.simOutput.sim_stats["hub_zone"]:self.simOutput.sim_stats["hub_zone"]+1].plot(ax=ax)
 			plt.savefig(os.path.join(self.figures_path, "hub_location.png"), transparent=True)
 			plt.close()
 
-		elif self.simOutput.sim_scenario_conf["cps"]:
+		elif self.simOutput.sim_scenario_conf["distributed_cps"]:
 
 			charging_zones = pd.Index(self.sim_charges.zone_id.unique())
 			charging_poles_by_zone = self.sim_charges.zone_id.value_counts()
 			self.grid.loc[charging_zones, "poles_count"] = charging_poles_by_zone
-
-			fig, ax = plt.subplots(1, 1, figsize=(15, 15))
-			plt.title("")
-			plt.xlabel(None)
-			plt.xticks([])
-			plt.ylabel(None)
-			plt.yticks([])
 			self.grid.plot(color="white", edgecolor="black", ax=ax)
 			self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 			self.grid.loc[charging_zones].plot(ax=ax)
-			# grid.dropna().plot(column="poles_count", ax=ax, legend=True)
 			plt.savefig(os.path.join(self.figures_path, "cps_locations.png"), transparent=True)
 			plt.close()
 

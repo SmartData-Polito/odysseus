@@ -27,27 +27,33 @@ class SimInput:
 
         self.n_vehicles_original = self.sim_general_conf["n_vehicles_original"]
         self.n_vehicles_sim = int(abs(self.n_vehicles_original * self.sim_scenario_conf["n_vehicles_factor"]))
-        self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
+
+        if "tot_n_charging_poles" in self.sim_scenario_conf.keys():
+            self.tot_n_charging_poles = self.sim_scenario_conf["tot_n_charging_poles"]
+        elif "n_poles_n_vehicles_factor" in self.sim_scenario_conf.keys():
+            self.tot_n_charging_poles = abs(
+                    self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"]
+                )
 
         self.hub_zone = -1
+        if self.sim_scenario_conf["hub"]:
+            self.n_charging_zones = 1
+            self.sim_scenario_conf["cps_zones_percentage"] = 1 / self.tot_n_charging_poles
+        else:
+            if self.sim_scenario_conf["cps_zones_percentage"] == 0:
+                self.n_charging_zones = 1
+                self.sim_scenario_conf["cps_zones_percentage"] = 1 / self.tot_n_charging_poles
+            self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
 
         if self.sim_scenario_conf["hub"] and not self.sim_scenario_conf["distributed_cps"]:
-            self.hub_n_charging_poles = int(
-                abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"])
-            )
-            self.n_charging_poles = self.hub_n_charging_poles
-
+            self.hub_n_charging_poles = int(self.tot_n_charging_poles)
+            self.n_charging_poles = 0
         elif not self.sim_scenario_conf["hub"] and self.sim_scenario_conf["distributed_cps"]:
             self.hub_n_charging_poles = 0
-            self.n_charging_poles = int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"]))
-
+            self.n_charging_poles = self.tot_n_charging_poles
         elif self.sim_scenario_conf["hub"] and self.sim_scenario_conf["distributed_cps"]:
-
-            self.n_charging_poles = \
-                int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"])) / 2
-
-            self.hub_n_charging_poles = \
-                int(abs(self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"])) / 2
+            self.n_charging_poles = int(self.tot_n_charging_poles / 2)
+            self.hub_n_charging_poles = int(self.tot_n_charging_poles / 2)
 
         if self.sim_scenario_conf["alpha"] == "auto":
             self.sim_scenario_conf["alpha"] = self.input_bookings.driving_distance.max()
@@ -115,6 +121,8 @@ class SimInput:
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
 
     def init_hub(self):
+
+        self.hub_zone = int(self.input_bookings.destination_id.value_counts().iloc[:1].index[0])
 
         if self.sim_scenario_conf["hub_zone_policy"] == "manual":
             pass

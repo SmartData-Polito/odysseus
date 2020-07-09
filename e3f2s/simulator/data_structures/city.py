@@ -13,7 +13,7 @@ from e3f2s.utils.time_utils import *
 
 class City:
 
-    def __init__(self, city_name, data_source_id, sim_general_conf, kde_bw=1):
+    def __init__(self, city_name, data_source_id, sim_general_conf, kde_bw=0.1):
 
         self.city_name = city_name
 
