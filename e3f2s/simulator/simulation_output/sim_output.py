@@ -291,6 +291,7 @@ class EFFCS_SimOutput ():
 			] = self.sim_charge_deaths.origin_id.value_counts()
 
 		self.sim_stats.loc["hub_zone"] = sim.simInput.hub_zone
+		self.sim_stats.loc["n_charging_zones"] = sim.simInput.n_charging_zones
 
 		self.vehicles_history = pd.DataFrame()
 		for vehicle in sim.vehicles_list:

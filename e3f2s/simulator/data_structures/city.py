@@ -13,7 +13,7 @@ from e3f2s.utils.time_utils import *
 
 class City:
 
-    def __init__(self, city_name, data_source_id, sim_general_conf, kde_bw=0.1):
+    def __init__(self, city_name, data_source_id, sim_general_conf, kde_bw=1):
 
         self.city_name = city_name
 
@@ -64,12 +64,13 @@ class City:
         self.grid["zone_id"] = self.grid.index.values
         self.map_zones_on_trips(self.grid)
         self.bookings = self.get_input_bookings_filtered().dropna()
-        self.valid_zones = self.grid.index
         self.bookings = self.bookings.loc[
             (self.bookings.origin_id.isin(self.grid.index)) & (
                 self.bookings.destination_id.isin(self.grid.index)
             )
         ]
+
+        self.valid_zones = self.get_valid_zones()
 
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
@@ -161,7 +162,7 @@ class City:
 
         return self.bookings
 
-    def get_valid_zones(self, count_threshold):
+    def get_valid_zones(self, count_threshold=0):
 
         self.valid_zones = self.bookings.origin_id.value_counts().sort_values().tail(
             int(self.sim_general_conf["k_zones_factor"] * len(self.grid))
@@ -194,7 +195,7 @@ class City:
                 self.neighbors_dict[int(zone)] = {}
                 for ii in range(i_low, i_up+1):
                     for jj in range(j_low, j_up+1):
-                        if ii != i or jj != j and self.grid_matrix.iloc[ii, jj] in self.valid_zones:
+                        if ii != i or jj != j and self.grid_matrix.iloc[ii, jj] in self.grid.index:
                             self.neighbors_dict[int(zone)].update({iii: self.grid_matrix.iloc[ii, jj]})
                             iii += 1
         return self.neighbors_dict
@@ -205,8 +206,8 @@ class City:
 
         for hour, hour_df in self.bookings.groupby("hour"):
             self.hourly_ods[hour] = pd.DataFrame(
-                index=self.valid_zones,
-                columns=self.valid_zones
+                index=self.grid.index,
+                columns=self.grid.index
             )
             hourly_od = pd.pivot_table(
                 hour_df,
