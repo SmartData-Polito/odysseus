@@ -3,15 +3,15 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "requests_rate_factor": np.arange(1, 6, 0.5),
-    "n_vehicles_factor": np.arange(1, 6, 0.5),
+    "requests_rate_factor": np.arange(1, 6, 1),
+    "n_vehicles_factor": np.arange(1, 6, 1),
 
     "time_estimation": [True],
     "queuing": [True],
 
     "alpha": [26],
     "beta": [100],
-    "tot_n_charging_poles": np.arange(50, 310, 30),
+    "tot_n_charging_poles": np.arange(50, 550, 50),
 
     "hub": [False],
     "hub_zone_policy": [""],
@@ -22,7 +22,7 @@ sim_scenario_conf_grid = {
     "cps_zones_percentage": [0.15],
 
     "battery_swap": [False],
-    "avg_reach_time": [1],
+    "avg_reach_time": [20],
     "avg_service_time": [0],
 
     "n_workers": [1000],
