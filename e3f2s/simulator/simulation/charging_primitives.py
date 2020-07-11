@@ -216,7 +216,7 @@ class ChargingPrimitives:
         )
         if distance == 0:
             distance = self.simInput.sim_general_conf["bin_side_length"]
-        return distance / 1000 / 15
+        return distance / 1000 / 15 * 3600
 
     def get_cr_soc_delta(self, origin_id, destination_id):
         distance = get_od_distance(
