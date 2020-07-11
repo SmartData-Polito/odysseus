@@ -139,7 +139,6 @@ class SimInput:
             top_dest_zones = self.input_bookings.destination_id.value_counts().iloc[:self.n_charging_zones]
 
             self.n_charging_poles_by_zone = dict((top_dest_zones / top_dest_zones.sum() * self.n_charging_poles))
-            print(pd.Series(self.n_charging_poles_by_zone).sort_values(ascending=True).index)
 
             assigned_cps = 0
             for zone_id in self.n_charging_poles_by_zone:

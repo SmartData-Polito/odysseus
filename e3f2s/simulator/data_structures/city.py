@@ -167,8 +167,6 @@ class City:
                 )
             ]
 
-        print(self.bookings[["driving_distance", "duration", "avg_speed"]].describe())
-
         return self.bookings
 
     def get_valid_zones(self, count_threshold=0):
