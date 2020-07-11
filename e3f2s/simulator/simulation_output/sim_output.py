@@ -254,8 +254,9 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["avg_hourly_relo_t"] = \
 			self.sim_charges.groupby("hour").cr_timeout.sum().mean()
 
-		for key in self.sim_stats
-
+		for key in self.sim_stats.index:
+			if key.startswith("fraction"):
+				self.sim_stats["percentage" + key[8:]] = self.sim_stats[key] * 100
 
 		self.grid[
 			"origin_count"
