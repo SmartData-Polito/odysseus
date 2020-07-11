@@ -84,7 +84,7 @@ class City:
         self.locations.crs = "epsg:4326"
         squared_grid = get_city_grid_as_gdf(
             self.locations,
-            self.bin_side_length
+            self.bin_side_length * 1.4
         )
         return squared_grid
 
@@ -159,6 +159,15 @@ class City:
             self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
         elif self.city_name in ["Torino", "Berlin"]:
             self.bookings = self.bookings[self.bookings.avg_speed_kmh < 120]
+            self.bookings = self.bookings[
+                (self.bookings.duration > 3*60) & (
+                    self.bookings.duration < 60*60
+                ) & (
+                    self.bookings.euclidean_distance > 500
+                )
+            ]
+
+        print(self.bookings[["driving_distance", "duration", "avg_speed"]].describe())
 
         return self.bookings
 
@@ -271,6 +280,7 @@ class City:
             for hour in hours_list:
                 hour_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
                 if len(hour_df) == 0:
-                    self.trip_kdes[daytype][hour] = self.trip_kdes[daytype][(hour - 1) % 24]
+                    rates = pd.Series(self.request_rates[daytype])
+                    self.trip_kdes[daytype][hour] = self.trip_kdes[daytype][rates.idxmin()]
 
         return self.trip_kdes

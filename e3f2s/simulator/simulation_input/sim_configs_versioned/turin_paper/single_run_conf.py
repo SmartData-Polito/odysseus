@@ -6,7 +6,7 @@ sim_scenario_conf = {
 	"time_estimation": True,
 	"queuing": True,
 
-	"alpha": 30,
+	"alpha": 26,
 	"beta": 100,
 	"tot_n_charging_poles": 80,
 
@@ -16,7 +16,7 @@ sim_scenario_conf = {
 	"distributed_cps": True,
 	"system_cps": True,
 	"cps_placement_policy": "num_parkings",
-	"cps_zones_percentage": 0.2,
+	"cps_zones_percentage": 0.1,
 
 	"battery_swap": False,
 	"avg_reach_time": 1,

@@ -149,6 +149,7 @@ class ChargingPrimitives:
                         yield charging_request
                         self.n_vehicles_charging_system += 1
                         yield self.env.timeout(charge["duration"])
+
                     # self.zone_dict[charge["zone_id"]].add_vehicle(
                     #     charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
                     # )
@@ -160,6 +161,7 @@ class ChargingPrimitives:
                     #         charge["duration"]
                     #     )
                     # )
+
                     self.n_vehicles_charging_system -= 1
 
             elif operator == "users":
@@ -214,7 +216,7 @@ class ChargingPrimitives:
         )
         if distance == 0:
             distance = self.simInput.sim_general_conf["bin_side_length"]
-        return distance / 15 * 3600
+        return distance / 1000 / 15
 
     def get_cr_soc_delta(self, origin_id, destination_id):
         distance = get_od_distance(
@@ -224,4 +226,4 @@ class ChargingPrimitives:
         )
         if distance == 0:
             distance = self.simInput.sim_general_conf["bin_side_length"]
-        return get_soc_delta(distance)
+        return get_soc_delta(distance / 1000)

@@ -49,7 +49,6 @@ def single_run(conf_tuple):
 
 	print(datetime.datetime.now(), "City initialised!")
 	print(city_obj.bookings.shape)
-	#print(city_obj.neighbors_dict)
 
 	if sim_type == "eventG":
 
@@ -68,6 +67,8 @@ def single_run(conf_tuple):
 		simOutput = simOutput_traceB
 
 	print(datetime.datetime.now(), city, sim_scenario_name, "finished!")
+
+	os.makedirs(results_path, exist_ok=True)
 
 	sim_stats.to_pickle(os.path.join(results_path, "sim_stats.pickle"))
 	pd.Series(sim_general_conf).to_pickle(os.path.join(results_path, "sim_general_conf.pickle"))
