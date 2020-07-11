@@ -176,7 +176,7 @@ class EFFCS_SimOutput ():
 			self.sim_stats.loc["n_charges_by_vehicle_users_avg"] = 0
 
 		self.sim_stats["sim_duration"] = (sim.end - sim.start).total_seconds()
-
+		self.sim_stats.loc["tot_mobility_distance"] = self.sim_booking_requests.driving_distance.sum()
 		self.sim_stats.loc["tot_potential_mobility_energy"] = self.sim_booking_requests.soc_delta_kwh.sum()
 
 		if "tot_n_charging_poles" not in self.sim_stats.index:
