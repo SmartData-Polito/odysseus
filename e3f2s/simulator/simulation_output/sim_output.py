@@ -177,14 +177,18 @@ class EFFCS_SimOutput ():
 
 		self.sim_stats["sim_duration"] = (sim.end - sim.start).total_seconds()
 
-		self.sim_stats.loc["tot_potential_mobility_energy"] = \
-			self.sim_booking_requests.soc_delta.sum()
+		self.sim_stats.loc["tot_potential_mobility_energy"] = self.sim_booking_requests.soc_delta.sum()
 
-		self.sim_stats.loc["tot_potential_charging_energy"] = \
-			get_charging_soc(self.sim_stats["sim_duration"] / 3600)
+		if "tot_n_charging_poles" not in self.sim_stats.index:
+			self.sim_stats["tot_n_charging_poles"] = self.sim_stats.n_poles_n_vehicles_factor * (
+					self.sim_stats.n_vehicles_original * self.sim_stats.n_vehicles_factor
+			)
 
-		self.sim_stats.loc["tot_charging_energy"] = \
-			self.sim_charges["soc_delta_kwh"].sum()
+		self.sim_stats.loc["tot_potential_charging_energy"] = get_charging_soc(
+			self.sim_stats["sim_duration"]
+		) * self.sim_stats["tot_n_charging_poles"]
+
+		self.sim_stats.loc["tot_charging_energy"] = self.sim_charges["soc_delta_kwh"].sum()
 
 		if "system" in self.sim_charges.operator.unique():
 			self.sim_stats.loc["fraction_charges_system"] = \
