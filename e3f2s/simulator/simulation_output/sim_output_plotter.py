@@ -107,7 +107,7 @@ class EFFCS_SimOutputPlotter ():
 			charging_poles_by_zone = self.sim_charges.zone_id.value_counts()
 			self.grid.loc[charging_zones, "poles_count"] = charging_poles_by_zone
 			self.grid.plot(color="white", edgecolor="black", ax=ax)
-			self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
+			self.grid.plot(color="lavender", edgecolor="blue", column="poles_count", ax=ax).plot()
 			self.grid.loc[charging_zones].plot(ax=ax)
 			plt.savefig(os.path.join(self.figures_path, "cps_locations.png"), transparent=True)
 			plt.close()
