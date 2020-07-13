@@ -85,7 +85,6 @@ class ChargingStrategy (ChargingPrimitives):
 			zones_by_distance = self.simInput.zones_cp_distances.loc[
 				int(booking_request["destination_id"])
 			].sort_values()
-			print(zones_by_distance)
 
 			free_pole_flag = 0
 			for zone in zones_by_distance.index:
