@@ -47,6 +47,7 @@ class TraceDrivenSim (SharedMobilitySim):
             booking_request = update_req_time_info(booking_request)
             booking_request["soc_delta"] = -get_soc_delta(booking_request["driving_distance"] / 1000)
             booking_request["soc_delta_kwh"] = soc_to_kwh(booking_request["soc_delta"])
+            print(booking_request)
 
             yield self.env.timeout(booking_request["ia_timeout"])
             self.process_booking_request(booking_request)
