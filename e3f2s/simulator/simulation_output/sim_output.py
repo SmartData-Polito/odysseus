@@ -180,6 +180,7 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["tot_mobility_distance"] = self.sim_bookings.driving_distance.sum()
 		self.sim_stats.loc["tot_potential_mobility_energy"] = self.sim_booking_requests.soc_delta_kwh.sum()
 
+		self.sim_stats.loc["n_vehicles_sim"] = sim.simInput.n_vehicles_sim
 		if "tot_n_charging_poles" not in self.sim_stats.index:
 			self.sim_stats.loc["tot_n_charging_poles"] = self.sim_stats.loc["n_poles_n_vehicles_factor"] * (
 					self.sim_stats.loc["n_vehicles_sim"]
