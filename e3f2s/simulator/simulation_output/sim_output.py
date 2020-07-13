@@ -7,6 +7,8 @@ class EFFCS_SimOutput ():
 
 	def __init__ (self, sim):
 
+		self.sim = sim
+
 		self.sim_general_conf = sim.simInput.sim_general_conf
 		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
 
