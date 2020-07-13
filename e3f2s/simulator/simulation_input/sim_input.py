@@ -34,9 +34,10 @@ class SimInput:
             )
         elif "fleet_load_factor" in self.sim_scenario_conf.keys():
             self.n_vehicles_sim = int(
-                self.n_vehicles_original * self.sim_scenario_conf["requests_rate_factor"]
-            ) / self.sim_scenario_conf["fleet_load_factor"]
-
+                self.n_vehicles_original * self.sim_scenario_conf["requests_rate_factor"] / self.sim_scenario_conf[
+                    "fleet_load_factor"
+                ]
+            )
         if "tot_n_charging_poles" in self.sim_scenario_conf.keys():
             self.tot_n_charging_poles = self.sim_scenario_conf["tot_n_charging_poles"]
         elif "n_poles_n_vehicles_factor" in self.sim_scenario_conf.keys():
