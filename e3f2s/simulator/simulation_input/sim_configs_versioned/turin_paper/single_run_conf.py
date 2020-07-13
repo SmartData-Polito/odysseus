@@ -8,7 +8,7 @@ sim_scenario_conf = {
 
 	"alpha": 26,
 	"beta": 100,
-	"tot_n_charging_poles": 80,
+	"n_poles_n_vehicles_factor": 0.15,
 
 	"hub": False,
 	"hub_zone_policy": "",
@@ -16,7 +16,7 @@ sim_scenario_conf = {
 	"distributed_cps": True,
 	"system_cps": True,
 	"cps_placement_policy": "num_parkings",
-	"cps_zones_percentage": 0.1,
+	"cps_zones_percentage": 0.15,
 
 	"battery_swap": False,
 	"avg_reach_time": 20,
