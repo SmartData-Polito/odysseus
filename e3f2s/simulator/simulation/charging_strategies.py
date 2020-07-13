@@ -88,23 +88,21 @@ class ChargingStrategy (ChargingPrimitives):
 
 			free_pole_flag = 0
 			for zone in zones_by_distance.index:
-				if self.charging_poles_dict[zone].count < self.charging_poles_dict[zone].capacity:
+				if self.charging_stations_dict[zone].charging_station.count < self.charging_stations_dict[zone].charging_station.capacity:
 					free_pole_flag = 1
 					charging_zone_id = zone
-					break
-					# cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)
-					# print(cr_soc_delta)
-					# if cr_soc_delta > booking_request["end_soc"]:
-					# 	free_pole_flag = 0
-					# else:
-					# 	break
+					cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)
+					if cr_soc_delta > booking_request["end_soc"]:
+						free_pole_flag = 0
+					else:
+						break
 
 			if free_pole_flag == 0:
 				charging_zone_id = self.simInput.closest_cp_zone[
 					int(booking_request["destination_id"])
 				]
 
-			charging_station = self.charging_poles_dict[charging_zone_id]
+			charging_station = self.charging_stations_dict[charging_zone_id].charging_station
 			resource = charging_station
 
 			if self.simInput.sim_scenario_conf["time_estimation"]:
