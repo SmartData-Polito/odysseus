@@ -182,7 +182,7 @@ class EFFCS_SimOutput ():
 
 		if "tot_n_charging_poles" not in self.sim_stats.index:
 			self.sim_stats.loc["tot_n_charging_poles"] = self.sim_stats.loc["n_poles_n_vehicles_factor"] * (
-					self.sim_stats.loc["n_vehicles_original"] * self.sim_stats.loc["n_vehicles_factor"]
+					self.sim_stats.loc["n_vehicles_sim"]
 			)
 
 		self.sim_stats.loc["tot_potential_charging_energy"] = self.sim_stats.loc["sim_duration"] / 3600 * (
