@@ -88,7 +88,8 @@ class ChargingStrategy (ChargingPrimitives):
 
 			free_pole_flag = 0
 			for zone in zones_by_distance.index:
-				if self.charging_stations_dict[zone].charging_station.count < self.charging_stations_dict[zone].charging_station.capacity:
+				if self.charging_poles_dict[zone].count < self.charging_poles_dict[zone].capacity:
+
 					free_pole_flag = 1
 					charging_zone_id = zone
 					cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)

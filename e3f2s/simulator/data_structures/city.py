@@ -90,19 +90,21 @@ class City:
 
     def map_zones_on_trips(self, zones):
         self.trips_origins = gpd.sjoin(
-            zones,
             self.trips_origins,
-            how='right',
-            op='contains'
+            zones,
+            how='left',
+            op='within'
         )
         self.trips_destinations = gpd.sjoin(
-            zones,
             self.trips_destinations,
-            how='right',
-            op='contains'
+            zones,
+            how='left',
+            op='within'
         )
         self.bookings["origin_id"] = self.trips_origins.zone_id
         self.bookings["destination_id"] = self.trips_destinations.zone_id
+        self.grid["origin_count"] = self.bookings.origin_id.value_counts()
+        self.grid["destination_count"] = self.bookings.destination_id.value_counts()
 
     def get_input_bookings_filtered(self):
 

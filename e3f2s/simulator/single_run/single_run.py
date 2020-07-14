@@ -40,6 +40,9 @@ def single_run(conf_tuple):
 		city_obj.grid_matrix.to_pickle(
 			os.path.join(results_path, "grid_matrix.pickle")
 		)
+		city_obj.grid.to_pickle(
+			os.path.join(results_path, "grid.pickle")
+		)
 		pd.DataFrame(city_obj.neighbors_dict).to_pickle(
 			os.path.join(results_path, "neighbors_dict.pickle")
 		)

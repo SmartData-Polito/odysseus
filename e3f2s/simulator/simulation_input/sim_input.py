@@ -161,6 +161,7 @@ class SimInput:
                     assigned_cps += 1
 
             self.n_charging_poles_by_zone = dict(pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
+            print(self.n_charging_poles_by_zone)
 
             zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
 
