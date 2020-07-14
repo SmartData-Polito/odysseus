@@ -145,22 +145,23 @@ class ChargingPrimitives:
                         self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
                         charge["end_soc"] -= charge["cr_soc_delta"]
 
-                    with resource.request() as charging_request:
-                        yield charging_request
-                        self.n_vehicles_charging_system += 1
-                        yield self.env.timeout(charge["duration"])
+                    # with resource.request() as charging_request:
+                    #     yield charging_request
+                    #     self.n_vehicles_charging_system += 1
+                    #     yield self.env.timeout(charge["duration"])
 
-                    # self.zone_dict[charge["zone_id"]].add_vehicle(
-                    #     charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
-                    # )
-                    # yield self.env.process(
-                    #     self.charging_stations_dict[zone_id].charge(
-                    #         self.vehicles_list[vehicle_id],
-                    #         charge["start_time"],
-                    #         charge["cr_soc_delta"],
-                    #         charge["duration"]
-                    #     )
-                    # )
+                    self.n_vehicles_charging_system += 1
+                    self.zone_dict[charge["zone_id"]].add_vehicle(
+                        charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
+                    )
+                    yield self.env.process(
+                        self.charging_stations_dict[zone_id].charge(
+                            self.vehicles_list[vehicle_id],
+                            charge["start_time"],
+                            charge["cr_soc_delta"],
+                            charge["duration"]
+                        )
+                    )
 
                     self.n_vehicles_charging_system -= 1
 

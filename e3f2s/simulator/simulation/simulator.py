@@ -118,15 +118,15 @@ class SharedMobilitySim:
 
         booking_request["plate"] = vehicle_id
 
-        yield self.env.timeout(booking_request["duration"])
+        #yield self.env.timeout(booking_request["duration"])
 
-        # self.zone_dict[booking_request["origin_id"]].remove_vehicle(booking_request["start_time"])
-        # print(self.vehicles_list[vehicle_id].soc.level)
-        # yield self.env.process(self.vehicles_list[vehicle_id].booking(booking_request))
-        # self.zone_dict[booking_request["destination_id"]].add_vehicle(
-        #     booking_request["start_time"] + datetime.timedelta(seconds=booking_request['duration'])
-        # )
-        # print(self.vehicles_list[vehicle_id].soc.level)
+        self.zone_dict[booking_request["origin_id"]].remove_vehicle(booking_request["start_time"])
+        #print(self.vehicles_list[vehicle_id].soc.level)
+        yield self.env.process(self.vehicles_list[vehicle_id].booking(booking_request))
+        self.zone_dict[booking_request["destination_id"]].add_vehicle(
+            booking_request["start_time"] + datetime.timedelta(seconds=booking_request['duration'])
+        )
+        #print(self.vehicles_list[vehicle_id].soc.level)
 
         self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
         booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
