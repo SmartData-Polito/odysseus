@@ -106,7 +106,7 @@ class ChargingStrategy (ChargingPrimitives):
 			with open("check_file.csv", "a") as f:
 				f.write(",".join([str(booking_request["destination_id"]), str(charging_zone_id), str(free_pole_flag)]) + "\n")
 
-			charging_station = self.charging_poles_dict[charging_zone_id]
+			charging_station = self.charging_stations_dict[zone].charging_station
 			resource = charging_station
 
 			if self.simInput.sim_scenario_conf["time_estimation"]:
