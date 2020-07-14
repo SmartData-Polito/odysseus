@@ -155,7 +155,7 @@ class SimInput:
                 zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
                 assigned_cps += zone_n_cps
                 self.n_charging_poles_by_zone[zone_id] = zone_n_cps
-            for zone_id in pd.Series(self.n_charging_poles_by_zone).sort_values(ascending=True).index:
+            for zone_id in pd.Series(self.n_charging_poles_by_zone).sort_values(ascending=False).index:
                 if assigned_cps < self.n_charging_poles:
                     self.n_charging_poles_by_zone[zone_id] += 1
                     assigned_cps += 1
