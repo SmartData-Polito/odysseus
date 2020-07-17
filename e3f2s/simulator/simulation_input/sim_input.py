@@ -54,7 +54,7 @@ class SimInput:
             if self.sim_scenario_conf["cps_zones_percentage"] == 0:
                 self.n_charging_zones = 1
                 self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
-                print(len(self.valid_zones))
+                #print(len(self.valid_zones))
             self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
 
         if self.sim_scenario_conf["hub"] and not self.sim_scenario_conf["distributed_cps"]:
@@ -102,7 +102,7 @@ class SimInput:
             i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
         }
 
-        print(self.input_bookings.origin_id.value_counts(), len(self.valid_zones))
+        #print(self.input_bookings.origin_id.value_counts(), len(self.valid_zones))
 
         top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:len(self.valid_zones)]
 
@@ -166,20 +166,20 @@ class SimInput:
                     assigned_cps += 1
 
             self.n_charging_poles_by_zone = dict(pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
-            print(pd.Series(self.n_charging_poles_by_zone))
-            print(pd.Series(self.n_charging_poles_by_zone).sum())
-            print(len(pd.Series(self.n_charging_poles_by_zone)))
-            print(len(self.valid_zones))
+            # print(pd.Series(self.n_charging_poles_by_zone))
+            # print(pd.Series(self.n_charging_poles_by_zone).sum())
+            # print(len(pd.Series(self.n_charging_poles_by_zone)))
+            # print(len(self.valid_zones))
 
             zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
 
             self.zones_cp_distances = self.grid.centroid.apply(
                 lambda x: self.grid.loc[zones_with_cps].centroid.distance(x)
             )
-            print(self.zones_cp_distances)
+            #print(self.zones_cp_distances)
 
             self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
-            print(self.closest_cp_zone)
+            #print(self.closest_cp_zone)
 
             return self.n_charging_poles_by_zone
 

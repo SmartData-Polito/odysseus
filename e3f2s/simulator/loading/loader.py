@@ -72,7 +72,7 @@ class Loader:
         path = os.path.join(
             self.norm_data_path,
             "od_trips",
-            "bookings_.pickle"
+            "od_trips.pickle"
         )
         self.bookings = pd.read_pickle(path)
 

@@ -58,7 +58,7 @@ class City:
         self.bookings["euclidean_distance"] = (
                 self.trips_origins.distance(self.trips_destinations)
         ) / 1.4
-        print(self.bookings.shape)
+        #print(self.bookings.shape)
 
         self.grid = self.get_squared_grid()
         self.grid_matrix = get_city_grid_as_matrix(
@@ -70,7 +70,7 @@ class City:
         self.bookings = self.get_input_bookings_filtered().dropna()
 
         self.valid_zones = self.get_valid_zones()
-        print(len(self.valid_zones))
+        #print(len(self.valid_zones))
         self.grid = self.grid.loc[self.valid_zones]
 
         self.bookings = self.bookings.loc[
@@ -78,15 +78,15 @@ class City:
                 self.bookings.destination_id.isin(self.valid_zones)
             )
         ]
-        print(
-            self.bookings[[
-                "euclidean_distance", "driving_distance", "duration"
-            ]].describe()
-        )
+        # print(
+        #     self.bookings[[
+        #         "euclidean_distance", "driving_distance", "duration"
+        #     ]].describe()
+        # )
         points = self.grid.centroid.geometry
         self.od_distances = points.apply(lambda p: points.distance(p)) / 1.4
         self.max_dist = self.od_distances.max().max()
-        print(self.max_dist)
+        #print(self.max_dist)
 
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
@@ -133,7 +133,7 @@ class City:
     def get_input_bookings_filtered(self):
 
         self.bookings = self.bookings.sort_values("start_time")
-        print("duration" in self.bookings.columns)
+        #print("duration" in self.bookings.columns)
 
         if "driving_distance" not in self.bookings.columns:
             self.bookings["driving_distance"] = self.bookings.euclidean_distance * 1.4
@@ -208,9 +208,9 @@ class City:
         #print(len(self.grid), len(origin_zones_count), len(dest_zones_count))
 
         valid_origin_zones = origin_zones_count[(origin_zones_count > count_threshold)]
-        print(valid_origin_zones)
+        #print(valid_origin_zones)
         valid_dest_zones = dest_zones_count[(dest_zones_count > count_threshold)]
-        print(valid_dest_zones)
+        #print(valid_dest_zones)
 
         self.valid_zones = valid_origin_zones.index.intersection(
                 valid_dest_zones.index
