@@ -45,10 +45,10 @@ class City:
             self.bookings = pd.concat([self.bookings, bookings], ignore_index=True)
             self.trips_origins = pd.concat([
                 self.trips_origins, origins
-            ], ignore_index=True)
+            ], ignore_index=True, sort=False)
             self.trips_destinations = pd.concat([
                 self.trips_destinations, destinations
-            ], ignore_index=True)
+            ], ignore_index=True, sort=False)
 
         self.bookings.start_time = pd.to_datetime(self.bookings.start_time, utc=True)
         self.bookings.end_time = pd.to_datetime(self.bookings.end_time, utc=True)
