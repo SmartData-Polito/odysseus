@@ -34,21 +34,21 @@ def multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, sim_sc
 
 	with mp.Pool(n_cores) as pool:
 
-		if not os.path.exists(os.path.join(results_path, "city_obj.pickle")):
-			city_obj = City(city, sim_run_conf["data_source_id"], sim_general_conf)
-			pickle.dump(
-				city_obj,
-				open(os.path.join(results_path, "city_obj.pickle"), "wb")
-			)
-			city_obj.grid_matrix.to_pickle(
-				os.path.join(results_path, "grid_matrix.pickle")
-			)
-			pd.DataFrame(city_obj.neighbors_dict).to_pickle(
-				os.path.join(results_path, "neighbors_dict.pickle")
-			)
+		# if not os.path.exists(os.path.join(results_path, "city_obj.pickle")):
+		city_obj = City(city, sim_run_conf["data_source_id"], sim_general_conf)
+		pickle.dump(
+			city_obj,
+			open(os.path.join(results_path, "city_obj.pickle"), "wb")
+		)
+		city_obj.grid_matrix.to_pickle(
+			os.path.join(results_path, "grid_matrix.pickle")
+		)
+		pd.DataFrame(city_obj.neighbors_dict).to_pickle(
+			os.path.join(results_path, "neighbors_dict.pickle")
+		)
 
-		else:
-			city_obj = pickle.Unpickler(open(os.path.join(results_path, "city_obj.pickle"), "rb")).load()
+		# else:
+		# 	city_obj = pickle.Unpickler(open(os.path.join(results_path, "city_obj.pickle"), "rb")).load()
 
 		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 
@@ -89,7 +89,6 @@ def multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, sim_sc
 	print(datetime.datetime.now(), city, "multiple runs finished!")
 
 	sim_stats_df = pd.concat([sim_stats for sim_stats in pool_stats_list], axis=1, ignore_index=True).T
-    
 	sim_stats_df.to_csv(os.path.join(results_path, "sim_stats.csv"))
 	pd.Series(sim_general_conf).to_csv(os.path.join(results_path, "sim_general_conf.csv"), header=True)
 	pd.Series(sim_scenario_conf_grid).to_csv(os.path.join(results_path, "sim_scenario_conf_grid.csv"), header=True)

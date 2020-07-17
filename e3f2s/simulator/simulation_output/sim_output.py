@@ -13,9 +13,9 @@ class EFFCS_SimOutput ():
 		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
 
 		self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
-		print(self.sim_booking_requests[[
-			"euclidean_distance", "driving_distance", "duration"
-		]].describe())
+		# print(self.sim_booking_requests[[
+		# 	"euclidean_distance", "driving_distance", "duration"
+		# ]].describe())
 
 		self.sim_bookings = self.sim_booking_requests.dropna()
 		self.sim_charges = pd.DataFrame(sim.chargingStrategy.sim_charges)
