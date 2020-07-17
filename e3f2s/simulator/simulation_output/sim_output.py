@@ -13,6 +13,10 @@ class EFFCS_SimOutput ():
 		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
 
 		self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
+		print(self.sim_booking_requests[[
+			"euclidean_distance", "driving_distance", "duration"
+		]].describe())
+
 		self.sim_bookings = self.sim_booking_requests.dropna()
 		self.sim_charges = pd.DataFrame(sim.chargingStrategy.sim_charges)
 		self.sim_not_enough_energy_requests = pd.DataFrame(sim.sim_booking_requests_deaths)
@@ -178,9 +182,13 @@ class EFFCS_SimOutput ():
 			self.sim_stats.loc["n_charges_by_vehicle_users_avg"] = 0
 
 		self.sim_stats["sim_duration"] = (sim.end - sim.start).total_seconds()
-		self.sim_stats.loc["tot_mobility_duration"] = self.sim_bookings.duration.sum()
-		self.sim_stats.loc["tot_mobility_distance"] = self.sim_bookings.driving_distance.sum()
+		self.sim_stats.loc["tot_potential_mobility_distance"] = self.sim_booking_requests.driving_distance.sum()
+		self.sim_stats.loc["tot_potential_mobility_duration"] = self.sim_booking_requests.duration.sum()
 		self.sim_stats.loc["tot_potential_mobility_energy"] = self.sim_booking_requests.soc_delta_kwh.sum()
+
+		self.sim_stats.loc["tot_mobility_distance"] = self.sim_bookings.driving_distance.sum()
+		self.sim_stats.loc["tot_mobility_duration"] = self.sim_bookings.duration.sum()
+		self.sim_stats.loc["tot_mobility_energy"] = self.sim_bookings.soc_delta_kwh.sum()
 
 		self.sim_stats.loc["n_vehicles_sim"] = sim.simInput.n_vehicles_sim
 		if "tot_n_charging_poles" not in self.sim_stats.index:

@@ -31,24 +31,24 @@ def single_run(conf_tuple):
 	)
 	os.makedirs(results_path, exist_ok=True)
 
-	if not os.path.exists(os.path.join(results_path, "city_obj.pickle")):
-		city_obj = City(city, data_source_id, sim_general_conf)
-		pickle.dump(
-			city_obj,
-			open(os.path.join(results_path, "city_obj.pickle"), "wb")
-		)
-		city_obj.grid_matrix.to_pickle(
-			os.path.join(results_path, "grid_matrix.pickle")
-		)
-		city_obj.grid.to_pickle(
-			os.path.join(results_path, "grid.pickle")
-		)
-		pd.DataFrame(city_obj.neighbors_dict).to_pickle(
-			os.path.join(results_path, "neighbors_dict.pickle")
-		)
+	# if not os.path.exists(os.path.join(results_path, "city_obj.pickle")):
+	city_obj = City(city, data_source_id, sim_general_conf)
+	pickle.dump(
+		city_obj,
+		open(os.path.join(results_path, "city_obj.pickle"), "wb")
+	)
+	city_obj.grid_matrix.to_pickle(
+		os.path.join(results_path, "grid_matrix.pickle")
+	)
+	city_obj.grid.to_pickle(
+		os.path.join(results_path, "grid.pickle")
+	)
+	pd.DataFrame(city_obj.neighbors_dict).to_pickle(
+		os.path.join(results_path, "neighbors_dict.pickle")
+	)
 
-	else:
-		city_obj = pickle.Unpickler(open(os.path.join(results_path, "city_obj.pickle"), "rb")).load()
+	# else:
+	# 	city_obj = pickle.Unpickler(open(os.path.join(results_path, "city_obj.pickle"), "rb")).load()
 
 	print(datetime.datetime.now(), "City initialised!")
 	print(city_obj.bookings.shape)
@@ -74,6 +74,7 @@ def single_run(conf_tuple):
 	os.makedirs(results_path, exist_ok=True)
 
 	sim_stats.to_pickle(os.path.join(results_path, "sim_stats.pickle"))
+	sim_stats.to_csv(os.path.join(results_path, "sim_stats.csv"))
 	pd.Series(sim_general_conf).to_pickle(os.path.join(results_path, "sim_general_conf.pickle"))
 	pd.Series(sim_scenario_conf).to_pickle(os.path.join(results_path, "sim_scenario_conf.pickle"))
 

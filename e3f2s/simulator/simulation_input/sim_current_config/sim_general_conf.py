@@ -2,7 +2,7 @@ sim_general_conf_grid = {
 
     "const_load_factor": [1],
 
-    "n_vehicles_original": [400],
+    "n_vehicles_original": [410],
 
     "bin_side_length": [500],
     "k_zones_factor": [1],

@@ -21,8 +21,9 @@ class SimInput:
         self.grid_matrix = self.city_obj.grid_matrix
         self.input_bookings = self.city_obj.bookings
         self.request_rates = self.city_obj.request_rates
-        self.trip_kdes = self.city_obj.trip_kdes
+        #self.trip_kdes = self.city_obj.trip_kdes
         self.valid_zones = self.city_obj.valid_zones
+        #print(len(self.valid_zones))
         self.neighbors_dict = self.city_obj.neighbors_dict
 
         self.n_vehicles_original = self.sim_general_conf["n_vehicles_original"]
@@ -53,6 +54,7 @@ class SimInput:
             if self.sim_scenario_conf["cps_zones_percentage"] == 0:
                 self.n_charging_zones = 1
                 self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
+                print(len(self.valid_zones))
             self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
 
         if self.sim_scenario_conf["hub"] and not self.sim_scenario_conf["distributed_cps"]:
@@ -81,6 +83,7 @@ class SimInput:
             "start_time",
             "end_time",
             "ia_timeout",
+            "euclidean_distance",
             "driving_distance",
             "date",
             "hour",
@@ -92,17 +95,19 @@ class SimInput:
     def init_vehicles(self):
 
         vehicles_random_soc = list(
-            np.random.uniform(40, 80, self.n_vehicles_sim).astype(int)
+            np.random.uniform(25, 100, self.n_vehicles_sim).astype(int)
         )
 
         self.vehicles_soc_dict = {
             i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
         }
 
-        top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:31]
+        print(self.input_bookings.origin_id.value_counts(), len(self.valid_zones))
+
+        top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:len(self.valid_zones)]
 
         vehicles_random_zones = list(
-            np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()
+            np.random.uniform(0, len(self.valid_zones)-1, self.n_vehicles_sim).astype(int).round()
         )
 
         self.vehicles_zones = [
@@ -155,20 +160,26 @@ class SimInput:
                 zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
                 assigned_cps += zone_n_cps
                 self.n_charging_poles_by_zone[zone_id] = zone_n_cps
-            for zone_id in pd.Series(self.n_charging_poles_by_zone).sort_values(ascending=False).index:
+            for zone_id in self.n_charging_poles_by_zone:
                 if assigned_cps < self.n_charging_poles:
                     self.n_charging_poles_by_zone[zone_id] += 1
                     assigned_cps += 1
 
             self.n_charging_poles_by_zone = dict(pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
+            print(pd.Series(self.n_charging_poles_by_zone))
+            print(pd.Series(self.n_charging_poles_by_zone).sum())
+            print(len(pd.Series(self.n_charging_poles_by_zone)))
+            print(len(self.valid_zones))
 
             zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
 
             self.zones_cp_distances = self.grid.centroid.apply(
                 lambda x: self.grid.loc[zones_with_cps].centroid.distance(x)
             )
+            print(self.zones_cp_distances)
 
             self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
+            print(self.closest_cp_zone)
 
             return self.n_charging_poles_by_zone
 

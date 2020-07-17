@@ -7,8 +7,10 @@ import geopandas as gpd
 def get_city_grid_as_gdf (locations, bin_side_length):
 
     x_min, y_min, x_max, y_max = locations.total_bounds
-    width = bin_side_length / 111.32 * 0.001
-    height = bin_side_length / 111.32 * 0.001
+    # width = bin_side_length / 111.32 * 0.001 * 1.4
+    # height = bin_side_length / 111.32 * 0.001 * 1.4
+    width = bin_side_length * 1.4
+    height = bin_side_length * 1.4
     rows = int(np.ceil((y_max-y_min) / height))
     cols = int(np.ceil((x_max-x_min) / width))
     x_left = x_min
@@ -35,8 +37,10 @@ def get_city_grid_as_matrix (locations, bin_side_length):
 
     #grid = get_city_grid_as_gdf(locations, bin_side_length)
     x_min, y_min, x_max, y_max = locations.total_bounds
-    width = bin_side_length / 111.32 * 0.001
-    height = bin_side_length / 111.32 * 0.001
+    # width = bin_side_length / 111.32 * 0.001
+    # height = bin_side_length / 111.32 * 0.001
+    width = bin_side_length * 1.4
+    height = bin_side_length * 1.4
     rows = int(np.ceil((y_max-y_min) / height))
     cols = int(np.ceil((x_max-x_min) / width))
     grid_matrix = []
@@ -84,4 +88,4 @@ def get_od_distance(grid, origin_id, destination_id):
                 origin_id, "geometry"
             ].distance(
                 grid.loc[destination_id, "geometry"]
-            ) * 111.32 * 1000
+            )

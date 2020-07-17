@@ -1,5 +1,7 @@
 import os
+import geopandas as gpd
 import pandas as pd
+import shapely
 
 from e3f2s.city_data_manager.config.config import root_data_path
 
@@ -23,18 +25,46 @@ class Loader:
         )
 
     def read_origins_destinations (self):
-        path = os.path.join(
-            self.norm_data_path,
-            "points",
-            "origins.pickle"
+
+        # path = os.path.join(
+        #     self.norm_data_path,
+        #     "points",
+        #     "origins.pickle"
+        # )
+        # self.trips_origins = pd.read_pickle(path)
+        #
+        # path = os.path.join(
+        #     self.norm_data_path,
+        #     "points",
+        #     "destinations.pickle"
+        # )
+        # self.trips_destinations = pd.read_pickle(path)
+
+        #print(self.bookings[[
+        #    "start_longitude", "start_latitude",
+        #    "end_longitude", "end_latitude"
+        #]])
+
+        trips_origins = self.bookings.copy()
+        trips_destinations = self.bookings.copy()
+
+        trips_origins["geometry"] = trips_origins.apply(
+            lambda row: shapely.geometry.Point(row["start_latitude"], row["start_longitude"]), axis=1
         )
-        self.trips_origins = pd.read_pickle(path)
-        path = os.path.join(
-            self.norm_data_path,
-            "points",
-            "destinations.pickle"
+        trips_destinations["geometry"] = trips_destinations.apply(
+            lambda row: shapely.geometry.Point(row["end_latitude"], row["end_longitude"]), axis=1
         )
-        self.trips_destinations = pd.read_pickle(path)
+        self.trips_origins = gpd.GeoDataFrame(trips_origins)
+        #print(self.trips_origins.geometry)
+        self.trips_origins.crs = "epsg:4326"
+        self.trips_origins = self.trips_origins.to_crs("epsg:3857")
+        #print(self.trips_origins.geometry)
+        self.trips_destinations = gpd.GeoDataFrame(trips_destinations)
+        #print(self.trips_destinations.geometry)
+        self.trips_destinations.crs = "epsg:4326"
+        self.trips_destinations = self.trips_destinations.to_crs("epsg:3857")
+        #print(self.trips_destinations.geometry)
+
         return self.trips_origins, self.trips_destinations
 
     def read_trips (self):
@@ -42,8 +72,12 @@ class Loader:
         path = os.path.join(
             self.norm_data_path,
             "od_trips",
-            "od_trips.pickle"
+            "bookings_.pickle"
         )
         self.bookings = pd.read_pickle(path)
+
+        # self.bookings["euclidean_distance"] = self.bookings.euclidean_distance * 1000
+        # self.bookings["driving_distance"] = self.bookings.driving_distance * 1000
+        # self.bookings.duration = self.bookings.duration * 60
 
         return self.bookings
