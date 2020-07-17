@@ -39,6 +39,7 @@ class SimInput:
                     "fleet_load_factor"
                 ]
             )
+
         if "tot_n_charging_poles" in self.sim_scenario_conf.keys():
             self.tot_n_charging_poles = self.sim_scenario_conf["tot_n_charging_poles"]
         elif "n_poles_n_vehicles_factor" in self.sim_scenario_conf.keys():
@@ -110,10 +111,9 @@ class SimInput:
             np.random.uniform(0, len(self.valid_zones)-1, self.n_vehicles_sim).astype(int).round()
         )
 
-        self.vehicles_zones = [
-            self.grid.loc[int(top_o_zones.index[vehicles_random_zones[i]])].zone_id
-            for i in vehicles_random_zones
-        ]
+        self.vehicles_zones = []
+        for i in vehicles_random_zones:
+            self.vehicles_zones.append(self.grid.loc[int(top_o_zones.index[i])].zone_id)
 
         self.vehicles_zones = {
             i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)
