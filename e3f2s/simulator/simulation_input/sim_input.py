@@ -21,7 +21,7 @@ class SimInput:
         self.grid_matrix = self.city_obj.grid_matrix
         self.input_bookings = self.city_obj.bookings
         self.request_rates = self.city_obj.request_rates
-        #self.trip_kdes = self.city_obj.trip_kdes
+        self.trip_kdes = self.city_obj.trip_kdes
         self.valid_zones = self.city_obj.valid_zones
         #print(len(self.valid_zones))
         self.neighbors_dict = self.city_obj.neighbors_dict
