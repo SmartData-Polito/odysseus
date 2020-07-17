@@ -90,7 +90,7 @@ class City:
 
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
-        #self.trip_kdes = self.get_trip_kdes()
+        self.trip_kdes = self.get_trip_kdes()
         #exit(1)
 
     def get_squared_grid (self):
