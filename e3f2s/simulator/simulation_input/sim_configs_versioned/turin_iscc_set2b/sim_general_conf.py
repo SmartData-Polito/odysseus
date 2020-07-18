@@ -1,6 +1,6 @@
 sim_general_conf_grid = {
 
-    "const_load_factor": [1],
+    "const_load_factor": [False],
 
     "n_vehicles_original": [400],
 
