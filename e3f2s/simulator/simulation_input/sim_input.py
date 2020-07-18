@@ -27,6 +27,7 @@ class SimInput:
         self.neighbors_dict = self.city_obj.neighbors_dict
 
         self.n_vehicles_original = self.sim_general_conf["n_vehicles_original"]
+
         if "n_vehicles" in self.sim_scenario_conf.keys():
             self.n_vehicles_sim = self.sim_scenario_conf["n_vehicles"]
         elif "n_vehicles_factor" in self.sim_scenario_conf.keys():
@@ -48,15 +49,16 @@ class SimInput:
             )
 
         self.hub_zone = -1
+
         if self.sim_scenario_conf["hub"]:
             self.n_charging_zones = 1
             self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
-        else:
-            if self.sim_scenario_conf["cps_zones_percentage"] == 0:
-                self.n_charging_zones = 1
+        elif self.sim_scenario_conf["distributed_cps"]:
+            if "cps_zones_percentage" in self.sim_scenario_conf:
+                self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
+            elif "n_charging_zones" in self.sim_scenario_conf:
+                self.n_charging_zones = self.sim_scenario_conf["n_charging_zones"]
                 self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
-                #print(len(self.valid_zones))
-            self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
 
         if self.sim_scenario_conf["hub"] and not self.sim_scenario_conf["distributed_cps"]:
             self.hub_n_charging_poles = int(self.tot_n_charging_poles)

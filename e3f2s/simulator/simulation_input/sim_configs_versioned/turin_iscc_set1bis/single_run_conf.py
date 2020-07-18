@@ -16,7 +16,7 @@ sim_scenario_conf = {
 	"distributed_cps": True,
 	"system_cps": True,
 	"cps_placement_policy": "num_parkings",
-	"cps_zones_percentage": 0.2,
+	"n_charging_zones": 1,
 
 	"battery_swap": False,
 	"avg_reach_time": 1,
