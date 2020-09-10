@@ -58,7 +58,6 @@ class City:
         self.bookings["euclidean_distance"] = (
                 self.trips_origins.distance(self.trips_destinations)
         ) / 1.4
-        #print(self.bookings.shape)
 
         self.grid = self.get_squared_grid()
         self.grid_matrix = get_city_grid_as_matrix(
@@ -67,10 +66,11 @@ class City:
         )
         self.grid["zone_id"] = self.grid.index.values
         self.map_zones_on_trips(self.grid)
+        print(self.bookings.isnull().sum(), self.bookings.shape)
         self.bookings = self.get_input_bookings_filtered().dropna()
+        print(self.bookings.shape)
 
         self.valid_zones = self.get_valid_zones()
-        #print(len(self.valid_zones))
         self.grid = self.grid.loc[self.valid_zones]
 
         self.bookings = self.bookings.loc[
@@ -78,31 +78,22 @@ class City:
                 self.bookings.destination_id.isin(self.valid_zones)
             )
         ]
-        # print(
-        #     self.bookings[[
-        #         "euclidean_distance", "driving_distance", "duration"
-        #     ]].describe()
-        # )
+
         points = self.grid.centroid.geometry
         self.od_distances = points.apply(lambda p: points.distance(p)) / 1.4
         self.max_dist = self.od_distances.max().max()
-        #print(self.max_dist)
 
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
         self.trip_kdes = self.get_trip_kdes()
-        #exit(1)
 
     def get_squared_grid (self):
 
-        #print(self.trips_origins.crs)
-        #print(self.trips_destinations.crs)
         self.locations = pd.concat([
             self.trips_origins.geometry,
             self.trips_destinations.geometry
         ], ignore_index=True)
         self.locations.crs = "epsg:3857"
-        #print(self.locations.crs)
         squared_grid = get_city_grid_as_gdf(
             self.locations,
             self.bin_side_length
@@ -110,65 +101,63 @@ class City:
         return squared_grid
 
     def map_zones_on_trips(self, zones):
-        #print(self.trips_origins.crs, zones.crs)
         self.trips_origins = gpd.sjoin(
             self.trips_origins,
             zones,
             how='left',
-            op='within'
+            op='intersects'
         )
         self.trips_destinations = gpd.sjoin(
             self.trips_destinations,
             zones,
             how='left',
-            op='within'
+            op='intersects'
         )
-        #print(self.trips_origins.columns)
         self.bookings["origin_id"] = self.trips_origins.zone_id
         self.bookings["destination_id"] = self.trips_destinations.zone_id
-        #print(self.bookings.origin_id.value_counts(), self.bookings.destination_id.value_counts())
         self.grid["origin_count"] = self.bookings.origin_id.value_counts()
         self.grid["destination_count"] = self.bookings.destination_id.value_counts()
 
     def get_input_bookings_filtered(self):
 
         self.bookings = self.bookings.sort_values("start_time")
-        #print("duration" in self.bookings.columns)
+        print(self.bookings.shape)
 
         if "driving_distance" not in self.bookings.columns:
             self.bookings["driving_distance"] = self.bookings.euclidean_distance * 1.4
         self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x / 1000))
 
-        # self.bookings["random_seconds_start"] = np.random.uniform(-900, 900, len(self.bookings))
-        # self.bookings.start_time = pd.to_datetime(self.bookings.start_time) + self.bookings.random_seconds_start.apply(
-        #     lambda sec: datetime.timedelta(seconds=sec)
-        # )
+        self.bookings["random_seconds_start"] = np.random.uniform(-900, 900, len(self.bookings))
+        self.bookings.start_time = pd.to_datetime(self.bookings.start_time) + self.bookings.random_seconds_start.apply(
+            lambda sec: datetime.timedelta(seconds=sec)
+        )
         self.bookings = get_time_group_columns(self.bookings)
         self.bookings["hour"] = self.bookings.start_hour
         self.bookings["daytype"] = self.bookings.start_daytype
         self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
 
-        if "duration" not in self.bookings.columns:
-            self.bookings["random_seconds_end"] = np.random.uniform(-900, 900, len(self.bookings))
-            self.bookings["random_seconds_pos"] = np.random.uniform(0, 450, len(self.bookings))
+        self.bookings["random_seconds_end"] = np.random.uniform(-900, 900, len(self.bookings))
+        self.bookings["random_seconds_pos"] = np.random.uniform(0, 450, len(self.bookings))
 
-            self.bookings.end_time = pd.to_datetime(self.bookings.end_time) + self.bookings.random_seconds_end.apply(
-                lambda sec: datetime.timedelta(seconds=sec)
-            )
-            self.bookings.loc[self.bookings.start_time > self.bookings.end_time, "end_time"] = self.bookings.loc[
-                self.bookings.start_time > self.bookings.end_time, "start_time"
-            ] + self.bookings.loc[self.bookings.start_time > self.bookings.end_time, "random_seconds_pos"].apply(
-                lambda sec: datetime.timedelta(seconds=sec)
-            )
-            self.bookings.loc[:, "duration"] = (
-                    self.bookings.end_time - self.bookings.start_time
-            ).apply(lambda x: x.total_seconds())
-        else:
-            pass
-            # self.bookings.end_time = pd.to_datetime(self.bookings.end_time) + self.bookings.duration.apply(
-            #     lambda sec: datetime.timedelta(seconds=abs(sec))
-            # )
+        self.bookings.end_time = pd.to_datetime(self.bookings.end_time) + self.bookings.random_seconds_end.apply(
+            lambda sec: datetime.timedelta(seconds=sec)
+        )
+        self.bookings.loc[self.bookings.start_time > self.bookings.end_time, "end_time"] = self.bookings.loc[
+            self.bookings.start_time > self.bookings.end_time, "start_time"
+        ] + self.bookings.loc[self.bookings.start_time > self.bookings.end_time, "random_seconds_pos"].apply(
+            lambda sec: datetime.timedelta(seconds=sec)
+        )
+        self.bookings.loc[:, "duration"] = (
+                self.bookings.end_time - self.bookings.start_time
+        ).apply(lambda x: x.total_seconds())
 
+        # else:
+        #     pass
+        #     # self.bookings.end_time = pd.to_datetime(self.bookings.end_time) + self.bookings.duration.apply(
+        #     #     lambda sec: datetime.timedelta(seconds=abs(sec))
+        #     # )
+
+        self.bookings = self.bookings.sort_values("start_time")
         self.bookings.loc[:, "ia_timeout"] = (
                 self.bookings.start_time - self.bookings.start_time.shift()
         ).apply(lambda x: x.total_seconds()).abs()
@@ -176,15 +165,18 @@ class City:
 
         self.bookings = self.bookings[self.bookings.duration > 0]
         self.bookings = self.bookings[self.bookings.driving_distance >= 0]
-        #self.bookings.loc[self.bookings.driving_distance == 0, "driving_distance"] = self.bin_side_length
+        self.bookings.loc[self.bookings.driving_distance == 0, "driving_distance"] = self.bin_side_length
         self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(
             lambda x: get_soc_delta(x / 1000)
         )
         self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"]
         self.bookings["avg_speed_kmh"] = self.bookings.avg_speed * 3.6
 
+        print(self.bookings[["driving_distance", "duration"]].describe())
+
         if self.city_name in ["Minneapolis", "Louisville"]:
-            self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
+            pass
+            #self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
         elif self.city_name in ["Torino", "Berlin"]:
             self.bookings = self.bookings[self.bookings.avg_speed_kmh < 120]
             self.bookings = self.bookings[
@@ -195,6 +187,7 @@ class City:
                 )
             ]
 
+        print(self.bookings.isnull().sum(), self.bookings.shape)
         return self.bookings
 
     def get_valid_zones(self, count_threshold=0):
@@ -205,17 +198,13 @@ class City:
 
         origin_zones_count = self.bookings.origin_id.value_counts()
         dest_zones_count = self.bookings.destination_id.value_counts()
-        #print(len(self.grid), len(origin_zones_count), len(dest_zones_count))
 
         valid_origin_zones = origin_zones_count[(origin_zones_count > count_threshold)]
-        #print(valid_origin_zones)
         valid_dest_zones = dest_zones_count[(dest_zones_count > count_threshold)]
-        #print(valid_dest_zones)
 
         self.valid_zones = valid_origin_zones.index.intersection(
                 valid_dest_zones.index
             ).astype(int)
-        #print(len(self.valid_zones))
 
         return self.valid_zones
 

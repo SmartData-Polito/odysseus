@@ -1,14 +1,14 @@
 sim_scenario_conf = {
 
 	"requests_rate_factor": 1,
-	"n_vehicles_factor": 1,
+	"fleet_load_factor": 2,
 
 	"time_estimation": True,
 	"queuing": True,
 
-	"alpha": 30,
+	"alpha": 26,
 	"beta": 100,
-	"tot_n_charging_poles": 80,
+	"n_poles_n_vehicles_factor": 0.2,
 
 	"hub": False,
 	"hub_zone_policy": "",
@@ -16,7 +16,7 @@ sim_scenario_conf = {
 	"distributed_cps": True,
 	"system_cps": True,
 	"cps_placement_policy": "num_parkings",
-	"n_charging_zones": 1,
+	"cps_zones_percentage": 0.2,
 
 	"battery_swap": False,
 	"avg_reach_time": 1,

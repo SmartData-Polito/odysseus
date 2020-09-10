@@ -11,7 +11,7 @@ sim_scenario_conf_grid = {
 
     "alpha": [26],
     "beta": [100],
-    "n_poles_n_vehicles_factor": np.concatenate([np.arange(0.02, 0.1, 0.01), np.arange(0.1, 0.21, 0.02)]),
+    "n_poles_n_vehicles_factor": np.arange(0.05, 0.45, 0.05),
 
     "hub": [False],
     "hub_zone_policy": [""],
@@ -19,7 +19,7 @@ sim_scenario_conf_grid = {
     "distributed_cps": [True],
     "system_cps": [True],
     "cps_placement_policy": ["num_parkings"],
-    "cps_zones_percentage": [0.05, 0.2],
+    "cps_zones_percentage": np.arange(0.1, 0.25, 0.05),
 
     "battery_swap": [False],
     "avg_reach_time": [20],

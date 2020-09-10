@@ -31,8 +31,11 @@ class ChargingStrategy (ChargingPrimitives):
 					timeout_outward = 0
 					timeout_return = 0
 					cr_soc_delta = 0
-					charge["duration"] = np.random.exponential(
-						240 * 60
+					charge["duration"] = np.random.normal(
+						self.simInput.sim_scenario_conf[
+							"avg_service_time_users"
+						] * 60,
+						30 * 60
 					)
 					resource = self.workers
 
