@@ -66,9 +66,7 @@ class City:
         )
         self.grid["zone_id"] = self.grid.index.values
         self.map_zones_on_trips(self.grid)
-        print(self.bookings.isnull().sum(), self.bookings.shape)
         self.bookings = self.get_input_bookings_filtered().dropna()
-        print(self.bookings.shape)
 
         self.valid_zones = self.get_valid_zones()
         self.grid = self.grid.loc[self.valid_zones]
@@ -121,7 +119,6 @@ class City:
     def get_input_bookings_filtered(self):
 
         self.bookings = self.bookings.sort_values("start_time")
-        print(self.bookings.shape)
 
         if "driving_distance" not in self.bookings.columns:
             self.bookings["driving_distance"] = self.bookings.euclidean_distance * 1.4
@@ -172,8 +169,6 @@ class City:
         self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"]
         self.bookings["avg_speed_kmh"] = self.bookings.avg_speed * 3.6
 
-        print(self.bookings[["driving_distance", "duration"]].describe())
-
         if self.city_name in ["Minneapolis", "Louisville"]:
             pass
             #self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
@@ -187,7 +182,6 @@ class City:
                 )
             ]
 
-        print(self.bookings.isnull().sum(), self.bookings.shape)
         return self.bookings
 
     def get_valid_zones(self, count_threshold=0):

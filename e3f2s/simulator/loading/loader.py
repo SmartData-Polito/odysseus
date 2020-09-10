@@ -50,10 +50,10 @@ class Loader:
             self.trips_destinations = self.bookings.copy()
 
         self.trips_origins["geometry"] = self.trips_origins.apply(
-            lambda row: shapely.geometry.Point(row["start_latitude"], row["start_longitude"]), axis=1
+            lambda row: shapely.geometry.Point(row["start_longitude"], row["start_latitude"]), axis=1
         )
         self.trips_destinations["geometry"] = self.trips_destinations.apply(
-            lambda row: shapely.geometry.Point(row["end_latitude"], row["end_longitude"]), axis=1
+            lambda row: shapely.geometry.Point(row["end_longitude"], row["end_latitude"]), axis=1
         )
         self.trips_origins = gpd.GeoDataFrame(self.trips_origins)
         self.trips_destinations = gpd.GeoDataFrame(self.trips_destinations)
