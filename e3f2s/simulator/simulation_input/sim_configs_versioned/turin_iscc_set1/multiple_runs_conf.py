@@ -11,7 +11,9 @@ sim_scenario_conf_grid = {
 
     "alpha": [26],
     "beta": [100],
-    "n_poles_n_vehicles_factor": np.concatenate([np.arange(0.02, 0.1, 0.01), np.arange(0.1, 0.21, 0.02)]),
+    "n_poles_n_vehicles_factor": np.concatenate([
+        np.arange(0.02, 0.07, 0.005), np.arange(0.07, 0.21, 0.05)
+    ]),
 
     "hub": [False],
     "hub_zone_policy": [""],
