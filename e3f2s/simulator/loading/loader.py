@@ -26,28 +26,26 @@ class Loader:
 
     def read_origins_destinations (self):
 
-        if self.city == "Minneapolis":
-            path = os.path.join(
-                self.norm_data_path,
-                "points",
-                "origins.pickle"
-            )
-            self.trips_origins = pd.read_pickle(path).drop(["index_right", "zone_id"], axis=1)
-            self.trips_origins["start_longitude"] = self.trips_origins.geometry.apply(lambda p: p.x)
-            self.trips_origins["start_latitude"] = self.trips_origins.geometry.apply(lambda p: p.y)
+        path = os.path.join(
+            self.norm_data_path,
+            "points",
+            "origins.pickle"
+        )
+        self.trips_origins = pd.read_pickle(path).drop(["index_right", "zone_id"], axis=1)
+        self.trips_origins["start_longitude"] = self.trips_origins.geometry.apply(lambda p: p.x)
+        self.trips_origins["start_latitude"] = self.trips_origins.geometry.apply(lambda p: p.y)
 
-            path = os.path.join(
-                self.norm_data_path,
-                "points",
-                "destinations.pickle"
-            )
-            self.trips_destinations = pd.read_pickle(path).drop(["index_right", "zone_id"], axis=1)
-            self.trips_destinations["end_longitude"] = self.trips_destinations.geometry.apply(lambda p: p.x)
-            self.trips_destinations["end_latitude"] = self.trips_destinations.geometry.apply(lambda p: p.y)
+        path = os.path.join(
+            self.norm_data_path,
+            "points",
+            "destinations.pickle"
+        )
+        self.trips_destinations = pd.read_pickle(path).drop(["index_right", "zone_id"], axis=1)
+        self.trips_destinations["end_longitude"] = self.trips_destinations.geometry.apply(lambda p: p.x)
+        self.trips_destinations["end_latitude"] = self.trips_destinations.geometry.apply(lambda p: p.y)
 
-        else:
-            self.trips_origins = self.bookings.copy()
-            self.trips_destinations = self.bookings.copy()
+        self.trips_origins = self.bookings.copy()
+        self.trips_destinations = self.bookings.copy()
 
         self.trips_origins["geometry"] = self.trips_origins.apply(
             lambda row: shapely.geometry.Point(row["start_longitude"], row["start_latitude"]), axis=1
