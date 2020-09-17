@@ -3,7 +3,8 @@ import datetime
 import simpy
 from e3f2s.simulator.simulation.charging_primitives import get_charging_time
 
-class Station(object):
+
+class ChargingStation(object):
 
     def __init__(self, env, num_poles, zone_id, sim_start_time):
         self.env = env

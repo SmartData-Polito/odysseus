@@ -9,7 +9,7 @@ from e3f2s.simulator.data_structures.zone import Zone
 from e3f2s.simulator.simulation.charging_strategies import ChargingStrategy
 from e3f2s.simulator.data_structures.vehicle import Vehicle
 
-from e3f2s.simulator.data_structures.station import Station
+from e3f2s.simulator.data_structures.charging_station import ChargingStation
 from e3f2s.simulator.simulation_input.sim_current_config.cost_conf import vehicles_cost_conf
 from e3f2s.simulator.simulation_input.sim_current_config.vehicle_config import vehicle_conf
 
@@ -94,7 +94,7 @@ class SharedMobilitySim:
             for zone_id in self.simInput.n_charging_poles_by_zone:
                 zone_n_cps = self.simInput.n_charging_poles_by_zone[zone_id]
                 if zone_n_cps > 0:
-                    self.charging_stations_dict[zone_id] = Station(self.env, zone_n_cps, zone_id, self.start)
+                    self.charging_stations_dict[zone_id] = ChargingStation(self.env, zone_n_cps, zone_id, self.start)
 
         self.vehicles_list = []
         for i in range(self.simInput.n_vehicles_sim):

@@ -1,6 +1,6 @@
 sim_general_conf_grid = {
 
-    "const_load_factor": [False],
+    "const_load_factor": [1],
 
     "n_vehicles_original": [410],
 
@@ -9,6 +9,6 @@ sim_general_conf_grid = {
 
     "year": [2017],
     "month_start": [10],
-    "month_end": [13],
+    "month_end": [11],
 
 }
