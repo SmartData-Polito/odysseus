@@ -140,13 +140,26 @@ class SimInput:
 
     def init_hub(self):
 
-        self.hub_zone = int(self.input_bookings.destination_id.value_counts().iloc[:1].index[0])
-
         if self.sim_scenario_conf["hub_zone_policy"] == "manual":
-            pass
+            if self.sim_scenario_conf["hub_zone"] in self.valid_zones:
+                self.hub_zone = self.sim_scenario_conf["hub_zone"]
+            else:
+                print("Hub zone does not exist!")
+                exit(1)
 
-        if self.sim_scenario_conf["hub_zone_policy"] == "num_parkings":
+        elif self.sim_scenario_conf["hub_zone_policy"] == "num_parkings":
             self.hub_zone = int(self.input_bookings.destination_id.value_counts().iloc[:1].index[0])
+
+        else:
+            print("Hub placement policy not recognised!")
+            exit(1)
+
+        self.n_charging_poles_by_zone = {}
+        for zone in self.valid_zones:
+            if zone == self.hub_zone:
+                self.n_charging_poles_by_zone[zone] = self.n_charging_zones
+            else:
+                self.n_charging_poles_by_zone[zone] = 0
 
     def init_charging_poles(self):
 

@@ -283,15 +283,15 @@ class City:
         for daytype, daytype_bookings_gdf in self.bookings.groupby("daytype"):
             self.trip_kdes[daytype] = {}
             for hour in range(24):
-                hour_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
-                if len(hour_df):
+                slot_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
+                if len(slot_df):
                     self.trip_kdes[daytype][hour] = KernelDensity(
                         bandwidth=self.kde_bw
-                    ).fit(hour_df[self.kde_columns].dropna())
+                    ).fit(slot_df[self.kde_columns].dropna())
             hours_list = list(range(7, 24)) + list(range(7))
             for hour in hours_list:
-                hour_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
-                if len(hour_df) == 0:
+                slot_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
+                if len(slot_df) == 0:
                     rates = pd.Series(self.request_rates[daytype])
                     self.trip_kdes[daytype][hour] = self.trip_kdes[daytype][rates.idxmin()]
 
