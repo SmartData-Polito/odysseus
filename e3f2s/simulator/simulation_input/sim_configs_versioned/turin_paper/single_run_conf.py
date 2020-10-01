@@ -16,7 +16,7 @@ sim_scenario_conf = {
 	"distributed_cps": True,
 	"system_cps": True,
 	"cps_placement_policy": "old_manual",
-	"cps_zones": [200, 355],
+	"cps_zones": [386, 467, 468, 428],
 
 	"battery_swap": False,
 	"avg_reach_time": 1,
