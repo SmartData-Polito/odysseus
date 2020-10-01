@@ -22,6 +22,7 @@ class SimInput:
 		self.request_rates = self.city_obj.request_rates
 		self.trip_kdes = self.city_obj.trip_kdes
 		self.valid_zones = self.city_obj.valid_zones
+		print(self.valid_zones)
 		self.neighbors_dict = self.city_obj.neighbors_dict
 
 		self.n_vehicles_original = self.sim_general_conf["n_vehicles_original"]
@@ -45,6 +46,8 @@ class SimInput:
 			self.tot_n_charging_poles = abs(
 					self.n_vehicles_sim * self.sim_scenario_conf["n_poles_n_vehicles_factor"]
 			)
+		elif self.sim_scenario_conf["cps_placement_policy"] == "old_manual":
+			self.tot_n_charging_poles = len(self.sim_scenario_conf["cps_zones"]) * 4
 
 		self.hub_zone = -1
 
@@ -57,6 +60,8 @@ class SimInput:
 			elif "n_charging_zones" in self.sim_scenario_conf:
 				self.n_charging_zones = self.sim_scenario_conf["n_charging_zones"]
 				self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
+			elif "cps_zones" in self.sim_scenario_conf:
+				self.n_charging_zones = len(self.sim_scenario_conf["cps_zones"])
 		elif self.sim_scenario_conf["battery_swap"]:
 			self.n_charging_zones = 0
 
@@ -173,25 +178,34 @@ class SimInput:
 
 	def init_charging_poles(self):
 
-		if self.sim_scenario_conf["distributed_cps"] and self.sim_scenario_conf[
-			"cps_placement_policy"
-		] == "num_parkings":
+		if self.sim_scenario_conf["distributed_cps"]:
 
-			top_dest_zones = self.input_bookings.destination_id.value_counts().iloc[:self.n_charging_zones]
+			if self.sim_scenario_conf["cps_placement_policy"] == "num_parkings":
 
-			self.n_charging_poles_by_zone = dict((top_dest_zones / top_dest_zones.sum() * self.n_charging_poles))
+				top_dest_zones = self.input_bookings.destination_id.value_counts().iloc[:self.n_charging_zones]
 
-			assigned_cps = 0
-			for zone_id in self.n_charging_poles_by_zone:
-				zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
-				assigned_cps += zone_n_cps
-				self.n_charging_poles_by_zone[zone_id] = zone_n_cps
-			for zone_id in self.n_charging_poles_by_zone:
-				if assigned_cps < self.n_charging_poles:
-					self.n_charging_poles_by_zone[zone_id] += 1
-					assigned_cps += 1
+				self.n_charging_poles_by_zone = dict((top_dest_zones / top_dest_zones.sum() * self.n_charging_poles))
 
-			self.n_charging_poles_by_zone = dict(pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
+				assigned_cps = 0
+				for zone_id in self.n_charging_poles_by_zone:
+					zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
+					assigned_cps += zone_n_cps
+					self.n_charging_poles_by_zone[zone_id] = zone_n_cps
+				for zone_id in self.n_charging_poles_by_zone:
+					if assigned_cps < self.n_charging_poles:
+						self.n_charging_poles_by_zone[zone_id] += 1
+						assigned_cps += 1
+
+				self.n_charging_poles_by_zone = dict(pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
+
+			elif self.sim_scenario_conf["cps_placement_policy"] == "old_manual":
+
+				for zone_id in self.sim_scenario_conf["cps_zones"]:
+					if zone_id in self.valid_zones:
+						self.n_charging_poles_by_zone[zone_id] = 4
+					else:
+						print("Zone", zone_id, "does not exist!")
+						exit(1)
 
 			zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
 
@@ -200,8 +214,6 @@ class SimInput:
 			)
 
 			self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
-
-			return self.n_charging_poles_by_zone
 
 	def init_relocation(self):
 		pass
