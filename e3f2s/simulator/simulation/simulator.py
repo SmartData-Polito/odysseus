@@ -130,7 +130,7 @@ class SharedMobilitySim:
 
         self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
         booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
-        self.vehicles_zones[vehicle_id] = booking_request["destination_id"]
+        #self.vehicles_zones[vehicle_id] = booking_request["destination_id"]
 
         self.n_booked_vehicles -= 1
 

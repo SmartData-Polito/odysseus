@@ -97,7 +97,7 @@ class EFFCS_SimOutputPlotter ():
 		if self.simOutput.sim_scenario_conf["hub"]:
 			self.grid.plot(color="white", edgecolor="black", ax=ax)
 			self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
-			self.grid.iloc[self.simOutput.sim_stats["hub_zone"]:self.simOutput.sim_stats["hub_zone"]+1].plot(ax=ax)
+			self.grid.loc[[self.simOutput.sim_stats["hub_zone"]]].plot(ax=ax)
 			plt.savefig(os.path.join(self.figures_path, "hub_location.png"), transparent=True)
 			plt.close()
 

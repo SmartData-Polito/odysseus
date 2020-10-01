@@ -12,12 +12,12 @@ sim_scenario_conf = {
 
 	"hub": True,
 	"hub_zone_policy": "manual",
-	"hub_zone": 360,
+	"hub_zone": 387,
 
-	"distributed_cps": False,
-	"system_cps": False,
-	"cps_placement_policy": "",
-	"cps_zones_percentage": 0,
+	"distributed_cps": True,
+	"system_cps": True,
+	"cps_placement_policy": "num_parkings",
+	"cps_zones_percentage": 0.1,
 
 	"battery_swap": False,
 	"avg_reach_time": 1,
