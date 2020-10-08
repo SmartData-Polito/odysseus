@@ -5,7 +5,7 @@ example_vehicle_config = {
     "consumption": 1,
     "emissions": 90, #gr/Km CO2
 }
-
+# add comments
 class Vehicle:
     def __init__(self, vehicle_config):
 
