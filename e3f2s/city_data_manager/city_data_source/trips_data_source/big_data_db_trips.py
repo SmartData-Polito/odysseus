@@ -9,7 +9,7 @@ from e3f2s.city_data_manager.city_data_source.trips_data_source.trips_data_sourc
 class BigDataDBTrips(TripsDataSource):
 
     def __init__(self, city_name):
-        super().__init__(city_name, "big_data_db_polito", "car_sharing")
+        super().__init__(city_name, "big_data_db", "car_sharing")
 
     def load_raw(self):
 
@@ -52,14 +52,8 @@ class BigDataDBTrips(TripsDataSource):
         self.trips_df_norm.end_time = self.trips_df_norm.end_time - datetime.timedelta(hours=2)
         self.trips_df_norm.start_time = pd.to_datetime(self.trips_df_norm.start_time, utc=True)
         self.trips_df_norm.end_time = pd.to_datetime(self.trips_df_norm.end_time, utc=True)
-
-        # if self.city_name == "Torino":
-        #     tz = pytz.timezone("Europe/Rome")
-        # elif self.city_name == "Berlin":
-        #     tz = pytz.timezone("Europe/Berlin")
-        #
-        # self.trips_df_norm.start_time = self.trips_df_norm.start_time.dt.tz_convert(tz)
-        # self.trips_df_norm.end_time = self.trips_df_norm.end_time.dt.tz_convert(tz)
+        self.trips_df_norm.start_time = self.trips_df_norm.start_time.dt.tz_convert(self.tz)
+        self.trips_df_norm.end_time = self.trips_df_norm.end_time.dt.tz_convert(self.tz)
 
         if month == 12:
             self.trips_df_norm = self.trips_df_norm[

@@ -3,7 +3,7 @@ import geopandas as gpd
 import pandas as pd
 import shapely
 
-from e3f2s.city_data_manager.config.config import root_data_path
+from e3f2s.city_data_manager.config.config import *
 
 
 class Loader:
@@ -15,32 +15,36 @@ class Loader:
         self.month = month
         self.data_source_id = data_source_id
 
-        self.norm_data_path = os.path.join(
-            root_data_path,
-            self.city,
-            "_".join([str(year), str(month)]),
-            data_source_id,
-            str(bin_side_length),
+        self.trips = None
+        self.trips_destination = None
+        self.trips_origins = None
 
+        self.points_data_path = os.path.join(
+            data_paths_dict[self.city]["od_trips"]["points"],
+            data_source_id,
+            "_".join([str(year), str(month)])
+        )
+        self.trips_data_path = os.path.join(
+            data_paths_dict[self.city]["od_trips"]["trips"],
+            data_source_id,
+            "_".join([str(year), str(month)])
         )
 
     def read_origins_destinations (self):
 
         path = os.path.join(
-            self.norm_data_path,
-            "points",
+            self.points_data_path,
             "origins.pickle"
         )
-        self.trips_origins = pd.read_pickle(path).drop(["index_right", "zone_id"], axis=1)
+        self.trips_origins = pd.read_pickle(path)
         self.trips_origins["start_longitude"] = self.trips_origins.geometry.apply(lambda p: p.x)
         self.trips_origins["start_latitude"] = self.trips_origins.geometry.apply(lambda p: p.y)
 
         path = os.path.join(
-            self.norm_data_path,
-            "points",
+            self.points_data_path,
             "destinations.pickle"
         )
-        self.trips_destinations = pd.read_pickle(path).drop(["index_right", "zone_id"], axis=1)
+        self.trips_destinations = pd.read_pickle(path)
         self.trips_destinations["end_longitude"] = self.trips_destinations.geometry.apply(lambda p: p.x)
         self.trips_destinations["end_latitude"] = self.trips_destinations.geometry.apply(lambda p: p.y)
 
@@ -66,14 +70,9 @@ class Loader:
     def read_trips (self):
 
         path = os.path.join(
-            self.norm_data_path,
-            "od_trips",
-            "od_trips.pickle"
+            self.trips_data_path,
+            "trips.pickle"
         )
         self.bookings = pd.read_pickle(path)
-
-        # self.bookings["euclidean_distance"] = self.bookings.euclidean_distance * 1000
-        # self.bookings["driving_distance"] = self.bookings.driving_distance * 1000
-        # self.bookings.duration = self.bookings.duration * 60
-
+        print(self.bookings)
         return self.bookings

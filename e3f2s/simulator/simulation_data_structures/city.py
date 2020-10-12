@@ -17,7 +17,7 @@ class City:
 
         self.city_name = city_name
 
-        if self.city_name == "Torino":
+        if self.city_name == "raw":
             self.tz = pytz.timezone("Europe/Rome")
         elif self.city_name == "Berlin":
             self.tz = pytz.timezone("Europe/Berlin")
@@ -172,7 +172,7 @@ class City:
         if self.city_name in ["Minneapolis", "Louisville"]:
             pass
             #self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
-        elif self.city_name in ["Torino", "Berlin"]:
+        elif self.city_name in ["raw", "Berlin"]:
             self.bookings = self.bookings[self.bookings.avg_speed_kmh < 120]
             self.bookings = self.bookings[
                 (self.bookings.duration > 3*60) & (

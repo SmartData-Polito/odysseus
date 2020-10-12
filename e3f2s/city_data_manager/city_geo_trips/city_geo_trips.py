@@ -3,7 +3,7 @@ import os
 import geopandas as gpd
 import shapely
 
-from e3f2s.city_data_manager.config.config import data_paths_dict
+from e3f2s.city_data_manager.config.config import *
 from e3f2s.utils.time_utils import *
 from e3f2s.utils.path_utils import *
 from e3f2s.utils.geospatial_utils import *
@@ -11,7 +11,7 @@ from e3f2s.utils.geospatial_utils import *
 
 class CityGeoTrips:
 
-	def __init__(self, city_name, trips_data_source_id, year, month, bin_side_length):
+	def __init__(self, city_name, trips_data_source_id, year, month):
 
 		self.city_name = city_name
 		self.trips_data_source_id = trips_data_source_id
@@ -20,45 +20,21 @@ class CityGeoTrips:
 
 		self.trips_origins = gpd.GeoDataFrame()
 		self.trips_destinations = gpd.GeoDataFrame()
-		self.squared_grid = gpd.GeoDataFrame()
+		self.trips = gpd.GeoDataFrame()
 
 		self.points_data_path = os.path.join(
-			data_paths_dict[self.city_name],
-			"_".join([str(self.year), str(self.month)]),
+			data_paths_dict[self.city_name]["od_trips"]["points"],
 			self.trips_data_source_id,
-			str(bin_side_length),
-			"points",
+			"_".join([str(self.year), str(self.month)]),
 		)
 		check_create_path(self.points_data_path)
 
-		self.od_trips_data_path = os.path.join(
-			data_paths_dict[self.city_name],
-			"_".join([str(self.year), str(self.month)]),
+		self.trips_data_path = os.path.join(
+			data_paths_dict[self.city_name]["od_trips"]["trips"],
 			self.trips_data_source_id,
-			str(bin_side_length),
-			"od_trips",
-		)
-		check_create_path(self.od_trips_data_path)
-
-		self.squared_grid_data_path = os.path.join(
-			data_paths_dict[self.city_name],
 			"_".join([str(self.year), str(self.month)]),
-			self.trips_data_source_id,
-			str(bin_side_length),
-			"squared_grid",
 		)
-		check_create_path(self.squared_grid_data_path)
-
-		self.resampled_points_data_path = os.path.join(
-			data_paths_dict[self.city_name],
-			"_".join([str(self.year), str(self.month)]),
-			self.trips_data_source_id,
-			str(bin_side_length),
-			"resampled_points",
-		)
-		check_create_path(self.resampled_points_data_path)
-
-		self.bin_side_length = bin_side_length
+		check_create_path(self.trips_data_path)
 
 	def get_trips_od_gdfs(self):
 
@@ -68,9 +44,18 @@ class CityGeoTrips:
 		self.trips_df_norm = self.trips_ds_dict[self.trips_data_source_id].load_norm(
 			self.year, self.month
 		)
+		self.trips = self.trips_df_norm.copy()
+		self.trips["geometry"] = self.trips_df_norm.apply(
+			lambda row: shapely.geometry.LineString(
+				shapely.geometry.Point(row["start_longitude"], row["start_latitude"]),
+				shapely.geometry.Point(row["end_longitude"], row["end_latitude"]),
+			), axis=1
+		)
+		self.trips = gpd.GeoDataFrame(self.trips)
+		self.trips.crs = "epsg:4326"
+
 		self.trips_origins = self.trips_df_norm.copy()
 		self.trips_destinations = self.trips_df_norm.copy()
-
 		self.trips_origins["geometry"] = self.trips_origins.apply(
 			lambda row: shapely.geometry.Point(row["start_longitude"], row["start_latitude"]), axis=1
 		)
@@ -81,48 +66,6 @@ class CityGeoTrips:
 		self.trips_origins.crs = "epsg:4326"
 		self.trips_destinations = gpd.GeoDataFrame(self.trips_destinations)
 		self.trips_destinations.crs = "epsg:4326"
-
-		self.trips_df_norm["euclidean_distance"] = (
-			self.trips_origins.distance(self.trips_destinations) * 111.32 / 0.001
-		)
-
-	def get_squared_grid (self):
-
-		locations = pd.concat([
-				self.trips_origins.geometry, self.trips_destinations.geometry
-		], ignore_index=True)
-		locations.crs = "epsg:4326"
-		self.squared_grid = get_city_grid_as_gdf(
-			locations,
-			self.bin_side_length
-		)
-		return self.squared_grid
-
-	def map_zones_on_trips(self, zones):
-		self.trips_origins = gpd.sjoin(
-			self.trips_origins,
-			zones,
-			how='left',
-			op='within'
-		)
-		self.trips_destinations = gpd.sjoin(
-			self.trips_destinations,
-			zones,
-			how='left',
-			op='within'
-		)
-		self.od_trips_df = self.trips_df_norm.copy()
-		self.od_trips_df["origin_id"] = self.trips_origins.zone_id
-		self.od_trips_df["destination_id"] = self.trips_destinations.zone_id
-
-	def map_trips_on_zones(self, zones):
-		zones = add_grouped_count_to_grid(
-			zones, self.trips_origins, "start_hour", "o"
-		)
-		zones = add_grouped_count_to_grid(
-			zones, self.trips_destinations, "end_hour", "d"
-		)
-		return zones
 
 	def save_points(self, points, filename):
 		points.to_csv(
@@ -142,17 +85,17 @@ class CityGeoTrips:
 		self.save_points(self.trips_origins, "origins")
 		self.save_points(self.trips_destinations, "destinations")
 
-	def save_squared_grid(self):
-		self.squared_grid.to_csv(
+	def save_trips(self):
+		self.trips.to_csv(
 			os.path.join(
-				self.squared_grid_data_path,
-				str(self.bin_side_length) + ".csv"
+				self.trips_data_path,
+				"trips.csv"
 			)
 		)
-		self.squared_grid.to_pickle(
+		self.trips.to_pickle(
 			os.path.join(
-				self.squared_grid_data_path,
-				str(self.bin_side_length) + ".pickle"
+				self.trips_data_path,
+				"trips.pickle"
 			)
 		)
 
@@ -169,55 +112,10 @@ class CityGeoTrips:
 				"destinations.pickle"
 			)
 		))
-		self.squared_grid = pd.read_pickle(
+		self.trips = get_time_group_columns(pd.read_pickle(
 			os.path.join(
-				self.squared_grid_data_path,
-				str(self.bin_side_length) + ".pickle"
+				self.trips_data_path,
+				"raw.pickle"
 			)
-		)
+		))
 
-	def get_resampled_points_count_by_zone(self, group_cols, freq):
-		self.resampled_origins = get_grouped_resampled_count(
-			self.trips_origins,
-			group_cols,
-			freq
-		)
-
-	def save_resampled_points(self, points, filename):
-		points.to_csv(
-			os.path.join(
-				self.resampled_points_data_path,
-				filename + ".csv"
-			)
-		)
-		points.to_pickle(
-			os.path.join(
-				self.resampled_points_data_path,
-				filename + ".pickle"
-			)
-		)
-
-	def save_resampled_points_data(self):
-		self.save_resampled_points(self.resampled_origins, "origins")
-
-	def load_resampled(self):
-		self.resampled_origins = pd.read_pickle(
-			os.path.join(
-				self.resampled_points_data_path,
-				"origins.pickle"
-			)
-		)
-
-	def save_od_trips(self, od_trips, filename):
-		od_trips.to_csv(
-			os.path.join(
-				self.od_trips_data_path,
-				filename + ".csv"
-			)
-		)
-		od_trips.to_pickle(
-			os.path.join(
-				self.od_trips_data_path,
-				filename + ".pickle"
-			)
-		)

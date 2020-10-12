@@ -5,11 +5,12 @@ from random import sample
 
 import simpy
 
-from e3f2s.simulator.data_structures.zone import Zone
-from e3f2s.simulator.simulation.charging_strategies import ChargingStrategy
-from e3f2s.simulator.data_structures.vehicle import Vehicle
+from e3f2s.simulator.simulation_data_structures.zone import Zone
+from e3f2s.simulator.simulation_data_structures.vehicle import Vehicle
+from e3f2s.simulator.simulation_data_structures.charging_station import ChargingStation
 
-from e3f2s.simulator.data_structures.charging_station import ChargingStation
+from e3f2s.simulator.simulation.charging_strategies import ChargingStrategy
+
 from e3f2s.simulator.simulation_input.sim_current_config.cost_conf import vehicles_cost_conf
 from e3f2s.simulator.simulation_input.sim_current_config.vehicle_config import vehicle_conf
 

@@ -4,7 +4,7 @@ import pickle
 
 import pandas as pd
 
-from e3f2s.simulator.data_structures.city import City
+from e3f2s.simulator.simulation_data_structures.city import City
 from e3f2s.simulator.single_run.get_traceB_input import get_traceB_input
 from e3f2s.simulator.single_run.get_eventG_input import get_eventG_input
 from e3f2s.simulator.single_run.run_traceB_sim import run_traceB_sim

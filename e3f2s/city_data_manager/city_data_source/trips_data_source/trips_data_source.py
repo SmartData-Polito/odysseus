@@ -1,8 +1,8 @@
 import os
-
+import pytz
 import pandas as pd
 
-from e3f2s.city_data_manager.city_data_source.config.config import data_paths_dict
+from e3f2s.city_data_manager.config.config import *
 from e3f2s.utils.path_utils import check_create_path
 from e3f2s.utils.time_utils import get_time_group_columns
 
@@ -17,20 +17,27 @@ class TripsDataSource:
 		self.data_type_id = "trips"
 
 		self.raw_data_path = os.path.join(
-			data_paths_dict["raw"][self.data_type_id],
-			self.city_name,
+			data_paths_dict[self.city_name]["raw"][self.data_type_id],
 			self.data_source_id,
 		)
 
 		self.norm_data_path = os.path.join(
-			data_paths_dict["norm"][self.data_type_id],
-			self.city_name,
+			data_paths_dict[self.city_name]["norm"][self.data_type_id],
 			self.data_source_id
 		)
 		check_create_path(self.norm_data_path)
 
 		self.trips_df = pd.DataFrame()
 		self.trips_df_norm = pd.DataFrame()
+
+		if self.city_name == "Torino":
+			self.tz = pytz.timezone("Europe/Rome")
+		elif self.city_name == "Berlin":
+			self.tz = pytz.timezone("Europe/Berlin")
+		elif self.city_name == "Minneapolis":
+			self.tz = pytz.timezone("America/Chicago")
+		elif self.city_name == "Louisville":
+			self.tz = pytz.timezone("America/Kentucky/Louisville")
 
 	def load_raw(self):
 		return
@@ -62,8 +69,7 @@ class TripsDataSource:
 
 	def load_norm(self, year, month):
 		data_path = os.path.join(
-			data_paths_dict["norm"][self.data_type_id],
-			self.city_name,
+			data_paths_dict[self.city_name]["norm"][self.data_type_id],
 			self.data_source_id,
 			"_".join([str(year), str(month)]) + ".csv"
 		)

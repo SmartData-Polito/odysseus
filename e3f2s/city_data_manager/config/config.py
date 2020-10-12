@@ -1,11 +1,34 @@
 import os
 
 root_data_path = os.path.join(
-	os.path.dirname(os.path.dirname(__file__)), "data"
+	os.path.dirname(os.path.dirname(__file__)),
+	"data"
 )
 
-data_paths_dict = {
-	"Minneapolis": os.path.join(root_data_path, "Minneapolis"),
-	"Torino": os.path.join(root_data_path, "Torino"),
-	"Louisville": os.path.join(root_data_path, "Louisville"),
-}
+cities = [
+	"Torino"
+]
+
+data_steps_ids = [
+	"raw",
+	"norm",
+	"od_trips"
+]
+
+data_type_ids = [
+	"points",
+	"trips",
+	"weather",
+	"geo"
+]
+
+data_paths_dict = {}
+for city in cities:
+	data_paths_dict[city] = {}
+	for data_step_id in data_steps_ids:
+		data_paths_dict[city][data_step_id] = {}
+		for data_type_id in data_type_ids:
+			data_paths_dict[city][data_step_id][data_type_id] = os.path.join(
+				root_data_path, city, data_step_id, data_type_id
+			)
+
