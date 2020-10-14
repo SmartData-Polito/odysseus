@@ -46,10 +46,10 @@ class CityGeoTrips:
 		)
 		self.trips = self.trips_df_norm.copy()
 		self.trips["geometry"] = self.trips_df_norm.apply(
-			lambda row: shapely.geometry.LineString(
+			lambda row: shapely.geometry.LineString([
 				shapely.geometry.Point(row["start_longitude"], row["start_latitude"]),
 				shapely.geometry.Point(row["end_longitude"], row["end_latitude"]),
-			), axis=1
+			]), axis=1
 		)
 		self.trips = gpd.GeoDataFrame(self.trips)
 		self.trips.crs = "epsg:4326"

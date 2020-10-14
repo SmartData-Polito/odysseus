@@ -40,34 +40,34 @@ for month in [10]:
 #
 # print(datetime.datetime.now())
 
-# from e3f2s.city_data_manager.city_geo_trips.louisville_geo_trips import LouisvilleGeoTrips
-#
-# print(datetime.datetime.now())
-#
-# for month in [7, 8, 9]:
-#
-#     print(datetime.datetime.now())
-#     print(month)
-#
-#     for bin_side_length in [200]:
-#
-#         louisville = LouisvilleGeoTrips("city_of_louisville", 2019, month, bin_side_length)
-#         louisville.get_trips_od_gdfs()
-#
-#         louisville.get_squared_grid()
-#
-#         louisville.map_zones_on_trips(louisville.squared_grid)
-#         louisville.squared_grid = louisville.map_trips_on_zones(louisville.squared_grid)
-#
-#         louisville.save_points_data()
-#         louisville.save_squared_grid()
-#         louisville.save_od_trips(louisville.od_trips_df, "od_trips")
-#
-#         louisville.load()
-#         louisville.get_resampled_points_count_by_zone(
-#             ["zone_id"],
-#             "60Min"
-#         )
-#         louisville.save_resampled_points_data()
+from e3f2s.city_data_manager.city_geo_trips.louisville_geo_trips import LouisvilleGeoTrips
+
+print(datetime.datetime.now())
+
+for month in [7, 8, 9]:
+
+    print(datetime.datetime.now())
+    print(month)
+
+    louisville = LouisvilleGeoTrips("city_of_louisville", 2019, month)
+    louisville.get_trips_od_gdfs()
+    louisville.save_points_data()
+    louisville.save_trips()
+
+    # louisville.get_squared_grid()
+    #
+    # louisville.map_zones_on_trips(louisville.squared_grid)
+    # louisville.squared_grid = louisville.map_trips_on_zones(louisville.squared_grid)
+    #
+    # louisville.save_points_data()
+    # louisville.save_squared_grid()
+    # louisville.save_od_trips(louisville.od_trips_df, "od_trips")
+    #
+    # louisville.load()
+    # louisville.get_resampled_points_count_by_zone(
+    #     ["zone_id"],
+    #     "60Min"
+    # )
+    # louisville.save_resampled_points_data()
 
 print(datetime.datetime.now())
