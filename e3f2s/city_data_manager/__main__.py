@@ -28,18 +28,21 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    city="single_run",
+    city="Torino",
     data_source_id="big_data_db",
     year="2017",
     month="10",
 )
 
 args = parser.parse_args()
-
-big_data_db_geo_trips = BigDataDBGeoTrips(args.city, args.data_source_id, int(args.year), int(args.month))
-big_data_db_geo_trips.get_trips_od_gdfs()
-big_data_db_geo_trips.save_points_data()
-big_data_db_geo_trips.save_trips()
+for city in args.cities:
+    for data_source_id in args.data_source_ids:
+        for year in args.years:
+            for month in args.months:
+                big_data_db_geo_trips = BigDataDBGeoTrips(args.city, args.data_source_id, int(args.year), int(args.month))
+                big_data_db_geo_trips.get_trips_od_gdfs()
+                big_data_db_geo_trips.save_points_data()
+                big_data_db_geo_trips.save_trips()
 
 # from e3f2s.city_data_manager.city_geo_trips.minneapolis_geo_trips import MinneapolisGeoTrips
 #
