@@ -39,7 +39,7 @@ for city in args.cities:
     for data_source_id in args.data_source_ids:
         for year in args.years:
             for month in args.months:
-                big_data_db_geo_trips = BigDataDBGeoTrips(args.city, args.data_source_id, int(args.year), int(args.month))
+                big_data_db_geo_trips = BigDataDBGeoTrips(city, data_source_id, int(year), int(month))
                 big_data_db_geo_trips.get_trips_od_gdfs()
                 big_data_db_geo_trips.save_points_data()
                 big_data_db_geo_trips.save_trips()
