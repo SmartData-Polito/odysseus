@@ -28,10 +28,10 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    city="Torino",
-    data_source_id="big_data_db",
-    year="2017",
-    month="10",
+    cities=["Torino"],
+    data_source_ids=["big_data_db"],
+    years=["2017"],
+    months=["10"],
 )
 
 args = parser.parse_args()
