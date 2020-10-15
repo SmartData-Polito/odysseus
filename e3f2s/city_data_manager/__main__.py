@@ -1,13 +1,45 @@
+import argparse
 import datetime
 print(datetime.datetime.now())
 
 from e3f2s.city_data_manager.city_geo_trips.big_data_db_geo_trips import BigDataDBGeoTrips
 
-for month in [10]:
-    big_data_db_geo_trips = BigDataDBGeoTrips("Torino", "big_data_db", 2017, month)
-    big_data_db_geo_trips.get_trips_od_gdfs()
-    big_data_db_geo_trips.save_points_data()
-    big_data_db_geo_trips.save_trips()
+parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "-c", "--cities", nargs="+",
+    help="specify cities"
+)
+
+parser.add_argument(
+    "-y", "--years", nargs="+",
+    help="specify years"
+)
+
+parser.add_argument(
+    "-m", "--months", nargs="+",
+    help="specify months"
+)
+
+parser.add_argument(
+    "-d", "--data_source_ids", nargs="+",
+    help="specify data source ids"
+)
+
+
+parser.set_defaults(
+    city="single_run",
+    data_source_id="big_data_db",
+    year="2017",
+    month="10",
+)
+
+args = parser.parse_args()
+
+big_data_db_geo_trips = BigDataDBGeoTrips(args.city, args.data_source_id, int(args.year), int(args.month))
+big_data_db_geo_trips.get_trips_od_gdfs()
+big_data_db_geo_trips.save_points_data()
+big_data_db_geo_trips.save_trips()
 
 # from e3f2s.city_data_manager.city_geo_trips.minneapolis_geo_trips import MinneapolisGeoTrips
 #
