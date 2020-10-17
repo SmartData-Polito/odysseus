@@ -3,15 +3,15 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "requests_rate_factor": np.arange(1, 6, 1),
-    "n_vehicles_factor": np.arange(1, 6, 1),
+    "requests_rate_factor": [1],
+    "n_vehicles_factor": [1],
 
     "time_estimation": [True],
     "queuing": [True],
 
     "alpha": [26],
     "beta": [100],
-    "n_poles_n_vehicles_factor": np.arange(0.05, 0.45, 0.05),
+    "n_charging_poles": np.arange(5, 150, 5),
 
     "hub": [False],
     "hub_zone_policy": [""],

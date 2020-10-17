@@ -15,12 +15,13 @@ from e3f2s.simulator.simulation_output.sim_output_plotter import EFFCS_SimOutput
 
 def single_run(conf_tuple):
 
-	city = conf_tuple[0]["city"]
-	data_source_id = conf_tuple[0]["data_source_id"]
-	sim_general_conf = conf_tuple[1]
-	sim_scenario_conf = conf_tuple[2]
-	sim_scenario_name = conf_tuple[3]
-	sim_type = conf_tuple[0]["sim_technique"]
+	sim_general_conf = conf_tuple[0]
+	sim_scenario_conf = conf_tuple[1]
+	sim_scenario_name = conf_tuple[2]
+
+	city = sim_general_conf["city"]
+	data_source_id = sim_general_conf["data_source_id"]
+	sim_type = sim_general_conf["sim_technique"]
 
 	results_path = os.path.join(
 		os.path.dirname(os.path.dirname(__file__)),

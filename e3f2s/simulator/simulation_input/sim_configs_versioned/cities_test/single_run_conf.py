@@ -1,12 +1,12 @@
 sim_scenario_conf = {
 
 	"requests_rate_factor": 1,
-	"fleet_load_factor": 2, # misleading name, change it
+	"fleet_load_factor": 1,
 
 	"time_estimation": True,
 	"queuing": True,
 
-	"alpha": 26,
+	"alpha": 'auto',
 	"beta": 100,
 	"n_poles_n_vehicles_factor": 0.2,
 
@@ -26,6 +26,6 @@ sim_scenario_conf = {
 	"relocation": False,
 
 	"user_contribution": False,
-	"willingness": 0.5,
+	"willingness": 0,
 
 }
