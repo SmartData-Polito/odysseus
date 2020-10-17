@@ -77,6 +77,9 @@ class City:
             )
         ]
 
+        if 'plate' in self.bookings:
+            self.n_vehicles_original = len(self.bookings.plate.unique())
+
         points = self.grid.centroid.geometry
         self.od_distances = points.apply(lambda p: points.distance(p)) / 1.4
         self.max_dist = self.od_distances.max().max()

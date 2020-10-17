@@ -23,8 +23,7 @@ class SimInput:
 		self.trip_kdes = self.city_obj.trip_kdes
 		self.valid_zones = self.city_obj.valid_zones
 		self.neighbors_dict = self.city_obj.neighbors_dict
-
-		self.n_vehicles_original = self.sim_general_conf["n_vehicles_original"]
+		self.n_vehicles_original = self.city_obj.n_vehicles_original
 
 		if "n_vehicles" in self.sim_scenario_conf.keys():
 			self.n_vehicles_sim = self.sim_scenario_conf["n_vehicles"]

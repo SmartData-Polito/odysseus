@@ -10,7 +10,6 @@ sim_general_conf_grid = {
 
     # Fleet general parameters
     "const_load_factor": [1],
-    "n_vehicles_original": [400],
 
     # Space general parameters
     "bin_side_length": [500],
