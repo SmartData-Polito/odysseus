@@ -264,13 +264,16 @@ class City:
 
     def get_trip_kdes(self):
 
+        zone_coords_dict = []
         for i in self.grid_matrix.index:
             for j in self.grid_matrix.columns:
-                zone = self.grid_matrix.iloc[i, j]
-                self.bookings.loc[self.bookings.origin_id == zone, "origin_i"] = i
-                self.bookings.loc[self.bookings.origin_id == zone, "origin_j"] = j
-                self.bookings.loc[self.bookings.destination_id == zone, "destination_i"] = i
-                self.bookings.loc[self.bookings.destination_id == zone, "destination_j"] = j
+                zone_coords_dict[self.grid_matrix.iloc[i, j]] = (i, j)
+
+        for zone in self.bookings.origin_id.unique():
+            self.bookings.loc[self.bookings.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
+            self.bookings.loc[self.bookings.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
+            self.bookings.loc[self.bookings.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
+            self.bookings.loc[self.bookings.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
 
         self.trip_kdes = {}
         self.kde_columns = [
