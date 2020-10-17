@@ -25,7 +25,7 @@ sim_scenario_conf = {
 	"n_workers": 1000,
 	"relocation": False,
 
-	"user_contribution": False,
-	"willingness": 0,
+	"user_contribution": True,
+	"willingness": 0.66,
 
 }

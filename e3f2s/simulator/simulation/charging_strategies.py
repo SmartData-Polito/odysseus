@@ -138,7 +138,7 @@ class ChargingStrategy (ChargingPrimitives):
 				elif operator == "users":
 
 					charging_zone_id = booking_request["destination_id"]
-					charging_station = self.charging_poles_dict[charging_zone_id]
+					charging_station = self.charging_stations_dict[zone].charging_station
 					resource = charging_station
 					timeout_outward = 0
 					charge["duration"] = get_charging_time(
