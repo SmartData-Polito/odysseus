@@ -13,7 +13,6 @@ confs_dict["multiple_runs"] = sim_scenario_conf_grid
 confs_dict["single_run"] = sim_scenario_conf
 
 sim_general_conf_list = EFFCS_SimConfGrid(sim_general_conf_grid).conf_list
-print(sim_general_conf_list)
 for sim_general_conf in sim_general_conf_list:
     for sim_run_mode in sim_general_conf["sim_run_mode"]:
         if sim_run_mode == "single_run":
