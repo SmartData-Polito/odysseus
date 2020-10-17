@@ -264,7 +264,7 @@ class City:
 
     def get_trip_kdes(self):
 
-        zone_coords_dict = []
+        zone_coords_dict = {}
         for i in self.grid_matrix.index:
             for j in self.grid_matrix.columns:
                 zone_coords_dict[self.grid_matrix.iloc[i, j]] = (i, j)
