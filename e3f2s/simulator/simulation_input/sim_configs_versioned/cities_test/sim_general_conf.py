@@ -4,9 +4,9 @@ sim_general_conf_grid = {
     "city": ["Torino", "Milano", "Berlin", "Vancouver", "New_York_City"],
     "sim_run_mode": ["single_run"],
 
-    "data_source_id": "big_data_db",
-    "sim_technique": "traceB",
-    "sim_scenario_name": "cities_test",
+    "data_source_id": ["big_data_db"],
+    "sim_technique": ["traceB"],
+    "sim_scenario_name": ["cities_test"],
 
     # Fleet general parameters
     "const_load_factor": [1],
