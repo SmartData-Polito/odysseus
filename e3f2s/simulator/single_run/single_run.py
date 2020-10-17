@@ -79,117 +79,122 @@ def single_run(conf_tuple):
 	pd.Series(sim_general_conf).to_pickle(os.path.join(results_path, "sim_general_conf.pickle"))
 	pd.Series(sim_scenario_conf).to_pickle(os.path.join(results_path, "sim_scenario_conf.pickle"))
 
-	simOutput.grid.to_pickle(
-		os.path.join(
-			results_path,
-			"grid.pickle"
-		)
+	pickle.dump(
+		simOutput,
+		open(os.path.join(results_path, "sim_output.pickle"), "wb")
 	)
 
-	simOutput.sim_booking_requests.to_pickle(
-		os.path.join(
-			results_path,
-			"sim_booking_requests.pickle"
-		)
-	)
-	simOutput.sim_bookings.to_pickle(
-		os.path.join(
-			results_path,
-			"sim_bookings.pickle"
-		)
-	)
-	simOutput.sim_charges.to_pickle(
-		os.path.join(
-			results_path,
-			"sim_charges.pickle"
-		)
-	)
-	simOutput.sim_not_enough_energy_requests.to_pickle(
-		os.path.join(
-			results_path,
-			"sim_unsatisfied_no-energy.pickle"
-		)
-	)
-	simOutput.sim_no_close_vehicle_requests.to_pickle(
-		os.path.join(
-			results_path,
-			"sim_unsatisfied_no_close_vehicle.pickle"
-		)
-	)
-	simOutput.sim_unsatisfied_requests.to_pickle(
-		os.path.join(
-			results_path,
-			"sim_unsatisfied_requests.pickle"
-		)
-	)
-	simOutput.sim_system_charges_bookings.to_pickle(
-		os.path.join(
-			results_path,
-			"sim_system_charges_bookings.pickle"
-		)
-	)
-	simOutput.sim_users_charges_bookings.to_pickle(
-		os.path.join(
-			results_path,
-			"sim_users_charges_bookings.pickle"
-		)
-	)
-	simOutput.sim_unfeasible_charge_bookings.to_pickle(
-		os.path.join(
-			results_path,
-			"sim_unfeasible_charge_bookings.pickle"
-		)
-	)
-	simOutput.sim_charge_deaths.to_pickle(
-		os.path.join(
-			results_path,
-			"sim_unfeasible_charges.pickle"
-		)
-	)
-
-	simOutput.n_vehicles_per_zones_history.to_pickle(
-		os.path.join(
-			results_path,
-			"n_vehicles_per_zones_history.pickle"
-		)
-	)
-	simOutput.n_vehicles_per_zones_history.to_csv(
-		os.path.join(
-			results_path,
-			"n_vehicles_per_zones_history.csv"
-		)
-	)
-
-	simOutput.vehicles_history.to_csv(
-		os.path.join(
-			results_path,
-			"vehicles_history.csv"
-		)
-	)
-
-	print(datetime.datetime.now(), city, sim_scenario_name, "results saved!")
-
-	plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
-	plotter.plot_events_profile_barh()
-	plotter.plot_events_t()
-	plotter.plot_fleet_status_t()
-	plotter.plot_events_hourly_count_boxplot("bookings", "start")
-	plotter.plot_events_hourly_count_boxplot("charges", "start")
-	plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
-	plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
-
-	plotter.plot_city_zones()
-	plotter.plot_charging_infrastructure()
-	for col in [
-		"origin_count",
-		"destination_count",
-		"charge_needed_system_zones_count",
-		"charge_needed_users_zones_count",
-		"unsatisfied_demand_origins_fraction",
-		"not_enough_energy_origins_count",
-		"charge_deaths_origins_count",
-	]:
-		if col in simOutput.grid:
-			plotter.plot_choropleth(col)
+	# simOutput.grid.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"grid.pickle"
+	# 	)
+	# )
+	#
+	# simOutput.sim_booking_requests.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"sim_booking_requests.pickle"
+	# 	)
+	# )
+	# simOutput.sim_bookings.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"sim_bookings.pickle"
+	# 	)
+	# )
+	# simOutput.sim_charges.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"sim_charges.pickle"
+	# 	)
+	# )
+	# simOutput.sim_not_enough_energy_requests.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"sim_unsatisfied_no-energy.pickle"
+	# 	)
+	# )
+	# simOutput.sim_no_close_vehicle_requests.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"sim_unsatisfied_no_close_vehicle.pickle"
+	# 	)
+	# )
+	# simOutput.sim_unsatisfied_requests.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"sim_unsatisfied_requests.pickle"
+	# 	)
+	# )
+	# simOutput.sim_system_charges_bookings.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"sim_system_charges_bookings.pickle"
+	# 	)
+	# )
+	# simOutput.sim_users_charges_bookings.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"sim_users_charges_bookings.pickle"
+	# 	)
+	# )
+	# simOutput.sim_unfeasible_charge_bookings.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"sim_unfeasible_charge_bookings.pickle"
+	# 	)
+	# )
+	# simOutput.sim_charge_deaths.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"sim_unfeasible_charges.pickle"
+	# 	)
+	# )
+	#
+	# simOutput.n_vehicles_per_zones_history.to_pickle(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"n_vehicles_per_zones_history.pickle"
+	# 	)
+	# )
+	# simOutput.n_vehicles_per_zones_history.to_csv(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"n_vehicles_per_zones_history.csv"
+	# 	)
+	# )
+	#
+	# simOutput.vehicles_history.to_csv(
+	# 	os.path.join(
+	# 		results_path,
+	# 		"vehicles_history.csv"
+	# 	)
+	# )
+	#
+	# print(datetime.datetime.now(), city, sim_scenario_name, "results saved!")
+	#
+	# plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
+	# plotter.plot_events_profile_barh()
+	# plotter.plot_events_t()
+	# plotter.plot_fleet_status_t()
+	# plotter.plot_events_hourly_count_boxplot("bookings", "start")
+	# plotter.plot_events_hourly_count_boxplot("charges", "start")
+	# plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
+	# plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
+	#
+	# plotter.plot_city_zones()
+	# plotter.plot_charging_infrastructure()
+	# for col in [
+	# 	"origin_count",
+	# 	"destination_count",
+	# 	"charge_needed_system_zones_count",
+	# 	"charge_needed_users_zones_count",
+	# 	"unsatisfied_demand_origins_fraction",
+	# 	"not_enough_energy_origins_count",
+	# 	"charge_deaths_origins_count",
+	# ]:
+	# 	if col in simOutput.grid:
+	# 		plotter.plot_choropleth(col)
 
 	return sim_stats

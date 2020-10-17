@@ -76,7 +76,9 @@ class SimInput:
 			self.n_charging_poles = 0
 
 		if self.sim_scenario_conf["alpha"] == "auto":
-			self.sim_scenario_conf["alpha"] = self.input_bookings.driving_distance.max()
+			self.sim_scenario_conf["alpha"] = get_soc_delta(
+				self.input_bookings.driving_distance.max() / 1000
+			)
 
 		self.avg_speed_mean = self.input_bookings.avg_speed.mean()
 		self.avg_speed_std = self.input_bookings.avg_speed.std()
