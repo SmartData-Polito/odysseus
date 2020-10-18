@@ -174,18 +174,22 @@ class ChargingPrimitives:
 		charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
 		self.sim_charges += [charge]
 
-	def check_system_charge(self, booking_request, vehicle):
+	def check_system_charge(self, booking_request, vehicle, charging_strategy):
+		if charging_strategy == "reactive":
 
-		if self.vehicles_soc_dict[vehicle] < self.simInput.sim_scenario_conf["alpha"]:
-			charge = init_charge(
-				booking_request,
-				self.vehicles_soc_dict,
-				vehicle,
-				self.simInput.sim_scenario_conf["beta"]
-			)
-			return True, charge
+			if self.vehicles_soc_dict[vehicle] < self.simInput.sim_scenario_conf["alpha"]:
+				charge = init_charge(
+					booking_request,
+					self.vehicles_soc_dict,
+					vehicle,
+					self.simInput.sim_scenario_conf["beta"]
+				)
+				return True, charge
+			else:
+				return False, None
 		else:
-			return False, None
+			print("No such charging strategy supported")
+			exit()
 
 	def check_user_charge(self, booking_request, vehicle):
 

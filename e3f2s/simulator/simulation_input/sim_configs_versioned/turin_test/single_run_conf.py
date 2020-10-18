@@ -1,7 +1,7 @@
 sim_scenario_conf = {
 
 	"requests_rate_factor": 1,
-	"fleet_load_factor": 2, # misleading name, change it
+	"fleet_load_factor": 2,  # misleading name, change it
 
 	"time_estimation": True,
 	"queuing": True,
@@ -27,5 +27,8 @@ sim_scenario_conf = {
 
 	"user_contribution": False,
 	"willingness": 0.5,
+
+	"charging_strategy": "reactive",
+	"charging_relocation_strategy": "closest_free",
 
 }
