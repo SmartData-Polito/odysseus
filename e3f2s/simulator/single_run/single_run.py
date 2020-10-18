@@ -51,8 +51,8 @@ def single_run(conf_tuple):
 	else:
 		city_obj = pickle.Unpickler(open(os.path.join(results_path, "city_obj.pickle"), "rb")).load()
 
-	print(datetime.datetime.now(), "City initialised!")
-	print(city_obj.bookings.shape)
+	print(city, datetime.datetime.now(), "City initialised!")
+	print(results_path, city_obj.bookings.shape)
 
 	if sim_type == "eventG":
 

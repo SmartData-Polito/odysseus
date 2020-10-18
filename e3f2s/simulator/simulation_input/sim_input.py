@@ -75,10 +75,15 @@ class SimInput:
 		elif self.sim_scenario_conf["battery_swap"]:
 			self.n_charging_poles = 0
 
-		if self.sim_scenario_conf["alpha"] == "auto":
-			self.sim_scenario_conf["alpha"] = get_soc_delta(
-				self.input_bookings.driving_distance.max() / 1000
-			)
+		if "alpha_policy" in self.sim_scenario_conf:
+			if self.sim_scenario_conf["alpha_policy"] == "auto":
+				self.sim_scenario_conf["alpha"] = get_soc_delta(
+					self.input_bookings.driving_distance.max() / 1000
+				)
+			else:
+				print("Policy for alpha not recognised!")
+				exit(0)
+		print(self.sim_scenario_conf["alpha"])
 
 		self.avg_speed_mean = self.input_bookings.avg_speed.mean()
 		self.avg_speed_std = self.input_bookings.avg_speed.std()
