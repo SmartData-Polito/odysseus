@@ -11,7 +11,6 @@ from e3f2s.simulator.simulation_data_structures.charging_station import Charging
 
 from e3f2s.simulator.simulation.charging_strategies import ChargingStrategy
 
-from e3f2s.simulator.simulation_input.sim_current_config.cost_conf import vehicles_cost_conf
 from e3f2s.simulator.simulation_input.sim_current_config.vehicle_config import vehicle_conf
 
 
@@ -101,8 +100,7 @@ class SharedMobilitySim:
         for i in range(self.simInput.n_vehicles_sim):
             vehicle_object = Vehicle(
                 self.env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
-                vehicle_conf, vehicles_cost_conf, self.simInput.sim_scenario_conf,
-                self.start
+                vehicle_conf, self.simInput.sim_scenario_conf, self.start
             )
             self.vehicles_list.append(vehicle_object)
 

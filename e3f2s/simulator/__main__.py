@@ -1,8 +1,37 @@
 import datetime
 
+import os
+import json
+
+from shutil import copy
 from e3f2s.simulator.single_run.single_run import single_run
 from e3f2s.simulator.multiple_runs.multiple_runs import multiple_runs
 from e3f2s.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
+
+from e3f2s.simulator.simulation_input.sim_input_paths import simulation_input_paths
+
+with open(simulation_input_paths['sim_configs_target'], 'r') as my_file:
+    data = my_file.read()
+conf_name = json.loads(data)['config_names'][0]
+
+versioned_conf_path = os.path.join(
+    simulation_input_paths["sim_configs_versioned"],
+    conf_name
+)
+conf_path = simulation_input_paths['sim_current_config']
+os.makedirs(conf_path, exist_ok=True)
+
+try:
+    for f in os.listdir(versioned_conf_path):
+        if os.path.isfile(os.path.join(versioned_conf_path, f)):
+            copy(
+                os.path.join(versioned_conf_path, f),
+                os.path.join(conf_path)
+            )
+
+except FileNotFoundError:
+    print('Error %s conf not present' % conf_path + f)
+    exit()
 
 from e3f2s.simulator.simulation_input.sim_current_config.sim_general_conf import sim_general_conf_grid
 from e3f2s.simulator.simulation_input.sim_current_config.multiple_runs_conf import sim_scenario_conf_grid

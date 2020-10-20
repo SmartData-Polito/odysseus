@@ -17,7 +17,7 @@ class City:
 
         self.city_name = city_name
 
-        if self.city_name == "raw":
+        if self.city_name == "Torino":
             self.tz = pytz.timezone("Europe/Rome")
         elif self.city_name == "Berlin":
             self.tz = pytz.timezone("Europe/Berlin")
@@ -151,12 +151,6 @@ class City:
                 self.bookings.end_time - self.bookings.start_time
         ).apply(lambda x: x.total_seconds())
 
-        # else:
-        #     pass
-        #     # self.bookings.end_time = pd.to_datetime(self.bookings.end_time) + self.bookings.duration.apply(
-        #     #     lambda sec: datetime.timedelta(seconds=abs(sec))
-        #     # )
-
         self.bookings = self.bookings.sort_values("start_time")
         self.bookings.loc[:, "ia_timeout"] = (
                 self.bookings.start_time - self.bookings.start_time.shift()
@@ -172,18 +166,21 @@ class City:
         self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"]
         self.bookings["avg_speed_kmh"] = self.bookings.avg_speed * 3.6
 
+        print(self.bookings[["driving_distance", "duration", "avg_speed_kmh"]].describe())
+
         if self.city_name in ["Minneapolis", "Louisville"]:
             pass
             #self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
-        elif self.city_name in ["raw", "Berlin"]:
-            self.bookings = self.bookings[self.bookings.avg_speed_kmh < 120]
-            self.bookings = self.bookings[
-                (self.bookings.duration > 3*60) & (
-                    self.bookings.duration < 60*60
-                ) & (
-                    self.bookings.euclidean_distance > 500
-                )
-            ]
+        elif self.city_name in ["Torino", "Berlin"]:
+            pass
+            # self.bookings = self.bookings[self.bookings.avg_speed_kmh < 120]
+            # self.bookings = self.bookings[
+            #     (self.bookings.duration > 3*60) & (
+            #         self.bookings.duration < 60*60
+            #     ) & (
+            #         self.bookings.euclidean_distance > 500
+            #     )
+            # ]
 
         return self.bookings
 

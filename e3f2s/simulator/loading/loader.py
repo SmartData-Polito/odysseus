@@ -74,5 +74,4 @@ class Loader:
             "trips.pickle"
         )
         self.bookings = pd.read_pickle(path)
-        print(self.bookings)
         return self.bookings

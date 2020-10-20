@@ -3,7 +3,6 @@ import datetime
 
 import numpy as np
 
-from e3f2s.simulator.simulation_input.sim_current_config.vehicle_config import vehicle_conf
 from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.geospatial_utils import get_od_distance
 

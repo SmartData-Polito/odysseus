@@ -5,7 +5,7 @@ sim_general_conf_grid = {
     "sim_run_mode": ["multiple_runs"],
 
     "data_source_id": ["big_data_db"],
-    "sim_technique": ["traceB"],
+    "sim_technique": ["eventG"],
     "sim_scenario_name": ["isc2_set1a"],
 
     # Fleet general parameters
