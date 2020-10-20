@@ -83,7 +83,6 @@ class SimInput:
 			else:
 				print("Policy for alpha not recognised!")
 				exit(0)
-		print(self.sim_scenario_conf["alpha"])
 
 		self.avg_speed_mean = self.input_bookings.avg_speed.mean()
 		self.avg_speed_std = self.input_bookings.avg_speed.std()
@@ -174,6 +173,7 @@ class SimInput:
 
 			else:
 				print("Hub placement policy not recognised!")
+				exit(0)
 
 			for zone in self.valid_zones:
 				if zone == self.hub_zone:
@@ -210,7 +210,7 @@ class SimInput:
 						self.n_charging_poles_by_zone[zone_id] = 4
 					else:
 						print("Zone", zone_id, "does not exist!")
-						exit(1)
+						exit(0)
 
 			zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
 
