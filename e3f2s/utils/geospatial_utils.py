@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import Point, LineString, Polygon
 import geopandas as gpd
+from math import radians, cos, sin, asin, sqrt
 
 
 def get_city_grid_as_gdf (locations, bin_side_length):
@@ -83,9 +84,20 @@ def add_grouped_count_to_grid(grid, trips_locations, group_col, od_key, aggfunc=
     return grid
 
 
+def haversine(lon1, lat1, lon2, lat2):
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a))
+    r = 6371
+    return c * r
+
+
 def get_od_distance(grid, origin_id, destination_id):
-    return grid.loc[
-                origin_id, "geometry"
-            ].distance(
-                grid.loc[destination_id, "geometry"]
-            )
+    if grid.crs == "epsg:3857":
+        return grid.loc[
+                    origin_id, "geometry"
+                ].distance(
+                    grid.loc[destination_id, "geometry"]
+                ) * 0.7
