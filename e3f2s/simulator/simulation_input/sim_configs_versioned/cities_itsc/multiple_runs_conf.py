@@ -11,7 +11,7 @@ sim_scenario_conf_grid = {
 
     "alpha": [26],
     "beta": [100],
-    "n_charging_poles": np.arange(5, 150, 5),
+    "tot_n_charging_poles": np.arange(5, 150, 5),
 
     "hub": [False],
     "hub_zone_policy": [""],
