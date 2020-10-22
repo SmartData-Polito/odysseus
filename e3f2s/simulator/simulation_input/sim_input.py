@@ -128,10 +128,10 @@ class SimInput:
 			i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
 		}
 
-		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:len(self.valid_zones)]
+		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:31]
 
 		vehicles_random_zones = list(
-			np.random.uniform(0, len(self.valid_zones), self.n_vehicles_sim).astype(int).round()
+			np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()
 		)
 
 		self.vehicles_zones = []
