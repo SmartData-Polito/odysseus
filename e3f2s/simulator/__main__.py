@@ -10,6 +10,8 @@ from e3f2s.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 
 from e3f2s.simulator.simulation_input.sim_input_paths import simulation_input_paths
 
+print(datetime.datetime.now())
+
 with open(simulation_input_paths['sim_configs_target'], 'r') as my_file:
     data = my_file.read()
 conf_name = json.loads(data)['config_names'][0]

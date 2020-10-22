@@ -8,8 +8,8 @@ from math import radians, cos, sin, asin, sqrt
 def get_city_grid_as_gdf (locations, bin_side_length):
 
     x_min, y_min, x_max, y_max = locations.total_bounds
-    # width = bin_side_length / 111.32 * 0.001 * 1.4
-    # height = bin_side_length / 111.32 * 0.001 * 1.4
+    # width = bin_side_length / 111.32 * 0.001
+    # height = bin_side_length / 111.32 * 0.001
     width = bin_side_length
     height = bin_side_length
     rows = int(np.ceil((y_max-y_min) / height))
@@ -95,9 +95,8 @@ def haversine(lon1, lat1, lon2, lat2):
 
 
 def get_od_distance(grid, origin_id, destination_id):
-    if grid.crs == "epsg:3857":
-        return grid.loc[
-                    origin_id, "geometry"
-                ].distance(
-                    grid.loc[destination_id, "geometry"]
-                ) * 0.7
+    return grid.loc[
+                origin_id, "geometry"
+            ].distance(
+                grid.loc[destination_id, "geometry"]
+            ) * 0.7
