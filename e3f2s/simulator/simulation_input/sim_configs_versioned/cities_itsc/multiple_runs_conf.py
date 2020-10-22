@@ -19,7 +19,7 @@ sim_scenario_conf_grid = {
     "distributed_cps": [True],
     "system_cps": [True],
     "cps_placement_policy": ["num_parkings"],
-    "cps_zones_percentage": np.arange(0.1, 0.25, 0.05),
+    "cps_zones_percentage": [0.2],
 
     "battery_swap": [False],
     "avg_reach_time": [20],
@@ -28,7 +28,7 @@ sim_scenario_conf_grid = {
     "n_workers": [1000],
     "relocation": [False],
 
-    "user_contribution": [False],
-    "willingness": [0],
+    "user_contribution": [True],
+    "willingness": [0.66],
 
 }
