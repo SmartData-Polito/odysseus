@@ -20,8 +20,8 @@ sim_scenario_conf = {
 	"cps_zones_percentage": 0.2,
 
 	"battery_swap": False,
-	"avg_reach_time": 1,
-	"avg_service_time": 1,
+	"avg_reach_time": 20,
+	"avg_service_time": 0,
 
 	"n_workers": 1000,
 	"relocation": False,
