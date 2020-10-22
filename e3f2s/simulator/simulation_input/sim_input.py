@@ -80,7 +80,6 @@ class SimInput:
 				self.sim_scenario_conf["alpha"] = get_soc_delta(
 					self.input_bookings.driving_distance.max() / 1000
 				)
-				print(self.sim_scenario_conf["alpha"])
 			else:
 				print("Policy for alpha not recognised!")
 				exit(0)

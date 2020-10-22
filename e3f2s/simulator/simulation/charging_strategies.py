@@ -107,7 +107,7 @@ class ChargingStrategy (ChargingPrimitives):
 					int(booking_request["destination_id"])
 				]
 
-			charging_station = self.charging_stations_dict[zone].charging_station
+			charging_station = self.charging_stations_dict[charging_zone_id].charging_station
 			resource = charging_station
 
 			if self.simInput.sim_scenario_conf["time_estimation"]:
@@ -136,7 +136,7 @@ class ChargingStrategy (ChargingPrimitives):
 				elif operator == "users":
 
 					charging_zone_id = booking_request["destination_id"]
-					charging_station = self.charging_stations_dict[zone].charging_station
+					charging_station = self.charging_stations_dict[charging_zone_id].charging_station
 					resource = charging_station
 					timeout_outward = 0
 					charge["duration"] = get_charging_time(

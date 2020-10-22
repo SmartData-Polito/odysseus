@@ -183,18 +183,18 @@ def single_run(conf_tuple):
 	plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
 	plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
 
-	# plotter.plot_city_zones()
-	# plotter.plot_charging_infrastructure()
-	# for col in [
-	# 	"origin_count",
-	# 	"destination_count",
-	# 	"charge_needed_system_zones_count",
-	# 	"charge_needed_users_zones_count",
-	# 	"unsatisfied_demand_origins_fraction",
-	# 	"not_enough_energy_origins_count",
-	# 	"charge_deaths_origins_count",
-	# ]:
-	# 	if col in simOutput.grid:
-	# 		plotter.plot_choropleth(col)
+	plotter.plot_city_zones()
+	plotter.plot_charging_infrastructure()
+	for col in [
+		"origin_count",
+		"destination_count",
+		"charge_needed_system_zones_count",
+		"charge_needed_users_zones_count",
+		"unsatisfied_demand_origins_fraction",
+		"not_enough_energy_origins_count",
+		"charge_deaths_origins_count",
+	]:
+		if col in simOutput.grid:
+			plotter.plot_choropleth(col)
 
 	return sim_stats
