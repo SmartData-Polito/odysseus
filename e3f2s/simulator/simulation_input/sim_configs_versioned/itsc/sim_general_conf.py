@@ -6,7 +6,7 @@ sim_general_conf_grid = {
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["cities_itsc"],
+    "sim_scenario_name": ["itsc"],
 
     # Fleet general parameters
     "const_load_factor": [1],
