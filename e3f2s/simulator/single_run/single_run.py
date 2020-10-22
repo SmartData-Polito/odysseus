@@ -174,15 +174,15 @@ def single_run(conf_tuple):
 
 	print(datetime.datetime.now(), city, sim_scenario_name, "results saved!")
 
-	# plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
-	# plotter.plot_events_profile_barh()
-	# plotter.plot_events_t()
-	# plotter.plot_fleet_status_t()
-	# plotter.plot_events_hourly_count_boxplot("bookings", "start")
-	# plotter.plot_events_hourly_count_boxplot("charges", "start")
-	# plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
-	# plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
-	#
+	plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
+	plotter.plot_events_profile_barh()
+	plotter.plot_events_t()
+	plotter.plot_fleet_status_t()
+	plotter.plot_events_hourly_count_boxplot("bookings", "start")
+	plotter.plot_events_hourly_count_boxplot("charges", "start")
+	plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
+	plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
+
 	# plotter.plot_city_zones()
 	# plotter.plot_charging_infrastructure()
 	# for col in [

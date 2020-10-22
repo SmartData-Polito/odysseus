@@ -310,6 +310,8 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["hub_zone"] = sim.simInput.hub_zone
 		self.sim_stats.loc["n_charging_zones"] = sim.simInput.n_charging_zones
 
+		self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
+
 		self.vehicles_history = pd.DataFrame()
 		for vehicle in sim.vehicles_list:
 			vehicle_df = pd.DataFrame(vehicle.status_dict_list)
