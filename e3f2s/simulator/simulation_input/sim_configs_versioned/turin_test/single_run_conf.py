@@ -29,6 +29,6 @@ sim_scenario_conf = {
 	"willingness": 0.5,
 
 	"charging_strategy": "reactive",
-	"charging_relocation_strategy": "closest_free",
+	"charging_relocation_strategy": "random", #closest_free/random
 
 }
