@@ -81,7 +81,6 @@ class SharedMobilitySim:
         self.list_n_vehicles_available = []
         self.list_n_vehicles_dead = []
         self.vehicles_zones_history = []
-        self.n_vehicles_per_zones_history = []
 
         self.vehicles_list = []
         self.charging_stations_dict = {}

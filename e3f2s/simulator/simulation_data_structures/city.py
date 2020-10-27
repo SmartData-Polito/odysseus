@@ -21,6 +21,10 @@ class City:
             self.tz = pytz.timezone("Europe/Rome")
         elif self.city_name == "Berlin":
             self.tz = pytz.timezone("Europe/Berlin")
+        elif self.city_name == "Vancouver":
+            self.tz = pytz.timezone("Europe/Berlin")
+        elif self.city_name == "New_York_City":
+            self.tz = pytz.timezone("America/New_York")
         elif self.city_name == "Minneapolis":
             self.tz = pytz.timezone("America/Chicago")
         elif self.city_name == "Louisville":
@@ -59,6 +63,10 @@ class City:
                 self.trips_origins.distance(self.trips_destinations)
         ) / 1.4
 
+        if self.city_name == 'Vancouver':
+            self.bookings = self.bookings[self.bookings.start_longitude < 0]
+            print(self.bookings[['start_latitude', 'start_longitude']].describe())
+
         self.grid = self.get_squared_grid()
         self.grid_matrix = get_city_grid_as_matrix(
             self.locations,
@@ -83,6 +91,7 @@ class City:
         points = self.grid.centroid.geometry
         self.od_distances = points.apply(lambda p: points.distance(p)) / 1.4
         self.max_dist = self.od_distances.max().max()
+        print(self.max_dist)
 
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()

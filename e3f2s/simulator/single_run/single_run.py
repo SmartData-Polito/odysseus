@@ -152,23 +152,24 @@ def single_run(conf_tuple):
 		)
 	)
 
-	simOutput.n_vehicles_per_zones_history.to_pickle(
-		os.path.join(
-			results_path,
-			"n_vehicles_per_zones_history.pickle"
-		)
-	)
-	simOutput.n_vehicles_per_zones_history.to_csv(
-		os.path.join(
-			results_path,
-			"n_vehicles_per_zones_history.csv"
-		)
-	)
-
 	simOutput.vehicles_history.to_csv(
 		os.path.join(
 			results_path,
 			"vehicles_history.csv"
+		)
+	)
+
+	simOutput.stations_history.to_csv(
+		os.path.join(
+			results_path,
+			"stations_history.csv"
+		)
+	)
+
+	simOutput.zones_history.to_csv(
+		os.path.join(
+			results_path,
+			"zones_history.csv"
 		)
 	)
 

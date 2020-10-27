@@ -13,10 +13,6 @@ class EFFCS_SimOutput ():
 		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
 
 		self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
-		# print(self.sim_booking_requests[[
-		# 	"euclidean_distance", "driving_distance", "duration"
-		# ]].describe())
-
 		self.sim_bookings = self.sim_booking_requests.dropna()
 		self.sim_charges = pd.DataFrame(sim.chargingStrategy.sim_charges)
 		self.sim_not_enough_energy_requests = pd.DataFrame(sim.sim_booking_requests_deaths)
@@ -24,7 +20,6 @@ class EFFCS_SimOutput ():
 		self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 		self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
 		self.sim_users_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
-		self.n_vehicles_per_zones_history = pd.DataFrame(sim.n_vehicles_per_zones_history)
 
 		if "end_time" not in self.sim_system_charges_bookings:
 			self.sim_system_charges_bookings["end_time"] = pd.Series()
