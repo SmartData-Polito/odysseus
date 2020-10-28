@@ -1,7 +1,7 @@
 sim_general_conf_grid = {
 
     # Run configuration
-    "city": ["Torino", "Milano", "Berlin", "Vancouver", "New_York_City"],
+    "city": ["Berlin"],
     "sim_run_mode": ["single_run"],
 
     "data_source_id": ["big_data_db"],

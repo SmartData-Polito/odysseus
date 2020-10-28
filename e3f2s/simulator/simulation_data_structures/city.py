@@ -63,9 +63,30 @@ class City:
                 self.trips_origins.distance(self.trips_destinations)
         ) / 1.4
 
+        print(
+            self.bookings[[
+                'start_latitude', 'start_longitude', 'end_latitude', 'end_longitude'
+            ]].describe()
+        )
+
         if self.city_name == 'Vancouver':
             self.bookings = self.bookings[self.bookings.start_longitude < 0]
-            print(self.bookings[['start_latitude', 'start_longitude']].describe())
+            self.bookings = self.bookings[self.bookings.end_longitude < 0]
+        elif self.city_name == 'Berlin':
+            self.bookings = self.bookings[(self.bookings.start_latitude > 51) & (self.bookings.start_latitude < 53)]
+            self.bookings = self.bookings[(self.bookings.start_longitude > 12) & (self.bookings.start_longitude < 14)]
+            self.bookings = self.bookings[(self.bookings.end_latitude > 51) & (self.bookings.end_latitude < 53)]
+            self.bookings = self.bookings[(self.bookings.end_longitude > 12) & (self.bookings.end_longitude < 14)]
+
+        self.trips_origins = self.trips_origins.loc[self.bookings.index]
+        self.trips_destinations = self.trips_destinations.loc[self.bookings.index]
+
+        print(
+            self.bookings[[
+                'start_latitude', 'start_longitude', 'end_latitude', 'end_longitude'
+            ]].describe()
+        )
+        exit()
 
         self.grid = self.get_squared_grid()
         self.grid_matrix = get_city_grid_as_matrix(
