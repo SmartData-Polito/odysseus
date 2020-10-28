@@ -86,7 +86,6 @@ class City:
                 'start_latitude', 'start_longitude', 'end_latitude', 'end_longitude'
             ]].describe()
         )
-        exit()
 
         self.grid = self.get_squared_grid()
         self.grid_matrix = get_city_grid_as_matrix(
