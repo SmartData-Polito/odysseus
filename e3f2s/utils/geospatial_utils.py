@@ -99,4 +99,4 @@ def get_od_distance(grid, origin_id, destination_id):
                 origin_id, "geometry"
             ].distance(
                 grid.loc[destination_id, "geometry"]
-            ) * 0.7
+            )
