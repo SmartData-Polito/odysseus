@@ -50,6 +50,8 @@ def spark_multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_n
 
     city = sim_run_conf["city"]
 
+    print(sim_scenario_name)
+
     results_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
         "results",
