@@ -84,12 +84,6 @@ class Loader:
         self.trips_destinations.crs = "epsg:4326"
         self.trips_destinations = self.trips_destinations.to_crs("epsg:3857")
 
-        # print(
-        #     self.bookings[[
-        #         'start_latitude', 'start_longitude', 'end_latitude', 'end_longitude'
-        #     ]].describe()
-        # )
-
         if self.city == 'Vancouver':
             self.bookings = self.bookings[self.bookings.start_longitude < 0]
             self.bookings = self.bookings[self.bookings.end_longitude < 0]
@@ -102,29 +96,9 @@ class Loader:
         self.trips_origins = self.trips_origins.loc[self.bookings.index]
         self.trips_destinations = self.trips_destinations.loc[self.bookings.index]
 
-        # print(
-        #     self.bookings[[
-        #         'start_latitude', 'start_longitude', 'end_latitude', 'end_longitude'
-        #     ]].describe()
-        # )
-
-        print(
-            self.bookings[[
-                'start_time', 'end_time'
-            ]].dtypes
-        )
-
-        print(pd.to_datetime(self.bookings.start_time))
-
         self.bookings.start_time = pd.to_datetime(self.bookings.start_time, utc=True)
         self.trips_origins.start_time = self.bookings.start_time
         self.bookings.end_time = pd.to_datetime(self.bookings.end_time, utc=True)
         self.trips_destinations.end_time = self.bookings.end_time
-
-        print(
-            self.bookings[[
-                'start_time', 'end_time'
-            ]].dtypes
-        )
 
         return self.bookings, self.trips_origins, self.trips_destinations
