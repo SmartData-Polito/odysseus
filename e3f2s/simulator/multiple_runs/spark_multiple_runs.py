@@ -46,7 +46,7 @@ def get_eventG_sim_stats_spark (conf_tuple):
     return simOutput_eventG.sim_stats
 
 
-def spark_multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
+def spark_multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 
     city = sim_run_conf["city"]
 
@@ -64,13 +64,12 @@ def spark_multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, 
 
     print("Here 1!")
 
-    city_obj = City(city, sim_run_conf["data_source_id"], sim_general_conf)
+    city_obj = City(city, sim_general_conf["data_source_id"], sim_general_conf)
 
     global broadcastVar
     broadcastVar = sc.broadcast(city_obj)
 
     print("Here 2!")
-
 
     sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 
@@ -83,7 +82,9 @@ def spark_multiple_runs(sim_run_conf, sim_general_conf, sim_scenario_conf_grid, 
         )]
 
     bs_rdd = sc.parallelize(conf_tuples, numSlices=len(conf_tuples))
-    print("Here!", len(conf_tuples))
+
+    print("Here 3!", len(conf_tuples))
+
     sim_stats_list = bs_rdd.map(get_eventG_sim_stats_spark).collect()
 
     sim_stats_df = pd.concat([sim_stats for sim_stats in sim_stats_list], axis=1, ignore_index=True).T
@@ -102,12 +103,10 @@ print(datetime.datetime.now(), city_name, sim_scenario_name, "starting..")
 
 sim_general_conf_list = EFFCS_SimConfGrid(sim_general_conf_grid).conf_list
 
-print(sim_run_conf)
 for sim_general_conf in sim_general_conf_list:
     print(sim_general_conf)
     spark_multiple_runs(
-        sim_run_conf,
         sim_general_conf,
-        confs_dict["spark"],
+        sim_scenario_conf_grid,
         sim_scenario_name
     )
