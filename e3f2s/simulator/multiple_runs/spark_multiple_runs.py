@@ -101,10 +101,10 @@ sim_general_conf_list = EFFCS_SimConfGrid(sim_general_conf_grid).conf_list
 for sim_general_conf in sim_general_conf_list:
     print(sim_general_conf)
 
-    print(datetime.datetime.now(), city_name, sim_scenario_name, "starting..")
-
     city_name = sim_general_conf["city"]
     sim_scenario_name = sim_general_conf["sim_scenario_name"]
+
+    print(datetime.datetime.now(), city_name, sim_scenario_name, "starting..")
 
     spark_multiple_runs(
         sim_general_conf,
