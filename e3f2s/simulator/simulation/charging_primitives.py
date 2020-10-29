@@ -190,17 +190,14 @@ class ChargingPrimitives:
 
 		if booking_request["destination_id"] in self.charging_stations_dict:
 			if booking_request["end_soc"] < self.simInput.sim_scenario_conf["beta"]:
-				if booking_request["end_soc"] < self.simInput.sim_scenario_conf["alpha"]:
-					if np.random.binomial(1, self.simInput.sim_scenario_conf["willingness"]):
-						charge = init_charge(
-							booking_request,
-							self.vehicles_soc_dict,
-							vehicle,
-							self.simInput.sim_scenario_conf["beta"]
-						)
-						return True, charge
-					else:
-						return False, None
+				if np.random.binomial(1, self.simInput.sim_scenario_conf["willingness"]):
+					charge = init_charge(
+						booking_request,
+						self.vehicles_soc_dict,
+						vehicle,
+						self.simInput.sim_scenario_conf["beta"]
+					)
+					return True, charge
 				else:
 					return False, None
 			else:
