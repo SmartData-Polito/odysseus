@@ -96,12 +96,12 @@ def spark_multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_n
 confs_dict = {}
 confs_dict["spark"] = sim_scenario_conf_grid
 
-print(datetime.datetime.now(), city_name, sim_scenario_name, "starting..")
-
 sim_general_conf_list = EFFCS_SimConfGrid(sim_general_conf_grid).conf_list
 
 for sim_general_conf in sim_general_conf_list:
     print(sim_general_conf)
+
+    print(datetime.datetime.now(), city_name, sim_scenario_name, "starting..")
 
     city_name = sim_general_conf["city"]
     sim_scenario_name = sim_general_conf["sim_scenario_name"]
