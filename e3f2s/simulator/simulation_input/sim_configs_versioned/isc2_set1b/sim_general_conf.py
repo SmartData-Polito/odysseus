@@ -6,7 +6,7 @@ sim_general_conf_grid = {
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["isc2_set1a"],
+    "sim_scenario_name": ["isc2_set1b"],
 
     # Fleet general parameters
     "const_load_factor": [False],
@@ -18,6 +18,6 @@ sim_general_conf_grid = {
     # Time general parameters
     "year": [2017],
     "month_start": [10],
-    "month_end": [13],
+    "month_end": [11],
 
 }
