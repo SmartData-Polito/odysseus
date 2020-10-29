@@ -48,9 +48,9 @@ def get_eventG_sim_stats_spark (conf_tuple):
 
 def spark_multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 
-    city = sim_run_conf["city"]
+    city = sim_general_conf["city"]
 
-    print(sim_scenario_name)
+    print(city, sim_scenario_name)
 
     results_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
