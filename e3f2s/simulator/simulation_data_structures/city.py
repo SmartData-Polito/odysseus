@@ -16,20 +16,6 @@ class City:
     def __init__(self, city_name, data_source_id, sim_general_conf, kde_bw=1):
 
         self.city_name = city_name
-
-        if self.city_name == "Torino":
-            self.tz = pytz.timezone("Europe/Rome")
-        elif self.city_name == "Berlin":
-            self.tz = pytz.timezone("Europe/Berlin")
-        elif self.city_name == "Vancouver":
-            self.tz = pytz.timezone("Europe/Berlin")
-        elif self.city_name == "New_York_City":
-            self.tz = pytz.timezone("America/New_York")
-        elif self.city_name == "Minneapolis":
-            self.tz = pytz.timezone("America/Chicago")
-        elif self.city_name == "Louisville":
-            self.tz = pytz.timezone("America/Kentucky/Louisville")
-
         self.data_source_id = data_source_id
         self.sim_general_conf = sim_general_conf
         self.kde_bw = kde_bw
@@ -43,9 +29,8 @@ class City:
         self.trips_origins = pd.DataFrame()
         self.trips_destinations = pd.DataFrame()
         for month in range(start_month, end_month):
-            loader = Loader(self.city_name, data_source_id, year, month, self.bin_side_length)
-            bookings = loader.read_trips()
-            origins, destinations = loader.read_origins_destinations()
+            loader = Loader(self.city_name, data_source_id, year, month)
+            bookings, origins, destinations = loader.read_data()
             self.bookings = pd.concat([self.bookings, bookings], ignore_index=True)
             self.trips_origins = pd.concat([
                 self.trips_origins, origins
@@ -54,38 +39,14 @@ class City:
                 self.trips_destinations, destinations
             ], ignore_index=True, sort=False)
 
-        self.bookings.start_time = pd.to_datetime(self.bookings.start_time, utc=True)
-        self.bookings.end_time = pd.to_datetime(self.bookings.end_time, utc=True)
+        # self.bookings.start_time = pd.to_datetime(self.bookings.start_time, utc=True)
+        # self.bookings.end_time = pd.to_datetime(self.bookings.end_time, utc=True)
         self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
         self.bookings["daytype"] = self.bookings.start_daytype
         self.bookings["city"] = self.city_name
         self.bookings["euclidean_distance"] = (
                 self.trips_origins.distance(self.trips_destinations)
         ) / 1.4
-
-        print(
-            self.bookings[[
-                'start_latitude', 'start_longitude', 'end_latitude', 'end_longitude'
-            ]].describe()
-        )
-
-        if self.city_name == 'Vancouver':
-            self.bookings = self.bookings[self.bookings.start_longitude < 0]
-            self.bookings = self.bookings[self.bookings.end_longitude < 0]
-        elif self.city_name == 'Berlin':
-            self.bookings = self.bookings[(self.bookings.start_latitude > 51) & (self.bookings.start_latitude < 53)]
-            self.bookings = self.bookings[(self.bookings.start_longitude > 12) & (self.bookings.start_longitude < 14)]
-            self.bookings = self.bookings[(self.bookings.end_latitude > 51) & (self.bookings.end_latitude < 53)]
-            self.bookings = self.bookings[(self.bookings.end_longitude > 12) & (self.bookings.end_longitude < 14)]
-
-        self.trips_origins = self.trips_origins.loc[self.bookings.index]
-        self.trips_destinations = self.trips_destinations.loc[self.bookings.index]
-
-        print(
-            self.bookings[[
-                'start_latitude', 'start_longitude', 'end_latitude', 'end_longitude'
-            ]].describe()
-        )
 
         self.grid = self.get_squared_grid()
         self.grid_matrix = get_city_grid_as_matrix(
@@ -157,7 +118,7 @@ class City:
         self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x / 1000))
 
         self.bookings["random_seconds_start"] = np.random.uniform(-900, 900, len(self.bookings))
-        self.bookings.start_time = pd.to_datetime(self.bookings.start_time) + self.bookings.random_seconds_start.apply(
+        self.bookings.start_time = self.bookings.start_time + self.bookings.random_seconds_start.apply(
             lambda sec: datetime.timedelta(seconds=sec)
         )
         self.bookings = get_time_group_columns(self.bookings)
