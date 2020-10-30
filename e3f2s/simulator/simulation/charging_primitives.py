@@ -207,9 +207,9 @@ class ChargingPrimitives:
 
 	def get_timeout(self, origin_id, destination_id):
 		distance = get_od_distance(
-				self.simInput.grid,
-				origin_id,
-				destination_id
+			self.simInput.grid,
+			origin_id,
+			destination_id
 		)
 		if distance == 0:
 			distance = self.simInput.sim_general_conf["bin_side_length"]
@@ -217,9 +217,9 @@ class ChargingPrimitives:
 
 	def get_cr_soc_delta(self, origin_id, destination_id):
 		distance = get_od_distance(
-				self.simInput.grid,
-				origin_id,
-				destination_id
+			self.simInput.grid,
+			origin_id,
+			destination_id
 		)
 		if distance == 0:
 			distance = self.simInput.sim_general_conf["bin_side_length"]
