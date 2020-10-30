@@ -71,8 +71,14 @@ for sim_general_conf in sim_general_conf_list:
         city_obj.grid_matrix.to_pickle(
             os.path.join(demand_model_path, "grid_matrix.pickle")
         )
+        city_obj.grid_matrix.to_csv(
+            os.path.join(demand_model_path, "grid_matrix.csv")
+        )
         city_obj.grid.to_pickle(
             os.path.join(demand_model_path, "grid.pickle")
+        )
+        city_obj.grid.to_csv(
+            os.path.join(demand_model_path, "grid.csv")
         )
         pd.DataFrame(city_obj.neighbors_dict).to_pickle(
             os.path.join(demand_model_path, "neighbors_dict.pickle")

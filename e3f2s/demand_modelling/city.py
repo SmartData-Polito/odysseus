@@ -4,7 +4,7 @@ from sklearn.neighbors import KernelDensity
 
 from e3f2s.utils.geospatial_utils import *
 
-from e3f2s.demand_modelling.loading.loader import Loader
+from e3f2s.demand_modelling.loader import Loader
 from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.time_utils import *
 
@@ -73,7 +73,7 @@ class City:
             self.trips_origins.geometry,
             self.trips_destinations.geometry
         ], ignore_index=True)
-        self.locations.crs = "epsg:3857"
+        self.locations.crs = "epsg:4326"
         squared_grid = get_city_grid_as_gdf(
             self.locations,
             self.bin_side_length
