@@ -2,11 +2,10 @@ import os
 import datetime
 import pandas as pd
 
-from e3f2s.simulator.simulation_input.sim_current_config.sim_run_conf import sim_run_conf
 from e3f2s.simulator.simulation_input.sim_current_config.sim_general_conf import sim_general_conf_grid
 from e3f2s.simulator.simulation_input.sim_current_config.multiple_runs_conf import sim_scenario_conf_grid
 
-from e3f2s.simulator.simulation_data_structures.city import City
+from e3f2s.scenario_generator.city import City
 from e3f2s.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 from e3f2s.simulator.simulation_input.sim_input import SimInput
 from e3f2s.simulator.simulation.model_driven_simulator import ModelDrivenSim

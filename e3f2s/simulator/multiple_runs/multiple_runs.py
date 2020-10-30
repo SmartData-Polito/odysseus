@@ -5,10 +5,8 @@ import multiprocessing as mp
 
 import pandas as pd
 
-from e3f2s.simulator.simulation_data_structures.city import City
+from e3f2s.demand_modelling.city import City
 from e3f2s.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
-from e3f2s.simulator.single_run.get_traceB_input import get_traceB_input
-from e3f2s.simulator.single_run.get_eventG_input import get_eventG_input
 from e3f2s.simulator.single_run.run_eventG_sim import get_eventG_sim_stats
 from e3f2s.simulator.single_run.run_traceB_sim import get_traceB_sim_stats
 
@@ -34,20 +32,7 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 
 	with mp.Pool(mp.cpu_count()) as pool:
 
-		if not os.path.exists(os.path.join(results_path, "city_obj.pickle")):
-			city_obj = City(city, sim_general_conf["data_source_id"], sim_general_conf)
-			pickle.dump(
-				city_obj,
-				open(os.path.join(results_path, "city_obj.pickle"), "wb")
-			)
-			city_obj.grid_matrix.to_pickle(
-				os.path.join(results_path, "grid_matrix.pickle")
-			)
-			pd.DataFrame(city_obj.neighbors_dict).to_pickle(
-				os.path.join(results_path, "neighbors_dict.pickle")
-			)
-		else:
-			city_obj = pickle.Unpickler(open(os.path.join(results_path, "city_obj.pickle"), "rb")).load()
+		city_obj = pickle.Unpickler(open(os.path.join(results_path, "city_obj.pickle"), "rb")).load()
 
 		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 

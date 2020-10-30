@@ -31,7 +31,7 @@ parser.set_defaults(
     cities=["Torino"],
     data_source_ids=["big_data_db"],
     years=["2017"],
-    months=["10", "11", "12"],
+    months=["10"],
 )
 
 args = parser.parse_args()

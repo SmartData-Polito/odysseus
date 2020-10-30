@@ -1,23 +1,22 @@
 import datetime
-import pytz
-import math
 
 from sklearn.neighbors import KernelDensity
 
 from e3f2s.utils.geospatial_utils import *
 
-from e3f2s.simulator.loading.loader import Loader
+from e3f2s.demand_modelling.loading.loader import Loader
 from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.time_utils import *
 
 
 class City:
 
-    def __init__(self, city_name, data_source_id, sim_general_conf, kde_bw=1):
+    def __init__(self, city_name, sim_general_conf, kde_bw=1):
 
         self.city_name = city_name
-        self.data_source_id = data_source_id
         self.sim_general_conf = sim_general_conf
+        self.data_source_id = sim_general_conf["data_source_id"]
+
         self.kde_bw = kde_bw
 
         year = self.sim_general_conf["year"]
@@ -29,7 +28,7 @@ class City:
         self.trips_origins = pd.DataFrame()
         self.trips_destinations = pd.DataFrame()
         for month in range(start_month, end_month):
-            loader = Loader(self.city_name, data_source_id, year, month)
+            loader = Loader(self.city_name, self.data_source_id, year, month)
             bookings, origins, destinations = loader.read_data()
             self.bookings = pd.concat([self.bookings, bookings], ignore_index=True)
             self.trips_origins = pd.concat([
@@ -39,14 +38,9 @@ class City:
                 self.trips_destinations, destinations
             ], ignore_index=True, sort=False)
 
-        # self.bookings.start_time = pd.to_datetime(self.bookings.start_time, utc=True)
-        # self.bookings.end_time = pd.to_datetime(self.bookings.end_time, utc=True)
         self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
         self.bookings["daytype"] = self.bookings.start_daytype
         self.bookings["city"] = self.city_name
-        self.bookings["euclidean_distance"] = (
-                self.trips_origins.distance(self.trips_destinations)
-        ) / 1.4
 
         self.grid = self.get_squared_grid()
         self.grid_matrix = get_city_grid_as_matrix(
@@ -68,11 +62,6 @@ class City:
 
         if 'plate' in self.bookings:
             self.n_vehicles_original = len(self.bookings.plate.unique())
-
-        points = self.grid.centroid.geometry
-        self.od_distances = points.apply(lambda p: points.distance(p)) / 1.4
-        self.max_dist = self.od_distances.max().max()
-        print(self.max_dist)
 
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
@@ -117,15 +106,15 @@ class City:
             self.bookings["driving_distance"] = self.bookings.euclidean_distance * 1.4
         self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x / 1000))
 
-        self.bookings["random_seconds_start"] = np.random.uniform(-900, 900, len(self.bookings))
-        self.bookings.start_time = self.bookings.start_time + self.bookings.random_seconds_start.apply(
-            lambda sec: datetime.timedelta(seconds=sec)
-        )
         self.bookings = get_time_group_columns(self.bookings)
         self.bookings["hour"] = self.bookings.start_hour
         self.bookings["daytype"] = self.bookings.start_daytype
         self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
 
+        self.bookings["random_seconds_start"] = np.random.uniform(-900, 900, len(self.bookings))
+        self.bookings.start_time = self.bookings.start_time + self.bookings.random_seconds_start.apply(
+            lambda sec: datetime.timedelta(seconds=sec)
+        )
         self.bookings["random_seconds_end"] = np.random.uniform(-900, 900, len(self.bookings))
         self.bookings["random_seconds_pos"] = np.random.uniform(0, 450, len(self.bookings))
 
