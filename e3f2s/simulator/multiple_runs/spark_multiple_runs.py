@@ -14,6 +14,8 @@ from e3f2s.simulator.simulation_output.sim_output import EFFCS_SimOutput
 
 from pyspark import SparkConf, SparkContext
 
+conf = (SparkConf().setAppName("Spark trial for e3f2s"))
+sc = SparkContext(conf=conf)
 broadcastVar = ""
 
 
@@ -60,9 +62,6 @@ def spark_multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_n
         sim_scenario_name,
     )
     os.makedirs(results_path, exist_ok=True)
-
-    conf = (SparkConf().setAppName("Spark trial for e3f2s"))
-    sc = SparkContext(conf=conf)
 
     print("Here 1!")
 
@@ -113,3 +112,5 @@ for sim_general_conf in sim_general_conf_list:
         sim_scenario_conf_grid,
         sim_scenario_name
     )
+
+sc.stop()
