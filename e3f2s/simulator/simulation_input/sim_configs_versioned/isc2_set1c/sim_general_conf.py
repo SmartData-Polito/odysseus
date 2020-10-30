@@ -6,10 +6,10 @@ sim_general_conf_grid = {
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["isc2_set1b"],
+    "sim_scenario_name": ["isc2_set1c"],
 
     # Fleet general parameters
-    "const_load_factor": [1],
+    "const_load_factor": [False],
 
     # Space general parameters
     "bin_side_length": [500],
