@@ -21,18 +21,16 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 	# 	str(v) for v in sim_scenario_conf_grid.values()
 	# ]).replace(" ", "-").replace("'", "").replace(".", "d").replace(",", "-").replace("[", "-").replace("]", "-")
 
-	results_path = os.path.join(
-		os.path.dirname(os.path.dirname(__file__)),
-		"results",
-		city,
-		"multiple_runs",
-		sim_scenario_name,
+	demand_model_path = os.path.join(
+		os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+		"demand_modelling",
+		"demand_models",
+		sim_general_conf["city"],
 	)
-	os.makedirs(results_path, exist_ok=True)
 
 	with mp.Pool(mp.cpu_count()) as pool:
 
-		city_obj = pickle.Unpickler(open(os.path.join(results_path, "city_obj.pickle"), "rb")).load()
+		city_obj = pickle.Unpickler(open(os.path.join(demand_model_path, "city_obj.pickle"), "rb")).load()
 
 		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 
