@@ -16,10 +16,14 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 	sim_technique = sim_general_conf["sim_technique"]
 	city = sim_general_conf["city"]
 
-	# model_general_conf_string = "_".join([str(v) for v in sim_general_conf.values()]).replace("'", "").replace(".", "d")
-	# model_scenario_conf_grid_string = "_".join([
-	# 	str(v) for v in sim_scenario_conf_grid.values()
-	# ]).replace(" ", "-").replace("'", "").replace(".", "d").replace(",", "-").replace("[", "-").replace("]", "-")
+	results_path = os.path.join(
+		os.path.dirname(os.path.dirname(__file__)),
+		"results",
+		city,
+		"multiple_runs",
+		sim_scenario_name,
+	)
+	os.makedirs(results_path, exist_ok=True)
 
 	demand_model_path = os.path.join(
 		os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
