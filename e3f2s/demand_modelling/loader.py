@@ -71,7 +71,7 @@ class Loader:
         self.trips_destinations["end_latitude"] = self.trips_destinations.geometry.apply(lambda p: p.y)
 
         if self.city == 'Vancouver':
-            self.trips = self.trips[self.trips.start_longitude < 0]
+            self.trips = self.trips[self.trips.start_longitude < -122.9]
             self.trips = self.trips[self.trips.end_longitude < 0]
         elif self.city == 'Berlin':
             self.trips = self.trips[(self.trips.start_latitude > 51) & (self.trips.start_latitude < 53)]
