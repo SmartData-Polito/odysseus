@@ -16,7 +16,7 @@ class Loader:
         self.data_source_id = data_source_id
 
         self.trips = None
-        self.trips_destination = None
+        self.trips_destinations = None
         self.trips_origins = None
 
         self.points_data_path = os.path.join(
@@ -49,43 +49,42 @@ class Loader:
             self.trips_data_path,
             "trips.pickle"
         )
-        self.bookings = pd.read_pickle(path)
+        self.trips = gpd.GeoDataFrame(pd.read_pickle(path))
 
         path = os.path.join(
             self.points_data_path,
             "origins.pickle"
         )
-        self.trips_origins = pd.read_pickle(path)
+        self.trips_origins = gpd.GeoDataFrame(pd.read_pickle(path))
 
         path = os.path.join(
             self.points_data_path,
             "destinations.pickle"
         )
-        self.trips_destinations = pd.read_pickle(path)
+        self.trips_destinations = gpd.GeoDataFrame(pd.read_pickle(path))
 
         self.trips_origins.crs = "epsg:4326"
         self.trips_destinations.crs = "epsg:4326"
-
         self.trips_origins["start_longitude"] = self.trips_origins.geometry.apply(lambda p: p.x)
         self.trips_origins["start_latitude"] = self.trips_origins.geometry.apply(lambda p: p.y)
         self.trips_destinations["end_longitude"] = self.trips_destinations.geometry.apply(lambda p: p.x)
         self.trips_destinations["end_latitude"] = self.trips_destinations.geometry.apply(lambda p: p.y)
 
         if self.city == 'Vancouver':
-            self.bookings = self.bookings[self.bookings.start_longitude < 0]
-            self.bookings = self.bookings[self.bookings.end_longitude < 0]
+            self.trips = self.trips[self.trips.start_longitude < 0]
+            self.trips = self.trips[self.trips.end_longitude < 0]
         elif self.city == 'Berlin':
-            self.bookings = self.bookings[(self.bookings.start_latitude > 51) & (self.bookings.start_latitude < 53)]
-            self.bookings = self.bookings[(self.bookings.start_longitude > 12) & (self.bookings.start_longitude < 14)]
-            self.bookings = self.bookings[(self.bookings.end_latitude > 51) & (self.bookings.end_latitude < 53)]
-            self.bookings = self.bookings[(self.bookings.end_longitude > 12) & (self.bookings.end_longitude < 14)]
+            self.trips = self.trips[(self.trips.start_latitude > 51) & (self.trips.start_latitude < 53)]
+            self.trips = self.trips[(self.trips.start_longitude > 12) & (self.trips.start_longitude < 14)]
+            self.trips = self.trips[(self.trips.end_latitude > 51) & (self.trips.end_latitude < 53)]
+            self.trips = self.trips[(self.trips.end_longitude > 12) & (self.trips.end_longitude < 14)]
 
-        self.trips_origins = self.trips_origins.loc[self.bookings.index]
-        self.trips_destinations = self.trips_destinations.loc[self.bookings.index]
+        self.trips_origins = self.trips_origins.loc[self.trips.index]
+        self.trips_destinations = self.trips_destinations.loc[self.trips.index]
 
-        self.bookings.start_time = pd.to_datetime(self.bookings.start_time, utc=True)
-        self.trips_origins.start_time = self.bookings.start_time
-        self.bookings.end_time = pd.to_datetime(self.bookings.end_time, utc=True)
-        self.trips_destinations.end_time = self.bookings.end_time
+        self.trips.start_time = pd.to_datetime(self.trips.start_time, utc=True)
+        self.trips_origins.start_time = self.trips.start_time
+        self.trips.end_time = pd.to_datetime(self.trips.end_time, utc=True)
+        self.trips_destinations.end_time = self.trips.end_time
 
-        return self.bookings, self.trips_origins, self.trips_destinations
+        return self.trips, self.trips_origins, self.trips_destinations

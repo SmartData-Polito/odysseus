@@ -83,6 +83,7 @@ for sim_general_conf in sim_general_conf_list:
         pd.DataFrame(city_obj.neighbors_dict).to_pickle(
             os.path.join(demand_model_path, "neighbors_dict.pickle")
         )
+        city_obj.bookings.to_csv(os.path.join(demand_model_path, "bookings.csv"))
 
     if sim_run_mode == "single_run":
         single_run((

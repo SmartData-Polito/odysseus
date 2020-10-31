@@ -60,6 +60,11 @@ class City:
             )
         ]
 
+        self.bookings["euclidean_distance"] = self.bookings.apply(
+            lambda pp: haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
+            axis=1
+        )
+
         if 'plate' in self.bookings:
             self.n_vehicles_original = len(self.bookings.plate.unique())
 
@@ -78,6 +83,7 @@ class City:
             self.locations,
             self.bin_side_length
         )
+        squared_grid.crs = "epsg:4326"
         return squared_grid
 
     def map_zones_on_trips(self, zones):
@@ -145,7 +151,7 @@ class City:
         self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"]
         self.bookings["avg_speed_kmh"] = self.bookings.avg_speed * 3.6
 
-        print(self.bookings[["driving_distance", "duration", "avg_speed_kmh"]].describe())
+        print(self.bookings[["euclidean_distance", "driving_distance", "duration", "avg_speed_kmh"]].describe())
 
         if self.city_name in ["Minneapolis", "Louisville"]:
             pass

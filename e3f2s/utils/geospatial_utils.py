@@ -8,8 +8,8 @@ from math import radians, cos, sin, asin, sqrt
 def get_city_grid_as_gdf (locations, bin_side_length):
 
     x_min, y_min, x_max, y_max = locations.total_bounds
-    width = bin_side_length / 111320 / 0.706
-    height = bin_side_length / 111320 / 0.706
+    width = bin_side_length / 111320 * 1.2
+    height = bin_side_length / 111320 * 1.2
     # width = bin_side_length / 0.706
     # height = bin_side_length / 0.706
     rows = int(np.ceil((y_max-y_min) / height))
@@ -37,8 +37,8 @@ def get_city_grid_as_gdf (locations, bin_side_length):
 def get_city_grid_as_matrix (locations, bin_side_length):
 
     x_min, y_min, x_max, y_max = locations.total_bounds
-    width = bin_side_length / 111320 / 0.706
-    height = bin_side_length / 111320 / 0.706
+    width = bin_side_length / 111320 * 1.2
+    height = bin_side_length / 111320 * 1.2
     # width = bin_side_length / 0.706
     # height = bin_side_length / 0.706
     rows = int(np.ceil((y_max-y_min) / height))
@@ -90,12 +90,12 @@ def haversine(lon1, lat1, lon2, lat2):
     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
     c = 2 * asin(sqrt(a))
     r = 6371
-    return c * r
+    return c * r * 1000
 
 
 def get_od_distance(grid, origin_id, destination_id):
-    return grid.loc[
-                origin_id, "geometry"
-            ].distance(
-                grid.loc[destination_id, "geometry"]
-            ) * 111320
+    lon1 = grid.loc[origin_id, "geometry"].centroid.x
+    lat1 = grid.loc[origin_id, "geometry"].centroid.y
+    lon2 = grid.loc[destination_id, "geometry"].centroid.x
+    lat2 = grid.loc[destination_id, "geometry"].centroid.y
+    return haversine(lon1, lat1, lon2, lat2)
