@@ -6,42 +6,51 @@ example_station_config = {
 	"fuel_cost": 1.29
 }
 
-class Charging_Pole(object):
+class Pole(object):
 	def __init__(self, station_config):
 		self.fuel_type = example_station_config["fuel_type"] #electric, gasoline, diesel, lpg, gnc
 		self.fuel_cost = example_station_config["fuel_cost"]
 		if self.fuel_type == "electric":
 			self.voltage_output = example_station_config["voltage_output"]
 			self.current_output= example_station_config["current_output"]
-			self.rated_power = self.voltage_output * self.current_output
+			self.flow_rate = self.voltage_output * self.current_output
 		elif self.fuel_type in ["gasoline","diesel", "lpg","gnc"]:
 			self.flow_rate = example_station_config["flow_rate"] #L/min, kg/min
+			if self.fuel_type == "gasoline":
+				self.energy_content = 32  # MJ/L
+			elif self.fuel_type == "diesel":
+				self.energy_content = 36  # MJ/L
+			elif self.fuel_type == "lpg":
+				self.energy_content = 24  # MJ/L
+			elif self.fuel_type == "gnc":
+				self.energy_content = 44.4  # MJ/L
 
-	def get_charging_time_from_energy(self,energy):
+	def get_charging_time_from_energy(self,energy_mj): #energy in MegaJoules
 		if self.fuel_type == "electric":
-			return (energy/self.rated_power)*3600
-		else:
-			print("The pole must be electric")
-	def get_energy_from_charging_time(self,charging_time):
+			energy_kwh = energy_mj / 3.6
+			charging_time = (energy_kwh/self.flow_rate)*3600
+		elif self.fuel_type in ["gasoline", "diesel", "lpg", "gnc"]:
+			liters = energy_mj / self.energy_content
+			charging_time = (liters / self.flow_rate) * 60
+		return charging_time
+
+	def get_energy_from_charging_time(self,charging_time): #charging_time in seconds
 		if self.fuel_type == "electric":
-			return self.rated_power*(charging_time/3600)
-		else:
-			print("The pole must be electric")
-	def get_charging_time_from_liters(self,liters):
-		if self.fuel_type in ["gasoline","diesel", "lpg","gnc"]:
-			return (liters/self.flow_rate)*60
-		else:
-			print("The pole must not be electric")
-	def get_liters_from_charging_time(self,charging_time):
-		if self.fuel_type in ["gasoline","diesel", "lpg","gnc"]:
-			return (self.flow_rate*(charging_time/60))
-		else:
-			print("The pole must not be electric")
+			energy_kwh = self.flow_rate * (charging_time/3600)
+			energy_mj = energy_kwh * 3.6
+		elif self.fuel_type in ["gasoline", "diesel", "lpg", "gnc"]:
+			liters = self.flow_rate * (charging_time / 60)
+			energy_mj = liters * self.energy_content
+		return energy_mj
 
-	def get_fuelcost_per_amount(self,fuel_amount):
-		return self.fuel_cost * fuel_amount
+	def get_fuelcost_from_energy(self,energy_mj):
+		if self.fuel_type == "electric":
+			energy_kwh = energy_mj / 3.6
+			return self.fuel_cost * energy_kwh
+		elif self.fuel_type in ["gasoline", "diesel", "lpg", "gnc"]:
+			liters = energy_mj / self.energy_content
+			return self.fuel_cost * liters
 
-a=Charging_Pole(example_station_config)
-print(a.get_charging_time_from_energy(23*3600000))
-print(a.get_energy_from_charging_time(1))
-
+a=Pole(example_station_config)
+print(a.get_energy_from_charging_time(15.119796755911661))
+print(a.get_charging_time_from_energy(55.64085206175491))
