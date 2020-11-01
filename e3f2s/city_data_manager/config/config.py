@@ -7,7 +7,8 @@ root_data_path = os.path.join(
 
 cities = [
 	"Torino",
-	"Louisville"
+	"Louisville",
+	"Minneapolis"
 ]
 
 data_steps_ids = [

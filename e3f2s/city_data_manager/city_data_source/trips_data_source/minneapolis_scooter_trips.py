@@ -28,7 +28,7 @@ class MinneapolisScooterTrips(TripsDataSource):
 		)
 		self.trips_df = pd.read_csv(raw_trips_data_path, parse_dates=["StartTime", "EndTime"])
 
-		self.trips_df.StartTime = pd.to_datetime(self.trips_df.StartTime, utc=True)
+		self.trips_df.StartTime = pd.to_datetime(self.trips_df.StartTime, utc=True, format="")
 		self.trips_df.EndTime = pd.to_datetime(self.trips_df.EndTime, utc=True)
 
 
