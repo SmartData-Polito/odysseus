@@ -127,6 +127,22 @@ class ChargingStrategy(ChargingPrimitives):
 					if free_pole_flag == 1 or zones_by_distance.empty :
 						#print("end of choosing")
 						break
+			elif charging_relocation_strategy == 'closest_queueing':
+				zones_by_distance = self.simInput.zones_cp_distances.loc[
+					int(booking_request["destination_id"])
+				].sort_values()
+
+				free_pole_flag = 0
+				# find the nearest station with charging poles,if the station is full,put the vehicle into queue
+				for zone in zones_by_distance.index:
+					free_pole_flag = 1
+					charging_zone_id = zone
+					cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)
+					if cr_soc_delta > booking_request["end_soc"]:
+						free_pole_flag = 0
+					else:
+						charging_zone_id = charging_zone_id
+						break
 
 			else:
 				print("No such charging relocation strategy supported")
