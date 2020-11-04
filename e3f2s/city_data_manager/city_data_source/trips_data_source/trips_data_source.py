@@ -32,6 +32,10 @@ class TripsDataSource:
 
 		if self.city_name == "Torino" or self.city_name == "Milano":
 			self.tz = pytz.timezone("Europe/Rome")
+		elif self.city_name == "Amsterdam":
+			self.tz = pytz.timezone("Europe/Amsterdam")
+		elif self.city_name == "Madrid":
+			self.tz = pytz.timezone("Europe/Madrid")
 		elif self.city_name == "Berlin":
 			self.tz = pytz.timezone("Europe/Berlin")
 		elif self.city_name == "New_York_City":
