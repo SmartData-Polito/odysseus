@@ -30,7 +30,7 @@ class TripsDataSource:
 		self.trips_df = pd.DataFrame()
 		self.trips_df_norm = pd.DataFrame()
 
-		if self.city_name == "Torino" or self.city_name == "Milano":
+		if self.city_name == "Roma" or self.city_name == "Torino" or self.city_name == "Milano":
 			self.tz = pytz.timezone("Europe/Rome")
 		elif self.city_name == "Amsterdam":
 			self.tz = pytz.timezone("Europe/Amsterdam")
