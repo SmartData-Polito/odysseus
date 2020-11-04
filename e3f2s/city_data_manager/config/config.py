@@ -10,7 +10,9 @@ cities = [
 	"Milano",
 	"New_York_City",
 	"Berlin",
-	"Vancouver"
+	"Vancouver",
+	"Amsterdam",
+	"Madrid"
 ]
 
 data_steps_ids = [
