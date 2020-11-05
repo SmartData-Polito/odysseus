@@ -13,11 +13,19 @@ class LouisvilleScooterTrips(TripsDataSource):
 
     def load_raw(self):
 
-        raw_trips_data_path = os.path.join(
-            self.raw_data_path,
-            "DocklessTripOpenData_10.csv"
-        )
-        self.trips_df = pd.read_csv(raw_trips_data_path)
+        raw_trips_data_paths = [
+            os.path.join(
+                self.raw_data_path,
+                "DocklessTripOpenData_10.csv"
+            ),
+            os.path.join(
+                self.raw_data_path,
+                "Louisville-Dockless-Trips .csv"
+            )]
+
+        trips_dfs = [pd.read_csv(raw_trips_data_path) for raw_trips_data_path in raw_trips_data_paths]
+
+        self.trips_df = pd.concat(trips_dfs, axis=0, ignore_index=True)
 
         def filter_quantiles(x, lower, upper):
             return x[x.between(x.quantile(lower), x.quantile(upper))]

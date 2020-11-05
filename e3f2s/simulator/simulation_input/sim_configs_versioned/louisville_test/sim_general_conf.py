@@ -9,8 +9,8 @@ sim_general_conf_grid = {
     "k_zones_factor": [1],
 
     # Time general parameters
-    "year": [2019],
-    "month_start": [7],
-    "month_end": [9],
+    "year": [2020],
+    "month_start": [1],
+    "month_end": [7],
 
 }
