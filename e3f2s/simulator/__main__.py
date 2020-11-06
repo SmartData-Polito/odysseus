@@ -5,14 +5,6 @@ import json
 
 from shutil import copy
 
-import pandas as pd
-
-from e3f2s.demand_modelling.city import City
-
-from e3f2s.simulator.single_run.single_run import single_run
-from e3f2s.simulator.multiple_runs.multiple_runs import multiple_runs
-from e3f2s.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
-
 from e3f2s.simulator.simulation_input.sim_input_paths import simulation_input_paths
 
 print(datetime.datetime.now())
@@ -39,6 +31,14 @@ try:
 except FileNotFoundError:
     print('Error %s conf not present' % conf_path + f)
     exit()
+
+import pandas as pd
+
+from e3f2s.demand_modelling.city import City
+
+from e3f2s.simulator.single_run.single_run import single_run
+from e3f2s.simulator.multiple_runs.multiple_runs import multiple_runs
+from e3f2s.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 
 from e3f2s.simulator.simulation_input.sim_current_config.sim_general_conf import sim_general_conf_grid
 from e3f2s.simulator.simulation_input.sim_current_config.multiple_runs_conf import sim_scenario_conf_grid

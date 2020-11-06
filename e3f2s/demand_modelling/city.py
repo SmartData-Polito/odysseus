@@ -27,10 +27,9 @@ class City:
         self.bookings = pd.DataFrame()
         self.trips_origins = pd.DataFrame()
         self.trips_destinations = pd.DataFrame()
-        for month in range(start_month, end_month+1):
-            loader = Loader(self.city_name, self.data_source_id, year, month, self.bin_side_length)
-            bookings = loader.read_trips()
-            origins, destinations = loader.read_origins_destinations()
+        for month in range(start_month, end_month):
+            loader = Loader(self.city_name, self.data_source_id, year, month)
+            bookings, origins, destinations = loader.read_data()
             self.bookings = pd.concat([self.bookings, bookings], ignore_index=True)
             self.trips_origins = pd.concat([
                 self.trips_origins, origins
