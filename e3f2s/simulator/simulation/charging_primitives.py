@@ -3,7 +3,6 @@ import datetime
 
 import numpy as np
 
-from e3f2s.simulator.simulation_input.sim_current_config.vehicle_config import vehicle_conf
 from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.geospatial_utils import get_od_distance
 
@@ -174,23 +173,27 @@ class ChargingPrimitives:
 		charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
 		self.sim_charges += [charge]
 
-	def check_system_charge(self, booking_request, vehicle):
+	def check_system_charge(self, booking_request, vehicle, charging_strategy):
+		if charging_strategy == "reactive":
 
-		if self.vehicles_soc_dict[vehicle] < self.simInput.sim_scenario_conf["alpha"]:
-			charge = init_charge(
-				booking_request,
-				self.vehicles_soc_dict,
-				vehicle,
-				self.simInput.sim_scenario_conf["beta"]
-			)
-			return True, charge
+			if self.vehicles_soc_dict[vehicle] < self.simInput.sim_scenario_conf["alpha"]:
+				charge = init_charge(
+					booking_request,
+					self.vehicles_soc_dict,
+					vehicle,
+					self.simInput.sim_scenario_conf["beta"]
+				)
+				return True, charge
+			else:
+				return False, None
 		else:
-			return False, None
+			print("No such charging strategy supported")
+			exit()
 
 	def check_user_charge(self, booking_request, vehicle):
 
-		if booking_request["end_soc"] < self.simInput.sim_scenario_conf["beta"]:
-			if booking_request["end_soc"] < self.simInput.sim_scenario_conf["alpha"]:
+		if booking_request["destination_id"] in self.charging_stations_dict:
+			if booking_request["end_soc"] < self.simInput.sim_scenario_conf["beta"]:
 				if np.random.binomial(1, self.simInput.sim_scenario_conf["willingness"]):
 					charge = init_charge(
 						booking_request,
@@ -208,19 +211,19 @@ class ChargingPrimitives:
 
 	def get_timeout(self, origin_id, destination_id):
 		distance = get_od_distance(
-				self.simInput.grid,
-				origin_id,
-				destination_id
+			self.simInput.grid,
+			origin_id,
+			destination_id
 		)
 		if distance == 0:
 			distance = self.simInput.sim_general_conf["bin_side_length"]
-		return distance / 1000 / 15 * 3600
+		return distance / 1000 / self.simInput.avg_speed_kmh_mean * 3600
 
 	def get_cr_soc_delta(self, origin_id, destination_id):
 		distance = get_od_distance(
-				self.simInput.grid,
-				origin_id,
-				destination_id
+			self.simInput.grid,
+			origin_id,
+			destination_id
 		)
 		if distance == 0:
 			distance = self.simInput.sim_general_conf["bin_side_length"]

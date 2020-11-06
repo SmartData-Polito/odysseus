@@ -71,6 +71,7 @@ class ModelDrivenSim (SharedMobilitySim):
 				booking_request["origin_id"],
 				booking_request["destination_id"]
 			)
+
 			if booking_request["euclidean_distance"] == 0:
 				booking_request["euclidean_distance"] = self.simInput.sim_general_conf["bin_side_length"]
 
