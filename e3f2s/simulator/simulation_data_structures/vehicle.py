@@ -6,8 +6,7 @@ import datetime
 class Vehicle(object):
 
     def __init__(self, env, plate, start_zone, start_soc,
-                 vehicle_config, vehicle_cost_conf,
-                 sim_scenario_conf, sim_start_time):
+                 vehicle_config, sim_scenario_conf, sim_start_time):
 
         self.env = env
         self.plate = plate
@@ -16,9 +15,6 @@ class Vehicle(object):
 
         self.battery_capacity = vehicle_config["battery_capacity"]
         self.energy_efficiency = vehicle_config["energy_efficiency"]
-        self.annual_leasing_cost = vehicle_cost_conf["annual_leasing_cost"]
-        self.annual_insurance_cost = vehicle_cost_conf["annual_insurance_cost"]
-        self.annual_mantenaince_cost = vehicle_cost_conf["annual_mantenaince_cost"]
 
         self.available = True
         self.soc = simpy.Container(env, init=start_soc, capacity=100)

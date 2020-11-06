@@ -24,18 +24,18 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 class EFFCS_SimOutputPlotter ():
 
-	def __init__ (self, simOutput, city, sim_scenario_name):
+	def __init__ (self, sim_output, city, sim_scenario_name):
 
-		self.simOutput = simOutput
+		self.sim_output = sim_output
 		self.city = city
-		self.grid = simOutput.grid
+		self.grid = sim_output.grid
 		self.sim_scenario_name = sim_scenario_name
 
 		model_general_conf_string = "_".join([
-			str(v) for v in simOutput.sim_general_conf.values()]
+			str(v) for v in sim_output.sim_general_conf.values()]
 		).replace("'", "").replace(".", "d")
 		model_conf_string = "_".join([
-			str(v) for v in simOutput.sim_scenario_conf.values()]
+			str(v) for v in sim_output.sim_scenario_conf.values()]
 		).replace("'", "").replace(".", "d")
 		self.figures_path = os.path.join(
 			os.path.dirname(os.path.dirname(__file__)),
@@ -46,29 +46,29 @@ class EFFCS_SimOutputPlotter ():
 		)
 		os.makedirs(self.figures_path, exist_ok=True)
 
-		self.sim_booking_requests = simOutput.sim_booking_requests
+		self.sim_booking_requests = sim_output.sim_booking_requests
 
-		self.sim_bookings = simOutput.sim_bookings
+		self.sim_bookings = sim_output.sim_bookings
 
-		self.sim_charges = simOutput.sim_charges
+		self.sim_charges = sim_output.sim_charges
 
-		self.sim_not_enough_energy_requests = pd.DataFrame(simOutput.sim_not_enough_energy_requests)
+		self.sim_not_enough_energy_requests = pd.DataFrame(sim_output.sim_not_enough_energy_requests)
 
-		self.sim_no_close_vvehicle_requests = pd.DataFrame(simOutput.sim_no_close_vehicle_requests)
+		self.sim_no_close_vvehicle_requests = pd.DataFrame(sim_output.sim_no_close_vehicle_requests)
 
-		self.sim_unsatisfied_requests = simOutput.sim_unsatisfied_requests
+		self.sim_unsatisfied_requests = sim_output.sim_unsatisfied_requests
 
-		self.sim_system_charges_bookings = simOutput.sim_system_charges_bookings
+		self.sim_system_charges_bookings = sim_output.sim_system_charges_bookings
 
-		self.sim_users_charges_bookings = simOutput.sim_users_charges_bookings
+		self.sim_users_charges_bookings = sim_output.sim_users_charges_bookings
 
 		self.sim_vehicles_events = pd.concat([
 			self.sim_bookings, self.sim_charges
 		], ignore_index=True, sort=False).sort_values("start_time")
 
-		self.sim_charge_deaths = simOutput.sim_charge_deaths
+		self.sim_charge_deaths = sim_output.sim_charge_deaths
 
-		self.simOutput = simOutput
+		self.sim_output = sim_output
 
 	def plot_city_zones(self):
 
@@ -94,20 +94,20 @@ class EFFCS_SimOutputPlotter ():
 		self.grid.plot(color="white", edgecolor="black", ax=ax)
 		self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 
-		if self.simOutput.sim_scenario_conf["hub"]:
+		if self.sim_output.sim_scenario_conf["hub"]:
 			self.grid.plot(color="white", edgecolor="black", ax=ax)
 			self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
-			self.grid.loc[[self.simOutput.sim_stats["hub_zone"]]].plot(ax=ax)
+			self.grid.loc[[self.sim_output.sim_stats["hub_zone"]]].plot(ax=ax)
 			plt.savefig(os.path.join(self.figures_path, "hub_location.png"), transparent=True)
 			plt.close()
 
-		elif self.simOutput.sim_scenario_conf["distributed_cps"]:
+		elif self.sim_output.sim_scenario_conf["distributed_cps"]:
 
 			charging_zones = pd.Index(self.sim_charges.zone_id.unique())
 			charging_poles_by_zone = self.sim_charges.zone_id.value_counts()
 			self.grid.loc[charging_zones, "poles_count"] = charging_poles_by_zone
 			self.grid.plot(color="white", edgecolor="black", ax=ax)
-			self.grid.loc[self.simOutput.sim.simInput.valid_zones].plot(column="poles_count", ax=ax).plot()
+			self.grid.loc[self.sim_output.valid_zones].plot(column="poles_count", ax=ax).plot()
 			self.grid.loc[charging_zones].plot(ax=ax)
 			plt.savefig(os.path.join(self.figures_path, "cps_locations.png"), transparent=True)
 			plt.close()
@@ -118,16 +118,16 @@ class EFFCS_SimOutputPlotter ():
 		plt.title("fraction of events, single simulation")
 		pd.DataFrame([
 			pd.Series([
-				self.simOutput.sim_stats["fraction_same_zone_trips_satisfied"],
-				self.simOutput.sim_stats["fraction_not_same_zone_trips_satisfied"]
+				self.sim_output.sim_stats["fraction_same_zone_trips_satisfied"],
+				self.sim_output.sim_stats["fraction_not_same_zone_trips_satisfied"]
 			], index=["same zone", "neighbor zone"], name="satisfied %"),
 			pd.Series([
-				self.simOutput.sim_stats["fraction_no_close_vehicles_unsatisfied"],
-				self.simOutput.sim_stats["fraction_deaths_unsatisfied"]
+				self.sim_output.sim_stats["fraction_no_close_vehicles_unsatisfied"],
+				self.sim_output.sim_stats["fraction_deaths_unsatisfied"]
 			], index=["no close vehicle", "not enough energy"], name="unsatisfied %"),
 			pd.Series([
-				self.simOutput.sim_stats["fraction_unsatisfied"],
-				self.simOutput.sim_stats["fraction_satisfied"]
+				self.sim_output.sim_stats["fraction_unsatisfied"],
+				self.sim_output.sim_stats["fraction_satisfied"]
 			], index=["unsatisfied", "satisfied"], name="events %"),
 		]).plot.barh(stacked=True, ax=ax)
 

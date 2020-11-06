@@ -55,17 +55,18 @@ class ChargingStrategy(ChargingPrimitives):
 
 			if self.simInput.sim_scenario_conf["time_estimation"]:
 
-				timeout_outward = self.get_timeout(
+				timeout_outward = np.random.exponential(
+					self.simInput.sim_scenario_conf[
+						"avg_reach_time"
+					] * 60
+				)
+				timeout_return = self.get_timeout(
 					booking_request["destination_id"],
 					charging_zone_id
 				)
 				charge["duration"] = get_charging_time(
 					charge["soc_delta"]
 				)
-				if not self.simInput.sim_scenario_conf["relocation"]:
-					timeout_return = 0
-				elif self.simInput.sim_scenario_conf["relocation"]:
-					timeout_return = timeout_outward
 
 				cr_soc_delta = self.get_cr_soc_delta(
 					booking_request["destination_id"],
@@ -182,7 +183,7 @@ class ChargingStrategy(ChargingPrimitives):
 				elif operator == "users":
 
 					charging_zone_id = booking_request["destination_id"]
-					charging_station = self.charging_poles_dict[charging_zone_id]
+					charging_station = self.charging_stations_dict[charging_zone_id].charging_station
 					resource = charging_station
 					timeout_outward = 0
 					charge["duration"] = get_charging_time(

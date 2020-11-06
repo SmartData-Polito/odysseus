@@ -7,16 +7,12 @@ class EFFCS_SimOutput ():
 
 	def __init__ (self, sim):
 
-		self.sim = sim
+		self.valid_zones = sim.simInput.valid_zones
 
 		self.sim_general_conf = sim.simInput.sim_general_conf
 		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
 
 		self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
-		# print(self.sim_booking_requests[[
-		# 	"euclidean_distance", "driving_distance", "duration"
-		# ]].describe())
-
 		self.sim_bookings = self.sim_booking_requests.dropna()
 		self.sim_charges = pd.DataFrame(sim.chargingStrategy.sim_charges)
 		self.sim_not_enough_energy_requests = pd.DataFrame(sim.sim_booking_requests_deaths)
@@ -24,7 +20,6 @@ class EFFCS_SimOutput ():
 		self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 		self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
 		self.sim_users_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
-		self.n_vehicles_per_zones_history = pd.DataFrame(sim.n_vehicles_per_zones_history)
 
 		if "end_time" not in self.sim_system_charges_bookings:
 			self.sim_system_charges_bookings["end_time"] = pd.Series()
@@ -309,6 +304,8 @@ class EFFCS_SimOutput ():
 
 		self.sim_stats.loc["hub_zone"] = sim.simInput.hub_zone
 		self.sim_stats.loc["n_charging_zones"] = sim.simInput.n_charging_zones
+
+		self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
 
 		self.vehicles_history = pd.DataFrame()
 		for vehicle in sim.vehicles_list:

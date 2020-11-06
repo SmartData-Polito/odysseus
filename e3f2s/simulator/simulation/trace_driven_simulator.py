@@ -32,18 +32,9 @@ class TraceDrivenSim (SharedMobilitySim):
         self.init_data_structures()
         sim_timestamps = []
 
-        print(len(self.simInput.booking_requests_list))
-
         for booking_request in self.simInput.booking_requests_list:
 
             if booking_request["origin_id"] in self.valid_zones and booking_request["destination_id"] in self.valid_zones:
-
-                #self.vehicles_zones_history += [self.vehicles_zones]
-
-                # TODO -> find faster alternative
-                # self.n_vehicles_per_zones_history += [{
-                #     zone: len(self.available_vehicles_dict[zone]) for zone in self.available_vehicles_dict
-                # }]
 
                 sim_timestamps += [self.current_datetime]
 
@@ -51,12 +42,6 @@ class TraceDrivenSim (SharedMobilitySim):
                 booking_request = update_req_time_info(booking_request)
                 booking_request["soc_delta"] = -get_soc_delta(booking_request["driving_distance"] / 1000)
                 booking_request["soc_delta_kwh"] = soc_to_kwh(booking_request["soc_delta"])
-                #print(booking_request)
 
                 yield self.env.timeout(booking_request["ia_timeout"])
                 self.process_booking_request(booking_request)
-
-        self.n_vehicles_per_zones_history = pd.DataFrame(
-            self.n_vehicles_per_zones_history,
-            index=pd.DataFrame(self.sim_booking_requests)["start_time"]
-        )

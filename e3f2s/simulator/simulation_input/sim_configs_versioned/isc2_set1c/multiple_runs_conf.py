@@ -1,17 +1,19 @@
 import datetime
 import numpy as np
 
+
 sim_scenario_conf_grid = {
 
-    "requests_rate_factor": np.arange(1, 6, 1),
-    "n_vehicles_factor": np.arange(1, 6, 1),
+    "requests_rate_factor": np.arange(1, 4, 1),
+    "n_vehicles_factor": [1],
 
     "time_estimation": [True],
     "queuing": [True],
 
-    "alpha": [26],
+    "alpha_policy": ['auto'],
     "beta": [100],
-    "n_poles_n_vehicles_factor": np.arange(0.05, 0.45, 0.05),
+
+    "n_poles_n_vehicles_factor": [0.1],
 
     "hub": [False],
     "hub_zone_policy": [""],
@@ -19,7 +21,7 @@ sim_scenario_conf_grid = {
     "distributed_cps": [True],
     "system_cps": [True],
     "cps_placement_policy": ["num_parkings"],
-    "cps_zones_percentage": np.arange(0.1, 0.25, 0.05),
+    "n_charging_zones": [30],
 
     "battery_swap": [False],
     "avg_reach_time": [20],

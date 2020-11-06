@@ -23,8 +23,7 @@ class SimInput:
 		self.trip_kdes = self.city_obj.trip_kdes
 		self.valid_zones = self.city_obj.valid_zones
 		self.neighbors_dict = self.city_obj.neighbors_dict
-
-		self.n_vehicles_original = self.sim_general_conf["n_vehicles_original"]
+		self.n_vehicles_original = self.city_obj.n_vehicles_original
 
 		if "n_vehicles" in self.sim_scenario_conf.keys():
 			self.n_vehicles_sim = self.sim_scenario_conf["n_vehicles"]
@@ -76,8 +75,14 @@ class SimInput:
 		elif self.sim_scenario_conf["battery_swap"]:
 			self.n_charging_poles = 0
 
-		if self.sim_scenario_conf["alpha"] == "auto":
-			self.sim_scenario_conf["alpha"] = self.input_bookings.driving_distance.max()
+		if "alpha_policy" in self.sim_scenario_conf:
+			if self.sim_scenario_conf["alpha_policy"] == "auto":
+				self.sim_scenario_conf["alpha"] = get_soc_delta(
+					self.input_bookings.driving_distance.max() / 1000
+				)
+			else:
+				print("Policy for alpha not recognised!")
+				exit(0)
 
 		self.avg_speed_mean = self.input_bookings.avg_speed.mean()
 		self.avg_speed_std = self.input_bookings.avg_speed.std()
@@ -122,10 +127,10 @@ class SimInput:
 			i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
 		}
 
-		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:len(self.valid_zones)]
+		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:31]
 
 		vehicles_random_zones = list(
-			np.random.uniform(0, len(self.valid_zones), self.n_vehicles_sim).astype(int).round()
+			np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()
 		)
 
 		self.vehicles_zones = []
@@ -168,6 +173,7 @@ class SimInput:
 
 			else:
 				print("Hub placement policy not recognised!")
+				exit(0)
 
 			for zone in self.valid_zones:
 				if zone == self.hub_zone:
@@ -204,7 +210,7 @@ class SimInput:
 						self.n_charging_poles_by_zone[zone_id] = 4
 					else:
 						print("Zone", zone_id, "does not exist!")
-						exit(1)
+						exit(0)
 
 			zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
 

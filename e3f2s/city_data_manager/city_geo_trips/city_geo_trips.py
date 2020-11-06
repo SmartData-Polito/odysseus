@@ -115,7 +115,7 @@ class CityGeoTrips:
 		self.trips = get_time_group_columns(pd.read_pickle(
 			os.path.join(
 				self.trips_data_path,
-				"raw.pickle"
+				"trips.pickle"
 			)
 		))
 
