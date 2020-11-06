@@ -3,6 +3,8 @@ venv*/
 e3f2s/city_data_manager/data/*
 e3f2s/city_data_manager/city_data_source/data/*
 
+e3f2s/demand_modelling/demand_models/*
+
 e3f2s/simulator/data/*
 e3f2s/simulator/figures/*
 e3f2s/simulator/results/*

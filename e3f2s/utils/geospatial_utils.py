@@ -2,15 +2,16 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import Point, LineString, Polygon
 import geopandas as gpd
+from math import radians, cos, sin, asin, sqrt
 
 
 def get_city_grid_as_gdf (locations, bin_side_length):
 
     x_min, y_min, x_max, y_max = locations.total_bounds
-    # width = bin_side_length / 111.32 * 0.001 * 1.4
-    # height = bin_side_length / 111.32 * 0.001 * 1.4
-    width = bin_side_length * 1.4
-    height = bin_side_length * 1.4
+    width = bin_side_length / 111320 * 1.2
+    height = bin_side_length / 111320 * 1.2
+    # width = bin_side_length / 0.706
+    # height = bin_side_length / 0.706
     rows = int(np.ceil((y_max-y_min) / height))
     cols = int(np.ceil((x_max-x_min) / width))
     x_left = x_min
@@ -35,12 +36,11 @@ def get_city_grid_as_gdf (locations, bin_side_length):
 
 def get_city_grid_as_matrix (locations, bin_side_length):
 
-    #grid = get_city_grid_as_gdf(locations, bin_side_length)
     x_min, y_min, x_max, y_max = locations.total_bounds
-    # width = bin_side_length / 111.32 * 0.001
-    # height = bin_side_length / 111.32 * 0.001
-    width = bin_side_length * 1.4
-    height = bin_side_length * 1.4
+    width = bin_side_length / 111320 * 1.2
+    height = bin_side_length / 111320 * 1.2
+    # width = bin_side_length / 0.706
+    # height = bin_side_length / 0.706
     rows = int(np.ceil((y_max-y_min) / height))
     cols = int(np.ceil((x_max-x_min) / width))
     grid_matrix = []
@@ -83,9 +83,19 @@ def add_grouped_count_to_grid(grid, trips_locations, group_col, od_key, aggfunc=
     return grid
 
 
+def haversine(lon1, lat1, lon2, lat2):
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a))
+    r = 6371
+    return c * r * 1000
+
+
 def get_od_distance(grid, origin_id, destination_id):
-    return grid.loc[
-                origin_id, "geometry"
-            ].distance(
-                grid.loc[destination_id, "geometry"]
-            )
+    lon1 = grid.loc[origin_id, "geometry"].centroid.x
+    lat1 = grid.loc[origin_id, "geometry"].centroid.y
+    lon2 = grid.loc[destination_id, "geometry"].centroid.x
+    lat2 = grid.loc[destination_id, "geometry"].centroid.y
+    return haversine(lon1, lat1, lon2, lat2)

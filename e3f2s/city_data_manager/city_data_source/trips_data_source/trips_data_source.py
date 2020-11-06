@@ -30,14 +30,22 @@ class TripsDataSource:
 		self.trips_df = pd.DataFrame()
 		self.trips_df_norm = pd.DataFrame()
 
-		if self.city_name == "Torino":
+		if self.city_name == "Roma" or self.city_name == "Torino" or self.city_name == "Milano":
 			self.tz = pytz.timezone("Europe/Rome")
+		elif self.city_name == "Amsterdam":
+			self.tz = pytz.timezone("Europe/Amsterdam")
+		elif self.city_name == "Madrid":
+			self.tz = pytz.timezone("Europe/Madrid")
 		elif self.city_name == "Berlin":
 			self.tz = pytz.timezone("Europe/Berlin")
-		elif self.city_name == "Minneapolis":
-			self.tz = pytz.timezone("America/Chicago")
+		elif self.city_name == "New_York_City":
+			self.tz = pytz.timezone("America/New_York")
+		elif self.city_name == "Vancouver":
+			self.tz = pytz.timezone("America/Vancouver")
 		elif self.city_name == "Louisville":
 			self.tz = pytz.timezone("America/Kentucky/Louisville")
+		elif self.city_name == "Minneapolis":
+			self.tz = pytz.timezone("America/Chicago")
 
 	def load_raw(self):
 		return
