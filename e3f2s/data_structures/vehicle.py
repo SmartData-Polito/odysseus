@@ -2,13 +2,14 @@ import json
 import requests
 example_vehicle_config = {
 	"vehicle_type": "car",
-	"engine_type": "gasoline",
-	"fuel_capacity": 60,
-	"consumption": 8.772,
+	"engine_type": "electric",
+	"fuel_capacity": 35.8,
+	"consumption": 5.376,
 	"cost_car": 24700,
 }
-
-class Vehicle:
+electric_production_emissions = requests.get('https://api.co2signal.com/v1/latest?countryCode=IT-NO',
+                        headers={'auth-token': '658db0a8d45daedc'}) #North Italy code, see countries_api.json
+class Vehicle(object):
 	def __init__(self, vehicle_config):
 		self.vehicle_type = vehicle_config["vehicle_type"] #car,scooter,
 		self.engine_type = vehicle_config["engine_type"] #gasoline, diesel, lpg, gnc, electric
@@ -30,9 +31,7 @@ class Vehicle:
 			self.welltotank_emission = 67.6 #gCO2eq/MJ
 			self.energy_content = 44.4  # MJ/kg
 		elif self.engine_type == "electric":
-			response = requests.get('https://api.co2signal.com/v1/latest?countryCode=IT-NO',
-			                        headers={'auth-token': '658db0a8d45daedc'}) #North Italy code, see countries_api.json
-			self.welltotank_emission = json.loads(response.content)['data']['carbonIntensity'] #gCO2eq/Kwh
+			self.welltotank_emission = json.loads(electric_production_emissions.content)['data']['carbonIntensity'] #gCO2eq/Kwh
 
 
 	def get_charging_time_from_perc(self, flow_amount, beta=100):
