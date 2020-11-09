@@ -33,15 +33,21 @@ def get_time_group_columns (trips_df_norm):
 					vehicle_df.start_time.shift(-1) - vehicle_df.end_time
 			).apply(lambda dt: dt.total_seconds())
 
-	trips_df_norm.loc[:, "year"] = trips_df_norm.start_time.apply(
-		lambda dt: dt.year
-	)
-	trips_df_norm.loc[:, "month"] = trips_df_norm.start_time.apply(
-		lambda dt: dt.month
-	)
+	if "year" not in trips_df_norm:
+		trips_df_norm.loc[:, "year"] = trips_df_norm.start_time.apply(
+			lambda dt: dt.year
+		)
 
-	trips_df_norm.loc[:, "start_hour"] = trips_df_norm.start_time.apply(lambda d: d.hour).astype(int)
-	trips_df_norm.loc[:, "end_hour"] = trips_df_norm.end_time.apply(lambda d: d.hour).astype(int)
+	if "month" not in trips_df_norm:
+		trips_df_norm.loc[:, "month"] = trips_df_norm.start_time.apply(
+			lambda dt: dt.month
+		)
+
+	if "start_hour" not in trips_df_norm:
+		trips_df_norm.loc[:, "start_hour"] = trips_df_norm.start_time.apply(lambda d: d.hour).astype(int)
+
+	if "end_hour" not in trips_df_norm:
+		trips_df_norm.loc[:, "end_hour"] = trips_df_norm.end_time.apply(lambda d: d.hour).astype(int)
 
 	trips_df_norm.loc[:, "start_weekday"] = trips_df_norm.start_time.apply(lambda d: get_weekday_string_from_int(d.weekday()))
 	trips_df_norm.loc[:, "end_weekday"] = trips_df_norm.end_time.apply(lambda d: get_weekday_string_from_int(d.weekday()))
