@@ -70,8 +70,6 @@ class AustinScooterTrips(TripsDataSource):
             "month",
             "start_hour",
             "duration",
-            "start_council_district",
-            "end_council_district",
             "start_census_tract",
             "end_census_tract",
             "driving_distance"
@@ -83,10 +81,13 @@ class AustinScooterTrips(TripsDataSource):
 
         self.trips_df_norm.dropna(inplace=True)
 
-        self.trips_df_norm.start_council_district = self.trips_df_norm.start_council_district.astype(int).astype(str)
-        self.trips_df_norm.end_council_district = self.trips_df_norm.end_council_district.astype(int).astype(str)
-        self.trips_df_norm.start_census_tract = self.trips_df_norm.start_census_tract.astype(int).astype(str)
-        self.trips_df_norm.end_census_tract = self.trips_df_norm.end_census_tract.astype(int).astype(str)
+        self.trips_df_norm.start_census_tract = self.trips_df_norm.start_census_tract\
+            .astype(int)\
+            .apply(lambda x: x - 48453000000)
+
+        self.trips_df_norm.end_census_tract = self.trips_df_norm.end_census_tract\
+            .astype(int)\
+            .apply(lambda x: x - 48453000000)
 
         self.trips_df_norm = super().normalise()
 
