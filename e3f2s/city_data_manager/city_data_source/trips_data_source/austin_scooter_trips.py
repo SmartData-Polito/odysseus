@@ -20,10 +20,10 @@ class AustinScooterTrips(TripsDataSource):
 
         self.trips_df = pd.read_csv(raw_trips_data_path,
                                     dtype={
-                                        "Council District (Start)": np.float64,
-                                        "Council District (End)": np.float64,
-                                        "Census Tract Start": np.float64,
-                                        "Census Tract End": np.float64
+                                        "Council District (Start)": np.str,
+                                        "Council District (End)": np.str,
+                                        "Census Tract Start": np.str,
+                                        "Census Tract End": np.str
                                     },
                                     na_values={
                                         "Council District (Start)": "None",
@@ -83,13 +83,8 @@ class AustinScooterTrips(TripsDataSource):
 
         self.trips_df_norm.dropna(inplace=True)
 
-        self.trips_df_norm.start_census_tract = self.trips_df_norm.start_census_tract\
-            .astype(int)\
-            .apply(lambda x: x - 48453000000)
-
-        self.trips_df_norm.end_census_tract = self.trips_df_norm.end_census_tract\
-            .astype(int)\
-            .apply(lambda x: x - 48453000000)
+        self.trips_df_norm.start_census_tract = self.trips_df_norm.start_census_tract.astype(int)
+        self.trips_df_norm.end_census_tract = self.trips_df_norm.end_census_tract.astype(int)
 
         self.trips_df_norm = super().normalise()
 
