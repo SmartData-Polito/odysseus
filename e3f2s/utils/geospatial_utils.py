@@ -76,6 +76,15 @@ def get_random_point_from_linestring (linestring):
     return random_point
 
 
+def get_random_point_from_shape(shape):
+    within = False
+    while not within:
+        x = np.random.uniform(shape.bounds[0], shape.bounds[2])
+        y = np.random.uniform(shape.bounds[1], shape.bounds[3])
+        within = shape.contains(Point(x, y))
+    return Point(x, y)
+
+
 def add_grouped_count_to_grid(grid, trips_locations, group_col, od_key, aggfunc="count"):
     for group, group_df in trips_locations.groupby(group_col):
         grid["_".join([od_key, aggfunc, str(group)])] = \

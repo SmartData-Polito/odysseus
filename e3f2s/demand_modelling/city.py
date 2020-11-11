@@ -49,6 +49,12 @@ class City:
         )
         self.grid["zone_id"] = self.grid.index.values
         self.map_zones_on_trips(self.grid)
+
+        self.bookings["euclidean_distance"] = self.bookings.apply(
+            lambda pp: haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
+            axis=1
+        )
+
         self.bookings = self.get_input_bookings_filtered().dropna()
 
         self.valid_zones = self.get_valid_zones()
@@ -60,13 +66,10 @@ class City:
             )
         ]
 
-        self.bookings["euclidean_distance"] = self.bookings.apply(
-            lambda pp: haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
-            axis=1
-        )
-
         if 'plate' in self.bookings:
             self.n_vehicles_original = len(self.bookings.plate.unique())
+        if 'vehicle_id' in self.bookings:
+            self.n_vehicles_original = len(self.bookings.vehicle_id.unique())
 
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
@@ -153,7 +156,7 @@ class City:
 
         print(self.bookings[["euclidean_distance", "driving_distance", "duration", "avg_speed_kmh"]].describe())
 
-        if self.city_name in ["Minneapolis", "Louisville"]:
+        if self.city_name in ["Minneapolis", "Louisville", "Austin"]:
             pass
             #self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
         elif self.data_source_id in ["big_data_db"]:

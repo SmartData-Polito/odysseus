@@ -64,6 +64,8 @@ class AustinScooterTrips(TripsDataSource):
         self.trips_df_norm = self.trips_df_norm[self.trips_df_norm.vehicle_type == "scooter"]
 
         self.trips_df_norm = self.trips_df_norm[[
+            "trip_id",
+            "vehicle_id",
             "start_time",
             "end_time",
             "year",
