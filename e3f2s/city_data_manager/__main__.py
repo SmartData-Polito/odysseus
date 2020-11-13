@@ -7,6 +7,7 @@ from e3f2s.city_data_manager.city_geo_trips.big_data_db_geo_trips import BigData
 from e3f2s.city_data_manager.city_geo_trips.louisville_geo_trips import LouisvilleGeoTrips
 from e3f2s.city_data_manager.city_geo_trips.minneapolis_geo_trips import MinneapolisGeoTrips
 from e3f2s.city_data_manager.city_geo_trips.austin_geo_trips import AustinGeoTrips
+from e3f2s.city_data_manager.city_geo_trips.norfolk_geo_trips import NorfolkGeoTrips
 
 
 parser = argparse.ArgumentParser()
@@ -53,6 +54,8 @@ for city in args.cities:
                     geo_trips_ds = MinneapolisGeoTrips(year=int(year), month=int(month))
                 elif data_source_id == "city_of_austin":
                     geo_trips_ds = AustinGeoTrips(year=int(year), month=int(month))
+                elif data_source_id == "city_of_norfolk":
+                    geo_trips_ds = NorfolkGeoTrips(year=int(year), month=int(month))
 
                 geo_trips_ds.get_trips_od_gdfs()
                 geo_trips_ds.save_points_data()

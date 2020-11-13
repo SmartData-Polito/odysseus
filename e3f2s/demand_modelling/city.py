@@ -68,8 +68,10 @@ class City:
 
         if 'plate' in self.bookings:
             self.n_vehicles_original = len(self.bookings.plate.unique())
-        if 'vehicle_id' in self.bookings:
+        elif 'vehicle_id' in self.bookings:
             self.n_vehicles_original = len(self.bookings.vehicle_id.unique())
+        else:
+            self.n_vehicles_original = 100
 
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
@@ -156,7 +158,7 @@ class City:
 
         print(self.bookings[["euclidean_distance", "driving_distance", "duration", "avg_speed_kmh"]].describe())
 
-        if self.city_name in ["Minneapolis", "Louisville", "Austin"]:
+        if self.city_name in ["Minneapolis", "Louisville", "Austin", "Norfolk"]:
             pass
             #self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
         elif self.data_source_id in ["big_data_db"]:
