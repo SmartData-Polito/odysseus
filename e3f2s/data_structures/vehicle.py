@@ -92,14 +92,14 @@ class Vehicle(object):
 			tot_emissions_perkm = self.welltotank_emission / self.consumption
 			return distance * tot_emissions_perkm
 
-car = Vehicle(example_vehicle_config)
-distance = 130
-cons = car.distance_to_consumption(distance)
-print("Consumption = ", cons)
-print("Cons percentage = ", car.consumption_to_percentage(cons))
-print("Total emission Well to Wheel = ", car.distance_to_emission(distance))
-car.current_percentage -= car.consumption_to_percentage(cons)
-print(car.current_percentage)
-print("Charging time (s) = ",car.get_charging_time_from_perc(35,90))
-print("Charging perc = ", car.get_percentage_from_charging_time(15.119796755911661,35))
+# car = Vehicle(example_vehicle_config)
+# distance = 130
+# cons = car.distance_to_consumption(distance)
+# print("Consumption = ", cons)
+# print("Cons percentage = ", car.consumption_to_percentage(cons))
+# print("Total emission Well to Wheel = ", car.distance_to_emission(distance))
+# car.current_percentage -= car.consumption_to_percentage(cons)
+# print(car.current_percentage)
+# print("Charging time (s) = ",car.get_charging_time_from_perc(35,90))
+# print("Charging perc = ", car.get_percentage_from_charging_time(15.119796755911661,35))
 

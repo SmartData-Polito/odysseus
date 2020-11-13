@@ -21,14 +21,14 @@ def get_charging_soc(duration,
 	return (charging_efficiency * charger_rated_power * 100 * duration) / (3600 * battery_capacity)
 
 
-def init_charge(booking_request, vehicles_soc_dict, vehicle, beta):
+def init_charge(booking_request, vehicles_soc_level, vehicle, beta):
 	charge = {}
 	charge["plate"] = vehicle
 	charge["start_time"] = booking_request["end_time"]
 	charge["date"] = charge["start_time"].date()
 	charge["hour"] = charge["start_time"].hour
 	charge["day_hour"] = charge["start_time"].replace(minute=0, second=0, microsecond=0)
-	charge["start_soc"] = vehicles_soc_dict[vehicle]
+	charge["start_soc"] = vehicles_soc_level
 	charge["end_soc"] = beta
 	charge["soc_delta"] = charge["end_soc"] - charge["start_soc"]
 	charge["soc_delta_kwh"] = soc_to_kwh(charge["soc_delta"])
@@ -123,11 +123,13 @@ class ChargingPrimitives:
 						yield self.env.timeout(charge["duration"])
 						self.n_vehicles_charging_system -= 1
 						yield self.env.timeout(charge["timeout_return"])
-						self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+						#self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+						self.vehicles_list[vehicle_id].charge(charge["soc_delta"])
 			elif operator == "users":
 				self.n_vehicles_charging_users += 1
 				yield self.env.timeout(charge["duration"])
-				self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+				#self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+				self.vehicles_list[vehicle_id].charge(charge["soc_delta"])
 				self.n_vehicles_charging_users -= 1
 
 		else:
@@ -138,7 +140,8 @@ class ChargingPrimitives:
 						yield self.env.timeout(charge["timeout_outward"])
 						charge["start_soc"] -= charge["cr_soc_delta"]
 						yield self.env.timeout(charge["timeout_return"])
-						self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+						#self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+						self.vehicles_list[vehicle_id].charge(charge["soc_delta"])
 						charge["end_soc"] -= charge["cr_soc_delta"]
 
 					# with resource.request() as charging_request:
@@ -167,18 +170,18 @@ class ChargingPrimitives:
 						yield charging_request
 						self.n_vehicles_charging_users += 1
 						yield self.env.timeout(charge["duration"])
-					self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+					#self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+					self.vehicles_list[vehicle_id].charge(charge["soc_delta"])
 					self.n_vehicles_charging_users -= 1
 
 		charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
 		self.sim_charges += [charge]
 
 	def check_system_charge(self, booking_request, vehicle):
-
-		if self.vehicles_soc_dict[vehicle] < self.simInput.sim_scenario_conf["alpha"]:
+		if self.vehicles_list[vehicle].soc.level < self.simInput.sim_scenario_conf["alpha"]:
 			charge = init_charge(
 				booking_request,
-				self.vehicles_soc_dict,
+				self.vehicles_list[vehicle].soc.level,
 				vehicle,
 				self.simInput.sim_scenario_conf["beta"]
 			)
@@ -193,7 +196,7 @@ class ChargingPrimitives:
 				if np.random.binomial(1, self.simInput.sim_scenario_conf["willingness"]):
 					charge = init_charge(
 						booking_request,
-						self.vehicles_soc_dict,
+						self.vehicles_list[vehicle].soc.level,
 						vehicle,
 						self.simInput.sim_scenario_conf["beta"]
 					)

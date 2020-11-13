@@ -109,8 +109,9 @@ class SharedMobilitySim:
 
         self.available_vehicles_dict[zone_id].remove(vehicle_id)
         del self.vehicles_zones[vehicle_id]
-        booking_request["start_soc"] = self.vehicles_soc_dict[vehicle_id]
-        del self.vehicles_soc_dict[vehicle_id]
+        booking_request["start_soc"] = self.vehicles_list[vehicle_id].soc.level
+        #booking_request["start_soc"] = self.vehicles_soc_dict[vehicle_id]
+        #del self.vehicles_soc_dict[vehicle_id]
 
         self.n_booked_vehicles += 1
 
@@ -126,8 +127,9 @@ class SharedMobilitySim:
         )
         #print(self.vehicles_list[vehicle_id].soc.level)
 
-        self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
-        booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
+        #self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
+        #booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
+        booking_request["end_soc"] = self.vehicles_list[vehicle_id].soc.level
         #self.vehicles_zones[vehicle_id] = booking_request["destination_id"]
 
         self.n_booked_vehicles -= 1
@@ -159,10 +161,11 @@ class SharedMobilitySim:
         available_vehicle_flag_not_same_zone = False
 
         def find_vehicle (zone_id):
-            available_vehicles_soc_dict = {k: self.vehicles_soc_dict[k] for k in self.available_vehicles_dict[zone_id]}
+            #available_vehicles_soc_dict = {k: self.vehicles_soc_dict[k] for k in self.available_vehicles_dict[zone_id]}
+            available_vehicles_soc_dict = {k: self.vehicles_list[k].soc.level for k in self.available_vehicles_dict[zone_id]}
             max_soc = max(available_vehicles_soc_dict.values())
             max_soc_vehicle = max(available_vehicles_soc_dict, key=available_vehicles_soc_dict.get)
-            if self.vehicles_soc_dict[max_soc_vehicle] > abs(booking_request["soc_delta"]):
+            if self.vehicles_list[max_soc_vehicle].soc.level > abs(booking_request["soc_delta"]):
                 return True, max_soc_vehicle, max_soc
             else:
                 return False, max_soc_vehicle, max_soc

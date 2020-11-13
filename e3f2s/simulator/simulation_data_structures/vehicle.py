@@ -52,3 +52,6 @@ class Vehicle(Vehicle_definition):
             "zone": booking_request["destination_id"]
         }
         self.status_dict_list.append(self.current_status)
+
+    def charge(self,percentage):
+        self.soc.put(percentage)
