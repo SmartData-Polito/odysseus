@@ -2,11 +2,12 @@ import datetime
 
 import simpy
 from e3f2s.simulator.simulation.charging_primitives import get_charging_time
+from e3f2s.data_structures.charging_station import example_station_config,Pole
 
-
-class ChargingStation(object):
+class ChargingStation(Pole):
 
     def __init__(self, env, num_poles, zone_id, sim_start_time):
+        super().__init__(example_station_config)
         self.env = env
         self.charging_station = simpy.Resource(self.env, capacity=num_poles)
         self.zone_id = zone_id
@@ -46,7 +47,7 @@ class ChargingStation(object):
             vehicle.soc.put(amount)
         vehicle.available = True
         vehicle.current_status = {
-            "time": start_time + datetime.timedelta(seconds=get_charging_time(amount)),
+            "time": start_time + datetime.timedelta(seconds=duration),
             "status": "available",
             "soc": vehicle.soc.level,
             "zone": self.zone_id

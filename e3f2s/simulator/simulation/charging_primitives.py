@@ -14,12 +14,6 @@ def get_charging_time(soc_delta,
 	return (soc_delta * 3600 * battery_capacity) / (charging_efficiency * charger_rated_power * 100)
 
 
-def get_charging_soc(duration,
-					 battery_capacity=vehicle_conf["battery_capacity"],
-					 charging_efficiency=0.92,
-					 charger_rated_power=3.7):
-	return (charging_efficiency * charger_rated_power * 100 * duration) / (3600 * battery_capacity)
-
 
 def init_charge(booking_request, vehicles_soc_level, vehicle, beta):
 	charge = {}
@@ -218,7 +212,7 @@ class ChargingPrimitives:
 			distance = self.simInput.sim_general_conf["bin_side_length"]
 		return distance / 1000 / self.simInput.avg_speed_kmh_mean * 3600
 
-	def get_cr_soc_delta(self, origin_id, destination_id):
+	def get_cr_soc_delta(self, origin_id, destination_id,vehicle):
 		distance = get_od_distance(
 			self.simInput.grid,
 			origin_id,
@@ -226,4 +220,4 @@ class ChargingPrimitives:
 		)
 		if distance == 0:
 			distance = self.simInput.sim_general_conf["bin_side_length"]
-		return get_soc_delta(distance / 1000)
+		return vehicle.consumption_to_percentage(vehicle.distance_to_consumption(distance / 1000))

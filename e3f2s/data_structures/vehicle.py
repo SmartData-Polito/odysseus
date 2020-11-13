@@ -2,7 +2,7 @@ import json
 import requests
 example_vehicle_config = {
 	"vehicle_type": "car",
-	"engine_type": "electric",
+	"engine_type": "gasoline",
 	"fuel_capacity": 35.8,
 	"consumption": 5.376,
 	"cost_car": 24700,
@@ -66,6 +66,14 @@ class Vehicle(object):
 			capacity_left = (flow_rate*charging_time)/60
 			return 100 * (capacity_left / self.capacity)
 
+	def get_kwh_from_percentage(self, percentage):
+		if self.engine_type == "electric":
+			consumption_kwh = self.percentage_to_consumption(percentage)
+			return consumption_kwh
+		elif self.engine_type in ["gasoline", "diesel", "lpg", "gnc"]:
+			consumption_liter = self.percentage_to_consumption(percentage)
+			return consumption_liter * self.energy_content * 0.277777
+
 	def from_kml_to_lkm(self):
 		return 1 / self.consumption
 
@@ -77,6 +85,11 @@ class Vehicle(object):
 		# x:100 = consumption : capacity
 		percentage = (consumption * 100) / self.capacity
 		return percentage
+
+	def percentage_to_consumption(self, percentage):
+		# x:100 = consumption : capacity
+		consumption = (percentage * self.capacity) / 100
+		return consumption
 
 	def distance_to_consumption(self, distance):
 		perkm_consumption = self.from_kml_to_lkm()

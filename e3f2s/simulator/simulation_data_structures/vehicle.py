@@ -12,10 +12,10 @@ class Vehicle(Vehicle_definition):
         self.env = env
         self.plate = plate
         self.zone = start_zone
-        self.alpha = sim_scenario_conf["alpha"]
+        #self.alpha = sim_scenario_conf["alpha"]
 
-        self.battery_capacity = vehicle_config["battery_capacity"]
-        self.energy_efficiency = vehicle_config["energy_efficiency"]
+        #self.battery_capacity = vehicle_config["battery_capacity"]
+        #self.energy_efficiency = vehicle_config["energy_efficiency"]
 
         self.available = True
         self.soc = simpy.Container(env, init=start_soc, capacity=100)

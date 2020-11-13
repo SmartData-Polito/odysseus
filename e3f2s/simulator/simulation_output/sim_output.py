@@ -1,6 +1,5 @@
 import pandas as pd
 
-from e3f2s.simulator.simulation.charging_primitives import get_charging_soc
 
 
 class EFFCS_SimOutput ():
