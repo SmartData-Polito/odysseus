@@ -1,20 +1,21 @@
 import simpy
 import random
 import datetime
+from e3f2s.data_structures.vehicle import example_vehicle_config,Vehicle as Vehicle_definition
 
-
-class Vehicle(object):
+class Vehicle(Vehicle_definition):
 
     def __init__(self, env, plate, start_zone, start_soc,
                  vehicle_config, sim_scenario_conf, sim_start_time):
 
+        super().__init__(example_vehicle_config)
         self.env = env
         self.plate = plate
         self.zone = start_zone
-        self.alpha = sim_scenario_conf["alpha"]
+        #self.alpha = sim_scenario_conf["alpha"]
 
-        self.battery_capacity = vehicle_config["battery_capacity"]
-        self.energy_efficiency = vehicle_config["energy_efficiency"]
+        #self.battery_capacity = vehicle_config["battery_capacity"]
+        #self.energy_efficiency = vehicle_config["energy_efficiency"]
 
         self.available = True
         self.soc = simpy.Container(env, init=start_soc, capacity=100)
@@ -39,7 +40,9 @@ class Vehicle(object):
         }
         self.status_dict_list.append(self.current_status)
         yield self.env.timeout(booking_request["duration"])
-        self.soc.get(abs(booking_request["soc_delta"]))
+        fuel_consumed = self.distance_to_consumption(booking_request["driving_distance"]/1000)
+        percentage = self.consumption_to_percentage(fuel_consumed)
+        self.soc.get(percentage)
         self.zone = booking_request["destination_id"]
         self.available = True
         self.current_status = {
@@ -49,3 +52,6 @@ class Vehicle(object):
             "zone": booking_request["destination_id"]
         }
         self.status_dict_list.append(self.current_status)
+
+    def charge(self,percentage):
+        self.soc.put(percentage)

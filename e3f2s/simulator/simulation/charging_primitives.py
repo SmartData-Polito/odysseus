@@ -14,21 +14,15 @@ def get_charging_time(soc_delta,
 	return (soc_delta * 3600 * battery_capacity) / (charging_efficiency * charger_rated_power * 100)
 
 
-def get_charging_soc(duration,
-					 battery_capacity=vehicle_conf["battery_capacity"],
-					 charging_efficiency=0.92,
-					 charger_rated_power=3.7):
-	return (charging_efficiency * charger_rated_power * 100 * duration) / (3600 * battery_capacity)
 
-
-def init_charge(booking_request, vehicles_soc_dict, vehicle, beta):
+def init_charge(booking_request, vehicles_soc_level, vehicle, beta):
 	charge = {}
 	charge["plate"] = vehicle
 	charge["start_time"] = booking_request["end_time"]
 	charge["date"] = charge["start_time"].date()
 	charge["hour"] = charge["start_time"].hour
 	charge["day_hour"] = charge["start_time"].replace(minute=0, second=0, microsecond=0)
-	charge["start_soc"] = vehicles_soc_dict[vehicle]
+	charge["start_soc"] = vehicles_soc_level
 	charge["end_soc"] = beta
 	charge["soc_delta"] = charge["end_soc"] - charge["start_soc"]
 	charge["soc_delta_kwh"] = soc_to_kwh(charge["soc_delta"])
@@ -123,11 +117,13 @@ class ChargingPrimitives:
 						yield self.env.timeout(charge["duration"])
 						self.n_vehicles_charging_system -= 1
 						yield self.env.timeout(charge["timeout_return"])
-						self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+						#self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+						self.vehicles_list[vehicle_id].charge(charge["soc_delta"])
 			elif operator == "users":
 				self.n_vehicles_charging_users += 1
 				yield self.env.timeout(charge["duration"])
-				self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+				#self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+				self.vehicles_list[vehicle_id].charge(charge["soc_delta"])
 				self.n_vehicles_charging_users -= 1
 
 		else:
@@ -138,7 +134,8 @@ class ChargingPrimitives:
 						yield self.env.timeout(charge["timeout_outward"])
 						charge["start_soc"] -= charge["cr_soc_delta"]
 						yield self.env.timeout(charge["timeout_return"])
-						self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+						#self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+						self.vehicles_list[vehicle_id].charge(charge["soc_delta"])
 						charge["end_soc"] -= charge["cr_soc_delta"]
 
 					# with resource.request() as charging_request:
@@ -167,7 +164,8 @@ class ChargingPrimitives:
 						yield charging_request
 						self.n_vehicles_charging_users += 1
 						yield self.env.timeout(charge["duration"])
-					self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+					#self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
+					self.vehicles_list[vehicle_id].charge(charge["soc_delta"])
 					self.n_vehicles_charging_users -= 1
 
 		charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
@@ -175,11 +173,10 @@ class ChargingPrimitives:
 
 	def check_system_charge(self, booking_request, vehicle, charging_strategy):
 		if charging_strategy == "reactive":
-
-			if self.vehicles_soc_dict[vehicle] < self.simInput.sim_scenario_conf["alpha"]:
+			if self.vehicles_list[vehicle].soc.level < self.simInput.sim_scenario_conf["alpha"]:
 				charge = init_charge(
 					booking_request,
-					self.vehicles_soc_dict,
+					self.vehicles_list[vehicle].soc.level,
 					vehicle,
 					self.simInput.sim_scenario_conf["beta"]
 				)
@@ -197,7 +194,7 @@ class ChargingPrimitives:
 				if np.random.binomial(1, self.simInput.sim_scenario_conf["willingness"]):
 					charge = init_charge(
 						booking_request,
-						self.vehicles_soc_dict,
+						self.vehicles_list[vehicle].soc.level,
 						vehicle,
 						self.simInput.sim_scenario_conf["beta"]
 					)
@@ -219,7 +216,7 @@ class ChargingPrimitives:
 			distance = self.simInput.sim_general_conf["bin_side_length"]
 		return distance / 1000 / self.simInput.avg_speed_kmh_mean * 3600
 
-	def get_cr_soc_delta(self, origin_id, destination_id):
+	def get_cr_soc_delta(self, origin_id, destination_id,vehicle):
 		distance = get_od_distance(
 			self.simInput.grid,
 			origin_id,
@@ -227,4 +224,4 @@ class ChargingPrimitives:
 		)
 		if distance == 0:
 			distance = self.simInput.sim_general_conf["bin_side_length"]
-		return get_soc_delta(distance / 1000)
+		return vehicle.consumption_to_percentage(vehicle.distance_to_consumption(distance / 1000))

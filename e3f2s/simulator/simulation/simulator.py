@@ -103,14 +103,29 @@ class SharedMobilitySim:
             )
             self.vehicles_list.append(vehicle_object)
 
+        if "alpha_policy" in self.simInput.sim_scenario_conf:
+            if self.simInput.sim_scenario_conf["alpha_policy"] == "auto":
+                # self.sim_scenario_conf["alpha"] = get_soc_delta(
+                #     self.input_bookings.driving_distance.max() / 1000
+                # )
+                self.simInput.sim_scenario_conf["alpha"] = self.vehicles_list[0].consumption_to_percentage(
+                    self.vehicles_list[0].distance_to_consumption(
+                        self.simInput.input_bookings.driving_distance.max() / 1000
+                    )
+                )
+            else:
+                print("Policy for alpha not recognised!")
+                exit(0)
+
         self.chargingStrategy = ChargingStrategy(self.env, self)
 
     def schedule_booking (self, booking_request, vehicle_id, zone_id):
 
         self.available_vehicles_dict[zone_id].remove(vehicle_id)
         del self.vehicles_zones[vehicle_id]
-        booking_request["start_soc"] = self.vehicles_soc_dict[vehicle_id]
-        del self.vehicles_soc_dict[vehicle_id]
+        booking_request["start_soc"] = self.vehicles_list[vehicle_id].soc.level
+        #booking_request["start_soc"] = self.vehicles_soc_dict[vehicle_id]
+        #del self.vehicles_soc_dict[vehicle_id]
 
         self.n_booked_vehicles += 1
 
@@ -126,8 +141,9 @@ class SharedMobilitySim:
         )
         #print(self.vehicles_list[vehicle_id].soc.level)
 
-        self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
-        booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
+        #self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
+        #booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
+        booking_request["end_soc"] = self.vehicles_list[vehicle_id].soc.level
         #self.vehicles_zones[vehicle_id] = booking_request["destination_id"]
 
         self.n_booked_vehicles -= 1
@@ -159,10 +175,15 @@ class SharedMobilitySim:
         available_vehicle_flag_not_same_zone = False
 
         def find_vehicle (zone_id):
-            available_vehicles_soc_dict = {k: self.vehicles_soc_dict[k] for k in self.available_vehicles_dict[zone_id]}
+            #available_vehicles_soc_dict = {k: self.vehicles_soc_dict[k] for k in self.available_vehicles_dict[zone_id]}
+            available_vehicles_soc_dict = {k: self.vehicles_list[k].soc.level for k in self.available_vehicles_dict[zone_id]}
             max_soc = max(available_vehicles_soc_dict.values())
             max_soc_vehicle = max(available_vehicles_soc_dict, key=available_vehicles_soc_dict.get)
-            if self.vehicles_soc_dict[max_soc_vehicle] > abs(booking_request["soc_delta"]):
+            if self.vehicles_list[max_soc_vehicle].soc.level > abs(
+                    self.vehicles_list[max_soc_vehicle].consumption_to_percentage(
+                        self.vehicles_list[max_soc_vehicle].distance_to_consumption(booking_request["driving_distance"] / 1000)
+                    )
+            ):
                 return True, max_soc_vehicle, max_soc
             else:
                 return False, max_soc_vehicle, max_soc
@@ -174,6 +195,17 @@ class SharedMobilitySim:
                 find_vehicle(booking_request["origin_id"])
 
         if found_vehicle_flag:
+            booking_request["soc_delta"] = self.vehicles_list[max_soc_vehicle_origin].consumption_to_percentage(
+                        self.vehicles_list[max_soc_vehicle_origin].distance_to_consumption(
+                            booking_request["driving_distance"] / 1000
+                        )
+                    )
+            booking_request["soc_delta_kwh"] = self.vehicles_list[max_soc_vehicle_origin].get_kwh_from_percentage(
+                booking_request["soc_delta"]
+            )
+            booking_request["co2_emissions"] = self.vehicles_list[max_soc_vehicle_origin].distance_to_emission(
+                booking_request["driving_distance"]/1000
+            )
             self.env.process(
                 self.schedule_booking(booking_request, max_soc_vehicle_origin, booking_request["origin_id"])
             )

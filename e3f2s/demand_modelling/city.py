@@ -7,7 +7,7 @@ from e3f2s.utils.geospatial_utils import *
 from e3f2s.demand_modelling.loader import Loader
 from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.time_utils import *
-
+from e3f2s.data_structures.vehicle import Vehicle
 
 class City:
 
@@ -115,8 +115,8 @@ class City:
 
         if "driving_distance" not in self.bookings.columns:
             self.bookings["driving_distance"] = self.bookings.euclidean_distance * 1.4
-        self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x / 1000))
-
+        #self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x / 1000))
+        #self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x:Vehicle.consumption_to_percentage(Vehicle.distance_to_consumption(x / 1000)))
         self.bookings = get_time_group_columns(self.bookings)
         self.bookings["hour"] = self.bookings.start_hour
         self.bookings["daytype"] = self.bookings.start_daytype
@@ -150,9 +150,9 @@ class City:
         self.bookings = self.bookings[self.bookings.duration > 0]
         self.bookings = self.bookings[self.bookings.driving_distance >= 0]
         self.bookings.loc[self.bookings.driving_distance == 0, "driving_distance"] = self.bin_side_length
-        self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(
-            lambda x: get_soc_delta(x / 1000)
-        )
+        # self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(
+        #     lambda x: Vehicle.consumption_to_percentage(Vehicle.distance_to_consumption(x / 1000))
+        # )
         self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"]
         self.bookings["avg_speed_kmh"] = self.bookings.avg_speed * 3.6
 

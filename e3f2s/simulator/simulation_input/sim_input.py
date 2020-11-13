@@ -4,7 +4,8 @@ import pandas as pd
 import datetime
 import pytz
 
-from e3f2s.utils.vehicle_utils import get_soc_delta
+#from e3f2s.utils.vehicle_utils import get_soc_delta
+from e3f2s.data_structures.vehicle import Vehicle
 
 
 class SimInput:
@@ -75,14 +76,7 @@ class SimInput:
 		elif self.sim_scenario_conf["battery_swap"]:
 			self.n_charging_poles = 0
 
-		if "alpha_policy" in self.sim_scenario_conf:
-			if self.sim_scenario_conf["alpha_policy"] == "auto":
-				self.sim_scenario_conf["alpha"] = get_soc_delta(
-					self.input_bookings.driving_distance.max() / 1000
-				)
-			else:
-				print("Policy for alpha not recognised!")
-				exit(0)
+
 
 		self.avg_speed_mean = self.input_bookings.avg_speed.mean()
 		self.avg_speed_std = self.input_bookings.avg_speed.std()

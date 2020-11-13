@@ -3,12 +3,13 @@ import requests
 example_vehicle_config = {
 	"vehicle_type": "car",
 	"engine_type": "gasoline",
-	"fuel_capacity": 60,
-	"consumption": 8.772,
+	"fuel_capacity": 35.8,
+	"consumption": 5.376,
 	"cost_car": 24700,
 }
-
-class Vehicle:
+electric_production_emissions = requests.get('https://api.co2signal.com/v1/latest?countryCode=IT-NO',
+                        headers={'auth-token': '658db0a8d45daedc'}) #North Italy code, see countries_api.json
+class Vehicle(object):
 	def __init__(self, vehicle_config):
 		self.vehicle_type = vehicle_config["vehicle_type"] #car,scooter,
 		self.engine_type = vehicle_config["engine_type"] #gasoline, diesel, lpg, gnc, electric
@@ -30,9 +31,7 @@ class Vehicle:
 			self.welltotank_emission = 67.6 #gCO2eq/MJ
 			self.energy_content = 44.4  # MJ/kg
 		elif self.engine_type == "electric":
-			response = requests.get('https://api.co2signal.com/v1/latest?countryCode=IT-NO',
-			                        headers={'auth-token': '658db0a8d45daedc'}) #North Italy code, see countries_api.json
-			self.welltotank_emission = json.loads(response.content)['data']['carbonIntensity'] #gCO2eq/Kwh
+			self.welltotank_emission = json.loads(electric_production_emissions.content)['data']['carbonIntensity'] #gCO2eq/Kwh
 
 
 	def get_charging_time_from_perc(self, flow_amount, beta=100):
@@ -67,6 +66,14 @@ class Vehicle:
 			capacity_left = (flow_rate*charging_time)/60
 			return 100 * (capacity_left / self.capacity)
 
+	def get_kwh_from_percentage(self, percentage):
+		if self.engine_type == "electric":
+			consumption_kwh = self.percentage_to_consumption(percentage)
+			return consumption_kwh
+		elif self.engine_type in ["gasoline", "diesel", "lpg", "gnc"]:
+			consumption_liter = self.percentage_to_consumption(percentage)
+			return consumption_liter * self.energy_content * 0.277777
+
 	def from_kml_to_lkm(self):
 		return 1 / self.consumption
 
@@ -78,6 +85,11 @@ class Vehicle:
 		# x:100 = consumption : capacity
 		percentage = (consumption * 100) / self.capacity
 		return percentage
+
+	def percentage_to_consumption(self, percentage):
+		# x:100 = consumption : capacity
+		consumption = (percentage * self.capacity) / 100
+		return consumption
 
 	def distance_to_consumption(self, distance):
 		perkm_consumption = self.from_kml_to_lkm()
@@ -93,14 +105,14 @@ class Vehicle:
 			tot_emissions_perkm = self.welltotank_emission / self.consumption
 			return distance * tot_emissions_perkm
 
-car = Vehicle(example_vehicle_config)
-distance = 130
-cons = car.distance_to_consumption(distance)
-print("Consumption = ", cons)
-print("Cons percentage = ", car.consumption_to_percentage(cons))
-print("Total emission Well to Wheel = ", car.distance_to_emission(distance))
-car.current_percentage -= car.consumption_to_percentage(cons)
-print(car.current_percentage)
-print("Charging time (s) = ",car.get_charging_time_from_perc(35,90))
-print("Charging perc = ", car.get_percentage_from_charging_time(15.119796755911661,35))
+# car = Vehicle(example_vehicle_config)
+# distance = 130
+# cons = car.distance_to_consumption(distance)
+# print("Consumption = ", cons)
+# print("Cons percentage = ", car.consumption_to_percentage(cons))
+# print("Total emission Well to Wheel = ", car.distance_to_emission(distance))
+# car.current_percentage -= car.consumption_to_percentage(cons)
+# print(car.current_percentage)
+# print("Charging time (s) = ",car.get_charging_time_from_perc(35,90))
+# print("Charging perc = ", car.get_percentage_from_charging_time(15.119796755911661,35))
 

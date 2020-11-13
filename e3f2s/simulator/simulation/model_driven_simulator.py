@@ -3,11 +3,11 @@ import itertools
 
 import numpy as np
 
-from e3f2s.utils.vehicle_utils import get_soc_delta
+#from e3f2s.utils.vehicle_utils import get_soc_delta
 from e3f2s.utils.vehicle_utils import soc_to_kwh
 from e3f2s.utils.geospatial_utils import get_od_distance
 from e3f2s.simulator.simulation.simulator import SharedMobilitySim
-
+from e3f2s.data_structures.vehicle import Vehicle
 
 np.random.seed(44)
 
@@ -84,8 +84,8 @@ class ModelDrivenSim (SharedMobilitySim):
 			booking_request["end_time"] = self.current_datetime + datetime.timedelta(
 				seconds=booking_request["duration"]
 			)
-			booking_request["soc_delta"] = -get_soc_delta(booking_request["driving_distance"] / 1000)
-			booking_request["soc_delta_kwh"] = soc_to_kwh(booking_request["soc_delta"])
+			#booking_request["soc_delta"] = -Vehicle.consumption_to_percentage(Vehicle.distance_to_consumption(booking_request["driving_distance"] / 1000))
+			#booking_request["soc_delta_kwh"] = soc_to_kwh(booking_request["soc_delta"])
 			self.process_booking_request(booking_request)
 		else:
 			self.create_booking_request(timeout)
