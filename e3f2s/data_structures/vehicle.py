@@ -2,9 +2,9 @@ import json
 import requests
 example_vehicle_config = {
 	"vehicle_type": "car",
-	"engine_type": "diesel",
-	"fuel_capacity": 50,
-	"consumption": 16.2,
+	"engine_type": "electric",
+	"fuel_capacity": 35.8,
+	"consumption": 1/0.147,
 	"cost_car": 24700,
 }
 electric_production_emissions = requests.get('https://api.co2signal.com/v1/latest?countryCode=IT-NO',
@@ -42,9 +42,9 @@ class Vehicle(object):
 		# gnc: kg/min (between 30-70)
 
 		if self.engine_type == "electric":
-			power_output = flow_amount
-			capacity_left = ((beta - actual_level_perc)/100) * self.capacity
-			return (capacity_left/power_output)*3600
+			power_output = flow_amount / 1000
+			capacity_left = ((beta - actual_level_perc) / 100) * self.capacity
+			return (capacity_left / power_output) * 3600
 		elif self.engine_type in ["gasoline", "diesel", "lpg","gnc"]:
 			flow_rate = flow_amount
 			capacity_left = ((beta - actual_level_perc)/100) * self.capacity
@@ -58,12 +58,12 @@ class Vehicle(object):
 		# gnc: kg/min (between 30-70)
 
 		if self.engine_type == "electric":
-			power_output = flow_amount
-			capacity_left = (power_output*charging_time)/3600
-			return 100 * (capacity_left/self.capacity)
+			power_output = flow_amount / 1000
+			capacity_left = power_output * (charging_time / 3600)
+			return 100 * (capacity_left / self.capacity)
 		elif self.engine_type in ["gasoline", "diesel", "lpg", "gnc"]:
 			flow_rate = flow_amount
-			capacity_left = (flow_rate*charging_time)/60
+			capacity_left = (flow_rate * charging_time)/60
 			return 100 * (capacity_left / self.capacity)
 
 	def get_kwh_from_percentage(self, percentage):
