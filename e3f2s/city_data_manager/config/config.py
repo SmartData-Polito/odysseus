@@ -17,7 +17,8 @@ cities = [
 	"Madrid",
 	"Roma",
 	"Austin",
-	"Norfolk"
+	"Norfolk",
+	"Kansas City"
 ]
 
 data_steps_ids = [

@@ -42,7 +42,7 @@ class Loader:
             self.tz = pytz.timezone("America/Chicago")
         elif self.city == "Louisville":
             self.tz = pytz.timezone("America/Kentucky/Louisville")
-        elif self.city == "Austin":
+        elif self.city == "Austin" or self.city == "Kansas City":
             self.tz = pytz.timezone("US/Central")
         elif self.city == "Norfolk":
             self.tz = pytz.timezone("US/Eastern")
