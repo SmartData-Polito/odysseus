@@ -19,6 +19,8 @@ class MinneapolisScooterTrips(TripsDataSource):
 			7: "July",
 			8: "August",
 			9: "September",
+			10: "October",
+			11: "November"
 		}
 		month = months_dict[month]
 
