@@ -8,7 +8,7 @@ root_data_path = os.path.join(
 cities = [
 	"Torino",
 	"Louisville",
-	"Minneapolis"
+	"Minneapolis",
 	"Milano",
 	"New_York_City",
 	"Berlin",
