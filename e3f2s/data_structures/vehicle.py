@@ -2,9 +2,9 @@ import json
 import requests
 example_vehicle_config = {
 	"vehicle_type": "car",
-	"engine_type": "electric",
-	"fuel_capacity": 35.8,
-	"consumption": 1/0.147,
+	"engine_type": "cng",
+	"fuel_capacity": 11,
+	"consumption": 34.48,
 	"cost_car": 24700,
 }
 electric_production_emissions = requests.get('https://api.co2signal.com/v1/latest?countryCode=IT-NO',
@@ -27,7 +27,7 @@ class Vehicle(object):
 		elif self.engine_type == "lpg":
 			self.welltotank_emission = 73.2 #gCO2eq/MJ
 			self.energy_content = 24  # MJ/L
-		elif self.engine_type == "gnc":
+		elif self.engine_type == "cng":
 			self.welltotank_emission = 67.6 #gCO2eq/MJ
 			self.energy_content = 44.4  # MJ/kg
 		elif self.engine_type == "electric":
@@ -45,7 +45,7 @@ class Vehicle(object):
 			power_output = flow_amount / 1000
 			capacity_left = ((beta - actual_level_perc) / 100) * self.capacity
 			return (capacity_left / power_output) * 3600
-		elif self.engine_type in ["gasoline", "diesel", "lpg","gnc"]:
+		elif self.engine_type in ["gasoline", "diesel", "lpg","cng"]:
 			flow_rate = flow_amount
 			capacity_left = ((beta - actual_level_perc)/100) * self.capacity
 			return (capacity_left/flow_rate) * 60
@@ -61,7 +61,7 @@ class Vehicle(object):
 			power_output = flow_amount / 1000
 			capacity_left = power_output * (charging_time / 3600)
 			return 100 * (capacity_left / self.capacity)
-		elif self.engine_type in ["gasoline", "diesel", "lpg", "gnc"]:
+		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
 			flow_rate = flow_amount
 			capacity_left = (flow_rate * charging_time)/60
 			return 100 * (capacity_left / self.capacity)
@@ -70,7 +70,7 @@ class Vehicle(object):
 		if self.engine_type == "electric":
 			consumption_kwh = self.percentage_to_consumption(percentage)
 			return consumption_kwh
-		elif self.engine_type in ["gasoline", "diesel", "lpg", "gnc"]:
+		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
 			consumption_liter = self.percentage_to_consumption(percentage)
 			return consumption_liter * self.energy_content * (1/3.6)
 
@@ -97,7 +97,7 @@ class Vehicle(object):
 		return tot_consumption
 
 	def distance_to_emission(self, distance):
-		if self.engine_type in ["gasoline", "diesel", "lpg", "gnc"]:
+		if self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
 			tot_emissions_perkm = self.welltotank_emission * self.from_kml_to_energyperkm()
 			tot_emissions = distance * tot_emissions_perkm
 			return tot_emissions
