@@ -1,3 +1,5 @@
+*.DS_Store
+
 venv*/
 
 e3f2s/city_data_manager/data/*
