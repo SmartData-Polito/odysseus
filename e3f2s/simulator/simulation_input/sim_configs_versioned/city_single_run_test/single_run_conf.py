@@ -29,4 +29,9 @@ sim_scenario_conf = {
 	"user_contribution": False,
 	"willingness": 0,
 
+	"charging_strategy": "reactive",
+	"charging_relocation_strategy": "closest_queueing", #closest_free/random/closest_queueing
+
+	"number of workers": 8
+
 }

@@ -1,42 +1,56 @@
-#from e3f2s.data_structures.vehicle import Vehicle,example_vehicle_config
-
-
 example_station_config = {
-	#the speed of charging ,type : number
-   "charging_speed":1,
-   "number_of_poles": 100,
-    #electric/gasoline
-	"fuel_type": "electric"
+	"voltage_output": 230,
+	"current_output": 16,
+	"flow_rate": 35,
+	"fuel_type": "electric",
+	"fuel_cost": 1.29
 }
 
-class Charging_Station(object):
+class Pole(object):
 	def __init__(self, station_config):
-		self.charging_speed = station_config["charging_speed"]
-		self.number_of_poles = station_config["number_of_poles"]
-		self.available_poles = self.number_of_poles
+		self.fuel_type = example_station_config["fuel_type"] #electric, gasoline, diesel, lpg, gnc
+		self.fuel_cost = example_station_config["fuel_cost"]
+		if self.fuel_type == "electric":
+			self.voltage_output = example_station_config["voltage_output"]
+			self.current_output= example_station_config["current_output"]
+			self.flow_rate = self.voltage_output * self.current_output
+		elif self.fuel_type in ["gasoline","diesel", "lpg","gnc"]:
+			self.flow_rate = example_station_config["flow_rate"] #L/min, kg/min
+			if self.fuel_type == "gasoline":
+				self.energy_content = 32  # MJ/L
+			elif self.fuel_type == "diesel":
+				self.energy_content = 36  # MJ/L
+			elif self.fuel_type == "lpg":
+				self.energy_content = 24  # MJ/L
+			elif self.fuel_type == "gnc":
+				self.energy_content = 44.4  # MJ/L
 
-	def check_poles(self):
-		if self.available_poles > 0 :
-			return True
-		else :
-			return False
+	def get_charging_time_from_energy(self,energy_mj): #energy in MegaJoules
+		if self.fuel_type == "electric":
+			energy_kwh = energy_mj / 3.6
+			charging_time = (energy_kwh/self.flow_rate)*3600
+		elif self.fuel_type in ["gasoline", "diesel", "lpg", "gnc"]:
+			liters = energy_mj / self.energy_content
+			charging_time = (liters / self.flow_rate) * 60
+		return charging_time
 
-	def charging_one_vehicle(self, vehicle):
-		if self.check_poles():
-			self.available_poles -= 1
-			return vehicle.charge(self.charging_speed)
+	def get_energy_from_charging_time(self,charging_time): #charging_time in seconds
+		if self.fuel_type == "electric":
+			energy_kwh = self.flow_rate * (charging_time/3600)
+			energy_mj = energy_kwh * 3.6
+		elif self.fuel_type in ["gasoline", "diesel", "lpg", "gnc"]:
+			liters = self.flow_rate * (charging_time / 60)
+			energy_mj = liters * self.energy_content
+		return energy_mj
 
+	def get_fuelcost_from_energy(self,energy_mj):
+		if self.fuel_type == "electric":
+			energy_kwh = energy_mj / 3.6
+			return self.fuel_cost * energy_kwh
+		elif self.fuel_type in ["gasoline", "diesel", "lpg", "gnc"]:
+			liters = energy_mj / self.energy_content
+			return self.fuel_cost * liters
 
-	def finish_charging_vehicle (self, vehicle):
-		self.available_poles += 1
-		vehicle.charge_complete()
-
-
-# v = Vehicle(example_vehicle_config)
-# s = Charging_Station(example_station_config)
-# distance = 20
-# v.consume(distance)
-# print(v.current_percentage)
-# duration = s.charging_one_vehicle(v)
-# print("duration:" , duration)
-# #print(v.current_percentage)
+a=Pole(example_station_config)
+print(a.get_energy_from_charging_time(15.119796755911661))
+print(a.get_charging_time_from_energy(55.64085206175491))

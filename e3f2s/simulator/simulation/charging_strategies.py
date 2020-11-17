@@ -1,9 +1,10 @@
 from e3f2s.simulator.simulation.charging_primitives import *
+import random
 
 
-class ChargingStrategy (ChargingPrimitives):
+class ChargingStrategy(ChargingPrimitives):
 
-	def get_charge_dict(self, vehicle, charge, booking_request, operator):
+	def get_charge_dict(self, vehicle, charge, booking_request, operator, charging_relocation_strategy):
 
 		if self.simInput.sim_scenario_conf["battery_swap"]:
 
@@ -86,21 +87,67 @@ class ChargingStrategy (ChargingPrimitives):
 
 		if self.simInput.sim_scenario_conf["distributed_cps"]:
 
-			zones_by_distance = self.simInput.zones_cp_distances.loc[
-				int(booking_request["destination_id"])
-			].sort_values()
+			if charging_relocation_strategy == "closest_free":
 
-			free_pole_flag = 0
-			for zone in zones_by_distance.index:
-				if self.charging_stations_dict[zone].charging_station.count < self.charging_stations_dict[zone].charging_station.capacity:
+				zones_by_distance = self.simInput.zones_cp_distances.loc[
+					int(booking_request["destination_id"])
+				].sort_values()
+
+				free_pole_flag = 0
+				# find the nearest available station with charging poles
+				for zone in zones_by_distance.index:
+					if self.charging_stations_dict[zone].charging_station.count < self.charging_stations_dict[
+						zone].charging_station.capacity:
+						free_pole_flag = 1
+						charging_zone_id = zone
+						cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)
+						if cr_soc_delta > booking_request["end_soc"]:
+							free_pole_flag = 0
+						else:
+							charging_zone_id = charging_zone_id
+							break
+
+			elif charging_relocation_strategy == "random":
+				zones_by_distance = self.simInput.zones_cp_distances.loc[int(booking_request["destination_id"])]
+				free_pole_flag = 0
+
+				# find a random station to charge
+				while True:
+					random_zone_id = random.choice(zones_by_distance.index)
+					#remove the element
+					zones_by_distance.pop(random_zone_id)
+					if self.charging_stations_dict[random_zone_id].charging_station.count < self.charging_stations_dict[
+						random_zone_id].charging_station.capacity:
+						free_pole_flag = 1
+						charging_zone_id = random_zone_id
+						cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)
+						if cr_soc_delta > booking_request["end_soc"]:
+							free_pole_flag = 0
+						else:
+							charging_zone_id = charging_zone_id
+					if free_pole_flag == 1 or zones_by_distance.empty :
+						#print("end of choosing")
+						break
+			elif charging_relocation_strategy == 'closest_queueing':
+				zones_by_distance = self.simInput.zones_cp_distances.loc[
+					int(booking_request["destination_id"])
+				].sort_values()
+
+				free_pole_flag = 0
+				# find the nearest station with charging poles,if the station is full,put the vehicle into queue
+				for zone in zones_by_distance.index:
 					free_pole_flag = 1
 					charging_zone_id = zone
 					cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)
 					if cr_soc_delta > booking_request["end_soc"]:
 						free_pole_flag = 0
 					else:
-						charging_zone_id_ = charging_zone_id
+						charging_zone_id = charging_zone_id
 						break
+
+			else:
+				print("No such charging relocation strategy supported")
+				exit()
 
 			if free_pole_flag == 0:
 				charging_zone_id = self.simInput.closest_cp_zone[
@@ -152,6 +199,8 @@ class ChargingStrategy (ChargingPrimitives):
 				timeout_return = 0
 				cr_soc_delta = 0
 
+
+
 		charge_dict = {
 			"charge": charge,
 			"resource": resource,
@@ -165,7 +214,7 @@ class ChargingStrategy (ChargingPrimitives):
 
 		return charge_dict
 
-	def check_charge (self, booking_request, vehicle):
+	def check_charge(self, booking_request, vehicle):
 
 		user_charge_flag = False
 
@@ -184,10 +233,13 @@ class ChargingStrategy (ChargingPrimitives):
 					charge_dict = self.get_charge_dict(vehicle, charge, booking_request, "system")
 					yield self.env.process(self.charge_vehicle(charge_dict))
 		else:
-			charge_flag, charge = self.check_system_charge(booking_request, vehicle)
+			charging_strategy = self.simInput.sim_scenario_conf["charging_strategy"]
+			charge_flag, charge = self.check_system_charge(booking_request, vehicle, charging_strategy)
 			if charge_flag:
 				self.list_system_charging_bookings.append(booking_request)
-				charge_dict = self.get_charge_dict(vehicle, charge, booking_request, "system")
+				charging_relocation_strategy = self.simInput.sim_scenario_conf["charging_relocation_strategy"]
+				charge_dict = self.get_charge_dict(vehicle, charge, booking_request, "system",
+												   charging_relocation_strategy)
 				yield self.env.process(self.charge_vehicle(charge_dict))
 
 		if charge_flag and not user_charge_flag:
