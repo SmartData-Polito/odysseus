@@ -82,10 +82,11 @@ class Vehicle(object):
 	def get_kwh_from_percentage(self, percentage):
 		if self.engine_type == "electric":
 			tanktowheel_mj = self.percentage_to_consumption(percentage) * 3.6
-			welltowheel_kwh = self.welltotank_energy * tanktowheel_mj / 3.6
+			welltotank_mj = self.welltotank_energy * tanktowheel_mj
 		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
 			tanktowheel_mj = self.percentage_to_consumption(percentage) * self.energy_content
-			welltowheel_kwh = self.welltotank_energy * tanktowheel_mj / 3.6
+			welltotank_mj = self.welltotank_energy * tanktowheel_mj
+		welltowheel_kwh = (welltotank_mj + tanktowheel_mj) / 3.6
 		return welltowheel_kwh
 
 	def from_kml_to_lkm(self):
