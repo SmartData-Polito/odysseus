@@ -158,7 +158,7 @@ class City:
 
         print(self.bookings[["euclidean_distance", "driving_distance", "duration", "avg_speed_kmh"]].describe())
 
-        if self.city_name in ["Minneapolis", "Louisville", "Austin", "Norfolk", "Kansas City", "Chicago"]:
+        if self.city_name in ["Minneapolis", "Louisville", "Austin", "Norfolk", "Kansas City", "Chicago", "Calgary"]:
             pass
             #self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
         elif self.data_source_id in ["big_data_db"]:

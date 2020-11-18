@@ -50,6 +50,8 @@ class TripsDataSource:
 			self.tz = pytz.timezone("US/Central")
 		elif self.city_name == "Norfolk":
 			self.tz = pytz.timezone("US/Eastern")
+		elif self.city_name == "Calgary":
+			self.tz = pytz.timezone("Canada/Mountain")
 
 	def load_raw(self):
 		return
