@@ -179,10 +179,12 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["tot_potential_mobility_distance"] = self.sim_booking_requests.driving_distance.sum()
 		self.sim_stats.loc["tot_potential_mobility_duration"] = self.sim_booking_requests.duration.sum()
 		self.sim_stats.loc["tot_potential_mobility_energy"] = self.sim_booking_requests.soc_delta_kwh.sum()
+		self.sim_stats.loc["tot_potential_co2_emissions_kg"] = self.sim_booking_requests.co2_emissions.sum() / 1000
 
 		self.sim_stats.loc["tot_mobility_distance"] = self.sim_bookings.driving_distance.sum()
 		self.sim_stats.loc["tot_mobility_duration"] = self.sim_bookings.duration.sum()
 		self.sim_stats.loc["tot_mobility_energy"] = self.sim_bookings.soc_delta_kwh.sum()
+		self.sim_stats.loc["tot_co2_emissions_kg"] = self.sim_bookings.co2_emissions.sum() / 1000
 
 		self.sim_stats.loc["n_vehicles_sim"] = sim.simInput.n_vehicles_sim
 		self.sim_stats.loc["tot_n_charging_poles"] = sim.simInput.tot_n_charging_poles
