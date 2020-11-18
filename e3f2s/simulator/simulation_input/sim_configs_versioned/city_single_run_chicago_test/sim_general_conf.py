@@ -5,7 +5,7 @@ sim_general_conf_grid = {
     "sim_run_mode": ["single_run"],
 
     "data_source_id": ["city_of_chicago"],
-    "sim_technique": ["traceB"],
+    "sim_technique": ["eventG"],
     "sim_scenario_name": ["city_single_run_test"],
 
     # Fleet general parameters

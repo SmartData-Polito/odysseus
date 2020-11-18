@@ -287,6 +287,10 @@ class City:
                 slot_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
                 if len(slot_df) == 0:
                     rates = pd.Series(self.request_rates[daytype])
-                    self.trip_kdes[daytype][hour] = self.trip_kdes[daytype][rates.idxmin()]
+                    min_evaluable_rate = rates.idxmin()
+                    while min_evaluable_rate not in self.trip_kdes[daytype].keys():
+                        rates = rates.drop(min_evaluable_rate)
+                        min_evaluable_rate = rates.idxmin()
+                    self.trip_kdes[daytype][hour] = self.trip_kdes[daytype][min_evaluable_rate]
 
         return self.trip_kdes
