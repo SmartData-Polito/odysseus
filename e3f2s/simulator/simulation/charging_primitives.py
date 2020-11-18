@@ -1,11 +1,9 @@
 import simpy
 import datetime
-
 import numpy as np
 
 from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.geospatial_utils import get_od_distance
-
 
 def get_charging_time(soc_delta,
 					  battery_capacity=vehicle_conf["battery_capacity"],
@@ -13,19 +11,17 @@ def get_charging_time(soc_delta,
 					  charger_rated_power=3.7):
 	return (soc_delta * 3600 * battery_capacity) / (charging_efficiency * charger_rated_power * 100)
 
-
-
-def init_charge(booking_request, vehicles_soc_level, vehicle, beta):
+def init_charge(booking_request, vehicle, beta):
 	charge = {}
-	charge["plate"] = vehicle
+	charge["plate"] = vehicle.plate
 	charge["start_time"] = booking_request["end_time"]
 	charge["date"] = charge["start_time"].date()
 	charge["hour"] = charge["start_time"].hour
 	charge["day_hour"] = charge["start_time"].replace(minute=0, second=0, microsecond=0)
-	charge["start_soc"] = vehicles_soc_level
+	charge["start_soc"] = vehicle.soc.level
 	charge["end_soc"] = beta
 	charge["soc_delta"] = charge["end_soc"] - charge["start_soc"]
-	charge["soc_delta_kwh"] = soc_to_kwh(charge["soc_delta"])
+	charge["soc_delta_kwh"] = vehicle.get_kwh_from_percentage(charge["soc_delta"])
 	return charge
 
 
@@ -105,7 +101,7 @@ class ChargingPrimitives:
 		charge["timeout_outward"] = timeout_outward
 		charge["timeout_return"] = timeout_return
 		charge["cr_soc_delta"] = cr_soc_delta
-		charge["cr_soc_delta_kwh"] = soc_to_kwh(cr_soc_delta)
+		charge["cr_soc_delta_kwh"] = self.vehicles_list[vehicle_id].get_kwh_from_percentage(cr_soc_delta)
 
 		if self.simInput.sim_scenario_conf["battery_swap"]:
 			if operator == "system":
@@ -175,8 +171,7 @@ class ChargingPrimitives:
 		if self.vehicles_list[vehicle].soc.level < self.simInput.sim_scenario_conf["alpha"]:
 			charge = init_charge(
 				booking_request,
-				self.vehicles_list[vehicle].soc.level,
-				vehicle,
+				self.vehicles_list[vehicle],
 				self.simInput.sim_scenario_conf["beta"]
 			)
 			return True, charge
@@ -190,8 +185,7 @@ class ChargingPrimitives:
 				if np.random.binomial(1, self.simInput.sim_scenario_conf["willingness"]):
 					charge = init_charge(
 						booking_request,
-						self.vehicles_list[vehicle].soc.level,
-						vehicle,
+						self.vehicles_list[vehicle],
 						self.simInput.sim_scenario_conf["beta"]
 					)
 					return True, charge

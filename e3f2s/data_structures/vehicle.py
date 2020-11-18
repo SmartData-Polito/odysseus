@@ -2,9 +2,9 @@ import json
 import requests
 example_vehicle_config = {
 	"vehicle_type": "car",
-	"engine_type": "cng",
-	"fuel_capacity": 11,
-	"consumption": 34.48,
+	"engine_type": "electric",
+	"fuel_capacity": 35.8,
+	"consumption": 7.299,
 	"cost_car": 24700,
 }
 electric_production_emissions = requests.get('https://api.co2signal.com/v1/latest?countryCode=IT-NO',
@@ -21,17 +21,22 @@ class Vehicle(object):
 		if self.engine_type == "gasoline":
 			self.welltotank_emission = 90.4 #gCO2eq/MJ
 			self.energy_content = 32 #MJ/L
+			self.welltotank_energy = 0.24 #MJ/MJgasoline
 		elif self.engine_type == "diesel":
 			self.welltotank_emission = 92.1 #gCO2eq/MJ
 			self.energy_content = 36 #MJ/L
+			self.welltotank_energy = 0.26 #MJ/MJdiesel
 		elif self.engine_type == "lpg":
 			self.welltotank_emission = 73.2 #gCO2eq/MJ
 			self.energy_content = 24  # MJ/L
+			self.welltotank_energy = 0.12 #MJ/MJlpg
 		elif self.engine_type == "cng":
 			self.welltotank_emission = 67.6 #gCO2eq/MJ
 			self.energy_content = 44.4  # MJ/kg
+			self.welltotank_energy = 0.15 #MJ/MJcng
 		elif self.engine_type == "electric":
 			self.welltotank_emission = json.loads(electric_production_emissions.content)['data']['carbonIntensity'] #gCO2eq/Kwh
+			self.welltotank_energy = 2.83 #MJ/MJelectricity
 
 
 	def get_charging_time_from_perc(self, actual_level_perc, flow_amount, beta=100):
@@ -68,11 +73,12 @@ class Vehicle(object):
 
 	def get_kwh_from_percentage(self, percentage):
 		if self.engine_type == "electric":
-			consumption_kwh = self.percentage_to_consumption(percentage)
-			return consumption_kwh
+			tanktowheel_mj = self.percentage_to_consumption(percentage) * 3.6
+			welltowheel_kwh = self.welltotank_energy * tanktowheel_mj / 3.6
 		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
-			consumption_liter = self.percentage_to_consumption(percentage)
-			return consumption_liter * self.energy_content * (1/3.6)
+			tanktowheel_mj = self.percentage_to_consumption(percentage) * self.energy_content
+			welltowheel_kwh = self.welltotank_energy * tanktowheel_mj / 3.6
+		return welltowheel_kwh
 
 	def from_kml_to_lkm(self):
 		return 1 / self.consumption

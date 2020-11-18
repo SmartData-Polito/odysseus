@@ -1,7 +1,7 @@
 example_station_config = {
 	"voltage_output": 230,
 	"current_output": 16,
-	"fuel_type": "cng",
+	"fuel_type": "electric",
 	"fuel_cost": 1.29
 }
 
