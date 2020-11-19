@@ -83,6 +83,8 @@ class ChargingPrimitives:
 		self.list_system_charging_bookings = []
 		self.list_users_charging_bookings = []
 
+		self.charging_outward_distance = 0
+
 	def charge_vehicle(
 			self,
 			charge_dict
@@ -96,6 +98,7 @@ class ChargingPrimitives:
 		timeout_outward = charge_dict["timeout_outward"]
 		timeout_return = charge_dict["timeout_return"]
 		cr_soc_delta = charge_dict["cr_soc_delta"]
+		#charging_outward_distance = charge_dict["charging_outward_distance"]
 
 		def check_queuing():
 			if self.simInput.sim_scenario_conf["queuing"]:
@@ -112,6 +115,7 @@ class ChargingPrimitives:
 		charge["timeout_return"] = timeout_return
 		charge["cr_soc_delta"] = cr_soc_delta
 		charge["cr_soc_delta_kwh"] = soc_to_kwh(cr_soc_delta)
+		#charging_outward_distance = charge_dict["charging_outward_distance"]
 
 		if self.simInput.sim_scenario_conf["battery_swap"]:
 			if operator == "system":
@@ -120,6 +124,7 @@ class ChargingPrimitives:
 						yield worker_request
 						self.n_vehicles_charging_system += 1
 						yield self.env.timeout(charge["timeout_outward"])
+						#self.charging_outward_distance+=charge["charging_outward_distance"]
 						yield self.env.timeout(charge["duration"])
 						self.n_vehicles_charging_system -= 1
 						yield self.env.timeout(charge["timeout_return"])
@@ -136,6 +141,7 @@ class ChargingPrimitives:
 					with self.workers.request() as worker_request:
 						yield worker_request
 						yield self.env.timeout(charge["timeout_outward"])
+						#self.charging_outward_distance += charge["charging_outward_distance"]
 						charge["start_soc"] -= charge["cr_soc_delta"]
 						yield self.env.timeout(charge["timeout_return"])
 						self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
@@ -228,3 +234,13 @@ class ChargingPrimitives:
 		if distance == 0:
 			distance = self.simInput.sim_general_conf["bin_side_length"]
 		return get_soc_delta(distance / 1000)
+
+	def get_distance(self,origin_id,destination_id):
+		distance = get_od_distance(
+			self.simInput.grid,
+			origin_id,
+			destination_id
+		)
+		if distance == 0:
+			distance = self.simInput.sim_general_conf["bin_side_length"]
+		return distance

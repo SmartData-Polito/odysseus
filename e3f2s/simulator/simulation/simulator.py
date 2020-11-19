@@ -82,6 +82,9 @@ class SharedMobilitySim:
         self.list_n_vehicles_dead = []
         self.vehicles_zones_history = []
 
+        self.charging_outward_distance = []
+
+
         self.vehicles_list = []
         self.charging_stations_dict = {}
         self.zone_dict = {}
@@ -149,6 +152,8 @@ class SharedMobilitySim:
         self.list_n_vehicles_available += [
             self.simInput.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
         ]
+
+        self.charging_outward_distance = [self.chargingStrategy.charging_outward_distance]
 
         self.sim_booking_requests += [booking_request]
         self.n_booking_requests += 1
