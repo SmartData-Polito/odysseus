@@ -38,14 +38,16 @@ class Loader:
             self.tz = pytz.timezone("Europe/Berlin")
         elif self.city == "New_York_City":
             self.tz = pytz.timezone("America/New_York")
-        elif self.city == "Minneapolis":
+        elif self.city == "Minneapolis" or self.city == "Chicago":
             self.tz = pytz.timezone("America/Chicago")
         elif self.city == "Louisville":
             self.tz = pytz.timezone("America/Kentucky/Louisville")
-        elif self.city == "Austin":
+        elif self.city == "Austin" or self.city == "Kansas City":
             self.tz = pytz.timezone("US/Central")
         elif self.city == "Norfolk":
             self.tz = pytz.timezone("US/Eastern")
+        elif self.city == "Calgary":
+            self.tz = pytz.timezone("Canada/Mountain")
 
     def read_data (self):
 

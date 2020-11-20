@@ -2,12 +2,14 @@ import argparse
 import datetime
 
 
-
 from e3f2s.city_data_manager.city_geo_trips.big_data_db_geo_trips import BigDataDBGeoTrips
 from e3f2s.city_data_manager.city_geo_trips.louisville_geo_trips import LouisvilleGeoTrips
 from e3f2s.city_data_manager.city_geo_trips.minneapolis_geo_trips import MinneapolisGeoTrips
 from e3f2s.city_data_manager.city_geo_trips.austin_geo_trips import AustinGeoTrips
 from e3f2s.city_data_manager.city_geo_trips.norfolk_geo_trips import NorfolkGeoTrips
+from e3f2s.city_data_manager.city_geo_trips.kansas_city_geo_trips import KansasCityGeoTrips
+from e3f2s.city_data_manager.city_geo_trips.chicago_geo_trips import ChicagoGeoTrips
+from e3f2s.city_data_manager.city_geo_trips.calgary_geo_trips import CalgaryGeoTrips
 
 
 parser = argparse.ArgumentParser()
@@ -46,16 +48,30 @@ for city in args.cities:
         for year in args.years:
             for month in args.months:
                 print(datetime.datetime.now(), city, data_source_id, year, month)
+
                 if data_source_id == "big_data_db":
                     geo_trips_ds = BigDataDBGeoTrips(city, data_source_id, int(year), int(month))
+
                 elif data_source_id == "city_of_louisville":
                     geo_trips_ds = LouisvilleGeoTrips(year=int(year), month=int(month))
+
                 elif data_source_id == "city_of_minneapolis":
                     geo_trips_ds = MinneapolisGeoTrips(year=int(year), month=int(month))
+
                 elif data_source_id == "city_of_austin":
                     geo_trips_ds = AustinGeoTrips(year=int(year), month=int(month))
+
                 elif data_source_id == "city_of_norfolk":
                     geo_trips_ds = NorfolkGeoTrips(year=int(year), month=int(month))
+
+                elif data_source_id == "city_of_kansas_city":
+                    geo_trips_ds = KansasCityGeoTrips(year=int(year), month=int(month))
+
+                elif data_source_id == "city_of_chicago":
+                    geo_trips_ds = ChicagoGeoTrips(year=int(year), month=int(month))
+
+                elif data_source_id == "city_of_calgary":
+                    geo_trips_ds = CalgaryGeoTrips(year=int(year), month=int(month))
 
                 geo_trips_ds.get_trips_od_gdfs()
                 geo_trips_ds.save_points_data()

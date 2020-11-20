@@ -8,7 +8,7 @@ root_data_path = os.path.join(
 cities = [
 	"Torino",
 	"Louisville",
-	"Minneapolis"
+	"Minneapolis",
 	"Milano",
 	"New_York_City",
 	"Berlin",
@@ -17,7 +17,10 @@ cities = [
 	"Madrid",
 	"Roma",
 	"Austin",
-	"Norfolk"
+	"Norfolk",
+	"Kansas City",
+	"Chicago",
+	"Calgary"
 ]
 
 data_steps_ids = [

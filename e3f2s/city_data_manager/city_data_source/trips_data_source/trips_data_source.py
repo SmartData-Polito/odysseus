@@ -44,12 +44,14 @@ class TripsDataSource:
 			self.tz = pytz.timezone("America/Vancouver")
 		elif self.city_name == "Louisville":
 			self.tz = pytz.timezone("America/Kentucky/Louisville")
-		elif self.city_name == "Minneapolis":
+		elif self.city_name == "Minneapolis" or self.city_name == "Chicago":
 			self.tz = pytz.timezone("America/Chicago")
-		elif self.city_name == "Austin":
+		elif self.city_name == "Austin" or self.city_name == "Kansas City":
 			self.tz = pytz.timezone("US/Central")
 		elif self.city_name == "Norfolk":
 			self.tz = pytz.timezone("US/Eastern")
+		elif self.city_name == "Calgary":
+			self.tz = pytz.timezone("Canada/Mountain")
 
 	def load_raw(self):
 		return
