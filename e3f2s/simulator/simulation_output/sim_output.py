@@ -54,6 +54,7 @@ class EFFCS_SimOutput ():
 		self.sim_booking_requests["n_vehicles_dead"] = \
 			pd.Series(sim.list_n_vehicles_dead)
 
+
 		self.sim_charge_deaths = pd.DataFrame(sim.chargingStrategy.sim_unfeasible_charge_bookings)
 
 		self.grid = sim.simInput.grid
@@ -192,6 +193,7 @@ class EFFCS_SimOutput ():
 		)
 
 		self.sim_stats.loc["tot_charging_energy"] = self.sim_charges["soc_delta_kwh"].sum()
+		self.sim_stats.loc["tot_charging_outwards_distance"] =sim.chargingStrategy.charging_outward_distance
 
 		if "system" in self.sim_charges.operator.unique():
 			self.sim_stats.loc["fraction_charges_system"] = \

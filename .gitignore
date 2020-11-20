@@ -1,3 +1,6 @@
+*.DS_Store
+*/__MACOSX/*
+
 venv*/
 
 e3f2s/city_data_manager/data/*
