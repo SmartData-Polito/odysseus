@@ -4,10 +4,10 @@ import itertools
 import numpy as np
 
 #from e3f2s.utils.vehicle_utils import get_soc_delta
-from e3f2s.utils.vehicle_utils import soc_to_kwh
+#from e3f2s.utils.vehicle_utils import soc_to_kwh
 from e3f2s.utils.geospatial_utils import get_od_distance
 from e3f2s.simulator.simulation.simulator import SharedMobilitySim
-from e3f2s.data_structures.vehicle import Vehicle
+#from e3f2s.data_structures.vehicle import Vehicle
 
 np.random.seed(44)
 
