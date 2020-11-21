@@ -200,12 +200,19 @@ class SharedMobilitySim:
                             booking_request["driving_distance"] / 1000
                         )
                     )
-            booking_request["soc_delta_kwh"] = self.vehicles_list[max_soc_vehicle_origin].get_kwh_from_percentage(
+            booking_request["welltotank_kwh"] = self.vehicles_list[max_soc_vehicle_origin].welltotank_energy_from_perc(
                 booking_request["soc_delta"]
             )
-            booking_request["co2_emissions"] = self.vehicles_list[max_soc_vehicle_origin].distance_to_emission(
-                booking_request["driving_distance"]/1000
+            booking_request["tanktowheel_kwh"] = self.vehicles_list[max_soc_vehicle_origin].tanktowheel_energy_from_perc(
+                booking_request["soc_delta"]
             )
+            booking_request["soc_delta_kwh"] = booking_request["welltotank_kwh"] + booking_request["tanktowheel_kwh"]
+            booking_request["welltotank_emissions"] = self.vehicles_list[
+                max_soc_vehicle_origin].distance_to_welltotank_emission(booking_request["driving_distance"] / 1000)
+            booking_request["tanktowheel_emissions"] = self.vehicles_list[
+                max_soc_vehicle_origin].distance_to_tanktowheel_emission(booking_request["driving_distance"] / 1000)
+            booking_request["co2_emissions"] = booking_request["welltotank_emissions"] + \
+                                               booking_request["tanktowheel_emissions"]
             self.env.process(
                 self.schedule_booking(booking_request, max_soc_vehicle_origin, booking_request["origin_id"])
             )

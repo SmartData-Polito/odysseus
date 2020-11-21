@@ -1,22 +1,34 @@
 import json
 import requests
 example_vehicle_config = {
-	"vehicle_type": "car",
-	"engine_type": "cng",
-	"fuel_capacity": 14.5,
-	"consumption": 22.2,
+	"engine_type": "electric",
+	"country":"Italy",
+	"zone":"North",
+	"fuel_capacity": 35.8,
+	"consumption": 10.309,
 	"cost_car": 24700,
 }
-electric_production_emissions = requests.get('https://api.co2signal.com/v1/latest?countryCode=IT-NO',
-                        headers={'auth-token': '658db0a8d45daedc'}) #North Italy code, see countries_api.json
+if example_vehicle_config["engine_type"] == "electric":
+	countries_code = json.loads(requests.get('https://api.electricitymap.org/v3/zones').content)
+	for k, v in countries_code.items():
+		if example_vehicle_config["zone"] == "":
+			if v["zoneName"] == example_vehicle_config["country"]:
+				code = k
+				break
+		elif "countryName" not in list(v.keys()):
+			pass
+		elif v['countryName'] == example_vehicle_config["country"] and v["zoneName"] == example_vehicle_config["zone"]:
+			code = k
+			break
+
+	electric_production_emissions = requests.get('https://api.co2signal.com/v1/latest?countryCode='+code,
+	                        headers={'auth-token': '658db0a8d45daedc'})
 class Vehicle(object):
 	def __init__(self, vehicle_config):
-		self.vehicle_type = vehicle_config["vehicle_type"] #car,scooter,
 		self.engine_type = vehicle_config["engine_type"] #gasoline, diesel, lpg, gnc, electric
 		self.consumption = vehicle_config["consumption"] #km/l, km/kWh
 		self.capacity = vehicle_config["fuel_capacity"] #kWh (electric), Liter (gasoline,diesel,lpg), kilograms (gnc)
 		self.cost_car = vehicle_config["cost_car"] # in €
-		#self.current_percentage = 100
 
 		if self.engine_type == "gasoline":
 			self.welltotank_emission = 90.4 #gCO2eq/MJ
@@ -79,15 +91,20 @@ class Vehicle(object):
 			capacity_left = (flow_rate * charging_time)/60
 			return 100 * (capacity_left / self.capacity)
 
-	def get_kwh_from_percentage(self, percentage):
+	def tanktowheel_energy_from_perc(self, percentage):
+		if self.engine_type == "electric":
+			tanktowheel_kwh = self.percentage_to_consumption(percentage)
+		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
+			tanktowheel_kwh = (self.percentage_to_consumption(percentage) * self.energy_content) / 3.6
+		return tanktowheel_kwh
+
+	def welltotank_energy_from_perc(self, percentage):
 		if self.engine_type == "electric":
 			tanktowheel_mj = self.percentage_to_consumption(percentage) * 3.6
-			welltotank_mj = self.welltotank_energy * tanktowheel_mj
 		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
 			tanktowheel_mj = self.percentage_to_consumption(percentage) * self.energy_content
-			welltotank_mj = self.welltotank_energy * tanktowheel_mj
-		welltowheel_kwh = (welltotank_mj + tanktowheel_mj) / 3.6
-		return welltowheel_kwh
+		welltotank_kwh = (self.welltotank_energy * tanktowheel_mj) / 3.6
+		return welltotank_kwh
 
 	def from_kml_to_lkm(self):
 		return 1 / self.consumption
@@ -111,17 +128,21 @@ class Vehicle(object):
 		tot_consumption = perkm_consumption * distance
 		return tot_consumption
 
-	def distance_to_emission(self, distance):
+	def distance_to_welltotank_emission(self,distance):
 		if self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
 			wtt_emissions_perkm = self.welltotank_emission * self.from_kml_to_energyperkm()
-			tot_wtt_emissions = distance * wtt_emissions_perkm
-			ttw_energy_mj = self.distance_to_consumption(distance) * self.energy_content
-			tot_ttw_emissions = (ttw_energy_mj / self.lower_heating_value * self.carbon_content / 100 / 12 * 44) * 1000 #gCO2
-			tot_emissions = tot_wtt_emissions + tot_ttw_emissions
-			return tot_emissions
 		elif self.engine_type == "electric":
-			tot_emissions_perkm = self.welltotank_emission / self.consumption
-			return distance * tot_emissions_perkm
+			wtt_emissions_perkm = self.welltotank_emission / self.consumption
+		tot_wtt_emissions = distance * wtt_emissions_perkm
+		return tot_wtt_emissions
+
+	def distance_to_tanktowheel_emission(self,distance):
+		if self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
+			ttw_energy_mj = self.distance_to_consumption(distance) * self.energy_content
+			tot_ttw_emissions = (ttw_energy_mj / self.lower_heating_value * self.carbon_content / 100 / 12 * 44) * 1000  # gCO2
+		elif self.engine_type == "electric":
+			tot_ttw_emissions = 0
+		return tot_ttw_emissions
 
 # car = Vehicle(example_vehicle_config)
 # distance = 130
