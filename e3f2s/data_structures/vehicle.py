@@ -47,16 +47,16 @@ class Vehicle(object):
 			self.energy_content = 24  # MJ/L
 			self.welltotank_energy = 0.12 #MJ/MJlpg
 			self.lower_heating_value = 46  # MJ/kg
-			self.carbon_content = 82.2  # %
+			self.carbon_content = 82.4  # %
 		elif self.engine_type == "cng":
 			self.welltotank_emission = 67.6 #gCO2eq/MJ
 			self.energy_content = 44.4  # MJ/kg
 			self.welltotank_energy = 0.15 #MJ/MJcng
-			self.lower_heating_value = 46.1  # MJ/kg
+			self.lower_heating_value = 46.6  # MJ/kg
 			self.carbon_content = 71.3  # %
 		elif self.engine_type == "electric":
 			self.welltotank_emission = json.loads(electric_production_emissions.content)['data']['carbonIntensity'] #gCO2eq/Kwh
-			self.welltotank_energy = 2.83 #MJ/MJelectricity
+			self.welltotank_energy = 2.96 #MJ/MJelectricity
 
 
 	def get_charging_time_from_perc(self, actual_level_perc, flow_amount, beta=100):
