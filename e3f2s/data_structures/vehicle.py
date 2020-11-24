@@ -1,28 +1,36 @@
-import json
-import requests
 example_vehicle_config = {
 	"engine_type": "electric",
-	"country":"Italy",
-	"zone":"North",
-	"fuel_capacity": 35.8,
+	"fuel_capacity": 35.3,
 	"consumption": 10.309,
 	"cost_car": 24700,
+	"country_energy_mix" : {
+		"nuclear": 0, # %
+		"natural_gas": 45, # %
+		"coal": 9.3, # %
+		"oil":0, # %
+		"biomass": 9, # %
+		"other":6.2, # %
+		"hydro": 16.3, # %
+		"wind":6.2, # %
+		"waste":0, # %
+		"solar": 8.3, # %
+		"geothermal":0, # %
+	}
 }
-if example_vehicle_config["engine_type"] == "electric":
-	countries_code = json.loads(requests.get('https://api.electricitymap.org/v3/zones').content)
-	for k, v in countries_code.items():
-		if example_vehicle_config["zone"] == "":
-			if v["zoneName"] == example_vehicle_config["country"]:
-				code = k
-				break
-		elif "countryName" not in list(v.keys()):
-			pass
-		elif v['countryName'] == example_vehicle_config["country"] and v["zoneName"] == example_vehicle_config["zone"]:
-			code = k
-			break
 
-	electric_production_emissions = requests.get('https://api.co2signal.com/v1/latest?countryCode='+code,
-	                        headers={'auth-token': '658db0a8d45daedc'})
+lca_emission_elect_sources = {
+	"nuclear":12, # g/kWh
+	"natural_gas":490, # g/kWh
+	"coal":910, # g/kWh
+	"oil":650, # g/kWh
+	"biomass":230, # g/kWh
+	"other":490, # g/kWh
+	"hydro":24, # g/kWh
+	"wind":11, # g/kWh
+	"waste":620, # g/kWh
+	"geothermal": 38, # g/kWh
+	"solar":11, # g/kWh
+}
 class Vehicle(object):
 	def __init__(self, vehicle_config):
 		self.engine_type = vehicle_config["engine_type"] #gasoline, diesel, lpg, gnc, electric
@@ -31,31 +39,36 @@ class Vehicle(object):
 		self.cost_car = vehicle_config["cost_car"] # in €
 
 		if self.engine_type == "gasoline":
-			self.welltotank_emission = 90.4 #gCO2eq/MJ
+			self.welltotank_emission = 17 #gCO2eq/MJ (pathway code COG-1)
 			self.energy_content = 32 #MJ/L
 			self.welltotank_energy = 0.24 #MJ/MJgasoline
 			self.lower_heating_value = 43.2 #MJ/kg
 			self.carbon_content = 86.4 #%
 		elif self.engine_type == "diesel":
-			self.welltotank_emission = 92.1 #gCO2eq/MJ
+			self.welltotank_emission = 18.9 #gCO2eq/MJ (pathway code COD-1)
 			self.energy_content = 36 #MJ/L
 			self.welltotank_energy = 0.26 #MJ/MJdiesel
 			self.lower_heating_value = 43.1  # MJ/kg
 			self.carbon_content = 86.1  # %
 		elif self.engine_type == "lpg":
-			self.welltotank_emission = 73.2 #gCO2eq/MJ
+			self.welltotank_emission = 7.8 #gCO2eq/MJ (pathway code LRLP-1 min 7.7 - max 8.3)
 			self.energy_content = 24  # MJ/L
 			self.welltotank_energy = 0.12 #MJ/MJlpg
 			self.lower_heating_value = 46  # MJ/kg
 			self.carbon_content = 82.4  # %
 		elif self.engine_type == "cng":
-			self.welltotank_emission = 67.6 #gCO2eq/MJ
+			self.welltotank_emission = 11.4 #gCO2eq/MJ (pathway code GMCG-1 min 10.5  - max 12.7)
 			self.energy_content = 44.4  # MJ/kg
 			self.welltotank_energy = 0.15 #MJ/MJcng
 			self.lower_heating_value = 46.6  # MJ/kg
 			self.carbon_content = 71.3  # %
 		elif self.engine_type == "electric":
-			self.welltotank_emission = json.loads(electric_production_emissions.content)['data']['carbonIntensity'] #gCO2eq/Kwh
+			tot_emission = 0
+			for i in list(lca_emission_elect_sources.keys()):
+				tot_emission = tot_emission + lca_emission_elect_sources[i] * example_vehicle_config[
+					"country_energy_mix"
+				][i]/100
+			self.welltotank_emission = tot_emission  #gCO2eq/kWh
 			self.welltotank_energy = 2.96 #MJ/MJelectricity
 
 
