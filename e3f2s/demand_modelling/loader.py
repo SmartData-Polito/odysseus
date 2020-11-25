@@ -84,6 +84,9 @@ class Loader:
             self.trips = self.trips[(self.trips.start_longitude > 12) & (self.trips.start_longitude < 14)]
             self.trips = self.trips[(self.trips.end_latitude > 51) & (self.trips.end_latitude < 53)]
             self.trips = self.trips[(self.trips.end_longitude > 12) & (self.trips.end_longitude < 14)]
+        elif self.city == 'Kansas City':
+            self.trips = self.trips[(self.trips.start_latitude > 38.95) & (self.trips.start_latitude < 39.20)]
+            self.trips = self.trips[(self.trips.end_latitude > 38.95) & (self.trips.end_latitude < 39.20)]
 
         self.trips_origins = self.trips_origins.loc[self.trips.index]
         self.trips_destinations = self.trips_destinations.loc[self.trips.index]
