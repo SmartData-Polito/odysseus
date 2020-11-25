@@ -20,11 +20,24 @@ class SimInput:
 		self.grid = self.city_obj.grid
 		self.grid_matrix = self.city_obj.grid_matrix
 		self.input_bookings = self.city_obj.bookings
+		print(self.input_bookings.shape)
 		self.request_rates = self.city_obj.request_rates
+		self.avg_request_rate = self.city_obj.avg_request_rate
 		self.trip_kdes = self.city_obj.trip_kdes
 		self.valid_zones = self.city_obj.valid_zones
 		self.neighbors_dict = self.city_obj.neighbors_dict
 		self.n_vehicles_original = self.city_obj.n_vehicles_original
+
+		if "n_requests" in self.sim_scenario_conf.keys():
+			# 30 => 1 month
+			self.desired_avg_rate = self.sim_scenario_conf["n_requests"] / 30 / 24 / 3600
+			print(self.avg_request_rate, self.desired_avg_rate)
+			self.rate_ratio = self.desired_avg_rate / self.avg_request_rate
+			print(self.rate_ratio)
+			self.sim_scenario_conf["requests_rate_factor"] = self.rate_ratio
+			for daytype in self.request_rates:
+				for hour in self.request_rates[daytype]:
+					self.request_rates[daytype][hour] *= self.rate_ratio
 
 		if "n_vehicles" in self.sim_scenario_conf.keys():
 			self.n_vehicles_sim = self.sim_scenario_conf["n_vehicles"]
