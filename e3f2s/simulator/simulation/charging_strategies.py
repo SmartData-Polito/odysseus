@@ -111,7 +111,11 @@ class ChargingStrategy(ChargingPrimitives):
 						free_pole_flag = 1
 						charging_zone_id = zone
 						charging_outward_distance = self.get_distance(booking_request["destination_id"], charging_zone_id)
-						cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)
+						cr_soc_delta = self.get_cr_soc_delta(
+							booking_request["destination_id"],
+							charging_zone_id,
+							vehicle
+						)
 						if cr_soc_delta > booking_request["end_soc"]:
 							free_pole_flag = 0
 						else:
@@ -190,13 +194,14 @@ class ChargingStrategy(ChargingPrimitives):
 					# 	charge["soc_delta"]
 					# )
 
-					charge["duration"] = self.vehicles_list[vehicle].get_charging_time_from_perc(
-						self.vehicles_list[vehicle].soc.level,
-						self.charging_stations_dict[charging_zone_id].flow_rate,charge["end_soc"]
+					charge["duration"] = vehicle.get_charging_time_from_perc(
+						vehicle.soc.level,
+						self.charging_stations_dict[charging_zone_id].flow_rate,
+						charge["end_soc"]
 					)
 
 					cr_soc_delta = self.get_cr_soc_delta(
-						booking_request["destination_id"], charging_zone_id,self.vehicles_list[vehicle]
+						booking_request["destination_id"], charging_zone_id, vehicle
 					)
 					charging_outward_distance = self.get_distance(booking_request["destination_id"], charging_zone_id)
 

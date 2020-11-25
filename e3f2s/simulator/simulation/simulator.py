@@ -122,23 +122,23 @@ class SharedMobilitySim:
 
         self.chargingStrategy = ChargingStrategy(self.env, self)
 
-    def schedule_booking (self, booking_request, vehicle_id, zone_id):
+    def schedule_booking (self, booking_request, vehicle, zone_id):
 
-        self.available_vehicles_dict[zone_id].remove(vehicle_id)
-        del self.vehicles_zones[vehicle_id]
-        booking_request["start_soc"] = self.vehicles_list[vehicle_id].soc.level
+        self.available_vehicles_dict[zone_id].remove(vehicle)
+        del self.vehicles_zones[vehicle]
+        booking_request["start_soc"] = self.vehicles_list[vehicle].soc.level
         #booking_request["start_soc"] = self.vehicles_soc_dict[vehicle_id]
         #del self.vehicles_soc_dict[vehicle_id]
 
         self.n_booked_vehicles += 1
 
-        booking_request["plate"] = vehicle_id
+        booking_request["plate"] = vehicle
 
         # yield self.env.timeout(booking_request["duration"])
 
         self.zone_dict[booking_request["origin_id"]].remove_vehicle(booking_request["start_time"])
         #print(self.vehicles_list[vehicle_id].soc.level)
-        yield self.env.process(self.vehicles_list[vehicle_id].booking(booking_request))
+        yield self.env.process(self.vehicles_list[vehicle].booking(booking_request))
         self.zone_dict[booking_request["destination_id"]].add_vehicle(
             booking_request["start_time"] + datetime.timedelta(seconds=booking_request['duration'])
         )
@@ -146,17 +146,17 @@ class SharedMobilitySim:
 
         #self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
         #booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
-        booking_request["end_soc"] = self.vehicles_list[vehicle_id].soc.level
+        booking_request["end_soc"] = self.vehicles_list[vehicle].soc.level
         #self.vehicles_zones[vehicle_id] = booking_request["destination_id"]
 
         self.n_booked_vehicles -= 1
 
         relocation_zone_id = yield self.env.process(
-            self.chargingStrategy.check_charge(booking_request, vehicle_id)
+            self.chargingStrategy.check_charge(booking_request, self.vehicles_list[vehicle])
         )
 
-        self.available_vehicles_dict[relocation_zone_id].append(vehicle_id)
-        self.vehicles_zones[vehicle_id] = relocation_zone_id
+        self.available_vehicles_dict[relocation_zone_id].append(vehicle)
+        self.vehicles_zones[vehicle] = relocation_zone_id
 
     def process_booking_request(self, booking_request):
 
