@@ -21,7 +21,7 @@ def init_charge(booking_request, vehicle, beta):
 	charge["start_soc"] = vehicle.soc.level
 	charge["end_soc"] = beta
 	charge["soc_delta"] = charge["end_soc"] - charge["start_soc"]
-	charge["soc_delta_kwh"] = vehicle.get_kwh_from_percentage(charge["soc_delta"])
+	charge["soc_delta_kwh"] = vehicle.tanktowheel_energy_from_perc(charge["soc_delta"])
 	return charge
 
 
@@ -104,7 +104,7 @@ class ChargingPrimitives:
 		charge["timeout_outward"] = timeout_outward
 		charge["timeout_return"] = timeout_return
 		charge["cr_soc_delta"] = cr_soc_delta
-		charge["cr_soc_delta_kwh"] = self.vehicles_list[vehicle_id].get_kwh_from_percentage(cr_soc_delta)
+		charge["cr_soc_delta_kwh"] = self.vehicles_list[vehicle_id].tanktowheel_energy_from_perc(cr_soc_delta)
 
 		if self.simInput.sim_scenario_conf["battery_swap"]:
 			if operator == "system":
