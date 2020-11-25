@@ -3,8 +3,8 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "n_requests": [10**5],
-    "n_vehicles": np.arange(100, 1000, 10),
+    "n_requests": [10 ** 5],
+    "n_vehicles": np.arange(100, 2000, 20),
 
     "time_estimation": [True],
     "queuing": [True],
