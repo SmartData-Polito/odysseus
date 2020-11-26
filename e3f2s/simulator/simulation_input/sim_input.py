@@ -35,9 +35,6 @@ class SimInput:
 			self.rate_ratio = self.desired_avg_rate / self.avg_request_rate
 			print(self.rate_ratio)
 			self.sim_scenario_conf["requests_rate_factor"] = self.rate_ratio
-			for daytype in self.request_rates:
-				for hour in self.request_rates[daytype]:
-					self.request_rates[daytype][hour] *= self.rate_ratio
 
 		if "n_vehicles" in self.sim_scenario_conf.keys():
 			self.n_vehicles_sim = self.sim_scenario_conf["n_vehicles"]
