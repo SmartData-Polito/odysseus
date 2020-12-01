@@ -31,9 +31,7 @@ class SimInput:
 		if "n_requests" in self.sim_scenario_conf.keys():
 			# 30 => 1 month
 			self.desired_avg_rate = self.sim_scenario_conf["n_requests"] / 30 / 24 / 3600
-			print(self.avg_request_rate, self.desired_avg_rate)
 			self.rate_ratio = self.desired_avg_rate / self.avg_request_rate
-			print(self.rate_ratio)
 			self.sim_scenario_conf["requests_rate_factor"] = self.rate_ratio
 
 		if "n_vehicles" in self.sim_scenario_conf.keys():
