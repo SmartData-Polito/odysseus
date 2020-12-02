@@ -37,11 +37,14 @@ class KansasCityScooterTrips(TripsDataSource):
             "Start Longitude": "start_longitude",
             "End Latitude": "end_latitude",
             "End Longitude": "end_longitude",
-            "Day of Week": "start_weekday",
-            "hour": "start_hour",
         }, axis=1)
 
-        self.trips_df_norm = self.trips_df_norm.drop(["Start Location", "End Location"], axis=1)
+        self.trips_df_norm["start_time"] = self.trips_df_norm["start_time"]\
+            .dt.tz_localize('utc').dt.tz_convert('US/Central')
+        self.trips_df_norm["end_time"] = self.trips_df_norm["end_time"]\
+            .dt.tz_localize('utc').dt.tz_convert('US/Central')
+
+        self.trips_df_norm = self.trips_df_norm.drop(["Start Location", "End Location", "hour", "Day of Week"], axis=1)
 
         self.trips_df_norm = super().normalise()
 
