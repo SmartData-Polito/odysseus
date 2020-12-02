@@ -33,6 +33,7 @@ sim_scenario_conf = {
 	"charging_strategy": "reactive",
 	"charging_relocation_strategy": "closest_free", #closest_free/random/closest_queueing
 
-	"number of workers": 1000
+	"number of workers": 1000,
 
+	"scooter_relocation": False
 }
