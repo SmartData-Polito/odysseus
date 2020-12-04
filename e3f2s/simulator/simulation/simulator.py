@@ -10,6 +10,7 @@ from e3f2s.simulator.simulation_data_structures.vehicle import Vehicle
 from e3f2s.simulator.simulation_data_structures.charging_station import ChargingStation
 
 from e3f2s.simulator.simulation.charging_strategies import ChargingStrategy
+from e3f2s.simulator.simulation.scooter_relocation_strategies import ScooterRelocationStrategy
 
 from e3f2s.simulator.simulation_input.sim_current_config.vehicle_config import vehicle_conf
 
@@ -121,6 +122,7 @@ class SharedMobilitySim:
                 exit(0)
 
         self.chargingStrategy = ChargingStrategy(self.env, self)
+        self.scooterRelocationStrategy = ScooterRelocationStrategy(self.env, self)
 
     def schedule_booking (self, booking_request, vehicle, zone_id):
 
@@ -244,6 +246,23 @@ class SharedMobilitySim:
                     self.schedule_booking(booking_request, max_soc_vehicle_neighbors, max_neighbor)
                 )
                 self.n_not_same_zone_trips += 1
+
+        if not found_vehicle_flag and self.simInput.sim_scenario_conf["scooter_relocation"] \
+                and self.simInput.sim_scenario_conf["scooter_relocation_strategy"] == "magic_relocation":
+
+            relocated, relocation_zone_id, relocated_vehicle = \
+                self.scooterRelocationStrategy.check_scooter_relocation(booking_request)
+
+            if relocated:
+
+                available_vehicle_flag = True
+                available_vehicle_flag_same_zone = True
+                found_vehicle_flag = True
+
+                self.env.process(
+                    self.schedule_booking(booking_request, relocated_vehicle, booking_request["origin_id"])
+                )
+                self.n_same_zone_trips += 1
 
         if not available_vehicle_flag:
             self.n_no_close_vehicles += 1

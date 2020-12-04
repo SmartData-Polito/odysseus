@@ -17,7 +17,7 @@ sim_general_conf_grid = {
 
     # Time general parameters
     "year": [2019],
-    "month_start": [6],
-    "month_end": [11],
+    "month_start": [7],
+    "month_end": [10],
 
 }

@@ -1,5 +1,6 @@
 sim_scenario_conf = {
 
+	"n_vehicles": 850,
 	"requests_rate_factor": 1,
 	"fleet_load_factor": 1,
 

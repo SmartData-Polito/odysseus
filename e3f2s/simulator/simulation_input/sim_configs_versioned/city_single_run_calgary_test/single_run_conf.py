@@ -1,5 +1,6 @@
 sim_scenario_conf = {
 
+	"n_vehicles": 2500,
 	"requests_rate_factor": 1,
 	"fleet_load_factor": 1,
 
@@ -9,7 +10,7 @@ sim_scenario_conf = {
 	"alpha_policy": 'auto',
 
 	"beta": 100,
-	"n_poles_n_vehicles_factor": 0.06,
+	"n_poles_n_vehicles_factor": 1,
 
 	"hub_zone_policy": "num_parkings",
 	"hub": False,
@@ -20,8 +21,8 @@ sim_scenario_conf = {
 	"cps_zones_percentage": 0.2,
 
 	"battery_swap": True,
-	"avg_reach_time": 20,
-	"avg_service_time": 0,
+	"avg_reach_time": 30,
+	"avg_service_time": 5,
 
 	"n_workers": 1000,
 	"relocation": False,
@@ -32,6 +33,8 @@ sim_scenario_conf = {
 	"charging_strategy": "reactive",
 	"charging_relocation_strategy": "closest_free", #closest_free/random/closest_queueing
 
-	"number of workers": 1000
+	"number of workers": 1000,
+
+	"scooter_relocation": False
 
 }
