@@ -118,12 +118,12 @@ class ChargingPrimitives:
 						self.n_vehicles_charging_system -= 1
 						yield self.env.timeout(charge["timeout_return"])
 						#self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
-						self.vehicles_list[vehicle].charge(charge["soc_delta"])
+						self.vehicles_list[vehicle.plate].charge(charge["soc_delta"])
 			elif operator == "users":
 				self.n_vehicles_charging_users += 1
 				yield self.env.timeout(charge["duration"])
 				#self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
-				self.vehicles_list[vehicle].charge(charge["soc_delta"])
+				self.vehicles_list[vehicle.plate].charge(charge["soc_delta"])
 				self.n_vehicles_charging_users -= 1
 
 		else:
@@ -166,7 +166,7 @@ class ChargingPrimitives:
 						self.n_vehicles_charging_users += 1
 						yield self.env.timeout(charge["duration"])
 					#self.vehicles_soc_dict[vehicle_id] = charge["end_soc"]
-					self.vehicles_list[vehicle].charge(charge["soc_delta"])
+					self.vehicles_list[vehicle.plate].charge(charge["soc_delta"])
 					self.n_vehicles_charging_users -= 1
 
 		charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
