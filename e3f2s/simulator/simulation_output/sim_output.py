@@ -143,12 +143,12 @@ class EFFCS_SimOutput ():
 
 		self.sim_stats.loc["n_charging_requests_system"] = len(self.sim_system_charges_bookings)
 
-		if "system" in self.sim_charges.operator:
+		if len(self.sim_charges) and "system" in self.sim_charges.operator:
 			self.sim_stats.loc["n_charges_system"] = self.sim_charges.groupby("operator").date.count().loc["system"]
 		else:
 			self.sim_stats.loc["n_charges_system"] = 0
 
-		if "users" in self.sim_charges.operator:
+		if len(self.sim_charges) and "users" in self.sim_charges.operator:
 			self.sim_stats.loc["n_charges_users"] = self.sim_charges.groupby("operator").date.count().loc["users"]
 		else:
 			self.sim_stats.loc["n_charges_users"] = 0
@@ -156,8 +156,11 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["n_charge_deaths"] = \
 			len(self.sim_charge_deaths)
 
-		self.sim_stats.loc["fraction_charge_deaths"] = \
-			len(self.sim_charge_deaths) / self.sim_stats.loc["n_charges"]
+		if len(self.sim_charges):
+			self.sim_stats.loc["fraction_charge_deaths"] = \
+				len(self.sim_charge_deaths) / self.sim_stats.loc["n_charges"]
+		else:
+			self.sim_stats.loc["fraction_charge_deaths"] = 0
 
 		self.sim_stats.loc["soc_avg"] = \
 			self.sim_bookings.start_soc.mean()
@@ -165,18 +168,24 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["soc_med"] = \
 			self.sim_bookings.start_soc.median()
 
-		self.sim_stats.loc["charging_time_avg"] = \
-			self.sim_charges.duration.mean() / 3600
+		if len(self.sim_charges):
+			self.sim_stats.loc["charging_time_avg"] = \
+				self.sim_charges.duration.mean() / 3600
 
-		self.sim_stats.loc["charging_time_med"] = \
-			self.sim_charges.duration.median() / 3600
+			self.sim_stats.loc["charging_time_med"] = \
+				self.sim_charges.duration.median() / 3600
 
-		self.sim_stats.loc["n_charges_by_vehicle_avg"] = \
-			self.sim_charges.groupby("plate").date.count().mean()
+			self.sim_stats.loc["n_charges_by_vehicle_avg"] = \
+				self.sim_charges.groupby("plate").date.count().mean()
 
-		self.sim_stats.loc["n_charges_by_vehicle_system_avg"] = \
-			self.sim_charges[self.sim_charges.operator == "system"]\
-				.groupby("plate").date.count().mean()
+			self.sim_stats.loc["n_charges_by_vehicle_system_avg"] = \
+				self.sim_charges[self.sim_charges.operator == "system"]\
+					.groupby("plate").date.count().mean()
+		else:
+			self.sim_stats.loc["charging_time_avg"] = 0
+			self.sim_stats.loc["charging_time_med"] = 0
+			self.sim_stats.loc["n_charges_by_vehicle_avg"] = 0
+			self.sim_stats.loc["n_charges_by_vehicle_system_avg"] = 0
 
 		if len(self.sim_users_charges_bookings):
 			self.sim_stats.loc["n_charges_by_vehicle_users_avg"] = \
@@ -211,10 +220,14 @@ class EFFCS_SimOutput ():
 			self.sim_stats.loc["tot_n_charging_poles"] * 3.7
 		)
 
-		self.sim_stats.loc["tot_charging_energy"] = self.sim_charges["soc_delta_kwh"].sum()
+		if len(self.sim_charges):
+			self.sim_stats.loc["tot_charging_energy"] = self.sim_charges["soc_delta_kwh"].sum()
+		else:
+			self.sim_stats.loc["tot_charging_energy"] = 0
+
 		self.sim_stats.loc["tot_charging_outwards_distance"] =sim.chargingStrategy.charging_outward_distance
 
-		if "system" in self.sim_charges.operator.unique():
+		if len(self.sim_charges) and "system" in self.sim_charges.operator.unique():
 			self.sim_stats.loc["fraction_charges_system"] = \
 				self.sim_charges.groupby("operator")\
 				.date.count().loc["system"]\
@@ -232,7 +245,7 @@ class EFFCS_SimOutput ():
 			self.sim_stats.loc["fraction_energy_system"] = 0
 			self.sim_stats.loc["fraction_duration_system"] = 0
 
-		if "users" in self.sim_charges.operator.unique():
+		if len(self.sim_charges) and "users" in self.sim_charges.operator.unique():
 			self.sim_stats.loc["fraction_charges_users"] = \
 				self.sim_charges.groupby("operator")\
 				.date.count().loc["users"]\
@@ -250,37 +263,49 @@ class EFFCS_SimOutput ():
 			self.sim_stats.loc["fraction_energy_users"] = 0
 			self.sim_stats.loc["fraction_duration_users"] = 0
 
-		self.sim_stats.loc["charging_duration_avg"] = \
-			self.sim_charges.duration.mean()
+		if len(self.sim_charges):
+			self.sim_stats.loc["charging_duration_avg"] = \
+				self.sim_charges.duration.mean()
 
-		self.sim_stats.loc["charging_energy_event_avg"] = \
-			self.sim_charges.soc_delta_kwh.mean()
+			self.sim_stats.loc["charging_energy_event_avg"] = \
+				self.sim_charges.soc_delta_kwh.mean()
 
-		self.sim_stats.loc["charging_energy_event_max"] = \
-			self.sim_charges.soc_delta_kwh.max()
+			self.sim_stats.loc["charging_energy_event_max"] = \
+				self.sim_charges.soc_delta_kwh.max()
 
-		self.sim_stats.loc["charging_energy_event_med"] = \
-			self.sim_charges.soc_delta_kwh.median()
+			self.sim_stats.loc["charging_energy_event_med"] = \
+				self.sim_charges.soc_delta_kwh.median()
 
-		self.sim_charges["cr_timeout"] = \
-			self.sim_charges.timeout_outward\
-			+ self.sim_charges.timeout_return
+			self.sim_charges["cr_timeout"] = \
+				self.sim_charges.timeout_outward\
+				+ self.sim_charges.timeout_return
 
-		self.sim_stats.loc["cum_relo_out_t"] = \
-			self.sim_charges.timeout_outward.sum() / 60 / 60
+			self.sim_stats.loc["cum_relo_out_t"] = \
+				self.sim_charges.timeout_outward.sum() / 60 / 60
 
-		self.sim_stats.loc["cum_relo_ret_t"] = \
-			self.sim_charges.timeout_return.sum() / 60 / 60
+			self.sim_stats.loc["cum_relo_ret_t"] = \
+				self.sim_charges.timeout_return.sum() / 60 / 60
 
-		self.sim_stats.loc["cum_relo_t"] = \
-			self.sim_stats.cum_relo_out_t + \
-			self.sim_stats.cum_relo_ret_t
+			self.sim_stats.loc["cum_relo_t"] = \
+				self.sim_stats.cum_relo_out_t + \
+				self.sim_stats.cum_relo_ret_t
 
-		self.sim_stats.loc["cum_relo_khw"] = \
-			self.sim_charges.cr_soc_delta_kwh.sum()
+			self.sim_stats.loc["cum_relo_khw"] = \
+				self.sim_charges.cr_soc_delta_kwh.sum()
 
-		self.sim_stats.loc["avg_hourly_relo_t"] = \
-			self.sim_charges.groupby("hour").cr_timeout.sum().mean()
+			self.sim_stats.loc["avg_hourly_relo_t"] = \
+				self.sim_charges.groupby("hour").cr_timeout.sum().mean()
+		else:
+			self.sim_stats.loc["charging_duration_avg"] = 0
+			self.sim_stats.loc["charging_energy_event_avg"] = 0
+			self.sim_stats.loc["charging_energy_event_max"] = 0
+			self.sim_stats.loc["charging_energy_event_med"] = 0
+			self.sim_charges["cr_timeout"] = 0
+			self.sim_stats.loc["cum_relo_out_t"] = 0
+			self.sim_stats.loc["cum_relo_ret_t"] = 0
+			self.sim_stats.loc["cum_relo_t"] = 0
+			self.sim_stats.loc["cum_relo_khw"] = 0
+			self.sim_stats.loc["avg_hourly_relo_t"] = 0
 
 		self.sim_stats.loc["n_scooter_relocations"] = \
 			len(self.sim_scooter_relocations)

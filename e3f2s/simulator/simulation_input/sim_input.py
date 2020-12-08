@@ -106,8 +106,7 @@ class SimInput:
 			"driving_distance",
 			"date",
 			"hour",
-			"duration",
-			"soc_delta"
+			"duration"
 		]].dropna().to_dict("records")
 		return self.booking_requests_list
 
