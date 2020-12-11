@@ -1,7 +1,7 @@
 example_vehicle_config = {
-	"engine_type": "electric",
-	"fuel_capacity": 35.3,
-	"consumption": 10.309,
+	"engine_type": "gasoline",
+	"fuel_capacity": 55,
+	"consumption": 18.215,
 	"cost_car": 24700,
 	"country_energy_mix" : {
 		"nuclear": 0, # %
@@ -37,7 +37,7 @@ energy_electr_sources = {
 	"natural_gas": 1.15,  # MJ/MJel
 	"coal": 1.69,  # MJ/MJel
 	"oil": 1.76,  # MJ/MJel
-	"biomass": 5.97,  # MJ/MJel
+	"biomass": 2.985,  # MJ/MJel
 	"other": 1.76,  # MJ/MJel
 	"hydro": 0,  # MJ/MJel
 	"wind": 0.07,  # MJ/MJel
@@ -53,30 +53,54 @@ class Vehicle(object):
 		self.capacity = vehicle_config["fuel_capacity"] #kWh (electric), Liter (gasoline,diesel,lpg), kilograms (gnc)
 		self.cost_car = vehicle_config["cost_car"] # in €
 
-		if self.engine_type == "gasoline":
+		if self.engine_type == "gasoline": # GASOLINE E5
 			self.welltotank_emission = 17 #gCO2eq/MJ (pathway code COG-1)
-			self.energy_content = 32 #MJ/L
 			self.welltotank_energy = 0.24 #MJ/MJgasoline
-			self.lower_heating_value = 43.2 #MJ/kg
-			self.carbon_content = 86.4 #%
-		elif self.engine_type == "diesel":
+			self.density = 745.8 # g/L
+			self.lower_heating_value = 42.3 #MJ/kg
+			self.carbon_content = 84.7 #%
+			self.thc_limits = 100 #mg/km
+			self.nox_limits = 60 #mg/km
+			self.perc_ch4_limits = 5 #%
+			self.perc_n2o_limits = 3 #%
+			self.gwp_ch4 = 25
+			self.gwp_n2o = 298
+		elif self.engine_type == "diesel": # DIESEL B7
 			self.welltotank_emission = 18.9 #gCO2eq/MJ (pathway code COD-1)
-			self.energy_content = 36 #MJ/L
 			self.welltotank_energy = 0.26 #MJ/MJdiesel
-			self.lower_heating_value = 43.1  # MJ/kg
-			self.carbon_content = 86.1  # %
+			self.density = 836.1 # g/L
+			self.lower_heating_value = 42.7  # MJ/kg
+			self.carbon_content = 85.4  # %
+			self.thc_limits = 90  # mg/km
+			self.nox_limits = 80  # mg/km
+			self.perc_ch4_limits = 10  # %
+			self.perc_n2o_limits = 5  # %
+			self.gwp_ch4 = 25
+			self.gwp_n2o = 298
 		elif self.engine_type == "lpg":
 			self.welltotank_emission = 7.8 #gCO2eq/MJ (pathway code LRLP-1 min 7.7 - max 8.3)
-			self.energy_content = 24  # MJ/L
 			self.welltotank_energy = 0.12 #MJ/MJlpg
+			self.density = 550 # g/L
 			self.lower_heating_value = 46  # MJ/kg
 			self.carbon_content = 82.4  # %
+			self.thc_limits = 100  # mg/km
+			self.nox_limits = 60  # mg/km
+			self.perc_ch4_limits = 5  # %
+			self.perc_n2o_limits = 3  # %
+			self.gwp_ch4 = 25
+			self.gwp_n2o = 298
 		elif self.engine_type == "cng":
 			self.welltotank_emission = 11.4 #gCO2eq/MJ (pathway code GMCG-1 min 10.5  - max 12.7)
-			self.energy_content = 44.4  # MJ/kg
 			self.welltotank_energy = 0.15 #MJ/MJcng
-			self.lower_heating_value = 46.6  # MJ/kg
-			self.carbon_content = 71.3  # %
+			self.density = 1000 #g/kg
+			self.lower_heating_value = 48  # MJ/kg
+			self.carbon_content = 73.5  # %
+			self.thc_limits = 100  # mg/km
+			self.nox_limits = 60  # mg/km
+			self.perc_ch4_limits = 60  # %
+			self.perc_n2o_limits = 3  # %
+			self.gwp_ch4 = 25
+			self.gwp_n2o = 298
 		elif self.engine_type == "electric":
 			tot_emission = 0
 			tot_energy = 0
@@ -127,14 +151,18 @@ class Vehicle(object):
 		if self.engine_type == "electric":
 			tanktowheel_kwh = self.percentage_to_consumption(percentage)
 		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
-			tanktowheel_kwh = (self.percentage_to_consumption(percentage) * self.energy_content) / 3.6
+			tanktowheel_kwh = self.percentage_to_consumption(percentage) * (
+					self.lower_heating_value / (1 / (self.density / 1000)) # converted lhv from MJ/kg to MJ/L
+			) / 3.6
 		return tanktowheel_kwh
 
 	def welltotank_energy_from_perc(self, percentage):
 		if self.engine_type == "electric":
 			tanktowheel_mj = self.percentage_to_consumption(percentage) * 3.6
 		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
-			tanktowheel_mj = self.percentage_to_consumption(percentage) * self.energy_content
+			tanktowheel_mj = self.percentage_to_consumption(percentage) * (
+					self.lower_heating_value / (1 / (self.density / 1000)) # converted lhv from MJ/kg to MJ/L
+			)
 		welltotank_kwh = (self.welltotank_energy * tanktowheel_mj) / 3.6
 		return welltotank_kwh
 
@@ -143,7 +171,9 @@ class Vehicle(object):
 
 	def from_kml_to_energyperkm(self):
 		perkm_consumption = self.from_kml_to_lkm()
-		return perkm_consumption * self.energy_content
+		return perkm_consumption * (
+					self.lower_heating_value / (1 / (self.density / 1000)) # converted lhv from MJ/kg to MJ/L
+			)
 
 	def consumption_to_percentage(self, consumption):
 		# x:100 = consumption : capacity
@@ -170,20 +200,35 @@ class Vehicle(object):
 
 	def distance_to_tanktowheel_emission(self,distance):
 		if self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
-			ttw_energy_mj = self.distance_to_consumption(distance) * self.energy_content
-			tot_ttw_emissions = (ttw_energy_mj / self.lower_heating_value * self.carbon_content / 100 / 12 * 44) * 1000  # gCO2
+			# TTW emission coefficient evaluated as sum of 1. co2 emissions per liter,
+			# 2. co2 equivalent emissions of CH4 per km,
+			# 3. co2 equivalent emissions of n2o per km
+
+			# 1. Start from C + O2 -> CO2 reaction, given moles of carbon in 1 L of fuel,
+			# find the amount of oxygen needed in the combustion, then
+			# the total co2 produced by 1 L of fuel is ttw_co2_emissions_perL
+			# 2. Amount of CH4 emissions responsible of global warming (see JEC TTW v5 EU report), evaluated in
+			# ttw_co2eq_emissions_ch4
+			# 3. Amount of N2O emissions responsible of global warming (see JEC TTW v5 EU report), evaluated in
+			# ttw_co2eq_emissions_n2o
+
+			carbon_moles = ((self.carbon_content / 100) * self.density) / 12.01
+			grams_oxygen = 32 * carbon_moles
+			ttw_co2_emissions_perL = (self.carbon_content / 100) * self.density + grams_oxygen
+			ttw_co2eq_emissions_ch4 = (self.thc_limits / 1000) * (self.perc_ch4_limits / self.thc_limits) * self.gwp_ch4
+			ttw_co2eq_emissions_n2o = (self.nox_limits / 1000) * (self.perc_n2o_limits / self.nox_limits) * self.gwp_n2o
+			tot_ttw_emissions = (1 / self.consumption) * (
+					ttw_co2_emissions_perL + ttw_co2eq_emissions_ch4 + ttw_co2eq_emissions_n2o
+			) * distance # gCO2
 		elif self.engine_type == "electric":
 			tot_ttw_emissions = 0
 		return tot_ttw_emissions
 
-# car = Vehicle(example_vehicle_config)
-# distance = 130
-# cons = car.distance_to_consumption(distance)
-# print("Consumption = ", cons)
-# print("Cons percentage = ", car.consumption_to_percentage(cons))
-# print("Total emission Well to Wheel = ", car.distance_to_emission(distance))
-# car.current_percentage -= car.consumption_to_percentage(cons)
-# print(car.current_percentage)
-# print("Charging time (s) = ",car.get_charging_time_from_perc(35,90))
-# print("Charging perc = ", car.get_percentage_from_charging_time(15.119796755911661,35))
+car = Vehicle(example_vehicle_config)
+distance = 1
+ttw = car.distance_to_tanktowheel_emission(distance)
+wtt = car.distance_to_welltotank_emission(distance)
+print("TTW: ", ttw)
+print("WTT: ", wtt)
+
 
