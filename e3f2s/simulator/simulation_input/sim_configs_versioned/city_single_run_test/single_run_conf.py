@@ -30,6 +30,12 @@ sim_scenario_conf = {
 	"willingness": 0,
 
 	"charging_strategy": "reactive",
-	"charging_relocation_strategy": "closest_queueing", #closest_free/random/closest_queueing
+	"charging_relocation_strategy": "closest_free", #closest_free/random/closest_queueing
+
+
+	"vehicle_relocation": True,
+	"vehicle_relocation_strategy": "magic_relocation"
+
+
 
 }

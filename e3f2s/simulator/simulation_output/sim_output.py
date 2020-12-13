@@ -20,6 +20,7 @@ class EFFCS_SimOutput ():
 		self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 		self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
 		self.sim_users_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
+		self.sim_vehicle_relocations = pd.DataFrame(sim.VehicleRelocationStrategy.sim_vehicle_relocations)
 
 		if "end_time" not in self.sim_system_charges_bookings:
 			self.sim_system_charges_bookings["end_time"] = pd.Series()
@@ -124,11 +125,18 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["fraction_not_same_zone_trips_satisfied"] = \
 			sim.n_not_same_zone_trips / self.sim_stats["n_bookings"]
 
-		self.sim_stats.loc["fraction_no_close_vehicles_unsatisfied"] = \
+		if self.sim_stats["n_unsatisfied"] > 0:
+			self.sim_stats.loc["fraction_no_close_vehicles_unsatisfied"] = \
 			sim.n_no_close_vehicles / self.sim_stats["n_unsatisfied"]
+		else:
+			self.sim_stats.loc["fraction_no_close_vehicles_unsatisfied"] = 0
 
-		self.sim_stats.loc["fraction_deaths_unsatisfied"] = \
-			sim.n_deaths / self.sim_stats["n_unsatisfied"]
+		if self.sim_stats["n_unsatisfied"] > 0:
+			self.sim_stats.loc["fraction_deaths_unsatisfied"] = \
+				sim.n_deaths / self.sim_stats["n_unsatisfied"]
+		else:
+			self.sim_stats.loc["fraction_deaths_unsatisfied"] = 0
+
 
 		self.sim_stats.loc["n_charges"] = \
 			len(self.sim_charges)
@@ -264,6 +272,16 @@ class EFFCS_SimOutput ():
 		self.sim_stats.loc["avg_hourly_relo_t"] = \
 			self.sim_charges.groupby("hour").cr_timeout.sum().mean()
 
+		self.sim_stats.loc["n_vehicle_relocations"] = \
+			len(self.sim_vehicle_relocations)
+
+		if len(self.sim_vehicle_relocations):
+			self.sim_stats.loc["tot_vehicle_relocations_distance"] = \
+				self.sim_vehicle_relocations.distance.sum()
+		else:
+			self.sim_stats.loc["tot_scooter_relocations_distance"] = 0
+
+
 		for key in self.sim_stats.index:
 			if key.startswith("fraction"):
 				self.sim_stats["percentage" + key[8:]] = self.sim_stats[key] * 100
@@ -291,10 +309,10 @@ class EFFCS_SimOutput ():
 			self.grid[
 				"charge_needed_users_zones_count"
 			] = 0
-
-		self.grid[
-			"unsatisfied_demand_origins_fraction"
-		] = self.sim_unsatisfied_requests.origin_id.value_counts() / len(self.sim_unsatisfied_requests)
+		#
+		# self.grid[
+		# 	"unsatisfied_demand_origins_fraction"
+		# ] = self.sim_unsatisfied_requests.origin_id.value_counts() / len(self.sim_unsatisfied_requests)
 		if len(self.sim_not_enough_energy_requests):
 			self.grid[
 				"not_enough_energy_origins_count"
