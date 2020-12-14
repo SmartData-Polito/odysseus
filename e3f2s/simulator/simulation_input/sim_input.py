@@ -107,7 +107,6 @@ class SimInput:
 			"date",
 			"hour",
 			"duration",
-			"soc_delta"
 		]].dropna().to_dict("records")
 		return self.booking_requests_list
 
