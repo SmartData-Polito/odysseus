@@ -6,9 +6,17 @@ from e3f2s.data_structures.vehicle import example_vehicle_config,Vehicle as Vehi
 class Vehicle(Vehicle_definition):
 
     def __init__(self, env, plate, start_zone, start_soc,
-                 vehicle_config, sim_scenario_conf, sim_start_time):
+                 vehicle_config, energymix_conf, sim_scenario_conf, sim_start_time):
 
-        super().__init__(example_vehicle_config)
+        engine_type = sim_scenario_conf["engine_type"]
+        model = sim_scenario_conf["vehicle_model_name"]
+        if engine_type == "electric":
+            country_energy_mix = sim_scenario_conf["country_energymix"]
+            year_energy_mix = sim_scenario_conf["year_energymix"]
+            energymix = energymix_conf[country_energy_mix][year_energy_mix]
+        else:
+            energymix = {}
+        super().__init__(vehicle_config[engine_type][model], energymix)
         self.env = env
         self.plate = plate
         self.zone = start_zone

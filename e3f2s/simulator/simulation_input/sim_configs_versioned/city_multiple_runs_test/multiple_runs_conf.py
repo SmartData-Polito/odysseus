@@ -5,6 +5,11 @@ sim_scenario_conf_grid = {
 
     "requests_rate_factor": [1],
     "n_vehicles_factor": [1],
+    "engine_type": ["electric"],
+    "profile_type": ["single_phase_1"], # works only if engine_type = electric
+    "vehicle_model_name": ["VW e-Golf 2018"],
+    "country_energymix": ["Italy"],
+    "year_energymix": ["2018"],
 
     "time_estimation": [True],
     "queuing": [True],
@@ -31,5 +36,5 @@ sim_scenario_conf_grid = {
 
     "user_contribution": [False],
     "willingness": [0],
-
+    "scooter_relocation": [False]
 }

@@ -47,11 +47,11 @@ energy_electr_sources = {
 }
 
 class Vehicle(object):
-	def __init__(self, vehicle_config):
+	def __init__(self, vehicle_config, energy_mix_conf):
 		self.engine_type = vehicle_config["engine_type"] #gasoline, diesel, lpg, gnc, electric
 		self.consumption = vehicle_config["consumption"] #km/l, km/kWh
 		self.capacity = vehicle_config["fuel_capacity"] #kWh (electric), Liter (gasoline,diesel,lpg), kilograms (gnc)
-		self.cost_car = vehicle_config["cost_car"] # in €
+		#self.cost_car = vehicle_config["cost_car"] # in €
 
 		if self.engine_type == "gasoline": # GASOLINE E5
 			self.welltotank_emission = 17 #gCO2eq/MJ (pathway code COG-1)
@@ -105,12 +105,8 @@ class Vehicle(object):
 			tot_emission = 0
 			tot_energy = 0
 			for i in list(lca_co2_elect_sources.keys()):
-				tot_emission = tot_emission + lca_co2_elect_sources[i] * example_vehicle_config[
-					"country_energy_mix"
-				][i]/100
-				tot_energy = tot_energy + energy_electr_sources[i] * example_vehicle_config[
-					"country_energy_mix"
-				][i] / 100
+				tot_emission = tot_emission + lca_co2_elect_sources[i] * energy_mix_conf[i] / 100
+				tot_energy = tot_energy + energy_electr_sources[i] * energy_mix_conf[i] / 100
 			self.welltotank_emission = tot_emission  #gCO2eq/kWh
 			self.welltotank_energy = tot_energy #MJ/MJelectricity
 			self.tx_efficiency = 92.5 # %

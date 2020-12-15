@@ -2,6 +2,11 @@ sim_scenario_conf = {
 
 	"requests_rate_factor": 1,
 	"fleet_load_factor": 1,
+	"engine_type": "electric",
+	"profile_type": "single_phase_1", # works only if engine_type = electric
+	"vehicle_model_name": "VW e-Golf 2018",
+	"country_energymix": "Italy",
+	"year_energymix": "2018",
 
 	"time_estimation": True,
 	"queuing": True,
@@ -9,7 +14,7 @@ sim_scenario_conf = {
 	"alpha_policy": 'auto',
 
 	"beta": 100,
-	"n_poles_n_vehicles_factor": 0.06,
+	"n_poles_n_vehicles_factor": 0.2,
 
 	"hub_zone_policy": "num_parkings",
 	"hub": False,
@@ -31,5 +36,6 @@ sim_scenario_conf = {
 
 	"charging_strategy": "reactive",
 	"charging_relocation_strategy": "closest_free", #closest_free/random/closest_queueing
+	"scooter_relocation": False
 
 }
