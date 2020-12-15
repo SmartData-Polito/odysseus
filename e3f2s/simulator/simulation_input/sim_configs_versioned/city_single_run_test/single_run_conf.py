@@ -1,7 +1,7 @@
 sim_scenario_conf = {
 
-	"requests_rate_factor": 1,
-	"fleet_load_factor": 1,
+	"n_requests": 10**5,
+	"n_vehicles": 200,
 	"engine_type": "electric",
 	"profile_type": "single_phase_1", # works only if engine_type = electric
 	"vehicle_model_name": "VW e-Golf 2018",
