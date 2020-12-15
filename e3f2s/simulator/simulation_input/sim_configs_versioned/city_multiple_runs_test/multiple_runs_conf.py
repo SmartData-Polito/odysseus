@@ -3,8 +3,8 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "requests_rate_factor": [1],
-    "n_vehicles_factor": [1],
+    "n_requests": [10 ** 5],
+    "n_vehicles": [200],
     "engine_type": ["electric"],
     "profile_type": ["single_phase_1"], # works only if engine_type = electric
     "vehicle_model_name": ["VW e-Golf 2018"],
@@ -36,5 +36,8 @@ sim_scenario_conf_grid = {
 
     "user_contribution": [False],
     "willingness": [0],
+
+    "charging_strategy": ["reactive"],
+	"charging_relocation_strategy": ["closest_free"], #closest_free/random/closest_queueing
     "scooter_relocation": [False]
 }
