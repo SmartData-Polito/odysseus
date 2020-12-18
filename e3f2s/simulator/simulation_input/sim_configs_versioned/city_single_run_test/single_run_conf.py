@@ -31,5 +31,14 @@ sim_scenario_conf = {
 
 	"charging_strategy": "reactive",
 	"charging_relocation_strategy": "closest_free", #closest_free/random/closest_queueing
+<<<<<<< e159f49632e3e0c5006fce5fc2b99f9ab0de2157
+=======
+
+
+	"vehicle_relocation": True,
+	"vehicle_relocation_strategy": "magic_relocation"
+
+
+>>>>>>> add magic relocations to vehicle
 
 }

@@ -221,7 +221,7 @@ class SimInput:
 
 			self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
 
-	def init_relocation(self):
+	def init_relobooking_requestation(self):
 		pass
 
 	def init_workers(self):

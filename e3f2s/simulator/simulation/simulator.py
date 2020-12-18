@@ -10,7 +10,11 @@ from e3f2s.simulator.simulation_data_structures.vehicle import Vehicle
 from e3f2s.simulator.simulation_data_structures.charging_station import ChargingStation
 
 from e3f2s.simulator.simulation.charging_strategies import ChargingStrategy
+<<<<<<< e159f49632e3e0c5006fce5fc2b99f9ab0de2157
 from e3f2s.simulator.simulation.scooter_relocation_strategies import ScooterRelocationStrategy
+=======
+from e3f2s.simulator.simulation.vehicle_relocation_strategies import VehicleRelocationStrategy
+>>>>>>> add magic relocations to vehicle
 
 from e3f2s.simulator.simulation_input.sim_current_config.vehicle_config import vehicle_conf
 
@@ -122,7 +126,11 @@ class SharedMobilitySim:
                 exit(0)
 
         self.chargingStrategy = ChargingStrategy(self.env, self)
+<<<<<<< e159f49632e3e0c5006fce5fc2b99f9ab0de2157
         self.scooterRelocationStrategy = ScooterRelocationStrategy(self.env, self)
+=======
+        self.VehicleRelocationStrategy = VehicleRelocationStrategy(self.env,self)
+>>>>>>> add magic relocations to vehicle
 
     def schedule_booking (self, booking_request, vehicle, zone_id):
 
@@ -247,6 +255,7 @@ class SharedMobilitySim:
                 )
                 self.n_not_same_zone_trips += 1
 
+<<<<<<< e159f49632e3e0c5006fce5fc2b99f9ab0de2157
         if not found_vehicle_flag and self.simInput.sim_scenario_conf["scooter_relocation"] \
                 and self.simInput.sim_scenario_conf["scooter_relocation_strategy"] == "magic_relocation":
 
@@ -255,6 +264,15 @@ class SharedMobilitySim:
 
             if relocated:
 
+=======
+        if not found_vehicle_flag and self.simInput.sim_scenario_conf["vehicle_relocation"] \
+                and self.simInput.sim_scenario_conf["vehicle_relocation_strategy"] == "magic_relocation":
+
+            relocated, relocation_zone_id, relocated_vehicle = \
+                self.VehicleRelocationStrategy.check_vehicle_relocation(booking_request)
+
+            if relocated:
+>>>>>>> add magic relocations to vehicle
                 available_vehicle_flag = True
                 available_vehicle_flag_same_zone = True
                 found_vehicle_flag = True
