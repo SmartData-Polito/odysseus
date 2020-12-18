@@ -9,7 +9,7 @@ sim_scenario_conf = {
 	"alpha_policy": 'auto',
 
 	"beta": 100,
-	"n_poles_n_vehicles_factor": 0.06,
+	"n_poles_n_vehicles_factor": 0.2,
 
 	"hub_zone_policy": "num_parkings",
 	"hub": False,
@@ -31,14 +31,11 @@ sim_scenario_conf = {
 
 	"charging_strategy": "reactive",
 	"charging_relocation_strategy": "closest_free", #closest_free/random/closest_queueing
-<<<<<<< e159f49632e3e0c5006fce5fc2b99f9ab0de2157
-=======
 
+	"scooter_relocation": False,
+	"scooter_relocation_strategy": "magic_relocation",
 
 	"vehicle_relocation": True,
 	"vehicle_relocation_strategy": "magic_relocation"
-
-
->>>>>>> add magic relocations to vehicle
 
 }
