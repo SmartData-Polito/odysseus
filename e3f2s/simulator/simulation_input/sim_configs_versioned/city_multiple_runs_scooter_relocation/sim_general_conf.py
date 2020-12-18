@@ -1,10 +1,10 @@
 sim_general_conf_grid = {
 
     # Run configuration
-    "city": ["Austin"],
+    "city": ["Louisville"],
     "sim_run_mode": ["multiple_runs"],
 
-    "data_source_id": ["city_of_austin"],
+    "data_source_id": ["city_of_louisville"],
     "sim_technique": ["eventG"],
     "sim_scenario_name": ["city_multiple_runs_scooter_relocation_magic_relocation"],
 

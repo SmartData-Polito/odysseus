@@ -2,7 +2,7 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "n_vehicles": [100, 1000, 10000],
+    "n_vehicles": np.arange(1000, 10100, 750),
     "requests_rate_factor": [1],
     "n_vehicles_factor": [1],
 

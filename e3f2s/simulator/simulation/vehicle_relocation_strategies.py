@@ -24,20 +24,28 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
                     max_soc_vehicle = max(available_vehicles_soc_dict, key=available_vehicles_soc_dict.get)
                     max_soc_vehicle_zone = self.vehicles_zones[max_soc_vehicle]
 
+                    if self.vehicles_list[max_soc_vehicle].soc.level > abs(
+                            self.vehicles_list[max_soc_vehicle].consumption_to_percentage(
+                                self.vehicles_list[max_soc_vehicle].distance_to_consumption(
+                                    booking_request["driving_distance"] / 1000
+                                )
+                            )
+                    ):
+                        found_vehicle_flag = True
 
-                    if self.vehicles_soc_dict[max_soc_vehicle] > abs(booking_request["soc_delta"]):
+                if found_vehicle_flag:
 
-                        relocated = True
-                        relocation_zone_id = booking_request["origin_id"]
-                        relocated_vehicle = max_soc_vehicle
+                    relocated = True
+                    relocation_zone_id = booking_request["origin_id"]
+                    relocated_vehicle = max_soc_vehicle
 
-                        vehicle_relocation = init_vehicle_relocation(
-                            relocated_vehicle,
-                            booking_request["start_time"],
-                            max_soc_vehicle_zone,
-                            relocation_zone_id
-                        )
+                    vehicle_relocation = init_vehicle_relocation(
+                        relocated_vehicle,
+                        booking_request["start_time"],
+                        max_soc_vehicle_zone,
+                        relocation_zone_id
+                    )
 
-                        self.relocate_vehicle(vehicle_relocation, relocated_vehicle)
+                    self.relocate_vehicle(vehicle_relocation, relocated_vehicle)
 
         return relocated, relocation_zone_id, relocated_vehicle
