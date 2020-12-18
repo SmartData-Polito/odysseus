@@ -9,7 +9,7 @@ sim_general_conf_grid = {
     "sim_scenario_name": ["city_multiple_runs_test"],
 
     # Fleet general parameters
-    "const_load_factor": [1],
+    "const_load_factor": [False],
 
     # Space general parameters
     "bin_side_length": [500],

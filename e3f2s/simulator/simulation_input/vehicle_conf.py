@@ -16,8 +16,8 @@ vehicle_conf = {
   "lpg" : {
     "Opel Corsa 1.4 EcoTech" : {
       "engine_type": "lpg",
-      "fuel_capacity" : 45,
-      "consumption" : 11.85
+      "fuel_capacity" : 35,
+      "consumption" : 11.1429
     }
   },
   "cng" : {
@@ -32,6 +32,11 @@ vehicle_conf = {
       "engine_type": "electric",
       "fuel_capacity" : 35.5,
       "consumption" : 10.309
+    },
+    "Smart fortwo Electric Drive 2018" : {
+      "engine_type": "electric",
+      "fuel_capacity": 16.7,
+      "consumption" : 7.6046
     }
   }
 }
