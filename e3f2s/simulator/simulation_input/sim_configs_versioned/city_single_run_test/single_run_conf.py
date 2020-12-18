@@ -32,10 +32,18 @@ sim_scenario_conf = {
 	"charging_strategy": "reactive",
 	"charging_relocation_strategy": "closest_free", #closest_free/random/closest_queueing
 
+<<<<<<< HEAD
 	"scooter_relocation": False,
 	"scooter_relocation_strategy": "magic_relocation",
 
 	"vehicle_relocation": True,
 	"vehicle_relocation_strategy": "magic_relocation"
+=======
+
+	"vehicle_relocation": True,
+	"vehicle_relocation_strategy": "magic_relocation"
+
+
+>>>>>>> b52889455e96ba837087ed9cd8619512089d0cad
 
 }

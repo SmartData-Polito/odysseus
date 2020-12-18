@@ -19,6 +19,7 @@ class EFFCS_SimOutput ():
 		self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 		self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
 		self.sim_users_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
+		self.sim_vehicle_relocations = pd.DataFrame(sim.VehicleRelocationStrategy.sim_vehicle_relocations)
 
 		if self.sim_scenario_conf["battery_swap"]:
 			self.sim_scooter_relocations = pd.DataFrame(sim.scooterRelocationStrategy.sim_scooter_relocations)
