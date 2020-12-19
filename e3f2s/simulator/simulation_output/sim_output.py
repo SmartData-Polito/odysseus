@@ -12,7 +12,7 @@ class EFFCS_SimOutput ():
 		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
 
 		self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
-		self.sim_bookings = self.sim_booking_requests.dropna()
+		self.sim_bookings = pd.DataFrame(sim.sim_bookings)
 		self.sim_charges = pd.DataFrame(sim.chargingStrategy.sim_charges)
 		self.sim_not_enough_energy_requests = pd.DataFrame(sim.sim_booking_requests_deaths)
 		self.sim_no_close_vehicle_requests = pd.DataFrame(sim.sim_no_close_vehicle_requests)

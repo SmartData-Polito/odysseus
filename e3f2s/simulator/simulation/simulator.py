@@ -64,6 +64,7 @@ class SharedMobilitySim:
 
         self.events = []
         self.sim_booking_requests = []
+        self.sim_bookings = []
         self.sim_booking_requests_deaths = []
         self.sim_unsatisfied_requests = []
         self.sim_no_close_vehicle_requests = []
@@ -125,6 +126,8 @@ class SharedMobilitySim:
         self.scooterRelocationStrategy = ScooterRelocationStrategy(self.env, self)
 
     def schedule_booking (self, booking_request, vehicle, zone_id):
+
+        self.sim_bookings += [booking_request]
 
         self.available_vehicles_dict[zone_id].remove(vehicle)
         del self.vehicles_zones[vehicle]
