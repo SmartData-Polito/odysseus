@@ -4,9 +4,6 @@ import urllib.request
 import io
 import time
 import zipfile
-import os
-import pandas as pd
-from haversine import haversine, Unit
 from pathlib import Path
 import xmltodict
 
@@ -27,11 +24,11 @@ class DataGatherer:
         self.structured_dataset_name = structured_dataset_name
 
         '''
-        get from official website the lists of all downlodahle csvs
+        get from official website the lists of all downloadable csvs
         dataset_names[yyyymm] = dataset_name_to_attach_to_root_url
         '''
-        f = urllib.request.urlopen(self.root_url)
-        xml = f.read().decode('utf8')
+        f = requests.get(self.root_url)
+        xml = f.text
         self.dataset_names = {}
         available_datasets_dict = xmltodict.parse(xml)
         for entry in available_datasets_dict['ListBucketResult']['Contents']:
@@ -47,27 +44,27 @@ class DataGatherer:
         year = str(year)
         month = str(month)
 
-        structured_output_path = self.output_path.joinpath(year).joinpath(month)
-
-        if os.path.isfile(structured_output_path.joinpath(self.structured_dataset_name)):
-            print(str(structured_output_path.joinpath(self.structured_dataset_name)),
-                  'already present. Delete it to redownload')
-            return
+        structured_output_path = self.output_path
 
         try:
-            dataset_name = self.dataset_names['%s%s' % (year, month.zfill(2))]
-            full_url = urllib.parse.urljoin(self.root_url, dataset_name)
+            structured_dataset_name = self.dataset_names['%s%s' % (year, month.zfill(2))]
+            full_url = urllib.parse.urljoin(self.root_url, structured_dataset_name)
         except KeyError:
             print('Any available dataset for %s %s' % (year, month))
             return
 
+        if os.path.isfile(structured_output_path.joinpath(structured_dataset_name)):
+            print(str(structured_output_path.joinpath(structured_dataset_name)),
+                  'already present. Delete it to redownload')
+            return
+
         start = time.time()
-        print('Start download of %s' % dataset_name)
+        print('Start download of %s' % structured_dataset_name)
         r = requests.get(full_url)
         end = time.time()
         print('download completed in %.2f' % (end-start))
 
-        with open(self.output_path.joinpath(dataset_name), mode='wb') as localfile:
+        with open(self.output_path.joinpath(structured_dataset_name), mode='wb') as localfile:
             localfile.write(r.content)
 
         # Try catch for corrupted files
@@ -78,64 +75,14 @@ class DataGatherer:
             z.extractall(structured_output_path)
             os.rename(
                 structured_output_path.joinpath(extracted[0]),
-                structured_output_path.joinpath(self.structured_dataset_name)
+                structured_output_path.joinpath(structured_dataset_name)
             )
-            print('%s extracted' % (dataset_name))
+            print('%s extracted' % structured_dataset_name)
 
-            os.remove(self.output_path.joinpath(dataset_name))
+            os.remove(self.output_path.joinpath(structured_dataset_name))
         except zipfile.BadZipfile:
-            print('%s problem to unzip' % (dataset_name))
+            print('%s problem to unzip' % structured_dataset_name)
 
-        return
-
-    def standarzide_data(self, year, month):
-        year = str(year)
-        month = str(month)
-
-        file_path = self.output_path.joinpath(year).joinpath(month).joinpath(self.structured_dataset_name)
-
-        start = time.time()
-
-        if 'distance' in pd.read_csv(file_path, nrows=10).columns:
-            print(str(file_path), 'already standardized.')
-            return
-
-        df = pd.read_csv(file_path)
-
-        new_columns = {}
-        for column in df.columns:
-            new_columns[column] = column.lower().replace(' ', '').strip().replace('station', '_station_')
-        df = df.rename(columns=new_columns)
-
-        df['count'] = 0
-        df['tripduration'] = df['tripduration']
-
-        # df = df[(~df['start_station_longitude'].isna()) & (~df['start_station_latitude'].isna()) &
-        #         (~df['end_station_longitude'].isna()) & (~df['end_station_latitude'].isna())
-        #         ]
-
-        # limit to new york
-        df = df[(df['start_station_latitude'] >= self.min_lat) & (df['start_station_latitude'] <= self.max_lat)]
-        df = df[(df['start_station_longitude'] >= self.min_lon) & (df['start_station_longitude'] <= self.max_lon)]
-        df = df[(df['end_station_latitude'] >= self.min_lat) & (df['end_station_latitude'] <= self.max_lat)]
-        df = df[(df['end_station_longitude'] >= self.min_lon) & (df['end_station_longitude'] <= self.max_lon)]
-
-        # faster than using creates geodatafrems and use the distance to compute
-        df['distance'] = df.apply(
-            lambda x: haversine(
-                (x.start_station_latitude, x.start_station_longitude),
-                (x.end_station_latitude, x.end_station_longitude),
-                unit=Unit.METERS),
-            axis=1
-        )
-
-        df['starttime'] = pd.to_datetime(df['starttime'])
-        df['stoptime'] = pd.to_datetime(df['stoptime'])
-
-        df.to_csv(file_path, index=False)
-        end = time.time()
-        print(file_path, ' augmented in %.2f' % (end - start))
-        print()
         return
 
     '''
@@ -148,3 +95,14 @@ class DataGatherer:
             if standardize:
                 self.standarzide_data(year, month)
         return
+
+import os
+from e3f2s.city_data_manager.config.config import data_paths_dict
+
+raw_data_path = os.path.join(data_paths_dict["New_York_City"]["raw"]["trips"], "citi_bike")
+os.makedirs(raw_data_path, exist_ok=True)
+gatherer = DataGatherer(
+    raw_data_path,
+    "citibike-tripdata.csv"
+)
+gatherer.download_data(2017, 1)

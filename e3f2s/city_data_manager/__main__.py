@@ -10,7 +10,7 @@ from e3f2s.city_data_manager.city_geo_trips.norfolk_geo_trips import NorfolkGeoT
 from e3f2s.city_data_manager.city_geo_trips.kansas_city_geo_trips import KansasCityGeoTrips
 from e3f2s.city_data_manager.city_geo_trips.chicago_geo_trips import ChicagoGeoTrips
 from e3f2s.city_data_manager.city_geo_trips.calgary_geo_trips import CalgaryGeoTrips
-
+from e3f2s.city_data_manager.city_geo_trips.nyc_citi_bike_geo_trips import NewYorkCityBikeGeoTrips
 
 parser = argparse.ArgumentParser()
 
@@ -72,6 +72,9 @@ for city in args.cities:
 
                 elif data_source_id == "city_of_calgary":
                     geo_trips_ds = CalgaryGeoTrips(year=int(year), month=int(month))
+
+                elif data_source_id == "citi_bike":
+                    geo_trips_ds = NewYorkCityBikeGeoTrips(year=int(year), month=int(month))
 
                 geo_trips_ds.get_trips_od_gdfs()
                 geo_trips_ds.save_points_data()
