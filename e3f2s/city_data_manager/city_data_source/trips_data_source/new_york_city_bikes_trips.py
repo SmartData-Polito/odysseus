@@ -2,6 +2,7 @@ import os
 import datetime
 
 import pandas as pd
+from haversine import haversine, Unit
 
 from e3f2s.city_data_manager.city_data_source.trips_data_source.trips_data_source import TripsDataSource
 
@@ -9,7 +10,7 @@ from e3f2s.city_data_manager.city_data_source.trips_data_source.trips_data_sourc
 class NewYorkCityBikeTrips(TripsDataSource):
 
     def __init__(self, city_name):
-        super().__init__(city_name, 'city_of_new_york_city', 'bike')
+        super().__init__(city_name, 'citi_bike', 'bike')
 
     def load_raw(self):
 
@@ -23,6 +24,50 @@ class NewYorkCityBikeTrips(TripsDataSource):
     def normalise(self, year, month):
 
         self.trips_df_norm = self.trips_df
+
+        year = str(year)
+        month = str(month)
+
+        new_columns = {}
+        for column in self.trips_df_norm.columns:
+            new_columns[column] = column.lower().replace(' ', '').strip().replace('station', '_station_')
+        self.trips_df_norm = self.trips_df_norm.rename(columns=new_columns)
+
+        self.trips_df_norm['count'] = 0
+        self.trips_df_norm['tripduration'] = self.trips_df_norm['tripduration']
+
+        self.trips_df_norm = self.trips_df_norm[
+            (self.trips_df_norm['start_station_latitude'] >= self.min_lat) & (
+                    self.trips_df_norm['start_station_latitude'] <= self.max_lat
+            )
+        ]
+        self.trips_df_norm = self.trips_df_norm[
+            (self.trips_df_norm['start_station_longitude'] >= self.min_lon) & (
+                    self.trips_df_norm['start_station_longitude'] <= self.max_lon
+            )
+        ]
+        self.trips_df_norm = self.trips_df_norm[
+            (self.trips_df_norm['end_station_latitude'] >= self.min_lat) & (
+                    self.trips_df_norm['end_station_latitude'] <= self.max_lat
+            )
+        ]
+        self.trips_df_norm = self.trips_df_norm[
+            (self.trips_df_norm['end_station_longitude'] >= self.min_lon) & (
+                    self.trips_df_norm['end_station_longitude'] <= self.max_lon
+            )
+        ]
+
+        self.trips_df_norm['distance'] = self.trips_df_norm.apply(
+            lambda x: haversine(
+                (x.start_station_latitude, x.start_station_longitude),
+                (x.end_station_latitude, x.end_station_longitude),
+                unit=Unit.METERS),
+            axis=1
+        )
+
+        self.trips_df_norm['starttime'] = pd.to_datetime(self.trips_df_norm['starttime'])
+        self.trips_df_norm['stoptime'] = pd.to_datetime(self.trips_df_norm['stoptime'])
+
         self.trips_df_norm = self.trips_df_norm.rename({
             "starttime": "start_time",
             "stoptime": "end_time",
@@ -42,7 +87,7 @@ class NewYorkCityBikeTrips(TripsDataSource):
         self.trips_df_norm = self.trips_df_norm.drop(
             [
                 "start_station_id", "start_station_name", "end_station_id", "end_station_name",
-                "bikeid","usertype","birthyear","gender","count"
+                "bikeid", "usertype", "birthyear", "gender", "count"
             ],
             axis=1
         )
@@ -55,7 +100,7 @@ class NewYorkCityBikeTrips(TripsDataSource):
 
         self.trips_df_norm.dropna(inplace=True)
 
-        self.trips_df_norm.driving_distance = self.trips_df_norm.driving_distance.apply(miles_to_meters)
+        self.trips_df_norm.driving_distance = self.trips_df_norm.driving_distance * 1.609
 
         self.save_norm()
 
