@@ -9,7 +9,7 @@ sim_scenario_conf = {
 	"alpha_policy": 'auto',
 
 	"beta": 100,
-	"n_poles_n_vehicles_factor": 0.06,
+	"n_poles_n_vehicles_factor": 0.2,
 
 	"hub_zone_policy": "num_parkings",
 	"hub": False,
@@ -28,6 +28,8 @@ sim_scenario_conf = {
 
 	"user_contribution": False,
 	"willingness": 0,
+
+	"scooter_relocation": False,
 
 	"charging_strategy": "reactive",
 	"charging_relocation_strategy": "closest_free", #closest_free/random/closest_queueing

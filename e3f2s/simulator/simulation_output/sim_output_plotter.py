@@ -149,9 +149,10 @@ class EFFCS_SimOutputPlotter ():
 			self.sim_unsatisfied_requests.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
 				label="unsatisfied", linewidth=2, alpha=0.7
 			)
-		self.sim_charges.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
-			label="charges", linewidth=2, alpha=0.7
-		)
+		if len(self.sim_charges):
+			self.sim_charges.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
+				label="charges", linewidth=2, alpha=0.7
+			)
 		plt.legend()
 		plt.xlabel("t")
 		plt.ylabel("n_events")
@@ -211,6 +212,8 @@ class EFFCS_SimOutputPlotter ():
 			df = self.sim_bookings
 		if which_df == "charges":
 			df = self.sim_charges
+			if not len(df):
+				return
 		if which_df == "unsatisfied":
 			df = self.sim_unsatisfied_requests
 			if not len(df):
