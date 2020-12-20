@@ -8,11 +8,16 @@ from e3f2s.city_data_manager.city_geo_trips.city_geo_trips import CityGeoTrips
 
 class NewYorkCityBikeGeoTrips(CityGeoTrips):
 
-	def __init__(self, city_name, trips_data_source_id, year, month):
+	def __init__(self, city_name="New_York_City", trips_data_source_id="citi_bike", year=2017, month=1):
 
 		self.city_name = city_name
 		super().__init__(self.city_name, trips_data_source_id, year, month)
 		self.trips_ds_dict = {
-			"big_data_db": NewYorkCityBikeTrips(city_name)
+			"citi_bike": NewYorkCityBikeTrips(city_name)
 		}
 		self.trips_df_norm = pd.DataFrame()
+
+	def get_trips_od_gdfs(self):
+
+		self.trips_ds_dict[self.trips_data_source_id].load_raw(self.year, self.month)
+		self.trips_ds_dict[self.trips_data_source_id].normalise(self.year, self.month)
