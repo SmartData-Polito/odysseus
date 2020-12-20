@@ -6,10 +6,10 @@ sim_general_conf_grid = {
 
     "data_source_id": ["city_of_louisville"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["city_multiple_runs_scooter_relocation_magic_relocation"],
+    "sim_scenario_name": ["scooter_relocation_magic"],
 
     # Fleet general parameters
-    "const_load_factor": [1],
+    "const_load_factor": [False],
 
     # Space general parameters
     "bin_side_length": [200],

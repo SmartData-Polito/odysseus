@@ -2,9 +2,8 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "n_vehicles": np.arange(1000, 10100, 750),
-    "requests_rate_factor": [1],
-    "n_vehicles_factor": [1],
+    "n_requests": [1000000],
+    "fleet_load_factor": 1000000 / np.arange(1000, 10001, 500),
 
     "time_estimation": [True],
     "queuing": [True],
