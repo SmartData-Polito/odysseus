@@ -1,11 +1,26 @@
 import numpy as np
 import pandas as pd
-
+import geopandas as gpd
+from shapely.geometry import Point
 import datetime
 import pytz
 
 #from e3f2s.utils.vehicle_utils import get_soc_delta
-from e3f2s.data_structures.vehicle import Vehicle
+from e3f2s.simulator.simulation_input.stations_locations import station_locations
+
+def geodataframe_charging_points(city,engine_type,station_location):
+	charging_points = station_location[city][engine_type]
+	points_list = []
+
+	for point in charging_points.keys():
+		points_list.append(
+			{
+				"geometry": Point(
+					charging_points[point]["longitude"], charging_points[point]["latitude"]
+				)
+			}
+		)
+	return gpd.GeoDataFrame(points_list)
 
 
 class SimInput:
@@ -60,12 +75,12 @@ class SimInput:
 			self.n_charging_zones = 1
 			self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
 		elif self.sim_scenario_conf["distributed_cps"]:
-			if "cps_zones_percentage" in self.sim_scenario_conf:
+			if "cps_zones_percentage" in self.sim_scenario_conf and self.sim_scenario_conf["cps_placement_policy"] != "real_positions":
 				self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
-			elif "n_charging_zones" in self.sim_scenario_conf:
+			elif "n_charging_zones" in self.sim_scenario_conf and self.sim_scenario_conf["cps_placement_policy"] != "real_positions":
 				self.n_charging_zones = self.sim_scenario_conf["n_charging_zones"]
 				self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
-			elif "cps_zones" in self.sim_scenario_conf:
+			elif "cps_zones" in self.sim_scenario_conf and self.sim_scenario_conf["cps_placement_policy"] != "real_positions":
 				self.n_charging_zones = len(self.sim_scenario_conf["cps_zones"])
 		elif self.sim_scenario_conf["battery_swap"]:
 			self.n_charging_zones = 0
@@ -212,6 +227,23 @@ class SimInput:
 					else:
 						print("Zone", zone_id, "does not exist!")
 						exit(0)
+
+			elif self.sim_scenario_conf["cps_placement_policy"] == "real_positions":
+				cps_points = geodataframe_charging_points(
+					self.city,self.sim_scenario_conf["engine_type"],station_locations
+				)
+				self.n_charging_poles_by_zone = {}
+				value = 0
+				for p in cps_points.geometry:
+					for (geom,zone) in zip(self.grid.geometry,self.grid.zone_id):
+						if geom.intersects(p) == True:
+							if zone in self.n_charging_poles_by_zone.keys():
+								self.n_charging_poles_by_zone[zone] += 4
+							else:
+								self.n_charging_poles_by_zone[zone] = 4
+							value += 4
+				self.tot_n_charging_poles = value
+				self.n_charging_zones = len(self.n_charging_poles_by_zone.keys())
 
 			zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
 
