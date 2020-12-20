@@ -29,9 +29,6 @@ class NewYorkCityBikeTrips(TripsDataSource):
 
         self.trips_df_norm = self.trips_df
 
-        year = str(year)
-        month = str(month)
-
         new_columns = {}
         for column in self.trips_df_norm.columns:
             new_columns[column] = column.lower().replace(' ', '').strip().replace('station', '_station_')
