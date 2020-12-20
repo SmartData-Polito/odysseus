@@ -2,7 +2,7 @@ import os
 import datetime
 
 import pandas as pd
-from haversine import haversine, Unit
+from e3f2s.utils.geospatial_utils import haversine
 
 from e3f2s.city_data_manager.city_data_source.trips_data_source.trips_data_source import TripsDataSource
 
@@ -11,12 +11,16 @@ class NewYorkCityBikeTrips(TripsDataSource):
 
     def __init__(self, city_name):
         super().__init__(city_name, 'citi_bike', 'bike')
+        self.max_lon = -73.90
+        self.min_lon = -74.04
+        self.max_lat = 40.76
+        self.min_lat = 40.66
 
-    def load_raw(self):
+    def load_raw(self, year, month):
 
         raw_trips_data_path = os.path.join(
             self.raw_data_path,
-            "citibike-tripdata.csv"
+            '%s%s' % (str(year), str(month).zfill(2)) + "-citibike-tripdata.csv"
         )
         self.trips_df = pd.read_csv(raw_trips_data_path)
         return self.trips_df
@@ -59,10 +63,11 @@ class NewYorkCityBikeTrips(TripsDataSource):
 
         self.trips_df_norm['distance'] = self.trips_df_norm.apply(
             lambda x: haversine(
-                (x.start_station_latitude, x.start_station_longitude),
-                (x.end_station_latitude, x.end_station_longitude),
-                unit=Unit.METERS),
-            axis=1
+                x.start_station_latitude,
+                x.start_station_longitude,
+                x.end_station_latitude,
+                x.end_station_longitude
+            ), axis=1
         )
 
         self.trips_df_norm['starttime'] = pd.to_datetime(self.trips_df_norm['starttime'])

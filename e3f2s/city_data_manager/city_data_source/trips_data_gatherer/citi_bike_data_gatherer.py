@@ -17,10 +17,7 @@ class DataGatherer:
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
-        self.max_lon = -73.90
-        self.min_lon = -74.04
-        self.max_lat = 40.76
-        self.min_lat = 40.66
+
         self.structured_dataset_name = structured_dataset_name
 
         '''
@@ -53,33 +50,21 @@ class DataGatherer:
             print('Any available dataset for %s %s' % (year, month))
             return
 
-        if os.path.isfile(structured_output_path.joinpath(structured_dataset_name)):
-            print(str(structured_output_path.joinpath(structured_dataset_name)),
-                  'already present. Delete it to redownload')
-            return
+        if not os.path.isfile(structured_output_path.joinpath(structured_dataset_name)):
 
-        start = time.time()
-        print('Start download of %s' % structured_dataset_name)
-        r = requests.get(full_url)
-        end = time.time()
-        print('download completed in %.2f' % (end-start))
+            start = time.time()
+            print('Start download of %s' % structured_dataset_name)
+            r = requests.get(full_url)
+            end = time.time()
+            print('download completed in %.2f' % (end-start))
 
-        with open(self.output_path.joinpath(structured_dataset_name), mode='wb') as localfile:
-            localfile.write(r.content)
+            with open(structured_output_path.joinpath(structured_dataset_name), mode='wb') as localfile:
+                localfile.write(r.content)
 
-        # Try catch for corrupted files
         try:
-            z = zipfile.ZipFile(io.BytesIO(r.content))
-            extracted = z.namelist()
-
-            z.extractall(structured_output_path)
-            os.rename(
-                structured_output_path.joinpath(extracted[0]),
-                structured_output_path.joinpath(structured_dataset_name)
-            )
+            with zipfile.ZipFile(structured_output_path.joinpath(structured_dataset_name), 'r') as myzip:
+                myzip.extractall(structured_output_path)
             print('%s extracted' % structured_dataset_name)
-
-            os.remove(self.output_path.joinpath(structured_dataset_name))
         except zipfile.BadZipfile:
             print('%s problem to unzip' % structured_dataset_name)
 
