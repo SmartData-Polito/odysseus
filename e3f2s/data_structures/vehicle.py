@@ -1,7 +1,8 @@
 example_vehicle_config = {
-	"engine_type": "gasoline",
-	"fuel_capacity": 55,
-	"consumption": 18.215,
+	"engine_type": "electric",
+	"fuel_capacity": 17.6,
+	"consumption": 1 / 0.15838,
+	"efficiency": 0.15838,
 	"cost_car": 24700,
 	"country_energy_mix" : {
 		"nuclear": 0, # %

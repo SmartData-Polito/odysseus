@@ -56,18 +56,20 @@ class Loader:
             "trips.pickle"
         )
         self.trips = gpd.GeoDataFrame(pd.read_pickle(path))
-
+        print(self.trips.shape)
         path = os.path.join(
             self.points_data_path,
             "origins.pickle"
         )
         self.trips_origins = gpd.GeoDataFrame(pd.read_pickle(path))
+        print(self.trips_origins.shape)
 
         path = os.path.join(
             self.points_data_path,
             "destinations.pickle"
         )
         self.trips_destinations = gpd.GeoDataFrame(pd.read_pickle(path))
+        print(self.trips_destinations.shape)
 
         self.trips_origins.crs = "epsg:4326"
         self.trips_destinations.crs = "epsg:4326"
@@ -91,9 +93,9 @@ class Loader:
         self.trips_origins = self.trips_origins.loc[self.trips.index]
         self.trips_destinations = self.trips_destinations.loc[self.trips.index]
 
-        self.trips.start_time = pd.to_datetime(self.trips.start_time, utc=True)
+        self.trips.start_time = pd.to_datetime(self.trips.start_time)
         self.trips_origins.start_time = self.trips.start_time
-        self.trips.end_time = pd.to_datetime(self.trips.end_time, utc=True)
+        self.trips.end_time = pd.to_datetime(self.trips.end_time)
         self.trips_destinations.end_time = self.trips.end_time
 
         return self.trips, self.trips_origins, self.trips_destinations

@@ -1,3 +1,6 @@
+import os
+import pickle
+
 import numpy as np
 import pandas as pd
 
@@ -14,19 +17,35 @@ class SimInput:
 
 		self.sim_general_conf = conf_tuple[0]
 		self.sim_scenario_conf = conf_tuple[1]
-		self.city_obj = conf_tuple[2]
 
-		self.city = self.city_obj.city_name
-		self.grid = self.city_obj.grid
-		self.grid_matrix = self.city_obj.grid_matrix
-		self.input_bookings = self.city_obj.bookings
-		print(self.input_bookings.shape)
-		self.request_rates = self.city_obj.request_rates
-		self.avg_request_rate = self.city_obj.avg_request_rate
-		self.trip_kdes = self.city_obj.trip_kdes
-		self.valid_zones = self.city_obj.valid_zones
-		self.neighbors_dict = self.city_obj.neighbors_dict
-		self.n_vehicles_original = self.city_obj.n_vehicles_original
+		self.city = self.sim_general_conf["city"]
+
+		demand_model_path = os.path.join(
+			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+			"demand_modelling",
+			"demand_models",
+			self.sim_general_conf["city"],
+		)
+
+		self.grid = pickle.Unpickler(open(os.path.join(demand_model_path, "grid.pickle"), "rb")).load()
+		self.grid_matrix = pickle.Unpickler(open(os.path.join(demand_model_path, "grid_matrix.pickle"), "rb")).load()
+		self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
+		self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
+		self.valid_zones = pickle.Unpickler(open(os.path.join(demand_model_path, "valid_zones.pickle"), "rb")).load()
+		self.neighbors_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "neighbors_dict.pickle"), "rb")).load()
+		self.integers_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "integers_dict.pickle"), "rb")).load()
+
+		self.avg_request_rate = self.integers_dict["avg_request_rate"]
+		self.n_vehicles_original = self.integers_dict["n_vehicles_original"]
+		self.avg_speed_mean = self.integers_dict["avg_speed_mean"]
+		self.avg_speed_std = self.integers_dict["avg_speed_std"]
+		self.avg_speed_kmh_mean = self.integers_dict["avg_speed_kmh_mean"]
+		self.avg_speed_kmh_std = self.integers_dict["avg_speed_kmh_std"]
+		self.max_driving_distance = self.integers_dict["max_driving_distance"]
+
+		if self.sim_general_conf["sim_technique"] == "traceB":
+			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings.pickle"), "rb")).load()
+			self.booking_requests_list = self.get_booking_requests_list()
 
 		if "n_requests" in self.sim_scenario_conf.keys():
 			# 30 => 1 month
@@ -82,15 +101,7 @@ class SimInput:
 		elif self.sim_scenario_conf["battery_swap"]:
 			self.n_charging_poles = 0
 
-
-
-		self.avg_speed_mean = self.input_bookings.avg_speed.mean()
-		self.avg_speed_std = self.input_bookings.avg_speed.std()
-		self.avg_speed_kmh_mean = self.input_bookings.avg_speed_kmh.mean()
-		self.avg_speed_kmh_std = self.input_bookings.avg_speed_kmh.std()
-
 		self.n_charging_poles_by_zone = {}
-		self.booking_requests_list = []
 		self.vehicles_soc_dict = {}
 		self.vehicles_zones = {}
 		self.available_vehicles_dict = {}
@@ -102,7 +113,7 @@ class SimInput:
 
 	def get_booking_requests_list(self):
 
-		self.booking_requests_list = self.input_bookings[[
+		return self.bookings[[
 			"origin_id",
 			"destination_id",
 			"start_time",
@@ -114,7 +125,7 @@ class SimInput:
 			"hour",
 			"duration"
 		]].dropna().to_dict("records")
-		return self.booking_requests_list
+		return
 
 	def init_vehicles(self):
 
@@ -126,9 +137,7 @@ class SimInput:
 			i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
 		}
 
-		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:31]
-
-		print(len(self.valid_zones), len(self.grid), len(top_o_zones.index))
+		top_o_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:31]
 
 		vehicles_random_zones = list(
 			np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()
@@ -170,7 +179,7 @@ class SimInput:
 					exit(1)
 
 			elif self.sim_scenario_conf["hub_zone_policy"] == "num_parkings":
-				self.hub_zone = int(self.input_bookings.destination_id.value_counts().iloc[:1].index[0])
+				self.hub_zone = int(self.grid.origin_count.sort_values(ascending=False).iloc[:1].index[0])
 
 			else:
 				print("Hub placement policy not recognised!")
@@ -188,7 +197,7 @@ class SimInput:
 
 			if self.sim_scenario_conf["cps_placement_policy"] == "num_parkings":
 
-				top_dest_zones = self.input_bookings.destination_id.value_counts().iloc[:self.n_charging_zones]
+				top_dest_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:self.n_charging_zones]
 
 				self.n_charging_poles_by_zone = dict((top_dest_zones / top_dest_zones.sum() * self.n_charging_poles))
 

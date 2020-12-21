@@ -5,7 +5,7 @@ import multiprocessing as mp
 
 import pandas as pd
 
-from e3f2s.demand_modelling.city import City
+from e3f2s.demand_modelling.demand_model import DemandModel
 from e3f2s.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 from e3f2s.simulator.single_run.run_eventG_sim import get_eventG_sim_stats
 from e3f2s.simulator.single_run.run_traceB_sim import get_traceB_sim_stats

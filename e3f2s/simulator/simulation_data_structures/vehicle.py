@@ -1,7 +1,7 @@
 import simpy
 import random
 import datetime
-from e3f2s.data_structures.vehicle import example_vehicle_config,Vehicle as Vehicle_definition
+from e3f2s.data_structures.vehicle import example_vehicle_config, Vehicle as Vehicle_definition
 
 class Vehicle(Vehicle_definition):
 

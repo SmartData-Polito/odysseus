@@ -62,6 +62,7 @@ class ChargingPrimitives:
 						capacity=n
 					)
 
+		self.n_charges = 0
 		self.sim_charges = []
 		self.sim_unfeasible_charge_bookings = []
 
@@ -170,7 +171,11 @@ class ChargingPrimitives:
 					self.n_vehicles_charging_users -= 1
 
 		charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
-		self.sim_charges += [charge]
+
+		if "save_history" in self.simInput.sim_general_conf:
+			if self.simInput.sim_general_conf["save_history"]:
+				self.sim_charges += [charge]
+		self.n_charges += 1
 
 	def check_system_charge(self, booking_request, vehicle, charging_strategy):
 		if charging_strategy == "reactive":

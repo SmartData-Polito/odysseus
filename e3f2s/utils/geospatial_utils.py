@@ -5,9 +5,9 @@ import geopandas as gpd
 from math import radians, cos, sin, asin, sqrt
 
 
-def get_city_grid_as_gdf (locations, bin_side_length):
+def get_city_grid_as_gdf (total_bounds, crs, bin_side_length):
 
-    x_min, y_min, x_max, y_max = locations.total_bounds
+    x_min, y_min, x_max, y_max = total_bounds
     width = bin_side_length / 111320 * 1.2
     height = bin_side_length / 111320 * 1.2
     # width = bin_side_length / 0.706
@@ -29,14 +29,14 @@ def get_city_grid_as_gdf (locations, bin_side_length):
     grid = gpd.GeoDataFrame({"geometry": polygons})
 
     grid["zone_id"] = range(len(grid))
-    grid.crs = locations.crs
+    grid.crs = crs
 
     return grid
 
 
-def get_city_grid_as_matrix (locations, bin_side_length):
+def get_city_grid_as_matrix (total_bounds, bin_side_length):
 
-    x_min, y_min, x_max, y_max = locations.total_bounds
+    x_min, y_min, x_max, y_max = total_bounds
     width = bin_side_length / 111320 * 1.2
     height = bin_side_length / 111320 * 1.2
     # width = bin_side_length / 0.706

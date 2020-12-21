@@ -1,5 +1,5 @@
 from e3f2s.simulator.simulation.trace_driven_simulator import TraceDrivenSim
-from e3f2s.simulator.simulation_output.sim_output import EFFCS_SimOutput
+from e3f2s.simulator.simulation_output.sim_output import SimOutput
 from e3f2s.simulator.simulation_input.sim_input import SimInput
 
 
@@ -18,7 +18,7 @@ def run_traceB_sim (simInput):
 
 def get_traceB_sim_output(simInput):
     sim_traceB = run_traceB_sim(simInput)
-    return EFFCS_SimOutput(sim_traceB)
+    return SimOutput(sim_traceB)
 
 
 def get_traceB_sim_stats(conf_tuple):
@@ -29,5 +29,5 @@ def get_traceB_sim_stats(conf_tuple):
     simInput.init_hub()
     simInput.init_charging_poles()
     sim_traceB = run_traceB_sim(simInput)
-    simOutput_traceB = EFFCS_SimOutput(sim_traceB)
+    simOutput_traceB = SimOutput(sim_traceB)
     return simOutput_traceB.sim_stats
