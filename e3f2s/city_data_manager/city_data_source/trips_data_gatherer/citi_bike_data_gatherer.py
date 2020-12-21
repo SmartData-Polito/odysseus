@@ -17,7 +17,6 @@ class DataGatherer:
         if not os.path.exists(output_path):
             os.makedirs(output_path)
 
-
         self.structured_dataset_name = structured_dataset_name
 
         '''
