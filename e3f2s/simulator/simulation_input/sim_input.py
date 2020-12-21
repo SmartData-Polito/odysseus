@@ -17,7 +17,8 @@ def geodataframe_charging_points(city,engine_type,station_location):
 			{
 				"geometry": Point(
 					charging_points[point]["longitude"], charging_points[point]["latitude"]
-				)
+				),
+				"n_poles": charging_points[point]["n_poles"]
 			}
 		)
 	return gpd.GeoDataFrame(points_list)
@@ -234,14 +235,14 @@ class SimInput:
 				)
 				self.n_charging_poles_by_zone = {}
 				value = 0
-				for p in cps_points.geometry:
+				for (p,n) in zip(cps_points.geometry,cps_points.n_poles):
 					for (geom,zone) in zip(self.grid.geometry,self.grid.zone_id):
 						if geom.intersects(p) == True:
 							if zone in self.n_charging_poles_by_zone.keys():
-								self.n_charging_poles_by_zone[zone] += 4
+								self.n_charging_poles_by_zone[zone] += n
 							else:
-								self.n_charging_poles_by_zone[zone] = 4
-							value += 4
+								self.n_charging_poles_by_zone[zone] = n
+							value += n
 				self.tot_n_charging_poles = value
 				self.n_charging_zones = len(self.n_charging_poles_by_zone.keys())
 
