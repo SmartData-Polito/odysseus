@@ -6,7 +6,9 @@ sim_general_conf_grid = {
 
     "data_source_id": ["citi_bike"],
     "sim_technique": ["traceB"],
+
     "sim_scenario_name": ["mito-mobility_test"],
+
 
     # Fleet general parameters
     "const_load_factor": [1],

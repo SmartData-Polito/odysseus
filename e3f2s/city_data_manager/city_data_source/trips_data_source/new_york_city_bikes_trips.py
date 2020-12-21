@@ -79,7 +79,10 @@ class NewYorkCityBikeTrips(TripsDataSource):
             "start_station_longitude": "start_longitude",
             "end_station_latitude": "end_latitude",
             "end_station_longitude": "end_longitude",
+<<<<<<< HEAD
             "bikeid": "vehicle_id"
+=======
+>>>>>>> 2d4ab1fa23c8d303967cc6504213f5a42028122f
         }, axis=1)
 
         self.trips_df_norm["start_time"] = self.trips_df_norm["start_time"]\
@@ -90,7 +93,11 @@ class NewYorkCityBikeTrips(TripsDataSource):
         self.trips_df_norm = self.trips_df_norm.drop(
             [
                 "start_station_id", "start_station_name", "end_station_id", "end_station_name",
+<<<<<<< HEAD
                 "usertype", "birthyear", "gender", "count"
+=======
+                "bikeid", "usertype", "birthyear", "gender", "count"
+>>>>>>> 2d4ab1fa23c8d303967cc6504213f5a42028122f
             ],
             axis=1
         )
