@@ -2,6 +2,11 @@ sim_scenario_conf = {
 
 	"n_requests": 10**5,
 	"n_vehicles": 200,
+	"engine_type": "electric",
+	"profile_type": "single_phase_1", # works only if engine_type = electric
+	"vehicle_model_name": "VW e-Golf 2018",
+	"country_energymix": "Italy",
+	"year_energymix": "2018",
 
 	"time_estimation": True,
 	"queuing": True,
@@ -33,5 +38,6 @@ sim_scenario_conf = {
 
 	"charging_strategy": "reactive",
 	"charging_relocation_strategy": "closest_free", #closest_free/random/closest_queueing
+	"scooter_relocation": False
 
 }

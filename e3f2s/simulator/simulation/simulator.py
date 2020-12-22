@@ -1,6 +1,7 @@
 import copy
 import datetime
 import pytz
+import json
 from random import sample
 
 import simpy
@@ -12,7 +13,9 @@ from e3f2s.simulator.simulation_data_structures.charging_station import Charging
 from e3f2s.simulator.simulation.charging_strategies import ChargingStrategy
 from e3f2s.simulator.simulation.scooter_relocation_strategies import ScooterRelocationStrategy
 
-from e3f2s.simulator.simulation_input.sim_current_config.vehicle_config import vehicle_conf
+from e3f2s.simulator.simulation_input.vehicle_conf import vehicle_conf
+from e3f2s.simulator.simulation_input.energymix_conf import energymix_conf
+from e3f2s.simulator.simulation_input.station_conf import station_conf
 
 
 class SharedMobilitySim:
@@ -93,13 +96,15 @@ class SharedMobilitySim:
             for zone_id in self.simInput.n_charging_poles_by_zone:
                 zone_n_cps = self.simInput.n_charging_poles_by_zone[zone_id]
                 if zone_n_cps > 0:
-                    self.charging_stations_dict[zone_id] = ChargingStation(self.env, zone_n_cps, zone_id, self.start)
+                    self.charging_stations_dict[zone_id] = ChargingStation(
+                        self.env, zone_n_cps, zone_id, station_conf, self.simInput.sim_scenario_conf, self.start
+                    )
 
         self.vehicles_list = []
         for i in range(self.simInput.n_vehicles_sim):
             vehicle_object = Vehicle(
                 self.env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
-                vehicle_conf, self.simInput.sim_scenario_conf, self.start
+                vehicle_conf, energymix_conf, self.simInput.sim_scenario_conf, self.start
             )
             self.vehicles_list.append(vehicle_object)
 

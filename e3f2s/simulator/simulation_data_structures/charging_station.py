@@ -6,8 +6,13 @@ from e3f2s.data_structures.charging_station import example_station_config,Pole
 
 class ChargingStation(Pole):
 
-    def __init__(self, env, num_poles, zone_id, sim_start_time):
-        super().__init__(example_station_config)
+    def __init__(self, env, num_poles, zone_id, station_conf, sim_scenario_conf, sim_start_time):
+        engine_type = sim_scenario_conf["engine_type"]
+        if engine_type == "electric":
+            profile_type = sim_scenario_conf["profile_type"]
+            super().__init__(station_conf[engine_type][profile_type])
+        else:
+            super().__init__(station_conf[engine_type])
         self.env = env
         self.charging_station = simpy.Resource(self.env, capacity=num_poles)
         self.zone_id = zone_id
