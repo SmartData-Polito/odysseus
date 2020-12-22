@@ -46,12 +46,6 @@ class ChargingPrimitives:
 			capacity=self.simInput.sim_scenario_conf["n_workers"]
 		)
 
-		if self.simInput.sim_scenario_conf["hub"]:
-			self.charging_hub = simpy.Resource(
-				self.env,
-				capacity=self.simInput.hub_n_charging_poles
-			)
-
 		if self.simInput.sim_scenario_conf["distributed_cps"]:
 			self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone
 			self.charging_poles_dict = {}
@@ -74,7 +68,7 @@ class ChargingPrimitives:
 		self.list_system_charging_bookings = []
 		self.list_users_charging_bookings = []
 
-		self.charging_outward_distance = 0
+		self.charging_return_distance = 0
 
 	def charge_vehicle(
 			self,

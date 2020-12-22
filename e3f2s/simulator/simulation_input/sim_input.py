@@ -73,12 +73,7 @@ class SimInput:
 		elif self.sim_scenario_conf["cps_placement_policy"] == "old_manual":
 			self.tot_n_charging_poles = len(self.sim_scenario_conf["cps_zones"]) * 4
 
-		self.hub_zone = -1
-
-		if self.sim_scenario_conf["hub"]:
-			self.n_charging_zones = 1
-			self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
-		elif self.sim_scenario_conf["distributed_cps"]:
+		if self.sim_scenario_conf["distributed_cps"]:
 			if "cps_zones_percentage" in self.sim_scenario_conf:
 				self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
 			elif "n_charging_zones" in self.sim_scenario_conf:
@@ -88,18 +83,7 @@ class SimInput:
 				self.n_charging_zones = len(self.sim_scenario_conf["cps_zones"])
 		elif self.sim_scenario_conf["battery_swap"]:
 			self.n_charging_zones = 0
-
-		if self.sim_scenario_conf["hub"] and not self.sim_scenario_conf["distributed_cps"]:
-			self.hub_n_charging_poles = int(self.tot_n_charging_poles)
-			self.n_charging_poles = 0
-		elif not self.sim_scenario_conf["hub"] and self.sim_scenario_conf["distributed_cps"]:
-			self.hub_n_charging_poles = 0
-			self.n_charging_poles = self.tot_n_charging_poles
-		elif self.sim_scenario_conf["hub"] and self.sim_scenario_conf["distributed_cps"]:
-			self.n_charging_poles = int(self.tot_n_charging_poles / 2)
-			self.hub_n_charging_poles = int(self.tot_n_charging_poles / 2)
-		elif self.sim_scenario_conf["battery_swap"]:
-			self.n_charging_poles = 0
+			self.tot_n_charging_poles = 0
 
 		self.n_charging_poles_by_zone = {}
 		self.vehicles_soc_dict = {}
@@ -167,30 +151,6 @@ class SimInput:
 
 		return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
 
-	def init_hub(self):
-
-		if self.sim_scenario_conf["hub"]:
-			if self.sim_scenario_conf["hub_zone_policy"] == "manual":
-
-				if self.sim_scenario_conf["hub_zone"] in self.valid_zones:
-					self.hub_zone = self.sim_scenario_conf["hub_zone"]
-				else:
-					print("Hub zone does not exist!")
-					exit(1)
-
-			elif self.sim_scenario_conf["hub_zone_policy"] == "num_parkings":
-				self.hub_zone = int(self.grid.origin_count.sort_values(ascending=False).iloc[:1].index[0])
-
-			else:
-				print("Hub placement policy not recognised!")
-				exit(0)
-
-			for zone in self.valid_zones:
-				if zone == self.hub_zone:
-					self.n_charging_poles_by_zone[zone] = self.n_charging_zones
-				else:
-					self.n_charging_poles_by_zone[zone] = 0
-
 	def init_charging_poles(self):
 
 		if self.sim_scenario_conf["distributed_cps"]:
@@ -199,7 +159,7 @@ class SimInput:
 
 				top_dest_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:self.n_charging_zones]
 
-				self.n_charging_poles_by_zone = dict((top_dest_zones / top_dest_zones.sum() * self.n_charging_poles))
+				self.n_charging_poles_by_zone = dict((top_dest_zones / top_dest_zones.sum() * self.tot_n_charging_poles))
 
 				assigned_cps = 0
 				for zone_id in self.n_charging_poles_by_zone:
@@ -207,7 +167,7 @@ class SimInput:
 					assigned_cps += zone_n_cps
 					self.n_charging_poles_by_zone[zone_id] = zone_n_cps
 				for zone_id in self.n_charging_poles_by_zone:
-					if assigned_cps < self.n_charging_poles:
+					if assigned_cps < self.tot_n_charging_poles:
 						self.n_charging_poles_by_zone[zone_id] += 1
 						assigned_cps += 1
 

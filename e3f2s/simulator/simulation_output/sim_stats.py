@@ -33,7 +33,6 @@ class SimStats():
 
 		self.sim_stats.loc["n_vehicles_sim"] = sim.simInput.n_vehicles_sim
 		self.sim_stats.loc["tot_n_charging_poles"] = sim.simInput.tot_n_charging_poles
-		self.sim_stats.loc["hub_zone"] = sim.simInput.hub_zone
 		self.sim_stats.loc["n_charging_zones"] = sim.simInput.n_charging_zones
 
 		self.sim_stats["sim_duration"] = (sim.end - sim.start).total_seconds()

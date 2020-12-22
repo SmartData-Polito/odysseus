@@ -53,5 +53,5 @@ class Vehicle(Vehicle_definition):
         }
         self.status_dict_list.append(self.current_status)
 
-    def charge(self,percentage):
+    def charge(self, percentage):
         self.soc.put(percentage)

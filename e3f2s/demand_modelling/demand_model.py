@@ -12,6 +12,7 @@ from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.time_utils import *
 from e3f2s.data_structures.vehicle import Vehicle
 
+
 class DemandModel:
 
     def __init__(self, city_name, sim_general_conf, kde_bw=1):

@@ -13,7 +13,6 @@ class ChargingStrategy(ChargingPrimitives):
 			if self.simInput.sim_scenario_conf["time_estimation"]:
 
 				if operator == "system":
-
 					timeout_outward = np.random.exponential(
 						self.simInput.sim_scenario_conf[
 							"avg_reach_time"
@@ -26,14 +25,12 @@ class ChargingStrategy(ChargingPrimitives):
 					)
 					timeout_return = 0
 					cr_soc_delta = 0
-					charging_outward_distance = 0
 					resource = self.workers
 
 				elif operator == "users":
 					timeout_outward = 0
 					timeout_return = 0
 					cr_soc_delta = 0
-					charging_outward_distance = 0
 					charge["duration"] = np.random.normal(
 						self.simInput.sim_scenario_conf[
 							"avg_service_time_users"
@@ -48,52 +45,7 @@ class ChargingStrategy(ChargingPrimitives):
 				charge["duration"] = 0
 				timeout_return = 0
 				cr_soc_delta = 0
-				charging_outward_distance = 0
 				resource = self.workers
-
-		if self.simInput.sim_scenario_conf["hub"]:
-
-			charging_zone_id = self.simInput.hub_zone
-			resource = self.charging_hub
-
-			if self.simInput.sim_scenario_conf["time_estimation"]:
-
-				timeout_outward = np.random.exponential(
-					self.simInput.sim_scenario_conf[
-						"avg_reach_time"
-					] * 60
-				)
-				timeout_return = self.get_timeout(
-					booking_request["destination_id"],
-					charging_zone_id
-				)
-				charge["duration"] = get_charging_time(
-					charge["soc_delta"]
-				)
-
-				cr_soc_delta = self.get_cr_soc_delta(
-					booking_request["destination_id"],
-					charging_zone_id
-				)
-				charging_outward_distance = self.get_timeout(
-					booking_request["destination_id"],
-					charging_zone_id
-				)
-
-				if cr_soc_delta > booking_request["end_soc"]:
-					self.dead_vehicles.add(vehicle)
-					self.n_dead_vehicles = len(self.dead_vehicles)
-					self.sim_unfeasible_charge_bookings.append(booking_request)
-				else :
-					self.charging_outward_distance += charging_outward_distance
-
-			else:
-
-				timeout_outward = 0
-				charge["duration"] = 0
-				timeout_return = 0
-				cr_soc_delta = 0
-				charging_outward_distance = 0
 
 		if self.simInput.sim_scenario_conf["distributed_cps"]:
 
@@ -110,7 +62,6 @@ class ChargingStrategy(ChargingPrimitives):
 						zone].charging_station.capacity:
 						free_pole_flag = 1
 						charging_zone_id = zone
-						charging_outward_distance = self.get_distance(booking_request["destination_id"], charging_zone_id)
 						cr_soc_delta = self.get_cr_soc_delta(
 							booking_request["destination_id"],
 							charging_zone_id,
@@ -129,21 +80,17 @@ class ChargingStrategy(ChargingPrimitives):
 				# find a random station to charge
 				while True:
 					random_zone_id = random.choice(zones_by_distance.index)
-					#remove the element
 					zones_by_distance.pop(random_zone_id)
 					if self.charging_stations_dict[random_zone_id].charging_station.count < self.charging_stations_dict[
 						random_zone_id].charging_station.capacity:
 						free_pole_flag = 1
 						charging_zone_id = random_zone_id
-						charging_outward_distance = self.get_distance(booking_request["destination_id"],
-																	  charging_zone_id)
 						cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)
 						if cr_soc_delta > booking_request["end_soc"]:
 							free_pole_flag = 0
 						else:
 							charging_zone_id = charging_zone_id
 					if free_pole_flag == 1 or zones_by_distance.empty :
-						#print("end of choosing")
 						break
 			elif charging_relocation_strategy == 'closest_queueing':
 				zones_by_distance = self.simInput.zones_cp_distances.loc[
@@ -151,14 +98,12 @@ class ChargingStrategy(ChargingPrimitives):
 				].sort_values()
 
 				free_pole_flag = 0
-				# find the nearest station with charging poles,if the station is full,put the vehicle into queue
 				for zone in zones_by_distance.index:
 					free_pole_flag = 1
 					charging_zone_id = zone
 					cr_soc_delta = self.get_cr_soc_delta(
 						booking_request["destination_id"], charging_zone_id, self.vehicles_list[vehicle]
 					)
-					charging_outward_distance = self.get_distance(booking_request["destination_id"], charging_zone_id)
 					if cr_soc_delta > booking_request["end_soc"]:
 						free_pole_flag = 0
 					else:
@@ -190,9 +135,6 @@ class ChargingStrategy(ChargingPrimitives):
 						booking_request["destination_id"],
 						charging_zone_id
 					)
-					# charge["duration"] = get_charging_time(
-					# 	charge["soc_delta"]
-					# )
 
 					charge["duration"] = vehicle.get_charging_time_from_perc(
 						vehicle.soc.level,
@@ -205,13 +147,12 @@ class ChargingStrategy(ChargingPrimitives):
 					)
 					charging_outward_distance = self.get_distance(booking_request["destination_id"], charging_zone_id)
 
-
 					if cr_soc_delta > booking_request["end_soc"]:
 						self.dead_vehicles.add(vehicle)
 						self.n_dead_vehicles = len(self.dead_vehicles)
 						self.sim_unfeasible_charge_bookings.append(booking_request)
 					else:
-						self.charging_outward_distance += charging_outward_distance
+						self.charging_return_distance += charging_outward_distance
 
 				elif operator == "users":
 
@@ -232,8 +173,6 @@ class ChargingStrategy(ChargingPrimitives):
 				charge["duration"] = 0
 				timeout_return = 0
 				cr_soc_delta = 0
-
-
 
 		charge_dict = {
 			"charge": charge,
@@ -272,8 +211,10 @@ class ChargingStrategy(ChargingPrimitives):
 			if charge_flag:
 				self.list_system_charging_bookings.append(booking_request)
 				charging_relocation_strategy = self.simInput.sim_scenario_conf["charging_relocation_strategy"]
-				charge_dict = self.get_charge_dict(vehicle, charge, booking_request, "system",
-												   charging_relocation_strategy)
+				charge_dict = self.get_charge_dict(
+					vehicle, charge, booking_request, "system",
+					charging_relocation_strategy
+				)
 				yield self.env.process(self.charge_vehicle(charge_dict))
 
 		if charge_flag and not user_charge_flag:

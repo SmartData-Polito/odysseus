@@ -142,7 +142,7 @@ class SimOutput ():
 			else:
 				self.sim_stats.loc["tot_charging_energy"] = 0
 
-			self.sim_stats.loc["tot_charging_outwards_distance"] =sim.chargingStrategy.charging_outward_distance
+			self.sim_stats.loc["tot_charging_return_distance"] =sim.chargingStrategy.charging_return_distance
 
 			if len(self.sim_charges) and "system" in self.sim_charges.operator.unique():
 				self.sim_stats.loc["fraction_charges_system"] = \

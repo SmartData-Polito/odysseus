@@ -80,14 +80,14 @@ class SharedMobilitySim:
         self.list_n_vehicles_booked = []
         self.list_n_vehicles_available = []
         self.list_n_vehicles_dead = []
-        self.charging_outward_distance = []
+        self.charging_return_distance = []
 
         self.vehicles_list = []
         self.charging_stations_dict = {}
         self.zone_dict = {}
 
         for zone_id in self.simInput.valid_zones:
-            self.zone_dict[zone_id] = Zone(self.env, zone_id, self.start)
+            self.zone_dict[zone_id] = Zone(self.env, zone_id, self.start, self.available_vehicles_dict[zone_id])
 
         if self.simInput.sim_scenario_conf["distributed_cps"]:
             for zone_id in self.simInput.n_charging_poles_by_zone:
@@ -105,9 +105,6 @@ class SharedMobilitySim:
 
         if "alpha_policy" in self.simInput.sim_scenario_conf:
             if self.simInput.sim_scenario_conf["alpha_policy"] == "auto":
-                # self.sim_scenario_conf["alpha"] = get_soc_delta(
-                #     self.input_bookings.driving_distance.max() / 1000
-                # )
                 self.simInput.sim_scenario_conf["alpha"] = self.vehicles_list[0].consumption_to_percentage(
                     self.vehicles_list[0].distance_to_consumption(
                         self.simInput.max_driving_distance / 1000
@@ -172,7 +169,7 @@ class SharedMobilitySim:
             self.simInput.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
         ]
 
-        self.charging_outward_distance = [self.chargingStrategy.charging_outward_distance]
+        self.charging_return_distance = [self.chargingStrategy.charging_return_distance]
 
         if "save_history" in self.simInput.sim_general_conf:
             if self.simInput.sim_general_conf["save_history"]:
