@@ -4,7 +4,7 @@ sim_scenario_conf = {
 	"n_vehicles": 200,
 	"engine_type": "electric",
 	"profile_type": "single_phase_1", # works only if engine_type = electric
-	"vehicle_model_name": "VW e-Golf 2018",
+	"vehicle_model_name": "Smart fortwo Electric Drive 2018",
 	"country_energymix": "Italy",
 	"year_energymix": "2018",
 

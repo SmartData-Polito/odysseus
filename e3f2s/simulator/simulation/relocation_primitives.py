@@ -1,24 +1,8 @@
 import simpy
 import datetime
 
-import numpy as np
-
 from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.geospatial_utils import get_od_distance
-
-
-# def get_charging_time(soc_delta,
-# 					  battery_capacity=vehicle_conf["battery_capacity"],
-# 					  charging_efficiency=0.92,
-# 					  charger_rated_power=3.7):
-# 	return (soc_delta * 3600 * battery_capacity) / (charging_efficiency * charger_rated_power * 100)
-
-
-# def get_charging_soc(duration,
-# 					 battery_capacity=vehicle_conf["battery_capacity"],
-# 					 charging_efficiency=0.92,
-# 					 charger_rated_power=3.7):
-# 	return (charging_efficiency * charger_rated_power * 100 * duration) / (3600 * battery_capacity)
 
 
 def init_relocate(charge_dict, vehicles_soc_dict, vehicle):
@@ -30,8 +14,8 @@ def init_relocate(charge_dict, vehicles_soc_dict, vehicle):
 	relocate["day_hour"] = charge_dict["start_time"].replace(minute=0, second=0, microsecond=0)
 	relocate["start_soc"] = vehicles_soc_dict[vehicle]
 	relocate["end_soc"] = vehicles_soc_dict[vehicle]
-	relocate["soc_delta"] = charge_dict["end_soc"] - charge_dict["start_soc"]
-	relocate["soc_delta_kwh"] = soc_to_kwh(charge_dict["soc_delta"])
+	relocate["soc_delta"] = relocate["end_soc"] - relocate["start_soc"]
+	relocate["soc_delta_kwh"] = vehicle.tanktowheel_energy_from_perc(relocate["soc_delta"])
 	return relocate
 
 

@@ -213,6 +213,7 @@ class SimOutput ():
 				self.sim_stats.loc["avg_hourly_relo_t"] = \
 					self.sim_charges.groupby("hour").cr_timeout.sum().mean()
 			else:
+
 				self.sim_stats.loc["charging_duration_avg"] = 0
 				self.sim_stats.loc["charging_energy_event_avg"] = 0
 				self.sim_stats.loc["charging_energy_event_max"] = 0

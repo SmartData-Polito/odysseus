@@ -1,8 +1,8 @@
 import datetime
 
 import simpy
-from e3f2s.simulator.simulation.charging_primitives import get_charging_time
-from e3f2s.data_structures.charging_station import example_station_config,Pole
+from e3f2s.data_structures.charging_station import Pole
+
 
 class ChargingStation(Pole):
 

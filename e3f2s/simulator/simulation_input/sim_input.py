@@ -8,8 +8,9 @@ from shapely.geometry import Point
 import datetime
 import pytz
 
-#from e3f2s.utils.vehicle_utils import get_soc_delta
+
 from e3f2s.city_data_manager.data.Torino.raw.geo.openstreetmap.stations_locations import station_locations
+
 
 def geodataframe_charging_points(city,engine_type,station_location):
 	charging_points = station_location[city][engine_type]

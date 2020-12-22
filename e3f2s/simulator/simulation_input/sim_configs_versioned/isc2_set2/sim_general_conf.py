@@ -1,12 +1,12 @@
 sim_general_conf_grid = {
 
     # Run configuration
-    "city": ["Torino", "Milano", "Berlin", "Vancouver", "New_York_City", "Amsterdam", "Madrid", "Roma"],
+    "city": ["Torino", "Milano", "Vancouver"],
     "sim_run_mode": ["multiple_runs"],
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["isc2_set2b"],
+    "sim_scenario_name": ["isc2_set2"],
 
     # Fleet general parameters
     "const_load_factor": [False],

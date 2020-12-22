@@ -103,3 +103,6 @@ class SimStats():
 			self.sim_stats.loc["fraction_deaths_unsatisfied"] = 0
 
 		self.sim_stats.loc["n_charges"] = sim.chargingStrategy.n_charges
+
+		for metrics in sim.sim_metrics.metrics_values:
+			self.sim_stats.loc[metrics] = sim.sim_metrics.metrics_values[metrics]

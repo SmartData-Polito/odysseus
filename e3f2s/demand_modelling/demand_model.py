@@ -8,9 +8,7 @@ from sklearn.neighbors import KernelDensity
 from e3f2s.utils.geospatial_utils import *
 
 from e3f2s.demand_modelling.loader import Loader
-from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.time_utils import *
-from e3f2s.data_structures.vehicle import Vehicle
 
 
 class DemandModel:

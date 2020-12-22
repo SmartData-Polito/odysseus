@@ -36,7 +36,7 @@ vehicle_conf = {
 		"Smart fortwo Electric Drive 2018": {
 			"engine_type": "electric",
 			"fuel_capacity": 16.7,
-			"consumption": 7.6046
+			"consumption": 6.6046
 		}
 	}
 }

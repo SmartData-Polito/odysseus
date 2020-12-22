@@ -2,14 +2,8 @@ import simpy
 import datetime
 import numpy as np
 
-from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.geospatial_utils import get_od_distance
 
-def get_charging_time(soc_delta,
-					  battery_capacity=vehicle_conf["battery_capacity"],
-					  charging_efficiency=0.92,
-					  charger_rated_power=3.7):
-	return (soc_delta * 3600 * battery_capacity) / (charging_efficiency * charger_rated_power * 100)
 
 def init_charge(booking_request, vehicle, beta):
 	charge = {}
@@ -70,6 +64,8 @@ class ChargingPrimitives:
 
 		self.charging_return_distance = 0
 
+		self.sim_metrics = sim.sim_metrics
+
 	def charge_vehicle(
 			self,
 			charge_dict
@@ -83,6 +79,9 @@ class ChargingPrimitives:
 		timeout_outward = charge_dict["timeout_outward"]
 		timeout_return = charge_dict["timeout_return"]
 		cr_soc_delta = charge_dict["cr_soc_delta"]
+
+		self.sim_metrics.update_metrics("cum_relo_ret_t", timeout_return)
+
 		#charging_outward_distance = charge_dict["charging_outward_distance"]
 
 		def check_queuing():
@@ -223,7 +222,6 @@ class ChargingPrimitives:
 		if distance == 0:
 			distance = self.simInput.sim_general_conf["bin_side_length"]
 		return vehicle.consumption_to_percentage(vehicle.distance_to_consumption(distance / 1000))
-
 
 	def get_distance(self, origin_id, destination_id):
 		distance = get_od_distance(

@@ -16,7 +16,7 @@ from e3f2s.simulator.simulation.scooter_relocation_strategies import ScooterRelo
 from e3f2s.simulator.simulation_input.vehicle_conf import vehicle_conf
 from e3f2s.simulator.simulation_input.energymix_conf import energymix_conf
 from e3f2s.simulator.simulation_input.station_conf import station_conf
-
+from e3f2s.simulator.simulation.sim_metrics import SimMetrics
 
 class SharedMobilitySim:
 
@@ -118,6 +118,11 @@ class SharedMobilitySim:
             else:
                 print("Policy for alpha not recognised!")
                 exit(0)
+
+        metrics_dict = {
+            "cum_relo_ret_t": "sum"
+        }
+        self.sim_metrics = SimMetrics(metrics_dict)
 
         self.chargingStrategy = ChargingStrategy(self.env, self)
         self.scooterRelocationStrategy = ScooterRelocationStrategy(self.env, self)
