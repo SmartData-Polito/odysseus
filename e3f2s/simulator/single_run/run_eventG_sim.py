@@ -26,7 +26,6 @@ def get_eventG_sim_stats (conf_tuple):
     simInput = SimInput(conf_tuple)
     #simInput.get_booking_requests_list()
     simInput.init_vehicles()
-    simInput.init_hub()
     simInput.init_charging_poles()
     sim_eventG = run_eventG_sim(simInput)
     simOutput_eventG = SimOutput(sim_eventG)
