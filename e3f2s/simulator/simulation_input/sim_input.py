@@ -206,7 +206,7 @@ class SimInput:
 				value = 0
 				for (p,n) in zip(cps_points.geometry,cps_points.n_poles):
 					for (geom,zone) in zip(self.grid.geometry,self.grid.zone_id):
-						if geom.intersects(p) == True:
+						if geom.intersects(p):
 							if zone in self.n_charging_poles_by_zone.keys():
 								self.n_charging_poles_by_zone[zone] += n
 							else:
