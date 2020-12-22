@@ -137,7 +137,7 @@ class ChargingStrategy(ChargingPrimitives):
 						charging_zone_id = random_zone_id
 						charging_outward_distance = self.get_distance(booking_request["destination_id"],
 																	  charging_zone_id)
-						cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id)
+						cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id ,vehicle)
 						if cr_soc_delta > booking_request["end_soc"]:
 							free_pole_flag = 0
 						else:

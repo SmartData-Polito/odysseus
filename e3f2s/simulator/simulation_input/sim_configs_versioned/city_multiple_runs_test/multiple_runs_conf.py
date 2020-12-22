@@ -2,6 +2,9 @@ import datetime
 import numpy as np
 
 sim_scenario_conf_grid = {
+    
+    
+    "n_vehicles": np.arange(1000, 10100, 750),
 
     "requests_rate_factor": [1],
     "n_vehicles_factor": [1],
@@ -31,5 +34,16 @@ sim_scenario_conf_grid = {
 
     "user_contribution": [False],
     "willingness": [0],
+    
+    "charging_strategy": ["reactive"],
+	"charging_relocation_strategy": ["closest_free"], #closest_free/random/closest_queueing
+    
+    "number of workers": [1000],
+
+	"scooter_relocation": [False],
+	"scooter_relocation_strategy": [""],
+
+	"vehicle_relocation": [True],
+	"vehicle_relocation_strategy": ["magic_relocation"]
 
 }
