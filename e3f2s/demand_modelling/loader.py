@@ -30,12 +30,12 @@ class Loader:
             "_".join([str(year), str(month)])
         )
 
-        if self.city == "Torino":
+        if self.city in ["Torino", "Milano"]:
             self.tz = pytz.timezone("Europe/Rome")
         elif self.city == "Berlin":
             self.tz = pytz.timezone("Europe/Berlin")
         elif self.city == "Vancouver":
-            self.tz = pytz.timezone("Europe/Berlin")
+            self.tz = pytz.timezone("America/Vancouver")
         elif self.city == "New_York_City":
             self.tz = pytz.timezone("America/New_York")
         elif self.city == "Minneapolis" or self.city == "Chicago":
