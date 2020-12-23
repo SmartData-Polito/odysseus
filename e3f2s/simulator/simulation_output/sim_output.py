@@ -235,10 +235,6 @@ class SimOutput ():
 				self.sim_stats.loc["tot_scooter_relocations_distance"] = \
 					0
 
-			for key in self.sim_stats.index:
-				if key.startswith("fraction"):
-					self.sim_stats["percentage" + key[8:]] = self.sim_stats[key] * 100
-
 			self.grid[
 				"origin_count"
 			] = self.sim_booking_requests.origin_id.value_counts()
@@ -302,3 +298,7 @@ class SimOutput ():
 				zone_df = pd.DataFrame(sim.chargingStrategy.zone_dict[key].status_dict_list)
 				zone_df["zone_id"] = key
 				self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)
+
+		for key in self.sim_stats.index:
+			if key.startswith("fraction"):
+				self.sim_stats["percentage" + key[8:]] = self.sim_stats[key] * 100

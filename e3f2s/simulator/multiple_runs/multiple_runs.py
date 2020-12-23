@@ -32,7 +32,7 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 		sim_general_conf["city"],
 	)
 
-	with mp.Pool(mp.cpu_count()) as pool:
+	with mp.Pool(mp.cpu_count(), maxtasksperchild=100) as pool:
 
 		city_obj = pickle.Unpickler(open(os.path.join(demand_model_path, "city_obj.pickle"), "rb")).load()
 
