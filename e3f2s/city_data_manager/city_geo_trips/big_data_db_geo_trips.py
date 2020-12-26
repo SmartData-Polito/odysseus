@@ -1,6 +1,4 @@
 import pandas as pd
-import geopandas as gpd
-import shapely
 
 from e3f2s.city_data_manager.city_data_source.trips_data_source.big_data_db_trips import BigDataDBTrips
 

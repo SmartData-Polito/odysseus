@@ -2,6 +2,7 @@ import argparse
 import datetime
 
 from e3f2s.city_data_manager.city_geo_trips.nyc_citi_bike_geo_trips import NewYorkCityBikeGeoTrips
+from e3f2s.city_data_manager.city_geo_trips.big_data_db_geo_trips import BigDataDBGeoTrips
 
 parser = argparse.ArgumentParser()
 
@@ -27,10 +28,10 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    cities=["New_York_City"],
-    data_source_ids=["citi_bike"],
+    cities=["Torino", "Milano", "Vancouver"],
+    data_source_ids=["big_data_db"],
     years=["2017"],
-    months=["1"],
+    months=["10", "11", "12"],
 )
 
 args = parser.parse_args()
@@ -43,6 +44,8 @@ for city in args.cities:
 
                 if data_source_id == "citi_bike":
                     geo_trips_ds = NewYorkCityBikeGeoTrips(year=int(year), month=int(month))
+                elif data_source_id == "big_data_db":
+                    geo_trips_ds = BigDataDBGeoTrips(city, data_source_id, year=int(year), month=int(month))
 
                 geo_trips_ds.get_trips_od_gdfs()
                 geo_trips_ds.save_points_data()

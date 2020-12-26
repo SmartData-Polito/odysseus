@@ -32,9 +32,9 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 		sim_general_conf["city"],
 	)
 
-	with mp.Pool(mp.cpu_count(), maxtasksperchild=100) as pool:
+	with mp.Pool(mp.cpu_count(), maxtasksperchild=1) as pool:
 
-		city_obj = pickle.Unpickler(open(os.path.join(demand_model_path, "city_obj.pickle"), "rb")).load()
+		#city_obj = pickle.Unpickler(open(os.path.join(demand_model_path, "city_obj.pickle"), "rb")).load()
 
 		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 
@@ -50,25 +50,22 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 						conf_tuples += [(
 							sim_general_conf,
 							sim_scenario_conf,
-							city_obj
 						)]
 				else:
 					conf_tuples += [(
 						sim_general_conf,
 						sim_scenario_conf,
-						city_obj
 					)]
 			else:
 				conf_tuples += [(
 					sim_general_conf,
 					sim_scenario_conf,
-					city_obj
 				)]
 
 		if sim_technique == "eventG":
-			pool_stats_list += pool.map(get_eventG_sim_stats, conf_tuples)
+			pool_stats_list += pool.map_async(get_eventG_sim_stats, conf_tuples, chunksize=1)
 		elif sim_technique == "traceB":
-			pool_stats_list += pool.map(get_traceB_sim_stats, conf_tuples)
+			pool_stats_list += pool.map_async(get_traceB_sim_stats, conf_tuples, chunksize=1)
 
 	print(datetime.datetime.now(), city, "multiple runs finished!")
 
