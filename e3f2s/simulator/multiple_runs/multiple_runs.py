@@ -63,9 +63,9 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 				)]
 
 		if sim_technique == "eventG":
-			pool_stats_list += pool.map_async(get_eventG_sim_stats, conf_tuples, chunksize=1)
+			pool_stats_list += pool.map_async(get_eventG_sim_stats, conf_tuples, chunksize=1).get()
 		elif sim_technique == "traceB":
-			pool_stats_list += pool.map_async(get_traceB_sim_stats, conf_tuples, chunksize=1)
+			pool_stats_list += pool.map_async(get_traceB_sim_stats, conf_tuples, chunksize=1).get()
 
 	print(datetime.datetime.now(), city, "multiple runs finished!")
 
