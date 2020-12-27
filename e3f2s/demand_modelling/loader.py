@@ -10,7 +10,7 @@ class Loader:
     
     def __init__(self, city, data_source_id, year, month):
         
-        self.city = city
+        self.city_name = city
         self.year = year
         self.month = month
         self.data_source_id = data_source_id
@@ -20,33 +20,37 @@ class Loader:
         self.trips_origins = None
 
         self.points_data_path = os.path.join(
-            data_paths_dict[self.city]["od_trips"]["points"],
+            data_paths_dict[self.city_name]["od_trips"]["points"],
             data_source_id,
             "_".join([str(year), str(month)])
         )
         self.trips_data_path = os.path.join(
-            data_paths_dict[self.city]["od_trips"]["trips"],
+            data_paths_dict[self.city_name]["od_trips"]["trips"],
             data_source_id,
             "_".join([str(year), str(month)])
         )
 
-        if self.city in ["Torino", "Milano"]:
+        if self.city_name == "Roma" or self.city_name == "Torino" or self.city_name == "Milano":
             self.tz = pytz.timezone("Europe/Rome")
-        elif self.city == "Berlin":
+        elif self.city_name == "Amsterdam":
+            self.tz = pytz.timezone("Europe/Amsterdam")
+        elif self.city_name == "Madrid":
+            self.tz = pytz.timezone("Europe/Madrid")
+        elif self.city_name == "Berlin":
             self.tz = pytz.timezone("Europe/Berlin")
-        elif self.city == "Vancouver":
-            self.tz = pytz.timezone("America/Vancouver")
-        elif self.city == "New_York_City":
+        elif self.city_name == "New_York_City":
             self.tz = pytz.timezone("America/New_York")
-        elif self.city == "Minneapolis" or self.city == "Chicago":
-            self.tz = pytz.timezone("America/Chicago")
-        elif self.city == "Louisville":
+        elif self.city_name == "Vancouver":
+            self.tz = pytz.timezone("America/Vancouver")
+        elif self.city_name == "Louisville":
             self.tz = pytz.timezone("America/Kentucky/Louisville")
-        elif self.city == "Austin" or self.city == "Kansas City":
+        elif self.city_name == "Minneapolis" or self.city_name == "Chicago":
+            self.tz = pytz.timezone("America/Chicago")
+        elif self.city_name == "Austin" or self.city_name == "Kansas City":
             self.tz = pytz.timezone("US/Central")
-        elif self.city == "Norfolk":
+        elif self.city_name == "Norfolk":
             self.tz = pytz.timezone("US/Eastern")
-        elif self.city == "Calgary":
+        elif self.city_name == "Calgary":
             self.tz = pytz.timezone("Canada/Mountain")
 
     def read_data (self):
@@ -78,15 +82,15 @@ class Loader:
         self.trips_destinations["end_longitude"] = self.trips_destinations.geometry.apply(lambda p: p.x)
         self.trips_destinations["end_latitude"] = self.trips_destinations.geometry.apply(lambda p: p.y)
 
-        if self.city == 'Vancouver':
+        if self.city_name == 'Vancouver':
             self.trips = self.trips[self.trips.start_longitude < -122.9]
             self.trips = self.trips[self.trips.end_longitude < 0]
-        elif self.city == 'Berlin':
+        elif self.city_name == 'Berlin':
             self.trips = self.trips[(self.trips.start_latitude > 51) & (self.trips.start_latitude < 53)]
             self.trips = self.trips[(self.trips.start_longitude > 12) & (self.trips.start_longitude < 14)]
             self.trips = self.trips[(self.trips.end_latitude > 51) & (self.trips.end_latitude < 53)]
             self.trips = self.trips[(self.trips.end_longitude > 12) & (self.trips.end_longitude < 14)]
-        elif self.city == 'Kansas City':
+        elif self.city_name == 'Kansas City':
             self.trips = self.trips[(self.trips.start_latitude > 38.95) & (self.trips.start_latitude < 39.20)]
             self.trips = self.trips[(self.trips.end_latitude > 38.95) & (self.trips.end_latitude < 39.20)]
 

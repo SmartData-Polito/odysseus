@@ -38,14 +38,13 @@ def get_time_group_columns (trips_df_norm):
 			).apply(lambda dt: dt.total_seconds())
 
 	if "year" not in trips_df_norm:
-		trips_df_norm.loc[:, "year"] = trips_df_norm.start_time.apply(
-			lambda dt: dt.year
-		)
-
+		trips_df_norm.loc[:, "start_year"] = trips_df_norm.start_time.apply(lambda dt: dt.year)
+		trips_df_norm.loc[:, "end_year"] = trips_df_norm.end_time.apply(lambda dt: dt.year)
+		trips_df_norm.loc[:, "year"] = trips_df_norm.loc[:, "start_year"]
 	if "month" not in trips_df_norm:
-		trips_df_norm.loc[:, "month"] = trips_df_norm.start_time.apply(
-			lambda dt: dt.month
-		)
+		trips_df_norm.loc[:, "start_month"] = trips_df_norm.start_time.apply(lambda dt: dt.month)
+		trips_df_norm.loc[:, "end_month"] = trips_df_norm.end_time.apply(lambda dt: dt.month)
+		trips_df_norm.loc[:, "month"] = trips_df_norm.loc[:, "start_month"]
 
 	if "start_hour" not in trips_df_norm:
 		trips_df_norm.loc[:, "start_hour"] = trips_df_norm.start_time.apply(lambda d: d.hour).astype(int)

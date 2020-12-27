@@ -109,5 +109,6 @@ def get_od_distance(grid, origin_id, destination_id):
     lat2 = grid.loc[destination_id, "geometry"].centroid.y
     return haversine(lon1, lat1, lon2, lat2)
 
+
 def miles_to_meters(miles):
     return miles * 1609.34
