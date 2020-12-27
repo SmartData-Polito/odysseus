@@ -111,9 +111,10 @@ class Vehicle(object):
 			self.welltotank_emission = tot_emission  #gCO2eq/kWh
 			self.welltotank_energy = tot_energy #MJ/MJelectricity
 			self.tx_efficiency = 92.5 # %
+			self.supported_charge = vehicle_config["max_charg_power"]
 
 
-	def get_charging_time_from_perc(self, actual_level_perc, flow_amount, beta=100):
+	def get_charging_time_from_perc(self, actual_level_perc, flow_amount, profile , beta=100):
 		# flow_amount is generalized to represent the amount of fuel
 		# loaded in the vehicle per unit of time
 		# electric: kW (3.3,7.4,11,22,43,50,120)
@@ -121,7 +122,10 @@ class Vehicle(object):
 		# gnc: kg/min (between 30-70)
 
 		if self.engine_type == "electric":
-			power_output = flow_amount / 1000
+			if self.supported_charge[profile] < flow_amount:
+				power_output = self.supported_charge[profile] / 1000
+			else:
+				power_output = flow_amount / 1000
 			capacity_left = ((beta - actual_level_perc) / 100) * self.capacity
 			return (capacity_left / power_output) * 3600
 		elif self.engine_type in ["gasoline", "diesel", "lpg","cng"]:
@@ -129,7 +133,7 @@ class Vehicle(object):
 			capacity_left = ((beta - actual_level_perc)/100) * self.capacity
 			return (capacity_left/flow_rate) * 60
 
-	def get_percentage_from_charging_time(self, charging_time, flow_amount):
+	def get_percentage_from_charging_time(self, charging_time, flow_amount, profile):
 		# flow_amount is generalized to represent the amount of fuel
 		# loaded in the vehicle per unit of time
 		# electric: kW (3.3,7.4,11,22,43,50,120)
@@ -137,7 +141,10 @@ class Vehicle(object):
 		# gnc: kg/min (between 30-70)
 
 		if self.engine_type == "electric":
-			power_output = flow_amount / 1000
+			if self.supported_charge[profile] < flow_amount:
+				power_output = self.supported_charge[profile] / 1000
+			else:
+				power_output = flow_amount / 1000
 			capacity_left = power_output * (charging_time / 3600)
 			return 100 * (capacity_left / self.capacity)
 		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:

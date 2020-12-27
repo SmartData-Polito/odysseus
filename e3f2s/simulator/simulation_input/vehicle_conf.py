@@ -30,13 +30,33 @@ vehicle_conf = {
 	"electric": {
 		"VW e-Golf 2018": {
 			"engine_type": "electric",
-			"fuel_capacity": 35.5,
-			"consumption": 10.309
+			"fuel_capacity": 32,
+			"consumption": 10.309,
+			"max_charg_power": {
+				"wall_plug": 2300,
+				"single_phase_1": 3700,
+				"single_phase_2": 7200,
+				"three_phase_1": 7200,
+				"three_phase_2": 7200,
+				"three_phase_3": 7200,
+				"dcfc_1": 39000,
+				"dcfc_2": 39000
+			}
 		},
 		"Smart fortwo Electric Drive 2018": {
 			"engine_type": "electric",
 			"fuel_capacity": 16.7,
-			"consumption": 7.6046
+			"consumption": 7.6046,
+			"max_charg_power": {
+				"wall_plug": 2300,
+				"single_phase_1": 3700,
+				"single_phase_2": 4600,
+				"three_phase_1": 3700,
+				"three_phase_2": 4600,
+				"three_phase_3": 4600,
+				"dcfc_1": 4600,
+				"dcfc_2": 4600
+			}
 		}
 	}
 }

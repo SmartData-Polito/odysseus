@@ -16,6 +16,12 @@ station_conf = {
 		"fuel_cost": 0
 	},
 	"electric": {
+		"wall_plug": {
+			"fuel_type": "electric",
+			"voltage_output": 230,
+			"current_output": 10,
+			"fuel_cost": 1.29
+		},
 		"single_phase_1": {
 			"fuel_type": "electric",
 			"voltage_output": 230,
