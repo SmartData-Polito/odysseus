@@ -28,7 +28,7 @@ def single_run(conf_tuple):
         sim_general_conf["city"],
     )
 
-    city_obj = pickle.Unpickler(open(os.path.join(demand_model_path, "city_obj.pickle"), "rb")).load()
+    #city_obj = pickle.Unpickler(open(os.path.join(demand_model_path, "city_obj.pickle"), "rb")).load()
 
     results_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),

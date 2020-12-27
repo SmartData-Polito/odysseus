@@ -64,8 +64,6 @@ class TripsDataSource:
 		for year in self.trips_df_norm.year.unique():
 			for month in self.trips_df_norm.month.unique():
 
-				print(year, month)
-
 				trips_df_norm_year_month = self.trips_df_norm[
 					(self.trips_df_norm.year == year) & (self.trips_df_norm.month == month)
 				]
