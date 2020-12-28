@@ -212,6 +212,8 @@ class SharedMobilitySim:
                             booking_request["driving_distance"] / 1000
                         )
                     )
+            booking_request["avg_speed_kmh"] = (booking_request["driving_distance"] / 1000)/\
+                                               (booking_request['duration'] / 3600)
             booking_request["welltotank_kwh"] = self.vehicles_list[max_soc_vehicle_origin].welltotank_energy_from_perc(
                 booking_request["soc_delta"]
             )

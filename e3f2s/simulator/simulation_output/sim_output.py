@@ -281,7 +281,7 @@ class SimOutput ():
 				] = self.sim_charge_deaths.origin_id.value_counts()
 
 
-
+			self.sim_stats.loc["avg_speed_kmh"] = self.sim_bookings.avg_speed_kmh.mean()
 			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
 
 			self.vehicles_history = pd.DataFrame()
