@@ -51,6 +51,8 @@ class SharedMobilitySim:
         else:
             self.current_daytype = "weekday"
 
+        self.update_relocation_schedule = True
+
         self.simInput = simInput
 
         self.available_vehicles_dict = self.simInput.supply_model.available_vehicles_dict
@@ -78,11 +80,15 @@ class SharedMobilitySim:
         self.n_deaths = 0
         self.n_booked_vehicles = 0
 
+        self.tot_mobility_distance = 0
+        self.tot_mobility_duration = 0
+
         self.list_n_vehicles_charging_system = []
         self.list_n_vehicles_charging_users = []
         self.list_n_vehicles_booked = []
         self.list_n_vehicles_available = []
         self.list_n_vehicles_dead = []
+        self.list_n_scooters_relocating = []
         self.charging_return_distance = []
 
         self.vehicles_list = []
@@ -126,14 +132,16 @@ class SharedMobilitySim:
         }
         self.sim_metrics = SimMetrics(metrics_dict)
 
-        self.chargingStrategy = ChargingStrategy(self.env, self)
         self.scooterRelocationStrategy = ScooterRelocationStrategy(self.env, self)
+        self.chargingStrategy = ChargingStrategy(self.env, self)
 
     def schedule_booking (self, booking_request, vehicle, zone_id):
 
         if "save_history" in self.simInput.demand_model_config:
             if self.simInput.demand_model_config["save_history"]:
                 self.sim_bookings += [booking_request]
+        self.tot_mobility_distance += booking_request["driving_distance"]
+        self.tot_mobility_duration += booking_request["duration"]
 
         self.available_vehicles_dict[zone_id].remove(vehicle)
         del self.vehicles_zones[vehicle]
@@ -166,6 +174,22 @@ class SharedMobilitySim:
             self.chargingStrategy.check_charge(booking_request, self.vehicles_list[vehicle])
         )
 
+        if self.simInput.supply_model_conf["battery_swap"] \
+                and self.simInput.supply_model_conf["scooter_relocation"] \
+                and "scooter_relocation_scheduling" in self.simInput.supply_model_conf:
+
+            if self.simInput.supply_model_conf["scooter_relocation_scheduling"] \
+                    and self.simInput.supply_model_conf["scooter_scheduled_relocation_triggers"]["post_trip"]:
+
+                relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
+                    booking_request,
+                    vehicles=[vehicle]
+                )
+
+                if relocated:
+                    relocation_zone_id = scooter_relocation["end_zone_id"]
+                    yield self.env.process(self.scooterRelocationStrategy.relocate_scooter(scooter_relocation))
+
         self.available_vehicles_dict[relocation_zone_id].append(vehicle)
         self.vehicles_zones[vehicle] = relocation_zone_id
 
@@ -180,6 +204,7 @@ class SharedMobilitySim:
         self.list_n_vehicles_available += [
             self.simInput.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
         ]
+        self.list_n_scooters_relocating += [self.scooterRelocationStrategy.n_scooters_relocating]
 
         self.charging_return_distance = [self.chargingStrategy.charging_return_distance]
 
@@ -259,20 +284,28 @@ class SharedMobilitySim:
                 )
                 self.n_not_same_zone_trips += 1
 
-        if not found_vehicle_flag and self.simInput.supply_model_conf["scooter_relocation"] \
+        if not found_vehicle_flag \
+                and "scooter_relocation" in self.simInput.supply_model_conf \
+                and self.simInput.supply_model_conf["scooter_relocation"] \
                 and self.simInput.supply_model_conf["scooter_relocation_strategy"] == "magic_relocation":
 
-            relocated, relocation_zone_id, relocated_vehicle = \
-                self.scooterRelocationStrategy.check_scooter_relocation(booking_request)
+            relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(booking_request)
 
             if relocated:
+
+                relocation_zone_id = scooter_relocation["end_zone_id"]
+                vehicle = scooter_relocation["vehicle_ids"][0]
+
+                self.scooterRelocationStrategy.magically_relocate_scooter(scooter_relocation)
+                self.available_vehicles_dict[relocation_zone_id].append(vehicle)
+                self.vehicles_zones[vehicle] = relocation_zone_id
 
                 available_vehicle_flag = True
                 available_vehicle_flag_same_zone = True
                 found_vehicle_flag = True
 
                 self.env.process(
-                    self.schedule_booking(booking_request, relocated_vehicle, booking_request["origin_id"])
+                    self.schedule_booking(booking_request, scooter_relocation["vehicle_id"], booking_request["origin_id"])
                 )
                 self.n_same_zone_trips += 1
 

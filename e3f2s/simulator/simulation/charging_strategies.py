@@ -10,18 +10,38 @@ class ChargingStrategy(ChargingPrimitives):
 
 			charging_zone_id = booking_request["destination_id"]
 
+			if self.simInput.sim_scenario_conf["scooter_relocation"] \
+				and self.simInput.sim_scenario_conf["scooter_relocation_strategy"] == "post_battery_swap":
+
+				if operator == "system":
+					relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
+						booking_request
+					)
+
+					if relocated:
+						charging_zone_id = scooter_relocation["end_zone_id"]
+
+						if self.simInput.sim_scenario_conf["time_estimation"]:
+							timeout_return = scooter_relocation["duration"]
+
+					else:
+						timeout_return = 0
+
+			else:
+				timeout_return = 0
+
+
 			if operator == "system":
 				timeout_outward = np.random.exponential(
-					self.simInput.supply_model_conf[
+					self.simInput.sim_scenario_conf[
 						"avg_reach_time"
 					] * 60
 				)
 				charge["duration"] = np.random.exponential(
-					self.simInput.supply_model_conf[
+					self.simInput.sim_scenario_conf[
 						"avg_service_time"
 					] * 60
 				)
-				timeout_return = 0
 				cr_soc_delta = 0
 				resource = self.workers
 
@@ -201,11 +221,26 @@ class ChargingStrategy(ChargingPrimitives):
 
 		if charge_flag and not user_charge_flag:
 
-			if not self.simInput.supply_model_conf["relocation"]:
-				relocation_zone_id = charge_dict["zone_id"]
+			relocation_zone_id = charge_dict["zone_id"]
 
-			elif self.simInput.supply_model_conf["relocation"]:
+			if self.simInput.supply_model_conf["relocation"]:
 				relocation_zone_id = booking_request["destination_id"]
+
+			elif self.simInput.supply_model_conf["battery_swap"] \
+				and self.simInput.supply_model_conf["scooter_relocation"] \
+				and "scooter_relocation_scheduling" in self.simInput.supply_model_conf:
+
+				if self.simInput.supply_model_conf["scooter_relocation_scheduling"] \
+					and self.simInput.supply_model_conf["scooter_scheduled_relocation_triggers"]["post_charge"]:
+
+					relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
+						booking_request,
+						vehicles=[vehicle.plate]
+					)
+
+					if relocated:
+						relocation_zone_id = scooter_relocation["end_zone_id"]
+						yield self.env.process(self.scooterRelocationStrategy.relocate_scooter(scooter_relocation))
 
 		else:
 

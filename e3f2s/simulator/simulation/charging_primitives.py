@@ -35,6 +35,8 @@ class ChargingPrimitives:
 
 		self.zone_dict = sim.zone_dict
 
+		self.scooterRelocationStrategy = sim.scooterRelocationStrategy
+
 		self.workers = simpy.Resource(
 			self.env,
 			capacity=self.simInput.supply_model_conf["n_workers"]

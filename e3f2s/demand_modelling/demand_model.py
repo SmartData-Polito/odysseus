@@ -97,6 +97,7 @@ class DemandModel:
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
         self.trip_kdes = self.get_trip_kdes()
+        self.origin_scores = self.get_origin_scores()
 
     def map_zones_on_trips(self, zones):
         self.trips_origins = gpd.sjoin(
@@ -320,6 +321,33 @@ class DemandModel:
 
         return self.trip_kdes
 
+    def get_origin_scores(self):
+        print("Calculating origins descrete marginal distributions...")
+        self.origin_scores = {}
+        for daytype in self.trip_kdes.keys():
+            self.origin_scores[daytype] = {}
+            for hour in self.trip_kdes[daytype].keys():
+                self.origin_scores[daytype][hour] = {}
+                total_covered_density = 0
+                for origin_i in self.grid_matrix.index:
+                    for origin_j in self.grid_matrix.columns:
+                        origin_id = self.grid_matrix.iloc[origin_i, origin_j]
+                        destination_log_densities = self.trip_kdes[daytype][hour].score_samples(
+                            np.array(np.meshgrid(
+                                [origin_i],
+                                [origin_j],
+                                [self.grid_matrix.index],
+                                [self.grid_matrix.columns]
+                            )).T.reshape(-1, 4)
+                        )
+                        origin_score = np.sum(np.exp(destination_log_densities))
+                        self.origin_scores[daytype][hour][origin_id] = origin_score
+                        total_covered_density += origin_score
+                print("daytype:", daytype, "hour:", hour, "total_covered_density:", total_covered_density)
+        print("Done!")
+
+        return self.origin_scores
+
     def save_results(self):
 
         demand_model_path = os.path.join(
@@ -359,6 +387,8 @@ class DemandModel:
             pickle.dump(self.trip_kdes, f)
         with open(os.path.join(demand_model_path, "valid_zones.pickle"), "wb") as f:
             pickle.dump(self.valid_zones, f)
+        with open(os.path.join(demand_model_path, "origin_scores.pickle"), "wb") as f:
+            pickle.dump(self.origin_scores, f)
 
         integers_dict = {
             "avg_request_rate" : self.avg_request_rate,
