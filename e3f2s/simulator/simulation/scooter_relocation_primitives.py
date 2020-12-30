@@ -1,17 +1,21 @@
+import simpy
+
 from e3f2s.utils.geospatial_utils import get_od_distance
 
 
-def init_scooter_relocation(vehicle_id, start_time, start_zone_id, end_zone_id):
+def init_scooter_relocation(vehicle_ids, start_time, start_zone_id, end_zone_id, distance=None, duration=0):
 
     scooter_relocation = {
         "start_time": start_time,
         "date": start_time.date(),
         "hour": start_time.hour,
         "day_hour": start_time.replace(minute=0, second=0, microsecond=0),
-        "vehicle_id": vehicle_id,
+        "n_vehicles": len(vehicle_ids),
+        "vehicle_ids": vehicle_ids,
         "start_zone_id": start_zone_id,
         "end_zone_id": end_zone_id,
-        "distance": None
+        "distance": distance,
+        "duration": duration
     }
     return scooter_relocation
 
@@ -34,31 +38,65 @@ class ScooterRelocationPrimitives:
 
         self.vehicles_zones = sim.vehicles_zones
 
+        self.relocation_workers = simpy.Resource(
+            self.env,
+            capacity=self.simInput.sim_scenario_conf["n_relocation_workers"]
+        )
+
+        self.n_scooter_relocations = 0
+        self.tot_scooter_relocations_distance = 0
+        self.tot_scooter_relocations_duration = 0
         self.sim_scooter_relocations = []
+
+        self.n_scooters_relocating = 0
+
+        self.scheduled_scooter_relocations = {}
 
     def relocate_scooter(self, scooter_relocation):
 
-        scooter_relocation["distance"] = get_od_distance(
+        scooter_relocation["distance"] = self.get_relocation_distance(scooter_relocation)
+
+        self.pick_up_scooter(scooter_relocation)
+
+        with self.relocation_workers.request() as relocation_worker_request:
+            yield relocation_worker_request
+            self.n_scooters_relocating += 1
+            yield self.env.timeout(scooter_relocation["duration"])
+            self.n_scooters_relocating -= 1
+
+        self.drop_off_scooter(scooter_relocation)
+
+        if "save_history" in self.simInput.sim_general_conf:
+            if self.simInput.sim_general_conf["save_history"]:
+                self.sim_scooter_relocations += [scooter_relocation]
+
+        self.n_scooter_relocations += 1
+        self.tot_scooter_relocations_distance += scooter_relocation["distance"]
+        self.tot_scooter_relocations_duration += scooter_relocation["duration"]
+
+    def magically_relocate_scooter(self, scooter_relocation):
+        scooter_relocation["distance"] = self.get_relocation_distance(scooter_relocation)
+        self.pick_up_scooter(scooter_relocation)
+        self.drop_off_scooter(scooter_relocation)
+        if "save_history" in self.simInput.sim_general_conf:
+            if self.simInput.sim_general_conf["save_history"]:
+                self.sim_scooter_relocations += [scooter_relocation]
+        self.n_scooter_relocations += 1
+        self.tot_scooter_relocations_distance += scooter_relocation["distance"]
+
+    def get_relocation_distance(self, scooter_relocation):
+        return get_od_distance(
             self.simInput.grid,
             scooter_relocation["start_zone_id"],
             scooter_relocation["end_zone_id"]
         )
 
-        self.vehicles_zones[scooter_relocation["vehicle_id"]] = scooter_relocation["end_zone_id"]
-
-        self.available_vehicles_dict[scooter_relocation["start_zone_id"]].remove(
-            scooter_relocation["vehicle_id"]
-        )
-
+    def pick_up_scooter(self, scooter_relocation):
         self.zone_dict[scooter_relocation["start_zone_id"]].remove_vehicle(
             scooter_relocation["start_time"]
         )
+
+    def drop_off_scooter(self, scooter_relocation):
         self.zone_dict[scooter_relocation["end_zone_id"]].add_vehicle(
             scooter_relocation["start_time"]
         )
-
-        self.available_vehicles_dict[scooter_relocation["end_zone_id"]].append(
-            scooter_relocation["vehicle_id"]
-        )
-
-        self.sim_scooter_relocations += [scooter_relocation]

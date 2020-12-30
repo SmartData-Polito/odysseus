@@ -103,3 +103,14 @@ class SimStats():
 			self.sim_stats.loc["fraction_deaths_unsatisfied"] = 0
 
 		self.sim_stats.loc["n_charges"] = sim.chargingStrategy.n_charges
+
+		self.sim_stats.loc["tot_mobility_distance"] = sim.tot_mobility_distance
+		self.sim_stats.loc["tot_mobility_duration"] = sim.tot_mobility_duration
+
+		if self.sim_scenario_conf["battery_swap"]:
+			if "scooter_relocation" in self.sim_scenario_conf and self.sim_scenario_conf["scooter_relocation"]:
+				self.sim_stats.loc["n_scooter_relocations"] = sim.scooterRelocationStrategy.n_scooter_relocations
+				self.sim_stats.loc["tot_scooter_relocations_distance"] = \
+					sim.scooterRelocationStrategy.tot_scooter_relocations_distance
+				self.sim_stats.loc["tot_scooter_relocations_duration"] = \
+					sim.scooterRelocationStrategy.tot_scooter_relocations_duration
