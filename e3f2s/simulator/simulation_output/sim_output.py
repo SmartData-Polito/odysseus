@@ -198,10 +198,10 @@ class SimOutput ():
 					+ self.sim_charges.timeout_return
 
 				self.sim_stats.loc["cum_relo_out_t"] = \
-					self.sim_charges.timeout_outward.sum() / 60 / 60
+					self.sim_charges.timeout_outward.sum()
 
 				self.sim_stats.loc["cum_relo_ret_t"] = \
-					self.sim_charges.timeout_return.sum() / 60 / 60
+					self.sim_charges.timeout_return.sum()
 
 				self.sim_stats.loc["cum_relo_t"] = \
 					self.sim_stats.cum_relo_out_t + \
@@ -276,8 +276,6 @@ class SimOutput ():
 				self.grid[
 					"charge_deaths_origins_count"
 				] = self.sim_charge_deaths.origin_id.value_counts()
-
-
 
 			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
 
