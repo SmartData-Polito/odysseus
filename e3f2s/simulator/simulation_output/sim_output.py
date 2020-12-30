@@ -8,7 +8,7 @@ class SimOutput ():
 
 		self.valid_zones = sim.simInput.valid_zones
 
-		self.sim_general_conf = sim.simInput.sim_general_conf
+		self.sim_general_conf = sim.simInput.demand_model_config
 		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
 		self.grid = sim.simInput.grid
 

@@ -165,7 +165,7 @@ class RelocationPrimitives:
 			destination_id
 		)
 		if distance == 0:
-			distance = self.simInput.sim_general_conf["bin_side_length"]
+			distance = self.simInput.demand_model_config["bin_side_length"]
 		return distance / 1000 / self.simInput.avg_speed_kmh_mean * 3600
 
 	def get_cr_soc_delta(self, origin_id, destination_id):
@@ -175,5 +175,5 @@ class RelocationPrimitives:
 			destination_id
 		)
 		if distance == 0:
-			distance = self.simInput.sim_general_conf["bin_side_length"]
+			distance = self.simInput.demand_model_config["bin_side_length"]
 		return get_soc_delta(distance / 1000)

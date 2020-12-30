@@ -23,21 +23,21 @@ class SharedMobilitySim:
     def __init__(self, simInput):
 
         self.start = datetime.datetime(
-            simInput.sim_general_conf["year"],
-            simInput.sim_general_conf["month_start"],
+            simInput.demand_model_config["year"],
+            simInput.demand_model_config["month_start"],
             1, tzinfo=pytz.UTC
         )
 
-        if simInput.sim_general_conf["month_end"] == 13:
+        if simInput.demand_model_config["month_end"] == 13:
             self.end = datetime.datetime(
-                simInput.sim_general_conf["year"] + 1,
+                simInput.demand_model_config["year"] + 1,
                 1,
                 1, tzinfo=pytz.UTC
             )
         else:
             self.end = datetime.datetime(
-                simInput.sim_general_conf["year"],
-                simInput.sim_general_conf["month_end"],
+                simInput.demand_model_config["year"],
+                simInput.demand_model_config["month_end"],
                 1, tzinfo=pytz.UTC
             )
 
@@ -92,6 +92,7 @@ class SharedMobilitySim:
         for zone_id in self.simInput.valid_zones:
             self.zone_dict[zone_id] = Zone(self.env, zone_id, self.start, self.available_vehicles_dict[zone_id])
 
+        self.real_n_charging_zones = 0
         if self.simInput.sim_scenario_conf["distributed_cps"]:
             for zone_id in self.simInput.n_charging_poles_by_zone:
                 zone_n_cps = self.simInput.n_charging_poles_by_zone[zone_id]
@@ -99,6 +100,7 @@ class SharedMobilitySim:
                     self.charging_stations_dict[zone_id] = ChargingStation(
                         self.env, zone_n_cps, zone_id, station_conf, self.simInput.sim_scenario_conf, self.start
                     )
+                    self.real_n_charging_zones += zone_n_cps
 
         self.vehicles_list = []
         for i in range(self.simInput.n_vehicles_sim):
@@ -129,8 +131,8 @@ class SharedMobilitySim:
 
     def schedule_booking (self, booking_request, vehicle, zone_id):
 
-        if "save_history" in self.simInput.sim_general_conf:
-            if self.simInput.sim_general_conf["save_history"]:
+        if "save_history" in self.simInput.demand_model_config:
+            if self.simInput.demand_model_config["save_history"]:
                 self.sim_bookings += [booking_request]
 
         self.available_vehicles_dict[zone_id].remove(vehicle)
@@ -181,8 +183,8 @@ class SharedMobilitySim:
 
         self.charging_return_distance = [self.chargingStrategy.charging_return_distance]
 
-        if "save_history" in self.simInput.sim_general_conf:
-            if self.simInput.sim_general_conf["save_history"]:
+        if "save_history" in self.simInput.demand_model_config:
+            if self.simInput.demand_model_config["save_history"]:
                 self.sim_booking_requests += [booking_request]
         self.n_booking_requests += 1
 
@@ -276,8 +278,8 @@ class SharedMobilitySim:
 
         if not available_vehicle_flag:
             self.n_no_close_vehicles += 1
-            if "save_history" in self.simInput.sim_general_conf:
-                if self.simInput.sim_general_conf["save_history"]:
+            if "save_history" in self.simInput.demand_model_config:
+                if self.simInput.demand_model_config["save_history"]:
                     self.sim_unsatisfied_requests += [booking_request]
                     self.sim_no_close_vehicle_requests += [booking_request]
 
@@ -298,8 +300,8 @@ class SharedMobilitySim:
             elif available_vehicle_flag_not_same_zone:
                 death["plate"] = max_soc_vehicle_neighbor
                 death["zone_id"] = max_neighbor
-            if "save_history" in self.simInput.sim_general_conf:
-                if self.simInput.sim_general_conf["save_history"]:
+            if "save_history" in self.simInput.demand_model_config:
+                if self.simInput.demand_model_config["save_history"]:
                     self.sim_booking_requests_deaths += [death]
 
     def run (self):

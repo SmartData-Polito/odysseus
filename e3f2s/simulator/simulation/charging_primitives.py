@@ -165,8 +165,8 @@ class ChargingPrimitives:
 
 		charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
 
-		if "save_history" in self.simInput.sim_general_conf:
-			if self.simInput.sim_general_conf["save_history"]:
+		if "save_history" in self.simInput.demand_model_config:
+			if self.simInput.demand_model_config["save_history"]:
 				self.sim_charges += [charge]
 		self.n_charges += 1
 
@@ -210,7 +210,7 @@ class ChargingPrimitives:
 			destination_id
 		)
 		if distance == 0:
-			distance = self.simInput.sim_general_conf["bin_side_length"]
+			distance = self.simInput.demand_model_config["bin_side_length"]
 		return distance / 1000 / self.simInput.avg_speed_kmh_mean * 3600
 
 	def get_cr_soc_delta(self, origin_id, destination_id, vehicle):
@@ -220,7 +220,7 @@ class ChargingPrimitives:
 			destination_id
 		)
 		if distance == 0:
-			distance = self.simInput.sim_general_conf["bin_side_length"]
+			distance = self.simInput.demand_model_config["bin_side_length"]
 		return vehicle.consumption_to_percentage(vehicle.distance_to_consumption(distance / 1000))
 
 	def get_distance(self, origin_id, destination_id):
@@ -230,5 +230,5 @@ class ChargingPrimitives:
 			destination_id
 		)
 		if distance == 0:
-			distance = self.simInput.sim_general_conf["bin_side_length"]
+			distance = self.simInput.demand_model_config["bin_side_length"]
 		return distance

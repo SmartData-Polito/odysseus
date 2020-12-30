@@ -32,7 +32,7 @@ class EFFCS_SimOutputPlotter ():
 		self.sim_scenario_name = sim_scenario_name
 
 		model_general_conf_string = "_".join([
-			str(v) for v in sim_output.sim_general_conf.values()]
+			str(v) for v in sim_output.demand_model_config.values()]
 		).replace("'", "").replace(".", "d")
 		model_conf_string = "_".join([
 			str(v) for v in sim_output.sim_scenario_conf.values()]

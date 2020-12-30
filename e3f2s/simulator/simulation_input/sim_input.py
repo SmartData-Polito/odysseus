@@ -201,7 +201,7 @@ class SimInput:
 
 			elif self.sim_scenario_conf["cps_placement_policy"] == "real_positions":
 				cps_points = geodataframe_charging_points(
-					self.city,self.sim_scenario_conf["engine_type"],station_locations
+					self.city, self.sim_scenario_conf["engine_type"], station_locations
 				)
 				self.n_charging_poles_by_zone = {}
 				value = 0

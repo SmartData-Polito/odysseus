@@ -21,15 +21,6 @@ def single_run(conf_tuple):
     city = sim_general_conf["city"]
     sim_type = sim_general_conf["sim_technique"]
 
-    demand_model_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-        "demand_modelling",
-        "demand_models",
-        sim_general_conf["city"],
-    )
-
-    #city_obj = pickle.Unpickler(open(os.path.join(demand_model_path, "city_obj.pickle"), "rb")).load()
-
     results_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
         "results",

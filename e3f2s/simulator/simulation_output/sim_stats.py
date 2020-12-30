@@ -12,7 +12,7 @@ class SimStats():
 
 		self.valid_zones = sim.simInput.valid_zones
 
-		self.sim_general_conf = sim.simInput.sim_general_conf
+		self.sim_general_conf = sim.simInput.demand_model_config
 		self.sim_scenario_conf = sim.simInput.sim_scenario_conf
 
 		self.grid = sim.simInput.grid
@@ -23,7 +23,7 @@ class SimStats():
 
 		self.sim_stats = pd.concat([
 			self.sim_stats,
-			pd.Series(sim.simInput.sim_general_conf)
+			pd.Series(sim.simInput.demand_model_config)
 		])
 
 		self.sim_stats = pd.concat([

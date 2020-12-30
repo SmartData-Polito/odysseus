@@ -54,18 +54,6 @@ for sim_general_conf in sim_general_conf_list:
     sim_run_mode = sim_general_conf["sim_run_mode"]
     print(sim_general_conf)
 
-    demand_model_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)),
-        "demand_modelling",
-        "demand_models",
-        sim_general_conf["city"],
-    )
-    os.makedirs(demand_model_path, exist_ok=True)
-
-    if not os.path.exists(os.path.join(demand_model_path, "city_obj.pickle")):
-        city_obj = DemandModel(sim_general_conf["city"], sim_general_conf)
-        city_obj.save_results()
-
     if sim_run_mode == "single_run":
         single_run((
             sim_general_conf,

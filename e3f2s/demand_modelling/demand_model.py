@@ -13,23 +13,24 @@ from e3f2s.utils.time_utils import *
 
 class DemandModel:
 
-    def __init__(self, city_name, sim_general_conf, kde_bw=1):
+    def __init__(self, city_name, demand_model_config):
 
         self.city_name = city_name
-        self.sim_general_conf = sim_general_conf
-        self.data_source_id = sim_general_conf["data_source_id"]
+        self.demand_model_config = demand_model_config
+        self.data_source_id = demand_model_config["data_source_id"]
 
-        self.kde_bw = kde_bw
+        self.kde_bw = self.demand_model_config["kde_bandwidth"]
 
-        year = self.sim_general_conf["year"]
-        start_month = self.sim_general_conf["month_start"]
-        end_month = self.sim_general_conf["month_end"]
-        self.bin_side_length = self.sim_general_conf["bin_side_length"]
+        year = self.demand_model_config["year"]
+        start_month = self.demand_model_config["start_month"]
+        end_month = self.demand_model_config["end_month"]
+
+        self.bin_side_length = self.demand_model_config["bin_side_length"]
 
         self.bookings = pd.DataFrame()
         self.trips_origins = pd.DataFrame()
         self.trips_destinations = pd.DataFrame()
-        for month in range(start_month, end_month):
+        for month in range(start_month, end_month+1):
             self.loader = Loader(self.city_name, self.data_source_id, year, month)
             bookings, origins, destinations = self.loader.read_data()
             self.bookings = pd.concat([self.bookings, bookings], ignore_index=True)
@@ -325,7 +326,7 @@ class DemandModel:
             os.path.dirname(os.path.dirname(__file__)),
             "demand_modelling",
             "demand_models",
-            self.sim_general_conf["city"],
+            self.demand_model_config["city"],
         )
 
         with open(os.path.join(demand_model_path, "city_obj.pickle"), "wb") as f:

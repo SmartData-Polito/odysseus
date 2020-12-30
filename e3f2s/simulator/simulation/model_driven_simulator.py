@@ -73,7 +73,7 @@ class ModelDrivenSim (SharedMobilitySim):
 			)
 
 			if booking_request["euclidean_distance"] == 0:
-				booking_request["euclidean_distance"] = self.simInput.sim_general_conf["bin_side_length"]
+				booking_request["euclidean_distance"] = self.simInput.demand_model_config["bin_side_length"]
 
 			booking_request["driving_distance"] = booking_request["euclidean_distance"] * 1.4
 			booking_request["duration"] = abs(booking_request["driving_distance"] / (
