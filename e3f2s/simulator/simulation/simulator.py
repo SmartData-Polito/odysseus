@@ -57,7 +57,7 @@ class SharedMobilitySim:
 
         self.neighbors_dict = self.simInput.neighbors_dict
 
-        if simInput.sim_scenario_conf["distributed_cps"]:
+        if simInput.supply_model_conf["distributed_cps"]:
             self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone
 
         self.vehicles_soc_dict = self.simInput.vehicles_soc_dict
@@ -93,12 +93,12 @@ class SharedMobilitySim:
             self.zone_dict[zone_id] = Zone(self.env, zone_id, self.start, self.available_vehicles_dict[zone_id])
 
         self.real_n_charging_zones = 0
-        if self.simInput.sim_scenario_conf["distributed_cps"]:
+        if self.simInput.supply_model_conf["distributed_cps"]:
             for zone_id in self.simInput.n_charging_poles_by_zone:
                 zone_n_cps = self.simInput.n_charging_poles_by_zone[zone_id]
                 if zone_n_cps > 0:
                     self.charging_stations_dict[zone_id] = ChargingStation(
-                        self.env, zone_n_cps, zone_id, station_conf, self.simInput.sim_scenario_conf, self.start
+                        self.env, zone_n_cps, zone_id, station_conf, self.simInput.supply_model_conf, self.start
                     )
                     self.real_n_charging_zones += zone_n_cps
 
@@ -106,13 +106,13 @@ class SharedMobilitySim:
         for i in range(self.simInput.n_vehicles_sim):
             vehicle_object = Vehicle(
                 self.env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
-                vehicle_conf, energymix_conf, self.simInput.sim_scenario_conf, self.start
+                vehicle_conf, energymix_conf, self.simInput.supply_model_conf, self.start
             )
             self.vehicles_list.append(vehicle_object)
 
-        if "alpha_policy" in self.simInput.sim_scenario_conf:
-            if self.simInput.sim_scenario_conf["alpha_policy"] == "auto":
-                self.simInput.sim_scenario_conf["alpha"] = self.vehicles_list[0].consumption_to_percentage(
+        if "alpha_policy" in self.simInput.supply_model_conf:
+            if self.simInput.supply_model_conf["alpha_policy"] == "auto":
+                self.simInput.supply_model_conf["alpha"] = self.vehicles_list[0].consumption_to_percentage(
                     self.vehicles_list[0].distance_to_consumption(
                         self.simInput.max_driving_distance / 1000
                     )
@@ -259,8 +259,8 @@ class SharedMobilitySim:
                 )
                 self.n_not_same_zone_trips += 1
 
-        if not found_vehicle_flag and self.simInput.sim_scenario_conf["scooter_relocation"] \
-                and self.simInput.sim_scenario_conf["scooter_relocation_strategy"] == "magic_relocation":
+        if not found_vehicle_flag and self.simInput.supply_model_conf["scooter_relocation"] \
+                and self.simInput.supply_model_conf["scooter_relocation_strategy"] == "magic_relocation":
 
             relocated, relocation_zone_id, relocated_vehicle = \
                 self.scooterRelocationStrategy.check_scooter_relocation(booking_request)

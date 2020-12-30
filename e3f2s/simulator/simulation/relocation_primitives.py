@@ -37,7 +37,7 @@ class RelocationPrimitives:
 
 		self.workers = simpy.Resource(
 			self.env,
-			capacity=self.simInput.sim_scenario_conf["n_relocate_workers"]
+			capacity=self.simInput.supply_model_conf["n_relocate_workers"]
 		)
 
 		# if self.simInput.sim_scenario_conf["hub"]:
@@ -129,7 +129,7 @@ class RelocationPrimitives:
 
 	def check_system_relocate(self, charge_dict, vehicle):
 		# have enough battery to relocate
-		if self.vehicles_soc_dict[vehicle] > self.simInput.sim_scenario_conf["alpha"]:
+		if self.vehicles_soc_dict[vehicle] > self.simInput.supply_model_conf["alpha"]:
 			relocate = init_relocate(
 				charge_dict,
 				self.vehicles_soc_dict,

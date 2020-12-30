@@ -1,7 +1,7 @@
 import datetime
 
 import simpy
-from e3f2s.data_structures.charging_station import Pole
+from e3f2s.supply_modelling.charging_station import Pole
 
 
 class ChargingStation(Pole):

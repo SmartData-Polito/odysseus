@@ -5,7 +5,6 @@ import multiprocessing as mp
 
 import pandas as pd
 
-from e3f2s.demand_modelling.demand_model import DemandModel
 from e3f2s.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 from e3f2s.simulator.single_run.run_eventG_sim import get_eventG_sim_stats
 from e3f2s.simulator.single_run.run_traceB_sim import get_traceB_sim_stats
@@ -25,16 +24,7 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 	)
 	os.makedirs(results_path, exist_ok=True)
 
-	demand_model_path = os.path.join(
-		os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-		"demand_modelling",
-		"demand_models",
-		sim_general_conf["city"],
-	)
-
 	with mp.Pool(mp.cpu_count(), maxtasksperchild=1) as pool:
-
-		#city_obj = pickle.Unpickler(open(os.path.join(demand_model_path, "city_obj.pickle"), "rb")).load()
 
 		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 

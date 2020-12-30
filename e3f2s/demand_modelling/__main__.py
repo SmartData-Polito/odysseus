@@ -52,5 +52,5 @@ for demand_model_config in demand_model_configs_list:
     os.makedirs(demand_model_path, exist_ok=True)
 
     if not os.path.exists(os.path.join(demand_model_path, "city_obj.pickle")):
-        city_obj = DemandModel(demand_model_config["city"], demand_model_config)
-        city_obj.save_results()
+        demand_model = DemandModel(demand_model_config["city"], demand_model_config)
+        demand_model.save_results()

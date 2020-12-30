@@ -5,7 +5,7 @@ import pandas as pd
 from e3f2s.simulator.simulation.simulator import SharedMobilitySim
 from e3f2s.utils.time_utils import update_req_time_info
 #from e3f2s.utils.vehicle_utils import *
-#from e3f2s.data_structures.vehicle import Vehicle
+#from e3f2s.supply_modelling.vehicle import Vehicle
 
 
 class TraceDrivenSim (SharedMobilitySim):

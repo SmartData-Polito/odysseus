@@ -6,7 +6,7 @@ class RelocationStrategy(RelocationPrimitives):
 
 	def get_relocate_dict(self, vehicle, relocate, charging_request, operator, post_relocation_strategy):
 
-		if self.simInput.sim_scenario_conf["distributed_cps"]:
+		if self.simInput.supply_model_conf["distributed_cps"]:
 
 			if post_relocation_strategy == "random_post_relocation":
 				# zones_by_distance = self.simInput.zones_cp_distances.loc[int(charging_request["destination_id"])]
@@ -41,7 +41,7 @@ class RelocationStrategy(RelocationPrimitives):
 			#relocation_station = self.charging_stations_dict[charging_zone_id].charging_station
 			#resource = relocation_station
 
-			if self.simInput.sim_scenario_conf["time_estimation"]:
+			if self.simInput.supply_model_conf["time_estimation"]:
 
 				if operator == "system":
 
@@ -104,7 +104,7 @@ class RelocationStrategy(RelocationPrimitives):
 		relocate_flag, relocate = self.check_system_relocate(charging_request, vehicle)
 		if relocate_flag:
 			self.list_system_relocation_bookings.append(charging_request)
-			post_relocation_strategy = self.simInput.sim_scenario_conf["post_relocation_strategy"]
+			post_relocation_strategy = self.simInput.supply_model_conf["post_relocation_strategy"]
 			relocate_dict = self.get_relocate_dict(vehicle, relocate, charging_request, "system",
 												post_relocation_strategy)
 			yield self.env.process(self.relocate_vehicle(relocate_dict))

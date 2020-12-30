@@ -10,9 +10,9 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
         relocation_zone_id = None
         relocated_vehicle = None
 
-        if self.simInput.sim_scenario_conf["battery_swap"]:
+        if self.simInput.supply_model_conf["battery_swap"]:
 
-            if self.simInput.sim_scenario_conf["scooter_relocation_strategy"] == "magic_relocation":
+            if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "magic_relocation":
 
                 booking_request_zone_column = int(np.floor(
                     booking_request["origin_id"] / self.simInput.grid_matrix.shape[0]

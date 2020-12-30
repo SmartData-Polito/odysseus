@@ -7,7 +7,7 @@ import numpy as np
 #from e3f2s.utils.vehicle_utils import soc_to_kwh
 from e3f2s.utils.geospatial_utils import get_od_distance
 from e3f2s.simulator.simulation.simulator import SharedMobilitySim
-#from e3f2s.data_structures.vehicle import Vehicle
+#from e3f2s.supply_modelling.vehicle import Vehicle
 
 np.random.seed(44)
 
@@ -96,7 +96,7 @@ class ModelDrivenSim (SharedMobilitySim):
 
 			timeout_sec = (
 				np.random.exponential(
-					1 / self.simInput.sim_scenario_conf["requests_rate_factor"] / self.current_arrival_rate
+                    1 / self.simInput.supply_model_conf["requests_rate_factor"] / self.current_arrival_rate
 				)
 			)
 

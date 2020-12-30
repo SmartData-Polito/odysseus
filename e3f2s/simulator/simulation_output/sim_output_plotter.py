@@ -35,7 +35,7 @@ class EFFCS_SimOutputPlotter ():
 			str(v) for v in sim_output.demand_model_config.values()]
 		).replace("'", "").replace(".", "d")
 		model_conf_string = "_".join([
-			str(v) for v in sim_output.sim_scenario_conf.values()]
+			str(v) for v in sim_output.supply_model_conf.values()]
 		).replace("'", "").replace(".", "d")
 		self.figures_path = os.path.join(
 			os.path.dirname(os.path.dirname(__file__)),
@@ -94,14 +94,14 @@ class EFFCS_SimOutputPlotter ():
 		self.grid.plot(color="white", edgecolor="black", ax=ax)
 		self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 
-		if self.sim_output.sim_scenario_conf["hub"]:
+		if self.sim_output.supply_model_conf["hub"]:
 			self.grid.plot(color="white", edgecolor="black", ax=ax)
 			self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 			self.grid.loc[[self.sim_output.sim_stats["hub_zone"]]].plot(ax=ax)
 			plt.savefig(os.path.join(self.figures_path, "hub_location.png"), transparent=True)
 			plt.close()
 
-		elif self.sim_output.sim_scenario_conf["distributed_cps"]:
+		elif self.sim_output.supply_model_conf["distributed_cps"]:
 
 			charging_zones = pd.Index(self.sim_charges.zone_id.unique())
 			charging_poles_by_zone = self.sim_charges.zone_id.value_counts()

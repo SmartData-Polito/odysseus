@@ -37,10 +37,10 @@ class ChargingPrimitives:
 
 		self.workers = simpy.Resource(
 			self.env,
-			capacity=self.simInput.sim_scenario_conf["n_workers"]
+			capacity=self.simInput.supply_model_conf["n_workers"]
 		)
 
-		if self.simInput.sim_scenario_conf["distributed_cps"]:
+		if self.simInput.supply_model_conf["distributed_cps"]:
 			self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone
 			self.charging_poles_dict = {}
 			for zone, n in self.n_charging_poles_by_zone.items():
@@ -85,7 +85,7 @@ class ChargingPrimitives:
 		#charging_outward_distance = charge_dict["charging_outward_distance"]
 
 		def check_queuing():
-			if self.simInput.sim_scenario_conf["queuing"]:
+			if self.simInput.supply_model_conf["queuing"]:
 				return True
 			else:
 				if resource.count < resource.capacity:
@@ -100,7 +100,7 @@ class ChargingPrimitives:
 		charge["cr_soc_delta"] = cr_soc_delta
 		charge["cr_soc_delta_kwh"] = vehicle.tanktowheel_energy_from_perc(cr_soc_delta)
 
-		if self.simInput.sim_scenario_conf["battery_swap"]:
+		if self.simInput.supply_model_conf["battery_swap"]:
 			if operator == "system":
 				if check_queuing():
 					with self.workers.request() as worker_request:
@@ -172,11 +172,11 @@ class ChargingPrimitives:
 
 	def check_system_charge(self, booking_request, vehicle, charging_strategy):
 		if charging_strategy == "reactive":
-			if vehicle.soc.level < self.simInput.sim_scenario_conf["alpha"]:
+			if vehicle.soc.level < self.simInput.supply_model_conf["alpha"]:
 				charge = init_charge(
 					booking_request,
 					vehicle,
-					self.simInput.sim_scenario_conf["beta"]
+					self.simInput.supply_model_conf["beta"]
 				)
 				return True, charge
 			else:
@@ -188,12 +188,12 @@ class ChargingPrimitives:
 	def check_user_charge(self, booking_request, vehicle):
 
 		if booking_request["destination_id"] in self.charging_stations_dict:
-			if booking_request["end_soc"] < self.simInput.sim_scenario_conf["beta"]:
-				if np.random.binomial(1, self.simInput.sim_scenario_conf["willingness"]):
+			if booking_request["end_soc"] < self.simInput.supply_model_conf["beta"]:
+				if np.random.binomial(1, self.simInput.supply_model_conf["willingness"]):
 					charge = init_charge(
 						booking_request,
 						self.vehicles_list[vehicle],
-						self.simInput.sim_scenario_conf["beta"]
+						self.simInput.supply_model_conf["beta"]
 					)
 					return True, charge
 				else:
