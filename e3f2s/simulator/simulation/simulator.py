@@ -167,7 +167,7 @@ class SharedMobilitySim:
                 and "scooter_relocation_scheduling" in self.simInput.sim_scenario_conf:
 
             if self.simInput.sim_scenario_conf["scooter_relocation_scheduling"] \
-                    and self.simInput.sim_scenario_conf["scooter_scheduled_relocation_triggers"]["post_trip"]:
+                    and dict(self.simInput.sim_scenario_conf["scooter_scheduled_relocation_triggers"])["post_trip"]:
 
                 relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
                     booking_request,

@@ -128,8 +128,6 @@ class SimOutput ():
 			self.sim_stats.loc["tot_potential_welltowheel_co2_emissions"] = self.sim_booking_requests.tanktowheel_emissions.sum() / 1000
 			self.sim_stats.loc["tot_potential_co2_emissions_kg"] = self.sim_booking_requests.co2_emissions.sum() / 1000
 
-			self.sim_stats.loc["tot_mobility_distance"] = self.sim_bookings.driving_distance.sum()
-			self.sim_stats.loc["tot_mobility_duration"] = self.sim_bookings.duration.sum()
 			self.sim_stats.loc["tot_welltotank_energy"] = self.sim_bookings.welltotank_kwh.sum()
 			self.sim_stats.loc["tot_tanktowheel_energy"] = self.sim_bookings.tanktowheel_kwh.sum()
 			self.sim_stats.loc["tot_mobility_energy"] = self.sim_bookings.soc_delta_kwh.sum()
@@ -223,16 +221,6 @@ class SimOutput ():
 				self.sim_stats.loc["cum_relo_t"] = 0
 				self.sim_stats.loc["cum_relo_khw"] = 0
 				self.sim_stats.loc["avg_hourly_relo_t"] = 0
-
-			self.sim_stats.loc["n_scooter_relocations"] = \
-				len(self.sim_scooter_relocations)
-
-			if len(self.sim_scooter_relocations):
-				self.sim_stats.loc["tot_scooter_relocations_distance"] = \
-					self.sim_scooter_relocations.distance.sum()
-			else:
-				self.sim_stats.loc["tot_scooter_relocations_distance"] = \
-					0
 
 			for key in self.sim_stats.index:
 				if key.startswith("fraction"):
