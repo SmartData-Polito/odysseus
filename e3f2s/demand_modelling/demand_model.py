@@ -1,6 +1,6 @@
 import os
 import pickle
-
+import multiprocessing as mp
 import datetime
 
 from sklearn.neighbors import KernelDensity
@@ -9,6 +9,28 @@ from e3f2s.utils.geospatial_utils import *
 
 from e3f2s.demand_modelling.loader import Loader
 from e3f2s.utils.time_utils import *
+
+
+def calculate_origin_scores(conf_tuple):
+    origin_scores = {}
+    total_covered_density = 0
+    for origin_i in conf_tuple["grid_matrix"].index:
+        for origin_j in conf_tuple["grid_matrix"].columns:
+            origin_id = conf_tuple["grid_matrix"].iloc[origin_i, origin_j]
+            destination_log_densities = conf_tuple["trip_kde"].score_samples(
+                np.array(np.meshgrid(
+                    [origin_i],
+                    [origin_j],
+                    [conf_tuple["grid_matrix"].index],
+                    [conf_tuple["grid_matrix"].columns]
+                )).T.reshape(-1, 4)
+            )
+            origin_score = np.sum(np.exp(destination_log_densities))
+            origin_scores[origin_id] = origin_score
+            total_covered_density += origin_score
+    print(datetime.datetime.now(), "daytype:", conf_tuple["daytype"], "hour:", conf_tuple["hour"],
+          "total_covered_density:", total_covered_density)
+    return conf_tuple["daytype"], conf_tuple["hour"], origin_scores
 
 
 class DemandModel:
@@ -322,30 +344,30 @@ class DemandModel:
         return self.trip_kdes
 
     def get_origin_scores(self):
-        print("Calculating origins descrete marginal distributions...")
-        self.origin_scores = {}
-        for daytype in self.trip_kdes.keys():
-            self.origin_scores[daytype] = {}
-            for hour in self.trip_kdes[daytype].keys():
-                self.origin_scores[daytype][hour] = {}
-                total_covered_density = 0
-                for origin_i in self.grid_matrix.index:
-                    for origin_j in self.grid_matrix.columns:
-                        origin_id = self.grid_matrix.iloc[origin_i, origin_j]
-                        destination_log_densities = self.trip_kdes[daytype][hour].score_samples(
-                            np.array(np.meshgrid(
-                                [origin_i],
-                                [origin_j],
-                                [self.grid_matrix.index],
-                                [self.grid_matrix.columns]
-                            )).T.reshape(-1, 4)
-                        )
-                        origin_score = np.sum(np.exp(destination_log_densities))
-                        self.origin_scores[daytype][hour][origin_id] = origin_score
-                        total_covered_density += origin_score
-                print("daytype:", daytype, "hour:", hour, "total_covered_density:", total_covered_density)
-        print("Done!")
+        print(datetime.datetime.now(), "Computing discrete marginal distributions of origins...")
 
+        results = []
+        with mp.Pool(mp.cpu_count()) as pool:
+            conf_tuples = []
+            self.origin_scores = {}
+            for daytype in self.trip_kdes.keys():
+                self.origin_scores[daytype] = {}
+                for hour in self.trip_kdes[daytype].keys():
+                    conf_tuple = {
+                        "grid_matrix": self.grid_matrix,
+                        "trip_kde": self.trip_kdes[daytype][hour],
+                        "daytype": daytype,
+                        "hour": hour
+                    }
+                    conf_tuples += [conf_tuple]
+
+            results += pool.map(calculate_origin_scores, conf_tuples)
+
+        for result in results:
+            daytype, hour, origin_scores = result
+            self.origin_scores[daytype][hour] = origin_scores
+
+        print(datetime.datetime.now(), "Done!")
         return self.origin_scores
 
     def save_results(self):
