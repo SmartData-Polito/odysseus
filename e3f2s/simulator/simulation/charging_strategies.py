@@ -15,7 +15,8 @@ class ChargingStrategy(ChargingPrimitives):
 
 				if operator == "system":
 					relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
-						booking_request
+						booking_request,
+						vehicles=[vehicle.plate]
 					)
 
 					if relocated:
@@ -231,7 +232,7 @@ class ChargingStrategy(ChargingPrimitives):
 				and "scooter_relocation_scheduling" in self.simInput.supply_model_conf:
 
 				if self.simInput.supply_model_conf["scooter_relocation_scheduling"] \
-					and self.simInput.supply_model_conf["scooter_scheduled_relocation_triggers"]["post_charge"]:
+					and dict(self.simInput.supply_model_conf["scooter_scheduled_relocation_triggers"])["post_charge"]:
 
 					relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
 						booking_request,
