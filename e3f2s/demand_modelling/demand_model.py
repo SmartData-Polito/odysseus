@@ -120,7 +120,7 @@ class DemandModel:
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
         self.trip_kdes = self.get_trip_kdes()
-        self.origin_scores = self.get_origin_scores()
+        # self.origin_scores = self.get_origin_scores()
 
     def map_zones_on_trips(self, zones):
         self.trips_origins = gpd.sjoin(
@@ -410,8 +410,8 @@ class DemandModel:
             pickle.dump(self.trip_kdes, f)
         with open(os.path.join(demand_model_path, "valid_zones.pickle"), "wb") as f:
             pickle.dump(self.valid_zones, f)
-        with open(os.path.join(demand_model_path, "origin_scores.pickle"), "wb") as f:
-            pickle.dump(self.origin_scores, f)
+        # with open(os.path.join(demand_model_path, "origin_scores.pickle"), "wb") as f:
+        #     pickle.dump(self.origin_scores, f)
 
         integers_dict = {
             "avg_request_rate" : self.avg_request_rate,
