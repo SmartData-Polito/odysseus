@@ -157,7 +157,7 @@ def maintenance_costs(fuel_type, distance):
 def get_fuelcost_from_energy(fuel_type, energy_mj):
 	if fuel_type == "electric":
 		energy_kwh = energy_mj / 3.6
-		return (fuel_costs[fuel_type]["fuel_cost"] * energy_kwh) / (fuel_costs[fuel_type]["charging_efficiency"])
+		return (fuel_costs[fuel_type]["fuel_cost"] * energy_kwh) / (fuel_costs[fuel_type]["charging_efficiency"] / 100)
 	elif fuel_type in ["gasoline", "diesel", "lpg", "cng"]:
 		liters = energy_mj / (
 				fuel_costs[fuel_type]["lower_heating_value"] / (1 / (fuel_costs[fuel_type]["density"] / 1000))
