@@ -1,7 +1,7 @@
 import simpy
 import random
 import datetime
-from e3f2s.data_structures.vehicle import example_vehicle_config, Vehicle as Vehicle_definition
+from e3f2s.data_structures.vehicle import Vehicle as Vehicle_definition
 
 class Vehicle(Vehicle_definition):
 
@@ -17,6 +17,7 @@ class Vehicle(Vehicle_definition):
         else:
             energymix = {}
         super().__init__(vehicle_config[engine_type][model], energymix)
+
         self.env = env
         self.plate = plate
         self.zone = start_zone

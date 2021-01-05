@@ -19,7 +19,7 @@ sim_scenario_conf = {
 	"hub_zone_policy": "num_parkings",
 	"hub": False,
 
-	"cps_placement_policy": "num_parkings",
+	"cps_placement_policy": "real_positions",
 	"distributed_cps": True,
 	"system_cps": True,
 	"cps_zones_percentage": 0.2,
@@ -33,8 +33,6 @@ sim_scenario_conf = {
 
 	"user_contribution": False,
 	"willingness": 0,
-
-	"scooter_relocation": False,
 
 	"charging_strategy": "reactive",
 	"charging_relocation_strategy": "closest_free", #closest_free/random/closest_queueing

@@ -1,10 +1,3 @@
-example_station_config = {
-	"voltage_output": 230,
-	"current_output": 16,
-	"fuel_type": "electric",
-	"fuel_cost": 1.29
-}
-
 class Pole(object):
 	def __init__(self, station_config):
 		self.fuel_type = station_config["fuel_type"] #electric, gasoline, diesel, lpg, gnc
@@ -13,6 +6,7 @@ class Pole(object):
 			self.voltage_output = station_config["voltage_output"]
 			self.current_output= station_config["current_output"]
 			self.flow_rate = self.voltage_output * self.current_output
+			self.cost = station_config["cost"]
 		elif self.fuel_type in ["gasoline","diesel", "lpg","cng"]:
 			#self.flow_rate = example_station_config["flow_rate"] #L/min, kg/min
 			if self.fuel_type == "gasoline": #GASOLINE E5

@@ -6,7 +6,7 @@ sim_general_conf_grid = {
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["city_multiple_runs_test"],
+    "sim_scenario_name": ["prova"],
 
     # Fleet general parameters
     "const_load_factor": [False],
@@ -17,7 +17,8 @@ sim_general_conf_grid = {
 
     # Time general parameters
     "year": [2017],
-    "month_start": [10],
-    "month_end": [11],
+    "month_start": [1],#10
+    "month_end": [12],#11
 
+    "save_history": [True]
 }

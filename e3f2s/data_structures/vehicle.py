@@ -1,24 +1,3 @@
-example_vehicle_config = {
-	"engine_type": "electric",
-	"fuel_capacity": 17.6,
-	"consumption": 1 / 0.15838,
-	"efficiency": 0.15838,
-	"cost_car": 24700,
-	"country_energy_mix" : {
-		"nuclear": 0, # %
-		"natural_gas": 45, # %
-		"coal": 9.3, # %
-		"oil":0, # %
-		"biomass": 9, # %
-		"other":6.2, # %
-		"hydro": 16.3, # %
-		"wind":6.2, # %
-		"waste":0, # %
-		"solar": 8.3, # %
-		"geothermal":0, # %
-	}
-}
-
 lca_co2_elect_sources = {
 	"nuclear":12, # g/kWh
 	"natural_gas":490, # g/kWh
@@ -52,7 +31,8 @@ class Vehicle(object):
 		self.engine_type = vehicle_config["engine_type"] #gasoline, diesel, lpg, gnc, electric
 		self.consumption = vehicle_config["consumption"] #km/l, km/kWh
 		self.capacity = vehicle_config["fuel_capacity"] #kWh (electric), Liter (gasoline,diesel,lpg), kilograms (gnc)
-		#self.cost_car = vehicle_config["cost_car"] # in €
+		self.n_seats = vehicle_config["n_seats"]
+		self.costs = vehicle_config["costs"]
 
 		if self.engine_type == "gasoline": # GASOLINE E5
 			self.welltotank_emission = 17 #gCO2eq/MJ (pathway code COG-1)
@@ -111,6 +91,7 @@ class Vehicle(object):
 			self.welltotank_emission = tot_emission  #gCO2eq/kWh
 			self.welltotank_energy = tot_energy #MJ/MJelectricity
 			self.tx_efficiency = 92.5 # %
+			self.charging_efficiency = 80 # %
 			self.supported_charge = vehicle_config["max_charg_power"]
 
 
@@ -127,7 +108,7 @@ class Vehicle(object):
 			else:
 				power_output = flow_amount / 1000
 			capacity_left = ((beta - actual_level_perc) / 100) * self.capacity
-			return (capacity_left / power_output) * 3600
+			return (capacity_left / (power_output * (self.charging_efficiency / 100))) * 3600
 		elif self.engine_type in ["gasoline", "diesel", "lpg","cng"]:
 			flow_rate = flow_amount
 			capacity_left = ((beta - actual_level_perc)/100) * self.capacity
@@ -145,7 +126,7 @@ class Vehicle(object):
 				power_output = self.supported_charge[profile] / 1000
 			else:
 				power_output = flow_amount / 1000
-			capacity_left = power_output * (charging_time / 3600)
+			capacity_left = (power_output * (self.charging_efficiency / 100)) * (charging_time / 3600)
 			return 100 * (capacity_left / self.capacity)
 		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
 			flow_rate = flow_amount
@@ -166,7 +147,7 @@ class Vehicle(object):
 			tanktowheel_mj = self.tanktowheel_energy_from_perc(percentage) * 3.6
 			welltotank_kwh = (self.welltotank_energy * (
 					1 + 0.01 * ((100 - self.tx_efficiency) / (1 - 0.01 * (100 - self.tx_efficiency)))
-			) * tanktowheel_mj) / 3.6
+			) * (1 / (self.charging_efficiency / 100)) * tanktowheel_mj) / 3.6
 		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
 			tanktowheel_mj = self.tanktowheel_energy_from_perc(percentage) * 3.6
 			welltotank_kwh = (self.welltotank_energy * tanktowheel_mj) / 3.6
@@ -202,7 +183,7 @@ class Vehicle(object):
 		elif self.engine_type == "electric":
 			wtt_emissions_perkm = self.welltotank_emission * (
 					1 + 0.01 * ((100 - self.tx_efficiency) / (1 - 0.01 * (100 - self.tx_efficiency)))
-			) * (1 / self.consumption)
+			) * (1 / (self.charging_efficiency / 100)) * (1 / self.consumption)
 		tot_wtt_emissions = distance * wtt_emissions_perkm
 		return tot_wtt_emissions
 

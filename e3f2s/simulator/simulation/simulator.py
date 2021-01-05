@@ -16,6 +16,7 @@ from e3f2s.simulator.simulation.scooter_relocation_strategies import ScooterRelo
 from e3f2s.simulator.simulation_input.vehicle_conf import vehicle_conf
 from e3f2s.simulator.simulation_input.energymix_conf import energymix_conf
 from e3f2s.simulator.simulation_input.station_conf import station_conf
+from e3f2s.utils.cost_utils import get_fuelcost_from_energy,maintenance_costs,bookings_revenues, ev_residual_value_revenue
 
 
 class SharedMobilitySim:
@@ -227,6 +228,24 @@ class SharedMobilitySim:
                 max_soc_vehicle_origin].distance_to_tanktowheel_emission(booking_request["driving_distance"] / 1000)
             booking_request["co2_emissions"] = booking_request["welltotank_emissions"] + \
                                                booking_request["tanktowheel_emissions"]
+            booking_request["energy_cost"] = get_fuelcost_from_energy(
+                self.simInput.sim_scenario_conf["engine_type"], booking_request["tanktowheel_kwh"]
+            )
+            booking_request["maintenance_cost"] = maintenance_costs(
+                self.simInput.sim_scenario_conf["engine_type"], booking_request["driving_distance"] / 1000
+            )
+            booking_request["booking_revenue"] = bookings_revenues[self.simInput.sim_scenario_conf["engine_type"]][
+                self.simInput.sim_scenario_conf["vehicle_model_name"]
+            ]["cost_permin"] * (booking_request['duration'] / 60)
+            if self.simInput.sim_scenario_conf["engine_type"] == "electric":
+                booking_request["depreciation_vehicle"] = (
+                        ev_residual_value_revenue["ICEV_depreciation_perkm"] +
+                        ev_residual_value_revenue["battery_depreciation_perkm"]
+                ) * booking_request["driving_distance"] / 1000
+            elif self.simInput.sim_scenario_conf["engine_type"] in ["gasoline", "diesel","lpg","cng"]:
+                booking_request["depreciation_vehicle"] = (
+                        ev_residual_value_revenue["ICEV_depreciation_perkm"]
+                ) * booking_request["driving_distance"] / 1000
             self.env.process(
                 self.schedule_booking(booking_request, max_soc_vehicle_origin, booking_request["origin_id"])
             )
