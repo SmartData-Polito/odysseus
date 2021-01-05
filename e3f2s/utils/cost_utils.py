@@ -133,7 +133,7 @@ ev_residual_value_revenue = {
 	"ICEV_depreciation_perkm": 0.025,
 	"battery_depreciation_perkm": 0.016
 }
-service_lifespan_vehicle_years = 8,
+service_lifespan_vehicle_years = 8.0
 non_rental_revenue ={
 	"advertising": 163.98
 }
@@ -170,9 +170,9 @@ def charging_station_costs(fuel_type, charging_stations):
 	if fuel_type == "electric":
 		costs = 0
 		for zone in charging_stations.keys():
-			for station in charging_stations[zone]:
-				costs += station.cost * (1 - (charging_stations_param["residual_value_rate"] / 100)) / \
-				         charging_stations_param["depreciation_period_charging_station"]
+			#for station in charging_stations[zone]:
+			costs += charging_stations[zone].cost * (1 - (charging_stations_param["residual_value_rate"] / 100)) / \
+			         charging_stations_param["depreciation_period_charging_station"]
 		return costs
 	else:
 		return 0
@@ -194,10 +194,10 @@ def purchase_cost_vehicle(engine_type,model):
 def total_purchase_cost(vehicles):
 	costs = 0
 	for vehicle in vehicles:
-		costs += (vehicle["costs"]["retail_price"] + (
-				(vehicle["costs"]["IVA"] / 100) * vehicle["costs"]["retail_price"])
-		          + vehicle["costs"]["put_into_circulation"]) - \
-		         vehicle["costs"]["government_subsidies"]
+		costs += (vehicle.costs["retail_price"] + (
+				(vehicle.costs["IVA"] / 100) * vehicle.costs["retail_price"])
+		          + vehicle.costs["put_into_circulation"]) - \
+		         vehicle.costs["government_subsidies"]
 	return costs
 
 
@@ -206,11 +206,11 @@ def insurance_costs(vehicles):
 	for vehicle in vehicles:
 		I_ci = insurance_fixed_costs["compulsory_traffic_insurance"]
 		I_li = insurance_fixed_costs["basic_premium"] + \
-		       (vehicle["costs"]["retail_price"] + ((vehicle["costs"]["IVA"] / 100) * vehicle["costs"]["retail_price"])
-		        + vehicle["costs"]["put_into_circulation"]) * 1.0880 / 100
+		       (vehicle.costs["retail_price"] + ((vehicle.costs["IVA"] / 100) * vehicle.costs["retail_price"])
+		        + vehicle.costs["put_into_circulation"]) * 1.0880 / 100
 		I_ti = insurance_fixed_costs["commercial_3rd_party_insurance"]
 		I_di = (I_li + I_ti) * (20 / 100)
-		I_pi = 6.31 * vehicle["n_seats"]
+		I_pi = 6.31 * vehicle.n_seats
 		costs += (I_ci + I_li + I_ti + I_di + I_pi)
 	return costs
 

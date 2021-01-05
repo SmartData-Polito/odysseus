@@ -19,7 +19,7 @@ sim_scenario_conf = {
 	"hub_zone_policy": "num_parkings",
 	"hub": False,
 
-	"cps_placement_policy": "real_positions",
+	"cps_placement_policy": "num_parkings",
 	"distributed_cps": True,
 	"system_cps": True,
 	"cps_zones_percentage": 0.2,

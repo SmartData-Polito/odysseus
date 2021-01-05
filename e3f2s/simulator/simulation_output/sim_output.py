@@ -285,12 +285,12 @@ class SimOutput():
 
 			self.sim_stats.loc["avg_speed_kmh"] = self.sim_bookings.avg_speed_kmh.mean()
 			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
-			self.sim_stats.loc["purchase_cost"] = total_purchase_cost(sim.vehicle_list)
-			self.sim_stats.loc["insurance_cost"] = insurance_costs(sim.vehicle_list)
-			self.sim_stats.loc["parking_spot_cost"] = parking_spot_costs(sim.vehicle_list)
-			self.sim_stats.loc["charging_station_cost"] = service_lifespan_vehicle_years * \
-			                                              charging_station_costs(self.sim_scenario_conf["engine_type"],
-			                                                                     sim.charging_station_dict)
+			self.sim_stats.loc["purchase_cost"] = total_purchase_cost(sim.vehicles_list)
+			self.sim_stats.loc["insurance_cost"] = insurance_costs(sim.vehicles_list)
+			self.sim_stats.loc["parking_spot_cost"] = parking_spot_costs(sim.vehicles_list)
+			self.sim_stats.loc["charging_station_cost"] = service_lifespan_vehicle_years * charging_station_costs(
+				self.sim_scenario_conf["engine_type"],sim.charging_stations_dict
+			)
 			self.sim_stats.loc["energy_cost"] = self.sim_bookings.energy_cost.sum()
 			self.sim_stats.loc["maintenance_cost"] = self.sim_bookings.maintenance_cost.sum()
 			self.sim_stats.loc["operational_cost"] = operational_costs(self.sim_stats.loc["n_workers"])
@@ -325,14 +325,14 @@ class SimOutput():
 			self.sim_stats.loc["non_rental_revenue"] = non_rental_revenue["advertising"]
 			self.sim_stats.loc["present_value_costs"] = self.sim_stats.loc["purchase_cost"] + \
 			                                            self.sim_stats.loc["charging_station_cost"]
-			for i in range(1,service_lifespan_vehicle_years + 1):
+			for i in range(1,int(service_lifespan_vehicle_years) + 1):
 				year_i_cost = (self.sim_stats.loc["insurance_cost"] + self.sim_stats.loc["energy_cost"] +
 				               self.sim_stats.loc["parking_spot_cost"] + self.sim_stats.loc["maintenance_cost"] +
 				               self.sim_stats.loc["operational_cost"]) / (1 + discount_rate) ** i
 				self.sim_stats.loc["present_value_costs"] += year_i_cost
 			self.sim_stats.loc["present_value_revenues"] = self.sim_stats.loc["residual_value_revenue"] / \
 			                                               (1 + discount_rate) ** service_lifespan_vehicle_years
-			for i in range(1,service_lifespan_vehicle_years + 1):
+			for i in range(1,int(service_lifespan_vehicle_years) + 1):
 				year_i_revenues = (self.sim_stats.loc["booking_revenue"] + self.sim_stats.loc["non_rental_revenue"]) / \
 				                  (1 + discount_rate) ** i
 				self.sim_stats.loc["present_value_revenues"] += year_i_revenues

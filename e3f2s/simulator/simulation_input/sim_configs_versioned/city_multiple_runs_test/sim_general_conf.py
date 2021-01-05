@@ -17,8 +17,8 @@ sim_general_conf_grid = {
 
     # Time general parameters
     "year": [2017],
-    "month_start": [1],#10
-    "month_end": [12],#11
+    "month_start": [10],#10
+    "month_end": [11],#11
 
     "save_history": [True]
 }
