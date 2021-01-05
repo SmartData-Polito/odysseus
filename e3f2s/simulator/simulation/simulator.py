@@ -229,7 +229,7 @@ class SharedMobilitySim:
             booking_request["co2_emissions"] = booking_request["welltotank_emissions"] + \
                                                booking_request["tanktowheel_emissions"]
             booking_request["energy_cost"] = get_fuelcost_from_energy(
-                self.simInput.sim_scenario_conf["engine_type"], booking_request["tanktowheel_kwh"]
+                self.simInput.sim_scenario_conf["engine_type"], booking_request["tanktowheel_kwh"] * 3.6
             )
             booking_request["maintenance_cost"] = maintenance_costs(
                 self.simInput.sim_scenario_conf["engine_type"], booking_request["driving_distance"] / 1000
