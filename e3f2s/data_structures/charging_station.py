@@ -1,7 +1,7 @@
 class Pole(object):
 	def __init__(self, station_config):
 		self.fuel_type = station_config["fuel_type"] #electric, gasoline, diesel, lpg, gnc
-		self.fuel_cost = station_config["fuel_cost"]
+		#self.fuel_cost = station_config["fuel_cost"]
 		if self.fuel_type == "electric":
 			self.voltage_output = station_config["voltage_output"]
 			self.current_output= station_config["current_output"]

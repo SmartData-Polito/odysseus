@@ -48,6 +48,74 @@ vehicle_cost = {
 	}
 }
 
+charging_station_costs = {
+		"wall_plug": {
+			"hardware": 1100,
+			"labor": 3500,
+			"materials": 1000,
+			"permits": 0,
+			"taxes": (22/100) * 1100,
+			"government_subsidy":1500
+
+		},
+		"single_phase_1": {
+			"hardware": 3400,
+			"labor": 1544,
+			"materials": 1112,
+			"permit": 82,
+			"taxes": (22/100) * 3400,
+			"government_subsidy":1500
+		},
+		"single_phase_2": {
+			"hardware": 3400,
+			"labor": 1544,
+			"materials": 1112,
+			"permit": 82,
+			"taxes": (22/100) * 3400,
+			"government_subsidy": 1500
+		},
+		"three_phase_1": {
+			"hardware": 3400,
+			"labor": 1544,
+			"materials": 1112,
+			"permit": 82,
+			"taxes": (22 / 100) * 3400,
+			"government_subsidy": 1500
+		},
+		"three_phase_2": {
+			"hardware": 4500,
+			"labor": 1544,
+			"materials": 1112,
+			"permit": 82,
+			"taxes": (22 / 100) * 4500,
+			"government_subsidy": 1500
+		},
+		"three_phase_3": {
+			"hardware": 4500,
+			"labor": 1544,
+			"materials": 1112,
+			"permit": 82,
+			"taxes": (22 / 100) * 4500,
+			"government_subsidy": 1500
+		},
+		"dcfc_1": {
+			"hardware": 31000,
+			"labor": 19200,
+			"materials": 26000,
+			"permit": 200,
+			"taxes": (22 / 100) * 31000,
+			"government_subsidy": 1500
+		},
+		"dcfc_2": {
+			"hardware": 75000,
+			"labor": 20160,
+			"materials": 27300,
+			"permit": 210,
+			"taxes": (22 / 100) * 75000,
+			"government_subsidy": 1500
+		},
+}
+
 insurance_fixed_costs = {
 	"compulsory_traffic_insurance": 119.83,
 	"basic_premium": 58.02,
@@ -84,7 +152,7 @@ fuel_costs = {
 		"density": 1000  # g/L
 	},
 	"electric": {
-		"fuel_cost": 0.0525,
+		"fuel_cost": 0.2634,
 		"charging_efficiency": 80
 	}
 }
@@ -165,18 +233,29 @@ def get_fuelcost_from_energy(fuel_type, energy_mj):
 		)
 		return fuel_costs[fuel_type]["fuel_cost"] * liters
 
+def num_charging_stations(poles):
+	if poles % 4 == 0:
+		return poles / 4
+	else:
+		return (poles // 4) + 1
 
-def charging_station_costs(fuel_type, charging_stations):
+def charging_station_total_costs(fuel_type, charging_stations):
 	if fuel_type == "electric":
 		costs = 0
 		for zone in charging_stations.keys():
 			#for station in charging_stations[zone]:
-			costs += charging_stations[zone].cost * (1 - (charging_stations_param["residual_value_rate"] / 100)) / \
+			costs += num_charging_stations(charging_stations[zone].num_poles) * charging_station_lord_cost(charging_stations[zone].cost) * \
+			         (1 - (charging_stations_param["residual_value_rate"] / 100)) / \
 			         charging_stations_param["depreciation_period_charging_station"]
 		return costs
 	else:
 		return 0
 
+def charging_station_lord_cost(costs):
+	cost = 0
+	for (index,numb) in costs.items():
+		cost += numb
+	return cost
 
 def parking_spot_costs(vehicles):
 	costs = 0

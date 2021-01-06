@@ -288,7 +288,7 @@ class SimOutput():
 			self.sim_stats.loc["purchase_cost"] = total_purchase_cost(sim.vehicles_list)
 			self.sim_stats.loc["insurance_cost"] = insurance_costs(sim.vehicles_list)
 			self.sim_stats.loc["parking_spot_cost"] = parking_spot_costs(sim.vehicles_list)
-			self.sim_stats.loc["charging_station_cost"] = service_lifespan_vehicle_years * charging_station_costs(
+			self.sim_stats.loc["charging_station_cost"] = service_lifespan_vehicle_years * charging_station_total_costs(
 				self.sim_scenario_conf["engine_type"],sim.charging_stations_dict
 			)
 			self.sim_stats.loc["energy_cost"] = self.sim_bookings.energy_cost.sum()
