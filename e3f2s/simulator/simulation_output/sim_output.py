@@ -398,3 +398,11 @@ class EFFCS_SimOutput ():
 			zone_df = pd.DataFrame(sim.chargingStrategy.zone_dict[key].status_dict_list)
 			zone_df["zone_id"] = key
 			self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)
+
+		if "vehicle_relocation" in self.sim_scenario_conf and self.sim_scenario_conf["vehicle_relocation"]:
+			self.sim_stats.loc["n_vehicle_relocations"] = sim.VehicleRelocationStrategy.n_vehicle_relocations
+			self.sim_stats.loc["tot_vehicle_relocations_distance"] = \
+				sim.VehicleRelocationStrategy.tot_vehicle_relocations_distance
+			self.sim_stats.loc["tot_vehicle_relocations_duration"] = \
+				sim.VehicleRelocationStrategy.tot_vehicle_relocations_duration
+

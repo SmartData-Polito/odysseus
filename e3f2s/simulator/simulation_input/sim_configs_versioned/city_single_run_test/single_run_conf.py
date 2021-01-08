@@ -23,8 +23,10 @@ sim_scenario_conf = {
 	"avg_reach_time": 20,
 	"avg_service_time": 0,
 
-	"n_workers": 1000,
+	"n_workers": 12,
 	"relocation": False,
+
+	"number of workers": 1000,
 
 	"user_contribution": False,
 	"willingness": 0,
@@ -36,6 +38,23 @@ sim_scenario_conf = {
 	"scooter_relocation_strategy": "magic_relocation",
 
 	"vehicle_relocation": True,
-	"vehicle_relocation_strategy": "magic_relocation"
+	"vehicle_relocation_strategy": "only_scheduled",
+
+	"vehicle_relocation_scheduling": True,
+	"vehicle_relocation_technique": frozenset({
+			"start": "aggregation",
+			# "start_demand_weight": 0.9,
+			# "start_vehicles_factor": 1,
+			"end": "kde_sampling",
+			# "end_demand_weight": 0.9,
+			# "end_vehicles_factor": 1,
+		}.items()),
+
+	"vehicle_scheduled_relocation_triggers": frozenset({
+        "post_charge": False,
+        "post_trip": True,
+    }.items()),
+	"n_relocation_workers": 12,
+	"avg_relocation_speed": 20  # km/h
 
 }

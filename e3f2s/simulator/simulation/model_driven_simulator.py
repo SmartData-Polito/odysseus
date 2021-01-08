@@ -15,7 +15,6 @@ np.random.seed(44)
 class ModelDrivenSim (SharedMobilitySim):
 
 	def init_data_structures (self):
-
 		self.booking_request_arrival_rates = self.simInput.request_rates
 		self.trip_kdes = self.simInput.trip_kdes
 		self.valid_zones = self.simInput.valid_zones
@@ -26,12 +25,22 @@ class ModelDrivenSim (SharedMobilitySim):
 		self.hours_spent += 1
 
 		self.current_datetime = self.start + datetime.timedelta(seconds=self.env.now)
-		self.current_hour = self.current_datetime.hour
+		if self.current_hour != self.current_datetime.hour:
+			self.current_hour = self.current_datetime.hour
+			self.update_relocation_schedule = True
 		self.current_weekday = self.current_datetime.weekday()
 		if self.current_weekday in [5, 6]:
 			self.current_daytype = "weekend"
 		else:
 			self.current_daytype = "weekday"
+
+		if self.update_relocation_schedule \
+				and self.simInput.sim_scenario_conf["vehicle_relocation"] \
+				and "vehicle_relocation_scheduling" in self.simInput.sim_scenario_conf.keys() \
+				and self.simInput.sim_scenario_conf["vehicle_relocation_scheduling"]:
+
+			self.VehicleRelocationStrategy.generate_relocation_schedule(self.current_daytype, self.current_hour)
+			self.update_relocation_schedule = False
 
 	def update_data_structures (self):
 

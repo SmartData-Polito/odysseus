@@ -1,5 +1,9 @@
+import os
+import pickle
+
 import numpy as np
 import pandas as pd
+
 
 import datetime
 import pytz
@@ -128,7 +132,7 @@ class SimInput:
 
 		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:31]
 
-		print(len(self.valid_zones), len(self.grid), len(top_o_zones.index))
+		#print(len(self.valid_zones), len(self.grid), len(top_o_zones.index))
 
 		vehicles_random_zones = list(
 			np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()
