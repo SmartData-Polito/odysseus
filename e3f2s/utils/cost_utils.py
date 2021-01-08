@@ -3,7 +3,7 @@ vehicle_cost = {
 		"VW Golf 7 1.0 TSI 2018": {
 			"retail_price": 16612.06,
 			"IVA": 22,
-			"put_into_circulation":833.28,
+			"put_into_circulation": 833.28,
 			"government_subsidies": 0
 		}
 	},
@@ -49,71 +49,71 @@ vehicle_cost = {
 }
 
 charging_station_costs = {
-		"wall_plug": {
-			"hardware": 1100,
-			"labor": 3500,
-			"materials": 1000,
-			"permits": 0,
-			"taxes": (22/100) * 1100,
-			"government_subsidy":1500
+	"wall_plug": {
+		"hardware": 813,
+		"labor": 600,
+		"materials": 0,
+		"permits": 0,
+		"taxes": (22 / 100) * 813,
+		"government_subsidy": -795.93
 
-		},
-		"single_phase_1": {
-			"hardware": 3400,
-			"labor": 1544,
-			"materials": 1112,
-			"permit": 82,
-			"taxes": (22/100) * 3400,
-			"government_subsidy":1500
-		},
-		"single_phase_2": {
-			"hardware": 3400,
-			"labor": 1544,
-			"materials": 1112,
-			"permit": 82,
-			"taxes": (22/100) * 3400,
-			"government_subsidy": 1500
-		},
-		"three_phase_1": {
-			"hardware": 3400,
-			"labor": 1544,
-			"materials": 1112,
-			"permit": 82,
-			"taxes": (22 / 100) * 3400,
-			"government_subsidy": 1500
-		},
-		"three_phase_2": {
-			"hardware": 4500,
-			"labor": 1544,
-			"materials": 1112,
-			"permit": 82,
-			"taxes": (22 / 100) * 4500,
-			"government_subsidy": 1500
-		},
-		"three_phase_3": {
-			"hardware": 4500,
-			"labor": 1544,
-			"materials": 1112,
-			"permit": 82,
-			"taxes": (22 / 100) * 4500,
-			"government_subsidy": 1500
-		},
-		"dcfc_1": {
-			"hardware": 31000,
-			"labor": 19200,
-			"materials": 26000,
-			"permit": 200,
-			"taxes": (22 / 100) * 31000,
-			"government_subsidy": 1500
-		},
-		"dcfc_2": {
-			"hardware": 75000,
-			"labor": 20160,
-			"materials": 27300,
-			"permit": 210,
-			"taxes": (22 / 100) * 75000,
-			"government_subsidy": 1500
-		},
+	},
+	"single_phase_1": {
+		"hardware": 3127,
+		"labor": 1544,
+		"materials": 1112,
+		"permit": 82,
+		"taxes": (22 / 100) * 3127,
+		"government_subsidy": -1500
+	},
+	"single_phase_2": {
+		"hardware": 3127,
+		"labor": 1544,
+		"materials": 1112,
+		"permit": 82,
+		"taxes": (22 / 100) * 3127,
+		"government_subsidy": -1500
+	},
+	"three_phase_1": {
+		"hardware": 3127,
+		"labor": 1544,
+		"materials": 1112,
+		"permit": 82,
+		"taxes": (22 / 100) * 3127,
+		"government_subsidy": -1500
+	},
+	"three_phase_2": {
+		"hardware": 4500,
+		"labor": 1544,
+		"materials": 1112,
+		"permit": 82,
+		"taxes": (22 / 100) * 4500,
+		"government_subsidy": -1500
+	},
+	"three_phase_3": {
+		"hardware": 4500,
+		"labor": 1544,
+		"materials": 1112,
+		"permit": 82,
+		"taxes": (22 / 100) * 4500,
+		"government_subsidy": -1500
+	},
+	"dcfc_1": {
+		"hardware": 31000,
+		"labor": 19200,
+		"materials": 26000,
+		"permit": 200,
+		"taxes": (22 / 100) * 31000,
+		"government_subsidy": -1500
+	},
+	"dcfc_2": {
+		"hardware": 75000,
+		"labor": 20160,
+		"materials": 27300,
+		"permit": 210,
+		"taxes": (22 / 100) * 75000,
+		"government_subsidy": -1500
+	},
 }
 
 insurance_fixed_costs = {
@@ -202,10 +202,11 @@ ev_residual_value_revenue = {
 	"battery_depreciation_perkm": 0.016
 }
 service_lifespan_vehicle_years = 8.0
-non_rental_revenue ={
+non_rental_revenue = {
 	"advertising": 163.98
 }
 discount_rate = 0.1
+
 
 def operational_costs(n_workers):
 	return n_workers * operational_fixed_costs["annual_worker_wage"] + operational_fixed_costs["annual_marketing"] + \
@@ -233,29 +234,34 @@ def get_fuelcost_from_energy(fuel_type, energy_mj):
 		)
 		return fuel_costs[fuel_type]["fuel_cost"] * liters
 
+
 def num_charging_stations(poles):
 	if poles % 4 == 0:
 		return poles / 4
 	else:
 		return (poles // 4) + 1
 
+
 def charging_station_total_costs(fuel_type, charging_stations):
 	if fuel_type == "electric":
 		costs = 0
 		for zone in charging_stations.keys():
-			#for station in charging_stations[zone]:
-			costs += num_charging_stations(charging_stations[zone].num_poles) * charging_station_lord_cost(charging_stations[zone].cost) * \
+			# for station in charging_stations[zone]:
+			costs += num_charging_stations(charging_stations[zone].num_poles) * charging_station_lord_cost(
+				charging_stations[zone].cost) * \
 			         (1 - (charging_stations_param["residual_value_rate"] / 100)) / \
 			         charging_stations_param["depreciation_period_charging_station"]
 		return costs
 	else:
 		return 0
 
+
 def charging_station_lord_cost(costs):
 	cost = 0
-	for (index,numb) in costs.items():
+	for (index, numb) in costs.items():
 		cost += numb
 	return cost
+
 
 def parking_spot_costs(vehicles):
 	costs = 0
@@ -264,11 +270,13 @@ def parking_spot_costs(vehicles):
 			"annual_rental_parking_space"]
 	return costs
 
-def purchase_cost_vehicle(engine_type,model):
+
+def purchase_cost_vehicle(engine_type, model):
 	return (vehicle_cost[engine_type][model]["retail_price"] + (
-		(vehicle_cost[engine_type][model]["IVA"] / 100) *
-		vehicle_cost[engine_type][model]["retail_price"]
+			(vehicle_cost[engine_type][model]["IVA"] / 100) *
+			vehicle_cost[engine_type][model]["retail_price"]
 	) + vehicle_cost[engine_type][model]["put_into_circulation"])
+
 
 def total_purchase_cost(vehicles):
 	costs = 0
