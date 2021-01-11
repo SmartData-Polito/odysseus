@@ -26,8 +26,8 @@ def get_traceB_sim_stats(conf_tuple):
     simInput = SimInput(conf_tuple)
     simInput.get_booking_requests_list()
     simInput.init_vehicles()
-    simInput.init_hub()
     simInput.init_charging_poles()
+    simInput.init_relocation()
     sim_traceB = run_traceB_sim(simInput)
     simOutput_traceB = SimOutput(sim_traceB)
     return simOutput_traceB.sim_stats

@@ -6,7 +6,7 @@ sim_general_conf_grid = {
 
     "data_source_id": ["city_of_louisville"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["scooter_relocation_magic"],
+    "sim_scenario_name": ["scooter_relocation_test"],
 
     # Fleet general parameters
     "const_load_factor": [False],
@@ -20,4 +20,5 @@ sim_general_conf_grid = {
     "month_start": [7],
     "month_end": [8],
 
+    "save_history": [False]
 }
