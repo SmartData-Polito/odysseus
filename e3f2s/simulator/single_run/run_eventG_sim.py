@@ -26,6 +26,7 @@ def get_eventG_sim_stats (conf_tuple):
     simInput = SimInput(conf_tuple)
     simInput.init_vehicles()
     simInput.init_charging_poles()
+    simInput.init_relocation()
     sim_eventG = run_eventG_sim(simInput)
     simOutput_eventG = SimOutput(sim_eventG)
     return simOutput_eventG.sim_stats

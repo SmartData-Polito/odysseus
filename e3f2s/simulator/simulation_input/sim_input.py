@@ -125,7 +125,57 @@ class SimInput:
 		return self.supply_model.init_charging_poles()
 
 	def init_relocation(self):
-		pass
+		if self.sim_scenario_conf["scooter_relocation"] \
+				and "scooter_relocation_scheduling" in self.sim_scenario_conf.keys() \
+				and self.sim_scenario_conf["scooter_relocation_scheduling"]:
+
+			start_technique = dict(self.sim_scenario_conf["scooter_relocation_technique"])["start"]
+			end_technique = dict(self.sim_scenario_conf["scooter_relocation_technique"])["end"]
+
+			if start_technique in ["delta"] or end_technique in ["delta"]:
+				self.origin_scores = {}
+				for daytype in self.trip_kdes.keys():
+					self.origin_scores[daytype] = {}
+					for hour in self.trip_kdes[daytype].keys():
+						self.origin_scores[daytype][hour] = self.gen_origin_scores(self.trip_kdes[daytype][hour])
 
 	def init_workers(self):
 		pass
+
+	def gen_trip_origin_zone_from_kde(self, kde):
+
+		def base_round(x, base):
+			if x < 0:
+				return 0
+			elif x > base:
+				return base
+			else:
+				return round(x)
+
+		trip_sample = kde.sample()
+		origin_i = base_round(trip_sample[0][0], len(self.grid_matrix.index) - 1)
+		origin_j = base_round(trip_sample[0][1], len(self.grid_matrix.columns) - 1)
+
+		return self.grid_matrix.loc[origin_i, origin_j]
+
+	def gen_origin_scores(self, kde):
+		origin_scores = {}
+		max_iterations = len(self.available_vehicles_dict.keys()) * 100
+		score_increment = 1 / max_iterations
+		tot_iterations = 0
+		tot_covered_density = 0
+		while len(origin_scores) < len(self.available_vehicles_dict.keys()) and tot_iterations < max_iterations:
+			origin_id = self.gen_trip_origin_zone_from_kde(kde)
+			if origin_id in self.valid_zones:
+				if origin_id in origin_scores:
+					if origin_scores[origin_id] < 1:
+						origin_scores[origin_id] += score_increment
+						tot_covered_density += score_increment
+				else:
+					origin_scores[origin_id] = score_increment
+					tot_covered_density += score_increment
+			tot_iterations += 1
+		for zone_id in self.available_vehicles_dict.keys():
+			if zone_id not in origin_scores.keys():
+				origin_scores[zone_id] = 0
+		return origin_scores
