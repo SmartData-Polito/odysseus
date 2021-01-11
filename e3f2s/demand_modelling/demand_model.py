@@ -16,20 +16,24 @@ from e3f2s.data_structures.vehicle import Vehicle
 def calculate_origin_scores(conf_tuple):
     origin_scores = {}
     total_covered_density = 0
-    for origin_i in conf_tuple["grid_matrix"].index:
-        for origin_j in conf_tuple["grid_matrix"].columns:
-            origin_id = conf_tuple["grid_matrix"].iloc[origin_i, origin_j]
-            destination_log_densities = conf_tuple["trip_kde"].score_samples(
-                np.array(np.meshgrid(
-                    [origin_i],
-                    [origin_j],
-                    [conf_tuple["grid_matrix"].index],
-                    [conf_tuple["grid_matrix"].columns]
-                )).T.reshape(-1, 4)
-            )
-            origin_score = np.sum(np.exp(destination_log_densities))
-            origin_scores[origin_id] = origin_score
-            total_covered_density += origin_score
+    for origin_id in conf_tuple["valid_zones"]:
+        origin_j = int(np.floor(
+            origin_id / conf_tuple["grid_matrix"].shape[0]
+        ))
+        origin_i = int(
+            origin_id - origin_j * conf_tuple["grid_matrix"].shape[0]
+        )
+        destination_log_densities = conf_tuple["trip_kde"].score_samples(
+            np.array(np.meshgrid(
+                [origin_i],
+                [origin_j],
+                [conf_tuple["grid_matrix"].index],
+                [conf_tuple["grid_matrix"].columns]
+            )).T.reshape(-1, 4)
+        )
+        origin_score = np.sum(np.exp(destination_log_densities))
+        origin_scores[origin_id] = origin_score
+        total_covered_density += origin_score
     print(datetime.datetime.now(), "daytype:", conf_tuple["daytype"], "hour:", conf_tuple["hour"],
           "total_covered_density:", total_covered_density)
     return conf_tuple["daytype"], conf_tuple["hour"], origin_scores
@@ -355,6 +359,7 @@ class DemandModel:
                 self.origin_scores[daytype] = {}
                 for hour in self.trip_kdes[daytype].keys():
                     conf_tuple = {
+                        "valid_zones": self.valid_zones,
                         "grid_matrix": self.grid_matrix,
                         "trip_kde": self.trip_kdes[daytype][hour],
                         "daytype": daytype,
