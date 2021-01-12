@@ -75,11 +75,11 @@ charging_station_costs = {
 		"government_subsidy": -1500
 	},
 	"three_phase_1": {
-		"hardware": 3127,
+		"hardware": 4500,
 		"labor": 1544,
 		"materials": 1112,
 		"permit": 82,
-		"taxes": (22 / 100) * 3127,
+		"taxes": (22 / 100) * 4500,
 		"government_subsidy": -1500
 	},
 	"three_phase_2": {
@@ -235,11 +235,11 @@ def get_fuelcost_from_energy(fuel_type, energy_mj):
 		return fuel_costs[fuel_type]["fuel_cost"] * liters
 
 
-def num_charging_stations(poles):
-	if poles % 4 == 0:
-		return poles / 4
-	else:
-		return (poles // 4) + 1
+# def num_charging_stations(poles):
+# 	if poles % 4 == 0:
+# 		return poles / 4
+# 	else:
+# 		return (poles // 4) + 1
 
 
 def charging_station_total_costs(fuel_type, charging_stations):
@@ -247,7 +247,7 @@ def charging_station_total_costs(fuel_type, charging_stations):
 		costs = 0
 		for zone in charging_stations.keys():
 			# for station in charging_stations[zone]:
-			costs += num_charging_stations(charging_stations[zone].num_poles) * charging_station_lord_cost(
+			costs += charging_stations[zone].num_poles * charging_station_lord_cost(
 				charging_stations[zone].cost) * \
 			         (1 - (charging_stations_param["residual_value_rate"] / 100)) / \
 			         charging_stations_param["depreciation_period_charging_station"]
