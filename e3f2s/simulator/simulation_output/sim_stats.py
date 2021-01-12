@@ -114,6 +114,11 @@ class SimStats():
 					sim.scooterRelocationStrategy.tot_scooter_relocations_distance
 				self.sim_stats.loc["tot_scooter_relocations_duration"] = \
 					sim.scooterRelocationStrategy.tot_scooter_relocations_duration
+				if sim.scooterRelocationStrategy.n_scooter_relocations:
+					self.sim_stats.loc["avg_n_vehicles_relocated"] = \
+						sim.scooterRelocationStrategy.n_vehicles_tot / sim.scooterRelocationStrategy.n_scooter_relocations
+				else:
+					self.sim_stats.loc["avg_n_vehicles_relocated"] = 0
 
 		for metrics in sim.sim_metrics.metrics_values:
 			self.sim_stats.loc[metrics] = sim.sim_metrics.metrics_values[metrics]

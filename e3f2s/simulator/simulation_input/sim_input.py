@@ -132,7 +132,7 @@ class SimInput:
 			start_technique = dict(self.sim_scenario_conf["scooter_relocation_technique"])["start"]
 			end_technique = dict(self.sim_scenario_conf["scooter_relocation_technique"])["end"]
 
-			if start_technique in ["delta"] or end_technique in ["delta"]:
+			if str(start_technique).startswith("delta") or str(end_technique).startswith("delta"):
 				self.origin_scores = {}
 				for daytype in self.trip_kdes.keys():
 					self.origin_scores[daytype] = {}

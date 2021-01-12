@@ -47,6 +47,7 @@ class ScooterRelocationPrimitives:
         self.tot_scooter_relocations_distance = 0
         self.tot_scooter_relocations_duration = 0
         self.sim_scooter_relocations = []
+        self.n_vehicles_tot = 0
 
         self.n_scooters_relocating = 0
 
@@ -66,13 +67,7 @@ class ScooterRelocationPrimitives:
 
         self.drop_off_scooter(scooter_relocation)
 
-        if "save_history" in self.simInput.sim_general_conf:
-            if self.simInput.sim_general_conf["save_history"]:
-                self.sim_scooter_relocations += [scooter_relocation]
-
-        self.n_scooter_relocations += 1
-        self.tot_scooter_relocations_distance += scooter_relocation["distance"]
-        self.tot_scooter_relocations_duration += scooter_relocation["duration"]
+        self.update_relocation_stats(scooter_relocation)
 
     def magically_relocate_scooter(self, scooter_relocation):
         scooter_relocation["distance"] = self.get_relocation_distance(scooter_relocation)
@@ -83,6 +78,7 @@ class ScooterRelocationPrimitives:
                 self.sim_scooter_relocations += [scooter_relocation]
         self.n_scooter_relocations += 1
         self.tot_scooter_relocations_distance += scooter_relocation["distance"]
+        self.n_vehicles_tot += scooter_relocation["n_vehicles"]
 
     def get_relocation_distance(self, scooter_relocation):
         return get_od_distance(
@@ -100,3 +96,14 @@ class ScooterRelocationPrimitives:
         self.zone_dict[scooter_relocation["end_zone_id"]].add_vehicle(
             scooter_relocation["start_time"]
         )
+
+    def update_relocation_stats(self, scooter_relocation):
+
+        if "save_history" in self.simInput.sim_general_conf:
+            if self.simInput.sim_general_conf["save_history"]:
+                self.sim_scooter_relocations += [scooter_relocation]
+
+        self.n_scooter_relocations += 1
+        self.tot_scooter_relocations_distance += scooter_relocation["distance"]
+        self.tot_scooter_relocations_duration += scooter_relocation["duration"]
+        self.n_vehicles_tot += scooter_relocation["n_vehicles"]
