@@ -297,6 +297,7 @@ class SharedMobilitySim:
                 vehicle = scooter_relocation["vehicle_ids"][0]
 
                 self.scooterRelocationStrategy.magically_relocate_scooter(scooter_relocation)
+                self.available_vehicles_dict[scooter_relocation["start_zone_id"]].remove(vehicle)
                 self.available_vehicles_dict[relocation_zone_id].append(vehicle)
                 self.vehicles_zones[vehicle] = relocation_zone_id
 
@@ -305,7 +306,7 @@ class SharedMobilitySim:
                 found_vehicle_flag = True
 
                 self.env.process(
-                    self.schedule_booking(booking_request, scooter_relocation["vehicle_id"], booking_request["origin_id"])
+                    self.schedule_booking(booking_request, vehicle, booking_request["origin_id"])
                 )
                 self.n_same_zone_trips += 1
 
