@@ -41,7 +41,7 @@ class ChargingPrimitives:
 		)
 
 		if self.simInput.supply_model_conf["distributed_cps"]:
-			self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone
+			self.n_charging_poles_by_zone = self.simInput.supply_model.n_charging_poles_by_zone
 			self.charging_poles_dict = {}
 			for zone, n in self.n_charging_poles_by_zone.items():
 				if n > 0:

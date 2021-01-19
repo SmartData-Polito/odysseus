@@ -9,16 +9,16 @@ class SimInput:
 
 	def __init__(self, conf_tuple):
 
-		self.sim_general_conf = conf_tuple[0]
+		self.demand_model_config = conf_tuple[0]
 		self.sim_scenario_conf = conf_tuple[1]
 
-		self.city = self.sim_general_conf["city"]
+		self.city = self.demand_model_config["city"]
 
 		demand_model_path = os.path.join(
 			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
 			"demand_modelling",
 			"demand_models",
-			self.sim_general_conf["city"],
+			self.demand_model_config["city"],
 		)
 
 		self.grid = pickle.Unpickler(open(os.path.join(demand_model_path, "grid.pickle"), "rb")).load()
@@ -37,7 +37,7 @@ class SimInput:
 		self.avg_speed_kmh_std = self.integers_dict["avg_speed_kmh_std"]
 		self.max_driving_distance = self.integers_dict["max_driving_distance"]
 
-		if self.sim_general_conf["sim_technique"] == "traceB":
+		if self.demand_model_config["sim_technique"] == "traceB":
 			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
 
@@ -89,19 +89,17 @@ class SimInput:
 		self.zones_cp_distances = pd.Series()
 		self.closest_cp_zone = pd.Series()
 
-		self.supply_model_conf = {
+		self.supply_model_conf = dict()
+		self.supply_model_conf.update(self.sim_scenario_conf)
+		self.supply_model_conf.update({
 			"city": self.city,
-			"data_source_id": self.sim_scenario_conf['data_source_id'],
+			"data_source_id": self.demand_model_config['data_source_id'],
 			"n_vehicles": self.n_vehicles_sim,
-			"engine_type": self.sim_scenario_conf['engine_type'],
-			"vehicle_model_name": self.sim_scenario_conf['vehicle_model_name'],
-			"distributed_cps": self.sim_scenario_conf['distributed_cps'],
-			"cps_placement_policy": self.sim_scenario_conf['cps_placement_policy'],
-			"profile_type": self.sim_scenario_conf['profile_type'],  # works only if engine_type = electric
-			"country_energymix": self.sim_scenario_conf['country_energymix'],
-			"year_energymix": self.sim_scenario_conf['year_energymix'],
-		}
+			"tot_n_charging_poles": self.tot_n_charging_poles,
+			"n_charging_zones": self.n_charging_zones,
+		})
 		self.supply_model = SupplyModel(self.supply_model_conf)
+		self.available_vehicles_dict = self.supply_model.available_vehicles_dict
 
 	def get_booking_requests_list(self):
 

@@ -9,7 +9,7 @@ import datetime
 import pytz
 
 
-from e3f2s.city_data_manager.data.Torino.raw.geo.openstreetmap.stations_locations import station_locations
+#from e3f2s.city_data_manager.data.Torino.raw.geo.openstreetmap.stations_locations import station_locations
 
 
 def geodataframe_charging_points(city,engine_type,station_location):
@@ -37,7 +37,7 @@ class SupplyModel:
 		self.city = self.supply_model_conf["city"]
 
 		demand_model_path = os.path.join(
-			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+			os.path.dirname(os.path.dirname(__file__)),
 			"demand_modelling",
 			"demand_models",
 			self.supply_model_conf["city"],
@@ -66,8 +66,6 @@ class SupplyModel:
 		self.vehicles_soc_dict = {}
 		self.vehicles_zones = {}
 		self.available_vehicles_dict = {}
-
-		self.start = None
 
 		self.zones_cp_distances = pd.Series()
 		self.closest_cp_zone = pd.Series()
@@ -104,12 +102,6 @@ class SupplyModel:
 			zone = self.vehicles_zones[vehicle]
 			self.available_vehicles_dict[zone] += [vehicle]
 
-		self.start = datetime.datetime(
-			self.supply_model_conf["year"],
-			self.supply_model_conf["month_start"],
-			1, tzinfo=pytz.UTC
-		)
-
 		return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
 
 	def init_charging_poles(self):
@@ -143,22 +135,22 @@ class SupplyModel:
 						print("Zone", zone_id, "does not exist!")
 						exit(0)
 
-			elif self.supply_model_conf["cps_placement_policy"] == "real_positions":
-				cps_points = geodataframe_charging_points(
-					self.city, self.supply_model_conf["engine_type"], station_locations
-				)
-				self.n_charging_poles_by_zone = {}
-				value = 0
-				for (p,n) in zip(cps_points.geometry,cps_points.n_poles):
-					for (geom,zone) in zip(self.grid.geometry,self.grid.zone_id):
-						if geom.intersects(p):
-							if zone in self.n_charging_poles_by_zone.keys():
-								self.n_charging_poles_by_zone[zone] += n
-							else:
-								self.n_charging_poles_by_zone[zone] = n
-							value += n
-				self.tot_n_charging_poles = value
-				self.n_charging_zones = len(self.n_charging_poles_by_zone.keys())
+			# elif self.supply_model_conf["cps_placement_policy"] == "real_positions":
+			# 	cps_points = geodataframe_charging_points(
+			# 		self.city, self.supply_model_conf["engine_type"], station_locations
+			# 	)
+			# 	self.n_charging_poles_by_zone = {}
+			# 	value = 0
+			# 	for (p,n) in zip(cps_points.geometry,cps_points.n_poles):
+			# 		for (geom,zone) in zip(self.grid.geometry,self.grid.zone_id):
+			# 			if geom.intersects(p):
+			# 				if zone in self.n_charging_poles_by_zone.keys():
+			# 					self.n_charging_poles_by_zone[zone] += n
+			# 				else:
+			# 					self.n_charging_poles_by_zone[zone] = n
+			# 				value += n
+			# 	self.tot_n_charging_poles = value
+			# 	self.n_charging_zones = len(self.n_charging_poles_by_zone.keys())
 
 			zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
 

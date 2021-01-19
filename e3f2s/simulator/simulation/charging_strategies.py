@@ -10,48 +10,38 @@ class ChargingStrategy(ChargingPrimitives):
 
 			charging_zone_id = booking_request["destination_id"]
 
-			if self.simInput.supply_model_conf["time_estimation"]:
-
-				if operator == "system":
-					timeout_outward = np.random.exponential(
-						self.simInput.supply_model_conf[
-							"avg_reach_time"
-						] * 60
-					)
-					charge["duration"] = np.random.exponential(
-						self.simInput.supply_model_conf[
-							"avg_service_time"
-						] * 60
-					)
-					timeout_return = 0
-					cr_soc_delta = 0
-					resource = self.workers
-
-				elif operator == "users":
-					timeout_outward = 0
-					timeout_return = 0
-					cr_soc_delta = 0
-					charge["duration"] = np.random.normal(
-						self.simInput.supply_model_conf[
-							"avg_service_time_users"
-						] * 60,
-						30 * 60
-					)
-					resource = self.workers
-
-			else:
-
-				timeout_outward = 0
-				charge["duration"] = 0
+			if operator == "system":
+				timeout_outward = np.random.exponential(
+					self.simInput.supply_model_conf[
+						"avg_reach_time"
+					] * 60
+				)
+				charge["duration"] = np.random.exponential(
+					self.simInput.supply_model_conf[
+						"avg_service_time"
+					] * 60
+				)
 				timeout_return = 0
 				cr_soc_delta = 0
+				resource = self.workers
+
+			elif operator == "users":
+				timeout_outward = 0
+				timeout_return = 0
+				cr_soc_delta = 0
+				charge["duration"] = np.random.normal(
+					self.simInput.supply_model_conf[
+						"avg_service_time_users"
+					] * 60,
+					30 * 60
+				)
 				resource = self.workers
 
 		if self.simInput.supply_model_conf["distributed_cps"]:
 
 			if charging_relocation_strategy == "closest_free":
 
-				zones_by_distance = self.simInput.zones_cp_distances.loc[
+				zones_by_distance = self.simInput.supply_model.zones_cp_distances.loc[
 					int(booking_request["destination_id"])
 				].sort_values()
 
@@ -74,7 +64,7 @@ class ChargingStrategy(ChargingPrimitives):
 							break
 
 			elif charging_relocation_strategy == "random":
-				zones_by_distance = self.simInput.zones_cp_distances.loc[int(booking_request["destination_id"])]
+				zones_by_distance = self.simInput.supply_model.zones_cp_distances.loc[int(booking_request["destination_id"])]
 				free_pole_flag = 0
 
 				# find a random station to charge
@@ -93,7 +83,7 @@ class ChargingStrategy(ChargingPrimitives):
 					if free_pole_flag == 1 or zones_by_distance.empty :
 						break
 			elif charging_relocation_strategy == 'closest_queueing':
-				zones_by_distance = self.simInput.zones_cp_distances.loc[
+				zones_by_distance = self.simInput.supply_model.zones_cp_distances.loc[
 					int(booking_request["destination_id"])
 				].sort_values()
 
@@ -115,64 +105,56 @@ class ChargingStrategy(ChargingPrimitives):
 				exit()
 
 			if free_pole_flag == 0:
-				charging_zone_id = self.simInput.closest_cp_zone[
+				charging_zone_id = self.simInput.supply_model.closest_cp_zone[
 					int(booking_request["destination_id"])
 				]
 
 			charging_station = self.charging_stations_dict[charging_zone_id].charging_station
 			resource = charging_station
 
-			if self.simInput.supply_model_conf["time_estimation"]:
+			if operator == "system":
 
-				if operator == "system":
+				timeout_outward = np.random.exponential(
+					self.simInput.supply_model_conf[
+						"avg_reach_time"
+					] * 60
+				)
+				timeout_return = self.get_timeout(
+					booking_request["destination_id"],
+					charging_zone_id
+				)
 
-					timeout_outward = np.random.exponential(
-						self.simInput.supply_model_conf[
-							"avg_reach_time"
-						] * 60
-					)
-					timeout_return = self.get_timeout(
-						booking_request["destination_id"],
-						charging_zone_id
-					)
+				charge["duration"] = vehicle.get_charging_time_from_perc(
+					vehicle.soc.level,
+					self.charging_stations_dict[charging_zone_id].flow_rate,
+					charge["end_soc"]
+				)
 
-					charge["duration"] = vehicle.get_charging_time_from_perc(
-						vehicle.soc.level,
-						self.charging_stations_dict[charging_zone_id].flow_rate,
-						charge["end_soc"]
-					)
+				cr_soc_delta = self.get_cr_soc_delta(
+					booking_request["destination_id"], charging_zone_id, vehicle
+				)
+				charging_outward_distance = self.get_distance(booking_request["destination_id"], charging_zone_id)
 
-					cr_soc_delta = self.get_cr_soc_delta(
-						booking_request["destination_id"], charging_zone_id, vehicle
-					)
-					charging_outward_distance = self.get_distance(booking_request["destination_id"], charging_zone_id)
+				if cr_soc_delta > booking_request["end_soc"]:
+					self.dead_vehicles.add(vehicle)
+					self.n_dead_vehicles = len(self.dead_vehicles)
+					self.sim_unfeasible_charge_bookings.append(booking_request)
+				else:
+					self.charging_return_distance += charging_outward_distance
 
-					if cr_soc_delta > booking_request["end_soc"]:
-						self.dead_vehicles.add(vehicle)
-						self.n_dead_vehicles = len(self.dead_vehicles)
-						self.sim_unfeasible_charge_bookings.append(booking_request)
-					else:
-						self.charging_return_distance += charging_outward_distance
+			elif operator == "users":
 
-				elif operator == "users":
-
-					charging_zone_id = booking_request["destination_id"]
-					charging_station = self.charging_stations_dict[charging_zone_id].charging_station
-					resource = charging_station
-					timeout_outward = 0
-					charge["duration"] = self.vehicles_list[vehicle].get_charging_time_from_perc(
-						self.vehicles_list[vehicle].soc.level,
-						self.charging_stations_dict[charging_zone_id].flow_rate, charge["end_soc"]
-					)
-					timeout_return = 0
-					cr_soc_delta = 0
-
-			else:
-
+				charging_zone_id = booking_request["destination_id"]
+				charging_station = self.charging_stations_dict[charging_zone_id].charging_station
+				resource = charging_station
 				timeout_outward = 0
-				charge["duration"] = 0
+				charge["duration"] = self.vehicles_list[vehicle].get_charging_time_from_perc(
+					self.vehicles_list[vehicle].soc.level,
+					self.charging_stations_dict[charging_zone_id].flow_rate, charge["end_soc"]
+				)
 				timeout_return = 0
 				cr_soc_delta = 0
+
 
 		charge_dict = {
 			"charge": charge,

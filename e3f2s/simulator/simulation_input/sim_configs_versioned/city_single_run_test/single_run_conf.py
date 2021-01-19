@@ -1,7 +1,7 @@
 sim_scenario_conf = {
 
-	"n_requests": 10**5,
-	"n_vehicles": 200,
+	"requests_rate_factor": 1,
+	"n_vehicles_factor": 1,
 	"engine_type": "electric",
 	"profile_type": "single_phase_1", # works only if engine_type = electric
 	"vehicle_model_name": "Smart fortwo Electric Drive 2018",

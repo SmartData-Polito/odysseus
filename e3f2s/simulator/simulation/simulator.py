@@ -53,15 +53,15 @@ class SharedMobilitySim:
 
         self.simInput = simInput
 
-        self.available_vehicles_dict = self.simInput.available_vehicles_dict
+        self.available_vehicles_dict = self.simInput.supply_model.available_vehicles_dict
 
         self.neighbors_dict = self.simInput.neighbors_dict
 
         if simInput.supply_model_conf["distributed_cps"]:
             self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone
 
-        self.vehicles_soc_dict = self.simInput.vehicles_soc_dict
-        self.vehicles_zones = self.simInput.vehicles_zones
+        self.vehicles_soc_dict = self.simInput.supply_model.vehicles_soc_dict
+        self.vehicles_zones = self.simInput.supply_model.vehicles_zones
 
         self.env = simpy.Environment()
 
@@ -94,8 +94,8 @@ class SharedMobilitySim:
 
         self.real_n_charging_zones = 0
         if self.simInput.supply_model_conf["distributed_cps"]:
-            for zone_id in self.simInput.n_charging_poles_by_zone:
-                zone_n_cps = self.simInput.n_charging_poles_by_zone[zone_id]
+            for zone_id in self.simInput.supply_model.n_charging_poles_by_zone:
+                zone_n_cps = self.simInput.supply_model.n_charging_poles_by_zone[zone_id]
                 if zone_n_cps > 0:
                     self.charging_stations_dict[zone_id] = ChargingStation(
                         self.env, zone_n_cps, zone_id, station_conf, self.simInput.supply_model_conf, self.start
