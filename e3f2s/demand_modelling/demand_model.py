@@ -123,7 +123,7 @@ class DemandModel:
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
         self.trip_kdes = self.get_trip_kdes()
-        # self.origin_scores = self.get_origin_scores()
+        self.origin_scores = self.get_origin_scores()
 
     def map_zones_on_trips(self, zones):
         self.trips_origins = gpd.sjoin(
@@ -348,31 +348,26 @@ class DemandModel:
         return self.trip_kdes
 
     def get_origin_scores(self):
-        print(datetime.datetime.now(), "Computing discrete marginal distributions of origins...")
+        self.origin_scores = {}
+        for daytype, daytype_df in self.trips_origins.groupby("start_daytype"):
+            self.origin_scores[daytype] = {}
+            for hour, hour_df in daytype_df.groupby("start_hour"):
+                self.origin_scores[daytype][hour] = {}
+                total_starts = len(hour_df)
+                for zone, zone_df in hour_df.groupby("zone_id"):
+                    if zone in self.valid_zones:
+                        self.origin_scores[daytype][hour][zone] = len(zone_df) / total_starts
 
-        results = []
-        with mp.Pool(mp.cpu_count()) as pool:
-            conf_tuples = []
-            self.origin_scores = {}
-            for daytype in self.trip_kdes.keys():
-                self.origin_scores[daytype] = {}
-                for hour in self.trip_kdes[daytype].keys():
-                    conf_tuple = {
-                        "valid_zones": self.valid_zones,
-                        "grid_matrix": self.grid_matrix,
-                        "trip_kde": self.trip_kdes[daytype][hour],
-                        "daytype": daytype,
-                        "hour": hour
-                    }
-                    conf_tuples += [conf_tuple]
+        for daytype in ["weekday", "weekend"]:
+            for hour in range(24):
+                for zone in self.valid_zones:
+                    if daytype not in self.origin_scores:
+                        self.origin_scores[daytype] = {}
+                    if hour not in self.origin_scores[daytype]:
+                        self.origin_scores[daytype][hour] = {}
+                    if zone not in  self.origin_scores[daytype][hour]:
+                        self.origin_scores[daytype][hour][zone] = 0
 
-            results += pool.map(calculate_origin_scores, conf_tuples)
-
-        for result in results:
-            daytype, hour, origin_scores = result
-            self.origin_scores[daytype][hour] = origin_scores
-
-        print(datetime.datetime.now(), "Done!")
         return self.origin_scores
 
     def save_results(self):
@@ -414,8 +409,8 @@ class DemandModel:
             pickle.dump(self.trip_kdes, f)
         with open(os.path.join(demand_model_path, "valid_zones.pickle"), "wb") as f:
             pickle.dump(self.valid_zones, f)
-        # with open(os.path.join(demand_model_path, "origin_scores.pickle"), "wb") as f:
-        #     pickle.dump(self.origin_scores, f)
+        with open(os.path.join(demand_model_path, "origin_scores.pickle"), "wb") as f:
+            pickle.dump(self.origin_scores, f)
 
         integers_dict = {
             "avg_request_rate" : self.avg_request_rate,

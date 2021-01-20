@@ -3,7 +3,7 @@ import numpy as np
 sim_scenario_conf_grid = {
 
     "n_requests": [1000000],
-    "fleet_load_factor": 1000000 / np.arange(1000, 10001, 500),
+    "fleet_load_factor": 1000000 / np.arange(100, 2001, 100),
 
     "time_estimation": [True],
     "queuing": [True],
@@ -43,9 +43,11 @@ sim_scenario_conf_grid = {
             "start": "delta",
             "start_demand_weight": 0.9,
             "start_vehicles_factor": 1,
+            "start_window_width": 2,
             "end": "delta",
             "end_demand_weight": 0.9,
             "end_vehicles_factor": 1,
+            "end_window_width": 2,
         }.items()),
     ],
     "scooter_relocation_scheduling": [True],
@@ -56,5 +58,10 @@ sim_scenario_conf_grid = {
         }.items()),
     ],
     "n_relocation_workers": range(3, 13),
-    "avg_relocation_speed": [20]  # km/h
+    "avg_relocation_speed": [20],  # km/h
+
+    "engine_type": ["electric"],
+    "vehicle_model_name": ["generic e-scooter"],
+    "country_energymix": ["Italy"],
+    "year_energymix": ["2018"],
 }
