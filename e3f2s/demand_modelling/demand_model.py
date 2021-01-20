@@ -1,6 +1,5 @@
 import os
 import pickle
-import multiprocessing as mp
 import datetime
 
 from sklearn.neighbors import KernelDensity
@@ -9,32 +8,6 @@ from e3f2s.utils.geospatial_utils import *
 
 from e3f2s.demand_modelling.loader import Loader
 from e3f2s.utils.time_utils import *
-
-
-def calculate_origin_scores(conf_tuple):
-    origin_scores = {}
-    total_covered_density = 0
-    for origin_id in conf_tuple["valid_zones"]:
-        origin_j = int(np.floor(
-            origin_id / conf_tuple["grid_matrix"].shape[0]
-        ))
-        origin_i = int(
-            origin_id - origin_j * conf_tuple["grid_matrix"].shape[0]
-        )
-        destination_log_densities = conf_tuple["trip_kde"].score_samples(
-            np.array(np.meshgrid(
-                [origin_i],
-                [origin_j],
-                [conf_tuple["grid_matrix"].index],
-                [conf_tuple["grid_matrix"].columns]
-            )).T.reshape(-1, 4)
-        )
-        origin_score = np.sum(np.exp(destination_log_densities))
-        origin_scores[origin_id] = origin_score
-        total_covered_density += origin_score
-    print(datetime.datetime.now(), "daytype:", conf_tuple["daytype"], "hour:", conf_tuple["hour"],
-          "total_covered_density:", total_covered_density)
-    return conf_tuple["daytype"], conf_tuple["hour"], origin_scores
 
 
 class DemandModel:
