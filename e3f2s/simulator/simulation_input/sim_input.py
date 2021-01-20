@@ -83,7 +83,6 @@ class SimInput:
 		self.n_charging_poles_by_zone = {}
 		self.vehicles_soc_dict = {}
 		self.vehicles_zones = {}
-		self.available_vehicles_dict = {}
 
 		self.start = None
 
@@ -100,7 +99,6 @@ class SimInput:
 			"n_charging_zones": self.n_charging_zones,
 		})
 		self.supply_model = SupplyModel(self.supply_model_conf)
-		self.available_vehicles_dict = self.supply_model.available_vehicles_dict
 
 	def get_booking_requests_list(self):
 
@@ -160,11 +158,11 @@ class SimInput:
 
 	def gen_origin_scores(self, kde):
 		origin_scores = {}
-		max_iterations = len(self.available_vehicles_dict.keys()) * 100
+		max_iterations = len(self.supply_model.available_vehicles_dict.keys()) * 100
 		score_increment = 1 / max_iterations
 		tot_iterations = 0
 		tot_covered_density = 0
-		while len(origin_scores) < len(self.available_vehicles_dict.keys()) and tot_iterations < max_iterations:
+		while len(origin_scores) < len(self.supply_model.available_vehicles_dict.keys()) and tot_iterations < max_iterations:
 			origin_id = self.gen_trip_origin_zone_from_kde(kde)
 			if origin_id in self.valid_zones:
 				if origin_id in origin_scores:
@@ -175,7 +173,7 @@ class SimInput:
 					origin_scores[origin_id] = score_increment
 					tot_covered_density += score_increment
 			tot_iterations += 1
-		for zone_id in self.available_vehicles_dict.keys():
+		for zone_id in self.supply_model.available_vehicles_dict.keys():
 			if zone_id not in origin_scores.keys():
 				origin_scores[zone_id] = 0
 		return origin_scores
