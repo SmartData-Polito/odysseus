@@ -338,7 +338,7 @@ class DemandModel:
                         self.origin_scores[daytype] = {}
                     if hour not in self.origin_scores[daytype]:
                         self.origin_scores[daytype][hour] = {}
-                    if zone not in  self.origin_scores[daytype][hour]:
+                    if zone not in self.origin_scores[daytype][hour]:
                         self.origin_scores[daytype][hour][zone] = 0
 
         return self.origin_scores
