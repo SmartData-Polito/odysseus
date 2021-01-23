@@ -34,12 +34,12 @@ class ChargingStrategy(ChargingPrimitives):
 
 			if operator == "system":
 				timeout_outward = np.random.exponential(
-					self.simInput.sim_scenario_conf[
+					self.simInput.supply_model_conf[
 						"avg_reach_time"
 					] * 60
 				)
 				charge["duration"] = np.random.exponential(
-					self.simInput.sim_scenario_conf[
+					self.simInput.supply_model_conf[
 						"avg_service_time"
 					] * 60
 				)
