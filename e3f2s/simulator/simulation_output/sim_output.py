@@ -283,61 +283,20 @@ class SimOutput():
 					"charge_deaths_origins_count"
 				] = self.sim_charge_deaths.origin_id.value_counts()
 
+			self.sim_bookings["avg_speed_kmh"] = (self.sim_bookings["driving_distance"] / 1000) / \
+			                                   (self.sim_bookings['duration'] / 3600)
+			# self.sim_bookings["energy_cost"] = get_fuelcost_from_energy(
+			# 	sim.simInput.sim_scenario_conf["engine_type"], self.sim_bookings["tanktowheel_kwh"] * 3.6
+			# )
+			# self.sim_bookings["maintenance_cost"] = maintenance_costs(
+			# 	sim.simInput.sim_scenario_conf["engine_type"], self.sim_bookings["driving_distance"] / 1000
+			# )
+			# self.sim_bookings["booking_revenue"] = bookings_revenues[sim.simInput.sim_scenario_conf["engine_type"]][
+			# 	                                     sim.simInput.sim_scenario_conf["vehicle_model_name"]
+			#                                      ]["cost_permin"] * (self.sim_bookings['duration'] / 60)
+
 			self.sim_stats.loc["avg_speed_kmh"] = self.sim_bookings.avg_speed_kmh.mean()
 			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
-			self.sim_stats.loc["purchase_cost"] = total_purchase_cost(sim.vehicles_list)
-			self.sim_stats.loc["insurance_cost"] = insurance_costs(sim.vehicles_list)
-			self.sim_stats.loc["parking_spot_cost"] = parking_spot_costs(sim.vehicles_list)
-			self.sim_stats.loc["charging_station_cost"] = service_lifespan_vehicle_years * charging_station_total_costs(
-				self.sim_scenario_conf["engine_type"],sim.charging_stations_dict
-			)
-			self.sim_stats.loc["energy_cost"] = self.sim_bookings.energy_cost.sum()
-			self.sim_stats.loc["maintenance_cost"] = self.sim_bookings.maintenance_cost.sum()
-			self.sim_stats.loc["operational_cost"] = operational_costs(self.sim_stats.loc["n_workers"])
-			self.sim_stats.loc["booking_revenue"] = self.sim_bookings.booking_revenue.sum()
-			if self.sim_scenario_conf["engine_type"] == "electric":
-				self.sim_stats.loc["residual_value_revenue"] = self.sim_stats.loc["n_vehicles"] * \
-				                                               (ev_residual_value_revenue[
-					                                                "annual_depreciation_rate"] **
-				                                                service_lifespan_vehicle_years *
-				                                                purchase_cost_vehicle(
-					                                                self.sim_scenario_conf["engine_type"],
-					                                                self.sim_scenario_conf["vehicle_model_name"]
-				                                                ) * (1 - ev_residual_value_revenue[
-							                                               "battery_to_vehicle_cost_ratio"]) +
-				                                                purchase_cost_vehicle(
-					                                                self.sim_scenario_conf["engine_type"],
-					                                                self.sim_scenario_conf["vehicle_model_name"]
-				                                                ) * ev_residual_value_revenue[
-					                                                "battery_to_vehicle_cost_ratio"]) - \
-				                                               self.sim_bookings.depreciation_vehicle.sum()
-			elif self.sim_scenario_conf["engine_type"] in ["gasoline", "diesel", "lpg", "cng"]:
-				self.sim_stats.loc["residual_value_revenue"] = self.sim_stats.loc["n_vehicles"] * \
-				                                               (ev_residual_value_revenue[
-					                                                "annual_depreciation_rate"] **
-				                                                service_lifespan_vehicle_years *
-				                                                purchase_cost_vehicle(
-					                                                self.sim_scenario_conf["engine_type"],
-					                                                self.sim_scenario_conf["vehicle_model_name"]
-				                                                )) - self.sim_bookings.depreciation_vehicle.sum()
-			if self.sim_stats.loc["residual_value_revenue"] < 0:
-				self.sim_stats.loc["residual_value_revenue"] = 0
-			self.sim_stats.loc["non_rental_revenue"] = non_rental_revenue["advertising"]
-			self.sim_stats.loc["present_value_costs"] = self.sim_stats.loc["purchase_cost"] + \
-			                                            self.sim_stats.loc["charging_station_cost"]
-			for i in range(1,int(service_lifespan_vehicle_years) + 1):
-				year_i_cost = (self.sim_stats.loc["insurance_cost"] + self.sim_stats.loc["energy_cost"] +
-				               self.sim_stats.loc["parking_spot_cost"] + self.sim_stats.loc["maintenance_cost"] +
-				               self.sim_stats.loc["operational_cost"]) / (1 + discount_rate) ** i
-				self.sim_stats.loc["present_value_costs"] += year_i_cost
-			self.sim_stats.loc["present_value_revenues"] = self.sim_stats.loc["residual_value_revenue"] / \
-			                                               (1 + discount_rate) ** service_lifespan_vehicle_years
-			for i in range(1,int(service_lifespan_vehicle_years) + 1):
-				year_i_revenues = (self.sim_stats.loc["booking_revenue"] + self.sim_stats.loc["non_rental_revenue"]) / \
-				                  (1 + discount_rate) ** i
-				self.sim_stats.loc["present_value_revenues"] += year_i_revenues
-			self.sim_stats.loc["net_present_value"] = self.sim_stats.loc["present_value_revenues"] - \
-			                                          self.sim_stats.loc["present_value_costs"]
 
 			self.vehicles_history = pd.DataFrame()
 			for vehicle in sim.vehicles_list:

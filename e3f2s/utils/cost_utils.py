@@ -116,18 +116,15 @@ charging_station_costs = {
 	},
 }
 
-insurance_fixed_costs = {
-	"compulsory_traffic_insurance": 119.83,
-	"basic_premium": 58.02,
-	"commercial_3rd_party_insurance": 157.93,
-}
 parking_spot_fixed_costs = {
 	"annual_rental_parking_space": 600,
 	"parking_spot_per_vehicle": 1.5
 }
+service_lifespan_vehicle_years = 8.0
+
 charging_stations_param = {
 	"residual_value_rate": 5,
-	"depreciation_period_charging_station": 8
+	"depreciation_period_charging_station": service_lifespan_vehicle_years
 }
 
 fuel_costs = {
@@ -157,12 +154,6 @@ fuel_costs = {
 	}
 }
 
-operational_fixed_costs = {
-	"annual_worker_wage": 12613.85,
-	"annual_marketing": 75683.1,
-	"annual_digital_platform": 151366.19,
-	"other_miscellaneous": 75683.1
-}
 
 bookings_revenues = {
 	"gasoline": {
@@ -195,22 +186,12 @@ bookings_revenues = {
 	}
 }
 
-ev_residual_value_revenue = {
-	"annual_depreciation_rate": 0.7,
-	"battery_to_vehicle_cost_ratio": 0.4,
-	"ICEV_depreciation_perkm": 0.025,
-	"battery_depreciation_perkm": 0.016
-}
-service_lifespan_vehicle_years = 8.0
+
 non_rental_revenue = {
 	"advertising": 163.98
 }
 discount_rate = 0.1
 
-
-def operational_costs(n_workers):
-	return n_workers * operational_fixed_costs["annual_worker_wage"] + operational_fixed_costs["annual_marketing"] + \
-	       operational_fixed_costs["other_miscellaneous"]
 
 
 def maintenance_costs(fuel_type, distance):
@@ -233,13 +214,6 @@ def get_fuelcost_from_energy(fuel_type, energy_mj):
 			# converted lhv from MJ/kg to MJ/L
 		)
 		return fuel_costs[fuel_type]["fuel_cost"] * liters
-
-
-# def num_charging_stations(poles):
-# 	if poles % 4 == 0:
-# 		return poles / 4
-# 	else:
-# 		return (poles // 4) + 1
 
 
 def charging_station_total_costs(fuel_type, charging_stations):
@@ -271,35 +245,7 @@ def parking_spot_costs(vehicles):
 	return costs
 
 
-def purchase_cost_vehicle(engine_type, model):
-	return (vehicle_cost[engine_type][model]["retail_price"] + (
-			(vehicle_cost[engine_type][model]["IVA"] / 100) *
-			vehicle_cost[engine_type][model]["retail_price"]
-	) + vehicle_cost[engine_type][model]["put_into_circulation"])
 
-
-def total_purchase_cost(vehicles):
-	costs = 0
-	for vehicle in vehicles:
-		costs += (vehicle.costs["retail_price"] + (
-				(vehicle.costs["IVA"] / 100) * vehicle.costs["retail_price"])
-		          + vehicle.costs["put_into_circulation"]) - \
-		         vehicle.costs["government_subsidies"]
-	return costs
-
-
-def insurance_costs(vehicles):
-	costs = 0
-	for vehicle in vehicles:
-		I_ci = insurance_fixed_costs["compulsory_traffic_insurance"]
-		I_li = insurance_fixed_costs["basic_premium"] + \
-		       (vehicle.costs["retail_price"] + ((vehicle.costs["IVA"] / 100) * vehicle.costs["retail_price"])
-		        + vehicle.costs["put_into_circulation"]) * 1.0880 / 100
-		I_ti = insurance_fixed_costs["commercial_3rd_party_insurance"]
-		I_di = (I_li + I_ti) * (20 / 100)
-		I_pi = 6.31 * vehicle.n_seats
-		costs += (I_ci + I_li + I_ti + I_di + I_pi)
-	return costs
 
 # def insert_administrative_costs(df,administrative_cost_conf):
 #     df['it_salary'] = administrative_cost_conf['n_it_specialists'] * administrative_cost_conf['it_specialist_ral']
