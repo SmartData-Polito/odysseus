@@ -32,7 +32,7 @@ class Vehicle(object):
 		self.consumption = vehicle_config["consumption"] #km/l, km/kWh
 		self.capacity = vehicle_config["fuel_capacity"] #kWh (electric), Liter (gasoline,diesel,lpg), kilograms (gnc)
 		self.n_seats = vehicle_config["n_seats"]
-		self.costs = vehicle_config["costs"]
+		# self.costs = vehicle_config["costs"]
 
 		if self.engine_type == "gasoline": # GASOLINE E5
 			self.welltotank_emission = 17 #gCO2eq/MJ (pathway code COG-1)

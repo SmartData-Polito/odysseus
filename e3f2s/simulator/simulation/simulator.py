@@ -16,7 +16,6 @@ from e3f2s.simulator.simulation.scooter_relocation_strategies import ScooterRelo
 from e3f2s.simulator.simulation_input.vehicle_conf import vehicle_conf
 from e3f2s.simulator.simulation_input.energymix_conf import energymix_conf
 from e3f2s.simulator.simulation_input.station_conf import station_conf
-from e3f2s.utils.cost_utils import get_fuelcost_from_energy,maintenance_costs,bookings_revenues, ev_residual_value_revenue
 
 
 class SharedMobilitySim:

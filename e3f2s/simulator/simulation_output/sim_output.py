@@ -1,7 +1,8 @@
 import pandas as pd
 from e3f2s.simulator.simulation_output.sim_stats import SimStats
-from e3f2s.utils.cost_utils import *
-
+from e3f2s.utils.cost_utils import insert_scenario_costs,insert_sim_costs
+from e3f2s.simulator.simulation_input.costs_conf import vehicle_cost,charging_station_costs,fuel_costs,\
+	administrative_cost_conf
 
 class SimOutput():
 
@@ -285,18 +286,13 @@ class SimOutput():
 
 			self.sim_bookings["avg_speed_kmh"] = (self.sim_bookings["driving_distance"] / 1000) / \
 			                                   (self.sim_bookings['duration'] / 3600)
-			# self.sim_bookings["energy_cost"] = get_fuelcost_from_energy(
-			# 	sim.simInput.sim_scenario_conf["engine_type"], self.sim_bookings["tanktowheel_kwh"] * 3.6
-			# )
-			# self.sim_bookings["maintenance_cost"] = maintenance_costs(
-			# 	sim.simInput.sim_scenario_conf["engine_type"], self.sim_bookings["driving_distance"] / 1000
-			# )
-			# self.sim_bookings["booking_revenue"] = bookings_revenues[sim.simInput.sim_scenario_conf["engine_type"]][
-			# 	                                     sim.simInput.sim_scenario_conf["vehicle_model_name"]
-			#                                      ]["cost_permin"] * (self.sim_bookings['duration'] / 60)
 
 			self.sim_stats.loc["avg_speed_kmh"] = self.sim_bookings.avg_speed_kmh.mean()
 			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
+			insert_scenario_costs(self.sim_stats, self.sim_scenario_conf,vehicle_cost,charging_station_costs)
+			insert_sim_costs(self.sim_stats,self.sim_scenario_conf,fuel_costs,administrative_cost_conf,vehicle_cost)
+			self.sim_stats.loc["total_profit"] = self.sim_stats.loc["revenues"] - (self.sim_stats.loc["scenario_cost"] +
+			                                                                       self.sim_stats.loc["sim_cost"])
 
 			self.vehicles_history = pd.DataFrame()
 			for vehicle in sim.vehicles_list:
