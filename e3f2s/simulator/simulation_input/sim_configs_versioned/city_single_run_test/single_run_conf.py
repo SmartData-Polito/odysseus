@@ -34,8 +34,6 @@ sim_scenario_conf = {
 	"user_contribution": False,
 	"willingness": 0,
 
-	"scooter_relocation": False,
-
 	"charging_strategy": "reactive",
 	"charging_relocation_strategy": "closest_free", #closest_free/random/closest_queueing
 	"scooter_relocation": False

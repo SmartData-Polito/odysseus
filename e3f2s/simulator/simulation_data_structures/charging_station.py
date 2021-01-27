@@ -14,6 +14,7 @@ class ChargingStation(Pole):
         else:
             super().__init__(station_conf[engine_type])
         self.env = env
+        self.num_poles = num_poles
         self.charging_station = simpy.Resource(self.env, capacity=num_poles)
         self.zone_id = zone_id
         self.current_status = {

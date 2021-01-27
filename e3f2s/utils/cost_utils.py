@@ -1,32 +1,43 @@
-def insert_administrative_costs(df,administrative_cost_conf):
-    df['it_salary'] = administrative_cost_conf['n_it_specialists'] * administrative_cost_conf['it_specialist_ral']
-    df['manager_salary'] = administrative_cost_conf['n_manager'] * administrative_cost_conf['manager_ral']
-    df['marketing_cost'] = administrative_cost_conf['marketing_costs']
-    df['office_cost'] = administrative_cost_conf['office_costs']
-    df['customer_service_cost'] = (
-            administrative_cost_conf['n_customer_service_specialists'] *
-            administrative_cost_conf['customer_service_specialist_ral'])
-    df['administrative_costs'] = (df.office_cost + df.manager_salary + df.it_salary
-                                  + df.customer_service_cost + df.marketing_cost)
+def get_fuelcost_from_energy(fuel_type,fuel_costs, energy_mj):
+	if fuel_type == "electric":
+		energy_kwh = energy_mj / 3.6
+		return (fuel_costs[fuel_type]["fuel_cost"] * energy_kwh) / (fuel_costs[fuel_type]["charging_efficiency"] / 100)
+	elif fuel_type in ["gasoline", "diesel", "lpg", "cng"]:
+		liters = energy_mj / (
+				fuel_costs[fuel_type]["lower_heating_value"] / (1 / (fuel_costs[fuel_type]["density"] / 1000))
+			# converted lhv from MJ/kg to MJ/L
+		)
+		return fuel_costs[fuel_type]["fuel_cost"] * liters
+
+def charging_station_lord_cost(costs):
+	cost = 0
+	for (index, numb) in costs.items():
+		cost += numb
+	return cost
+
+def insert_scenario_costs(df, sim_scenario_conf, vehicles_cost_conf, poles_cost_conf):
+	df['cars_cost'] = df.n_vehicles_sim * vehicles_cost_conf[sim_scenario_conf["engine_type"]][
+		sim_scenario_conf["vehicle_model_name"]
+	]['leasing_cost'] #/ 12
+	if sim_scenario_conf["engine_type"] == "electric":
+		df['charging_infrastructure_cost'] = df.tot_n_charging_poles * charging_station_lord_cost(
+			poles_cost_conf[sim_scenario_conf["profile_type"]]
+		)/ poles_cost_conf["pole_useful_life"]
+	else:
+		df['charging_infrastructure_cost'] = 0
+	df['scenario_cost'] = df.cars_cost + df.charging_infrastructure_cost
 
 
-def insert_scenario_costs(df, vehicles_cost_conf, poles_cost_conf):
-    df['cars_cost'] = (df.n_cars) * (
-                vehicles_cost_conf['car_annual_cost'] + vehicles_cost_conf['car_annual_insurance_cost'] +
-                vehicles_cost_conf['car_annual_mantenaince_cost'])
-    df['poles_cost'] = df.n_charging_poles * (
-                poles_cost_conf['pole_installation_cost'] + poles_cost_conf['pole_annual_mantenaince_cost'] +
-                poles_cost_conf['cosap_annual_tax'])
-
-
-def insert_sim_costs(df, scenario_costs_conf, administrative_cost_conf, vehicles_cost_conf):
-    df['relocation_cost'] = round((scenario_costs_conf['utilization_relocation_workers']*2*df.cum_relo_t/ \
-                                   ((sim_end - sim_start).total_seconds()/ 3600 / 8)))* \
-                            administrative_cost_conf['relocation_workers_hourly_cost']* \
-                            ((sim_end - sim_start).total_seconds() / 3600 / 8)
-    df['energy_cost'] = df.tot_charging_energy*scenario_costs_conf['kwh_cost']
-    df['revenues'] = (df.total_trips_duration*scenario_costs_conf['real_bookings_percentage']/100)*scenario_costs_conf['price_per_minute']
-    df['charge_deaths_cost'] = df.n_charge_deaths*scenario_costs_conf['tow_truck_cost_per_call']
-    df['deaths_cost'] = df.n_deaths*scenario_costs_conf['tow_truck_cost_per_call']
-    df['washing'] = vehicles_cost_conf['disinfection_cost']*df.n_charges + vehicles_cost_conf['washing_cost']*df.n_bookings/100
+def insert_sim_costs(df, sim_scenario_conf, fuel_costs, administrative_cost_conf, vehicles_cost_conf):
+	df['relocation_cost'] = df.cum_relo_ret_t * administrative_cost_conf['relocation_workers_hourly_cost']
+	df['energy_cost'] = get_fuelcost_from_energy(sim_scenario_conf["engine_type"],fuel_costs,df.tot_tanktowheel_energy)
+	df['revenues'] = (df.tot_mobility_duration / 60) * vehicles_cost_conf[sim_scenario_conf["engine_type"]][
+		sim_scenario_conf["vehicle_model_name"]
+	]["cost_permin"]
+	df['washing'] = vehicles_cost_conf[sim_scenario_conf["engine_type"]][
+		sim_scenario_conf["vehicle_model_name"]
+	]['disinfection_cost'] * df.n_charges + vehicles_cost_conf[
+		sim_scenario_conf["engine_type"]
+	][sim_scenario_conf["vehicle_model_name"]]['washing_cost'] * df.n_bookings / 100
+	df['sim_cost'] = df.relocation_cost + df.energy_cost + df.washing
 

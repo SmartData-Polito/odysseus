@@ -1,10 +1,12 @@
 import pandas as pd
 from e3f2s.simulator.simulation_output.sim_stats import SimStats
+from e3f2s.utils.cost_utils import insert_scenario_costs,insert_sim_costs
+from e3f2s.simulator.simulation_input.costs_conf import vehicle_cost,charging_station_costs,fuel_costs,\
+	administrative_cost_conf
 
+class SimOutput():
 
-class SimOutput ():
-
-	def __init__ (self, sim):
+	def __init__(self, sim):
 
 		self.valid_zones = sim.simInput.valid_zones
 
@@ -104,7 +106,7 @@ class SimOutput ():
 					self.sim_charges.groupby("plate").date.count().mean()
 
 				self.sim_stats.loc["n_charges_by_vehicle_system_avg"] = \
-					self.sim_charges[self.sim_charges.operator == "system"]\
+					self.sim_charges[self.sim_charges.operator == "system"] \
 						.groupby("plate").date.count().mean()
 			else:
 				self.sim_stats.loc["charging_time_avg"] = 0
@@ -114,7 +116,7 @@ class SimOutput ():
 
 			if len(self.sim_users_charges_bookings):
 				self.sim_stats.loc["n_charges_by_vehicle_users_avg"] = \
-					self.sim_charges[self.sim_charges.operator == "users"]\
+					self.sim_charges[self.sim_charges.operator == "users"] \
 						.groupby("plate").date.count().mean()
 			else:
 				self.sim_stats.loc["n_charges_by_vehicle_users_avg"] = 0
@@ -124,8 +126,10 @@ class SimOutput ():
 			self.sim_stats.loc["tot_potential_welltotank_energy"] = self.sim_booking_requests.welltotank_kwh.sum()
 			self.sim_stats.loc["tot_potential_tanktowheel_energy"] = self.sim_booking_requests.tanktowheel_kwh.sum()
 			self.sim_stats.loc["tot_potential_mobility_energy"] = self.sim_booking_requests.soc_delta_kwh.sum()
-			self.sim_stats.loc["tot_potential_welltotank_co2_emissions"] = self.sim_booking_requests.welltotank_emissions.sum() / 1000
-			self.sim_stats.loc["tot_potential_welltowheel_co2_emissions"] = self.sim_booking_requests.tanktowheel_emissions.sum() / 1000
+			self.sim_stats.loc[
+				"tot_potential_welltotank_co2_emissions"] = self.sim_booking_requests.welltotank_emissions.sum() / 1000
+			self.sim_stats.loc[
+				"tot_potential_welltowheel_co2_emissions"] = self.sim_booking_requests.tanktowheel_emissions.sum() / 1000
 			self.sim_stats.loc["tot_potential_co2_emissions_kg"] = self.sim_booking_requests.co2_emissions.sum() / 1000
 
 			self.sim_stats.loc["tot_welltotank_energy"] = self.sim_bookings.welltotank_kwh.sum()
@@ -140,20 +144,20 @@ class SimOutput ():
 			else:
 				self.sim_stats.loc["tot_charging_energy"] = 0
 
-			self.sim_stats.loc["tot_charging_return_distance"] =sim.chargingStrategy.charging_return_distance
+			self.sim_stats.loc["tot_charging_return_distance"] = sim.chargingStrategy.charging_return_distance
 
 			if len(self.sim_charges) and "system" in self.sim_charges.operator.unique():
 				self.sim_stats.loc["fraction_charges_system"] = \
-					self.sim_charges.groupby("operator")\
-					.date.count().loc["system"]\
+					self.sim_charges.groupby("operator") \
+						.date.count().loc["system"] \
 					/ len(self.sim_charges)
 				self.sim_stats.loc["fraction_energy_system"] = \
-					self.sim_charges.groupby("operator")\
-					.soc_delta_kwh.sum().loc["system"]\
+					self.sim_charges.groupby("operator") \
+						.soc_delta_kwh.sum().loc["system"] \
 					/ self.sim_stats["tot_charging_energy"]
 				self.sim_stats.loc["fraction_duration_system"] = \
-					self.sim_charges.groupby("operator")\
-					.duration.sum().loc["system"]\
+					self.sim_charges.groupby("operator") \
+						.duration.sum().loc["system"] \
 					/ self.sim_charges.duration.sum()
 			else:
 				self.sim_stats.loc["fraction_charges_system"] = 0
@@ -162,16 +166,16 @@ class SimOutput ():
 
 			if len(self.sim_charges) and "users" in self.sim_charges.operator.unique():
 				self.sim_stats.loc["fraction_charges_users"] = \
-					self.sim_charges.groupby("operator")\
-					.date.count().loc["users"]\
+					self.sim_charges.groupby("operator") \
+						.date.count().loc["users"] \
 					/ len(self.sim_charges)
 				self.sim_stats.loc["fraction_energy_users"] = \
-					self.sim_charges.groupby("operator")\
-					.soc_delta_kwh.sum().loc["users"]\
+					self.sim_charges.groupby("operator") \
+						.soc_delta_kwh.sum().loc["users"] \
 					/ self.sim_stats["tot_charging_energy"]
 				self.sim_stats.loc["fraction_duration_users"] = \
-					self.sim_charges.groupby("operator")\
-					.duration.sum().loc["users"]\
+					self.sim_charges.groupby("operator") \
+						.duration.sum().loc["users"] \
 					/ self.sim_charges.duration.sum()
 			else:
 				self.sim_stats.loc["fraction_charges_users"] = 0
@@ -192,7 +196,7 @@ class SimOutput ():
 					self.sim_charges.soc_delta_kwh.median()
 
 				self.sim_charges["cr_timeout"] = \
-					self.sim_charges.timeout_outward\
+					self.sim_charges.timeout_outward \
 					+ self.sim_charges.timeout_return
 
 				self.sim_stats.loc["cum_relo_out_t"] = \
@@ -275,7 +279,15 @@ class SimOutput ():
 					"charge_deaths_origins_count"
 				] = self.sim_charge_deaths.origin_id.value_counts()
 
+			self.sim_bookings["avg_speed_kmh"] = (self.sim_bookings["driving_distance"] / 1000) / \
+			                                   (self.sim_bookings['duration'] / 3600)
+
+			self.sim_stats.loc["avg_speed_kmh"] = self.sim_bookings.avg_speed_kmh.mean()
 			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
+			insert_scenario_costs(self.sim_stats, self.sim_scenario_conf,vehicle_cost,charging_station_costs)
+			insert_sim_costs(self.sim_stats,self.sim_scenario_conf,fuel_costs,administrative_cost_conf,vehicle_cost)
+			self.sim_stats.loc["total_profit"] = self.sim_stats.loc["revenues"] - (self.sim_stats.loc["scenario_cost"] +
+			                                                                       self.sim_stats.loc["sim_cost"])
 
 			self.vehicles_history = pd.DataFrame()
 			for vehicle in sim.vehicles_list:

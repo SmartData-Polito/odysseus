@@ -1,8 +1,31 @@
 import os
 import pickle
-import pandas as pd
 
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Point
+import datetime
+import pytz
 from e3f2s.supply_modelling.supply_model import SupplyModel
+
+#from e3f2s.utils.vehicle_utils import get_soc_delta
+from e3f2s.city_data_manager.data.Torino.raw.geo.openstreetmap.stations_locations import station_locations
+
+def geodataframe_charging_points(city,engine_type,station_location):
+	charging_points = station_location[city][engine_type]
+	points_list = []
+
+	for point in charging_points.keys():
+		points_list.append(
+			{
+				"geometry": Point(
+					charging_points[point]["longitude"], charging_points[point]["latitude"]
+				),
+				"n_poles": charging_points[point]["n_poles"]
+			}
+		)
+	return gpd.GeoDataFrame(points_list)
 
 
 class SimInput:
@@ -120,6 +143,24 @@ class SimInput:
 		return self.supply_model.init_vehicles()
 
 	def init_charging_poles(self):
+
+			#elif self.sim_scenario_conf["cps_placement_policy"] == "real_positions":
+			#	cps_points = geodataframe_charging_points(
+			#		self.city,self.sim_scenario_conf["engine_type"],station_locations
+			#	)
+			#	self.n_charging_poles_by_zone = {}
+			#	value = 0
+			#	for (p,n) in zip(cps_points.geometry,cps_points.n_poles):
+			#		for (geom,zone) in zip(self.grid.geometry,self.grid.zone_id):
+			#			if geom.intersects(p):
+			#				if zone in self.n_charging_poles_by_zone.keys():
+			#					self.n_charging_poles_by_zone[zone] += n
+			#				else:
+			#					self.n_charging_poles_by_zone[zone] = n
+			#				value += n
+			#	self.tot_n_charging_poles = value
+			#	self.n_charging_zones = len(self.n_charging_poles_by_zone.keys())
+
 		return self.supply_model.init_charging_poles()
 
 	def init_relocation(self):

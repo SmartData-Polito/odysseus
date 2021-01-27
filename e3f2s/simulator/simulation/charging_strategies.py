@@ -148,6 +148,7 @@ class ChargingStrategy(ChargingPrimitives):
 				charge["duration"] = vehicle.get_charging_time_from_perc(
 					vehicle.soc.level,
 					self.charging_stations_dict[charging_zone_id].flow_rate,
+					self.simInput.sim_scenario_conf["profile_type"],
 					charge["end_soc"]
 				)
 
@@ -171,8 +172,17 @@ class ChargingStrategy(ChargingPrimitives):
 				timeout_outward = 0
 				charge["duration"] = self.vehicles_list[vehicle].get_charging_time_from_perc(
 					self.vehicles_list[vehicle].soc.level,
-					self.charging_stations_dict[charging_zone_id].flow_rate, charge["end_soc"]
+					self.charging_stations_dict[charging_zone_id].flow_rate,
+					self.simInput.sim_scenario_conf["profile_type"],
+					charge["end_soc"]
 				)
+				timeout_return = 0
+				cr_soc_delta = 0
+
+			else:
+
+				timeout_outward = 0
+				charge["duration"] = 0
 				timeout_return = 0
 				cr_soc_delta = 0
 
