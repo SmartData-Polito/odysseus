@@ -7,7 +7,7 @@ import numpy as np
 #from e3f2s.utils.vehicle_utils import soc_to_kwh
 from e3f2s.utils.geospatial_utils import get_od_distance
 from e3f2s.simulator.simulation.simulator import SharedMobilitySim
-#from e3f2s.supply_modelling.vehicle import Vehicle
+#from e3f2s.data_structures.vehicle import Vehicle
 
 np.random.seed(44)
 
@@ -26,9 +26,7 @@ class ModelDrivenSim (SharedMobilitySim):
 		self.hours_spent += 1
 
 		self.current_datetime = self.start + datetime.timedelta(seconds=self.env.now)
-		if self.current_hour != self.current_datetime.hour:
-			self.current_hour = self.current_datetime.hour
-			self.update_relocation_schedule = True
+		self.current_hour = self.current_datetime.hour
 		self.current_weekday = self.current_datetime.weekday()
 		if self.current_weekday in [5, 6]:
 			self.current_daytype = "weekend"
@@ -41,6 +39,14 @@ class ModelDrivenSim (SharedMobilitySim):
 			and self.simInput.sim_scenario_conf["scooter_relocation_scheduling"]:
 
 			self.scooterRelocationStrategy.generate_relocation_schedule(self.current_daytype, self.current_hour)
+			self.update_relocation_schedule = False
+
+		if self.update_relocation_schedule \
+				and self.simInput.sim_scenario_conf["vehicle_relocation"] \
+				and "vehicle_relocation_scheduling" in self.simInput.sim_scenario_conf.keys() \
+				and self.simInput.sim_scenario_conf["vehicle_relocation_scheduling"]:
+
+			self.VehicleRelocationStrategy.generate_relocation_schedule(self.current_daytype, self.current_hour)
 			self.update_relocation_schedule = False
 
 	def update_data_structures (self):
@@ -83,7 +89,7 @@ class ModelDrivenSim (SharedMobilitySim):
 			)
 
 			if booking_request["euclidean_distance"] == 0:
-				booking_request["euclidean_distance"] = self.simInput.demand_model_config["bin_side_length"]
+				booking_request["euclidean_distance"] = self.simInput.sim_general_conf["bin_side_length"]
 
 			booking_request["driving_distance"] = booking_request["euclidean_distance"] * 1.4
 			booking_request["duration"] = abs(booking_request["driving_distance"] / (
