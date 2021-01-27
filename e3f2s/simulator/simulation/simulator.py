@@ -12,6 +12,7 @@ from e3f2s.simulator.simulation_data_structures.charging_station import Charging
 
 from e3f2s.simulator.simulation.charging_strategies import ChargingStrategy
 from e3f2s.simulator.simulation.scooter_relocation_strategies import ScooterRelocationStrategy
+from e3f2s.simulator.simulation.vehicle_relocation_strategies import VehicleRelocationStrategy
 
 from e3f2s.simulator.simulation_input.vehicle_conf import vehicle_conf
 from e3f2s.simulator.simulation_input.energymix_conf import energymix_conf
@@ -327,8 +328,7 @@ class SharedMobilitySim:
                     )
                 else:
                     self.env.process(
-                        self.schedule_booking(booking_request, vehicle, booking_request["origin_id"])["origin_id"])
-                    )
+                        self.schedule_booking(booking_request, vehicle, booking_request["origin_id"]))
 
                 self.n_same_zone_trips += 1
 
