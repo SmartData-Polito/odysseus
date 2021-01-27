@@ -11,7 +11,7 @@ import datetime
 import pytz
 
 #from e3f2s.utils.vehicle_utils import get_soc_delta
-from e3f2s.data_structures.vehicle import Vehicle
+#from e3f2s.data_structures.vehicle import Vehicle
 
 
 class SimInput:
