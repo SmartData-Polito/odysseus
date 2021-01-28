@@ -1,24 +1,8 @@
 import simpy
 import datetime
 
-import numpy as np
-
 from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.geospatial_utils import get_od_distance
-
-
-# def get_charging_time(soc_delta,
-# 					  battery_capacity=vehicle_conf["battery_capacity"],
-# 					  charging_efficiency=0.92,
-# 					  charger_rated_power=3.7):
-# 	return (soc_delta * 3600 * battery_capacity) / (charging_efficiency * charger_rated_power * 100)
-
-
-# def get_charging_soc(duration,
-# 					 battery_capacity=vehicle_conf["battery_capacity"],
-# 					 charging_efficiency=0.92,
-# 					 charger_rated_power=3.7):
-# 	return (charging_efficiency * charger_rated_power * 100 * duration) / (3600 * battery_capacity)
 
 
 def init_relocate(charge_dict, vehicles_soc_dict, vehicle):
@@ -30,8 +14,8 @@ def init_relocate(charge_dict, vehicles_soc_dict, vehicle):
 	relocate["day_hour"] = charge_dict["start_time"].replace(minute=0, second=0, microsecond=0)
 	relocate["start_soc"] = vehicles_soc_dict[vehicle]
 	relocate["end_soc"] = vehicles_soc_dict[vehicle]
-	relocate["soc_delta"] = charge_dict["end_soc"] - charge_dict["start_soc"]
-	relocate["soc_delta_kwh"] = soc_to_kwh(charge_dict["soc_delta"])
+	relocate["soc_delta"] = relocate["end_soc"] - relocate["start_soc"]
+	relocate["soc_delta_kwh"] = vehicle.tanktowheel_energy_from_perc(relocate["soc_delta"])
 	return relocate
 
 
@@ -53,7 +37,7 @@ class RelocationPrimitives:
 
 		self.workers = simpy.Resource(
 			self.env,
-			capacity=self.simInput.sim_scenario_conf["n_relocate_workers"]
+			capacity=self.simInput.supply_model_conf["n_relocate_workers"]
 		)
 
 		# if self.simInput.sim_scenario_conf["hub"]:
@@ -145,7 +129,7 @@ class RelocationPrimitives:
 
 	def check_system_relocate(self, charge_dict, vehicle):
 		# have enough battery to relocate
-		if self.vehicles_soc_dict[vehicle] > self.simInput.sim_scenario_conf["alpha"]:
+		if self.vehicles_soc_dict[vehicle] > self.simInput.supply_model_conf["alpha"]:
 			relocate = init_relocate(
 				charge_dict,
 				self.vehicles_soc_dict,
@@ -181,7 +165,7 @@ class RelocationPrimitives:
 			destination_id
 		)
 		if distance == 0:
-			distance = self.simInput.sim_general_conf["bin_side_length"]
+			distance = self.simInput.demand_model_config["bin_side_length"]
 		return distance / 1000 / self.simInput.avg_speed_kmh_mean * 3600
 
 	def get_cr_soc_delta(self, origin_id, destination_id):
@@ -191,5 +175,5 @@ class RelocationPrimitives:
 			destination_id
 		)
 		if distance == 0:
-			distance = self.simInput.sim_general_conf["bin_side_length"]
+			distance = self.simInput.demand_model_config["bin_side_length"]
 		return get_soc_delta(distance / 1000)

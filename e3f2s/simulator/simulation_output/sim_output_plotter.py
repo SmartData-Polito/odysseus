@@ -31,12 +31,6 @@ class EFFCS_SimOutputPlotter ():
 		self.grid = sim_output.grid
 		self.sim_scenario_name = sim_scenario_name
 
-		model_general_conf_string = "_".join([
-			str(v) for v in sim_output.sim_general_conf.values()]
-		).replace("'", "").replace(".", "d")
-		model_conf_string = "_".join([
-			str(v) for v in sim_output.sim_scenario_conf.values()]
-		).replace("'", "").replace(".", "d")
 		self.figures_path = os.path.join(
 			os.path.dirname(os.path.dirname(__file__)),
 			"figures",
@@ -94,14 +88,14 @@ class EFFCS_SimOutputPlotter ():
 		self.grid.plot(color="white", edgecolor="black", ax=ax)
 		self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 
-		if self.sim_output.sim_scenario_conf["hub"]:
+		if self.sim_output.supply_model_conf["hub"]:
 			self.grid.plot(color="white", edgecolor="black", ax=ax)
 			self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 			self.grid.loc[[self.sim_output.sim_stats["hub_zone"]]].plot(ax=ax)
 			plt.savefig(os.path.join(self.figures_path, "hub_location.png"), transparent=True)
 			plt.close()
 
-		elif self.sim_output.sim_scenario_conf["distributed_cps"]:
+		elif self.sim_output.supply_model_conf["distributed_cps"]:
 
 			charging_zones = pd.Index(self.sim_charges.zone_id.unique())
 			charging_poles_by_zone = self.sim_charges.zone_id.value_counts()
@@ -149,9 +143,10 @@ class EFFCS_SimOutputPlotter ():
 			self.sim_unsatisfied_requests.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
 				label="unsatisfied", linewidth=2, alpha=0.7
 			)
-		self.sim_charges.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
-			label="charges", linewidth=2, alpha=0.7
-		)
+		if len(self.sim_charges):
+			self.sim_charges.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
+				label="charges", linewidth=2, alpha=0.7
+			)
 		plt.legend()
 		plt.xlabel("t")
 		plt.ylabel("n_events")
@@ -211,6 +206,8 @@ class EFFCS_SimOutputPlotter ():
 			df = self.sim_bookings
 		if which_df == "charges":
 			df = self.sim_charges
+			if not len(df):
+				return
 		if which_df == "unsatisfied":
 			df = self.sim_unsatisfied_requests
 			if not len(df):

@@ -9,7 +9,7 @@ from e3f2s.scenario_generator.city import City
 from e3f2s.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 from e3f2s.simulator.simulation_input.sim_input import SimInput
 from e3f2s.simulator.simulation.model_driven_simulator import ModelDrivenSim
-from e3f2s.simulator.simulation_output.sim_output import EFFCS_SimOutput
+from e3f2s.simulator.simulation_output.sim_output import SimOutput
 
 from pyspark import SparkConf, SparkContext
 
@@ -31,7 +31,7 @@ def run_eventG_sim(simInput):
 
 def get_eventG_sim_output(simInput):
     sim_eventG = run_eventG_sim(simInput)
-    return EFFCS_SimOutput(sim_eventG)
+    return SimOutput(sim_eventG)
 
 
 def get_eventG_sim_stats_spark (conf_tuple):
@@ -43,7 +43,7 @@ def get_eventG_sim_stats_spark (conf_tuple):
     simInput.init_hub()
     simInput.init_charging_poles()
     sim_eventG = run_eventG_sim(simInput)
-    simOutput_eventG = EFFCS_SimOutput(sim_eventG)
+    simOutput_eventG = SimOutput(sim_eventG)
     return simOutput_eventG.sim_stats
 
 

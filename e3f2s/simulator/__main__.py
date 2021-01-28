@@ -34,7 +34,7 @@ except FileNotFoundError:
 
 import pandas as pd
 
-from e3f2s.demand_modelling.city import City
+from e3f2s.demand_modelling.demand_model import DemandModel
 
 from e3f2s.simulator.single_run.single_run import single_run
 from e3f2s.simulator.multiple_runs.multiple_runs import multiple_runs
@@ -53,37 +53,6 @@ sim_general_conf_list = EFFCS_SimConfGrid(sim_general_conf_grid).conf_list
 for sim_general_conf in sim_general_conf_list:
     sim_run_mode = sim_general_conf["sim_run_mode"]
     print(sim_general_conf)
-
-    demand_model_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)),
-        "demand_modelling",
-        "demand_models",
-        sim_general_conf["city"],
-    )
-    os.makedirs(demand_model_path, exist_ok=True)
-
-    if not os.path.exists(os.path.join(demand_model_path, "city_obj.pickle")):
-        city_obj = City(sim_general_conf["city"], sim_general_conf)
-        pickle.dump(
-            city_obj,
-            open(os.path.join(demand_model_path, "city_obj.pickle"), "wb")
-        )
-        city_obj.grid_matrix.to_pickle(
-            os.path.join(demand_model_path, "grid_matrix.pickle")
-        )
-        city_obj.grid_matrix.to_csv(
-            os.path.join(demand_model_path, "grid_matrix.csv")
-        )
-        city_obj.grid.to_pickle(
-            os.path.join(demand_model_path, "grid.pickle")
-        )
-        city_obj.grid.to_csv(
-            os.path.join(demand_model_path, "grid.csv")
-        )
-        pd.DataFrame(city_obj.neighbors_dict).to_pickle(
-            os.path.join(demand_model_path, "neighbors_dict.pickle")
-        )
-        city_obj.bookings.to_csv(os.path.join(demand_model_path, "bookings.csv"))
 
     if sim_run_mode == "single_run":
         single_run((

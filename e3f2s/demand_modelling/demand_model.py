@@ -1,3 +1,6 @@
+import os
+import pickle
+
 import datetime
 
 from sklearn.neighbors import KernelDensity
@@ -5,31 +8,31 @@ from sklearn.neighbors import KernelDensity
 from e3f2s.utils.geospatial_utils import *
 
 from e3f2s.demand_modelling.loader import Loader
-from e3f2s.utils.vehicle_utils import *
 from e3f2s.utils.time_utils import *
-from e3f2s.data_structures.vehicle import Vehicle
 
-class City:
 
-    def __init__(self, city_name, sim_general_conf, kde_bw=1):
+class DemandModel:
+
+    def __init__(self, city_name, demand_model_config):
 
         self.city_name = city_name
-        self.sim_general_conf = sim_general_conf
-        self.data_source_id = sim_general_conf["data_source_id"]
+        self.demand_model_config = demand_model_config
+        self.data_source_id = demand_model_config["data_source_id"]
 
-        self.kde_bw = kde_bw
+        self.kde_bw = self.demand_model_config["kde_bandwidth"]
 
-        year = self.sim_general_conf["year"]
-        start_month = self.sim_general_conf["month_start"]
-        end_month = self.sim_general_conf["month_end"]
-        self.bin_side_length = self.sim_general_conf["bin_side_length"]
+        year = self.demand_model_config["year"]
+        start_month = self.demand_model_config["start_month"]
+        end_month = self.demand_model_config["end_month"]
+
+        self.bin_side_length = self.demand_model_config["bin_side_length"]
 
         self.bookings = pd.DataFrame()
         self.trips_origins = pd.DataFrame()
         self.trips_destinations = pd.DataFrame()
-        for month in range(start_month, end_month):
-            loader = Loader(self.city_name, self.data_source_id, year, month)
-            bookings, origins, destinations = loader.read_data()
+        for month in range(start_month, end_month+1):
+            self.loader = Loader(self.city_name, self.data_source_id, year, month)
+            bookings, origins, destinations = self.loader.read_data()
             self.bookings = pd.concat([self.bookings, bookings], ignore_index=True)
             self.trips_origins = pd.concat([
                 self.trips_origins, origins
@@ -41,21 +44,39 @@ class City:
         self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
         self.bookings["daytype"] = self.bookings.start_daytype
         self.bookings["city"] = self.city_name
-
-        self.grid = self.get_squared_grid()
-        self.grid_matrix = get_city_grid_as_matrix(
-            self.locations,
-            self.bin_side_length
-        )
-        self.grid["zone_id"] = self.grid.index.values
-        self.map_zones_on_trips(self.grid)
-
         self.bookings["euclidean_distance"] = self.bookings.apply(
             lambda pp: haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
             axis=1
         )
 
         self.bookings = self.get_input_bookings_filtered().dropna()
+        self.avg_speed_mean = self.bookings.avg_speed.mean()
+        self.avg_speed_std = self.bookings.avg_speed.std()
+        self.avg_speed_kmh_mean = self.bookings.avg_speed_kmh.mean()
+        self.avg_speed_kmh_std = self.bookings.avg_speed_kmh.std()
+        self.max_driving_distance = self.bookings.driving_distance.max()
+
+        self.grid = get_city_grid_as_gdf(
+            (
+                min(self.trips_origins.start_longitude.min(), self.trips_destinations.end_longitude.min()),
+                min(self.trips_origins.start_latitude.min(), self.trips_destinations.end_latitude.min()),
+                max(self.trips_origins.start_longitude.max(), self.trips_destinations.end_longitude.max()),
+                max(self.trips_origins.start_latitude.max(), self.trips_destinations.end_latitude.max()),
+            ),
+            "epsg:4326",
+            self.bin_side_length
+        )
+        self.grid_matrix = get_city_grid_as_matrix(
+            (
+                min(self.trips_origins.start_longitude.min(), self.trips_destinations.end_longitude.min()),
+                min(self.trips_origins.start_latitude.min(), self.trips_destinations.end_latitude.min()),
+                max(self.trips_origins.start_longitude.max(), self.trips_destinations.end_longitude.max()),
+                max(self.trips_origins.start_latitude.max(), self.trips_destinations.end_latitude.max()),
+            ),
+            self.bin_side_length
+        )
+        self.grid["zone_id"] = self.grid.index.values
+        self.map_zones_on_trips(self.grid)
 
         self.valid_zones = self.get_valid_zones()
         self.grid = self.grid.loc[self.valid_zones]
@@ -76,20 +97,6 @@ class City:
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
         self.trip_kdes = self.get_trip_kdes()
-
-    def get_squared_grid (self):
-
-        self.locations = pd.concat([
-            self.trips_origins.geometry,
-            self.trips_destinations.geometry
-        ], ignore_index=True)
-        self.locations.crs = "epsg:4326"
-        squared_grid = get_city_grid_as_gdf(
-            self.locations,
-            self.bin_side_length
-        )
-        squared_grid.crs = "epsg:4326"
-        return squared_grid
 
     def map_zones_on_trips(self, zones):
         self.trips_origins = gpd.sjoin(
@@ -115,23 +122,35 @@ class City:
 
         if "driving_distance" not in self.bookings.columns:
             self.bookings["driving_distance"] = self.bookings.euclidean_distance * 1.4
-        #self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x: get_soc_delta(x / 1000))
-        #self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(lambda x:Vehicle.consumption_to_percentage(Vehicle.distance_to_consumption(x / 1000)))
-        self.bookings = get_time_group_columns(self.bookings)
+
+        #self.bookings = get_time_group_columns(self.bookings)
         self.bookings["hour"] = self.bookings.start_hour
         self.bookings["daytype"] = self.bookings.start_daytype
         self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
 
         self.bookings["random_seconds_start"] = np.random.uniform(-900, 900, len(self.bookings))
-        self.bookings.start_time = self.bookings.start_time + self.bookings.random_seconds_start.apply(
+        self.bookings.start_time = pd.to_datetime(
+            self.bookings.start_time, utc=True
+        ) + self.bookings.random_seconds_start.apply(
             lambda sec: datetime.timedelta(seconds=sec)
         )
         self.bookings["random_seconds_end"] = np.random.uniform(-900, 900, len(self.bookings))
         self.bookings["random_seconds_pos"] = np.random.uniform(0, 450, len(self.bookings))
 
-        self.bookings.end_time = pd.to_datetime(self.bookings.end_time) + self.bookings.random_seconds_end.apply(
+        self.bookings.end_time = pd.to_datetime(
+            self.bookings.end_time, utc=True
+        ) + self.bookings.random_seconds_end.apply(
             lambda sec: datetime.timedelta(seconds=sec)
         )
+
+        self.bookings["start_time"] = self.bookings["start_time"].dt.tz_convert(self.loader.tz)
+        self.bookings["end_time"] = self.bookings["end_time"].dt.tz_convert(self.loader.tz)
+
+        self.bookings = get_time_group_columns(self.bookings)
+        self.bookings["hour"] = self.bookings.start_hour
+        self.bookings["daytype"] = self.bookings.start_daytype
+        self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
+
         self.bookings.loc[self.bookings.start_time > self.bookings.end_time, "end_time"] = self.bookings.loc[
             self.bookings.start_time > self.bookings.end_time, "start_time"
         ] + self.bookings.loc[self.bookings.start_time > self.bookings.end_time, "random_seconds_pos"].apply(
@@ -150,17 +169,23 @@ class City:
         self.bookings = self.bookings[self.bookings.duration > 0]
         self.bookings = self.bookings[self.bookings.driving_distance >= 0]
         self.bookings.loc[self.bookings.driving_distance == 0, "driving_distance"] = self.bin_side_length
-        # self.bookings["soc_delta"] = self.bookings["driving_distance"].apply(
-        #     lambda x: Vehicle.consumption_to_percentage(Vehicle.distance_to_consumption(x / 1000))
-        # )
         self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"]
         self.bookings["avg_speed_kmh"] = self.bookings.avg_speed * 3.6
 
         print(self.bookings[["euclidean_distance", "driving_distance", "duration", "avg_speed_kmh"]].describe())
 
-        if self.city_name in ["Minneapolis", "Louisville", "Austin", "Norfolk", "Kansas City", "Chicago", "Calgary"]:
-            pass
-            #self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
+        if self.city_name in [
+            "Minneapolis", "Louisville", "Austin", "Norfolk", "Kansas City", "Chicago", "Calgary"
+        ] or self.data_source_id in ["citi_bike"]:
+            self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
+            self.bookings = self.bookings[(
+                    self.bookings.duration > 60
+                ) & (
+                    self.bookings.duration < 60*60
+                ) & (
+                    self.bookings.euclidean_distance > 200
+                )
+            ]
         elif self.data_source_id in ["big_data_db"]:
             self.bookings = self.bookings[self.bookings.avg_speed_kmh < 120]
             self.bookings = self.bookings[
@@ -294,3 +319,55 @@ class City:
                     self.trip_kdes[daytype][hour] = self.trip_kdes[daytype][min_evaluable_rate]
 
         return self.trip_kdes
+
+    def save_results(self):
+
+        demand_model_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "demand_modelling",
+            "demand_models",
+            self.demand_model_config["city"],
+        )
+
+        with open(os.path.join(demand_model_path, "city_obj.pickle"), "wb") as f:
+            pickle.dump(self, f)
+
+        self.grid_matrix.to_pickle(
+            os.path.join(demand_model_path, "grid_matrix.pickle")
+        )
+        self.grid_matrix.to_csv(
+            os.path.join(demand_model_path, "grid_matrix.csv")
+        )
+        self.grid.to_pickle(
+            os.path.join(demand_model_path, "grid.pickle")
+        )
+        self.grid.to_csv(
+            os.path.join(demand_model_path, "grid.csv")
+        )
+        pd.DataFrame(self.neighbors_dict).to_pickle(
+            os.path.join(demand_model_path, "neighbors_dict.pickle")
+        )
+        pd.DataFrame(self.neighbors_dict).to_csv(
+            os.path.join(demand_model_path, "neighbors_dict.csv")
+        )
+        self.bookings.to_csv(os.path.join(demand_model_path, "bookings.csv"))
+        self.bookings.to_pickle(os.path.join(demand_model_path, "bookings.pickle"))
+
+        with open(os.path.join(demand_model_path, "request_rates.pickle"), "wb") as f:
+            pickle.dump(self.request_rates, f)
+        with open(os.path.join(demand_model_path, "trip_kdes.pickle"), "wb") as f:
+            pickle.dump(self.trip_kdes, f)
+        with open(os.path.join(demand_model_path, "valid_zones.pickle"), "wb") as f:
+            pickle.dump(self.valid_zones, f)
+
+        integers_dict = {
+            "avg_request_rate" : self.avg_request_rate,
+            "n_vehicles_original" : self.n_vehicles_original,
+            "avg_speed_mean" : self.avg_speed_mean,
+            "avg_speed_std" : self.avg_speed_std,
+            "avg_speed_kmh_mean" : self.avg_speed_kmh_mean,
+            "avg_speed_kmh_std" : self.avg_speed_kmh_std,
+            "max_driving_distance" : self.max_driving_distance,
+        }
+        with open(os.path.join(demand_model_path, "integers_dict.pickle"), "wb") as f:
+            pickle.dump(integers_dict, f)

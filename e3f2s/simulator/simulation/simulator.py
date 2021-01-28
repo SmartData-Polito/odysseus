@@ -1,6 +1,7 @@
 import copy
 import datetime
 import pytz
+import json
 from random import sample
 
 import simpy
@@ -10,33 +11,34 @@ from e3f2s.simulator.simulation_data_structures.vehicle import Vehicle
 from e3f2s.simulator.simulation_data_structures.charging_station import ChargingStation
 
 from e3f2s.simulator.simulation.charging_strategies import ChargingStrategy
-# from e3f2s.simulator.simulation.scooter_relocation_strategies import ScooterRelocationStrategy
-
+from e3f2s.simulator.simulation.scooter_relocation_strategies import ScooterRelocationStrategy
 from e3f2s.simulator.simulation.vehicle_relocation_strategies import VehicleRelocationStrategy
 
-from e3f2s.simulator.simulation_input.sim_current_config.vehicle_config import vehicle_conf
-
+from e3f2s.simulator.simulation_input.vehicle_conf import vehicle_conf
+from e3f2s.simulator.simulation_input.energymix_conf import energymix_conf
+from e3f2s.simulator.simulation_input.station_conf import station_conf
+from e3f2s.simulator.simulation.sim_metrics import SimMetrics
 
 class SharedMobilitySim:
 
     def __init__(self, simInput):
 
         self.start = datetime.datetime(
-            simInput.sim_general_conf["year"],
-            simInput.sim_general_conf["month_start"],
+            simInput.demand_model_config["year"],
+            simInput.demand_model_config["month_start"],
             1, tzinfo=pytz.UTC
         )
 
-        if simInput.sim_general_conf["month_end"] == 13:
+        if simInput.demand_model_config["month_end"] == 13:
             self.end = datetime.datetime(
-                simInput.sim_general_conf["year"] + 1,
+                simInput.demand_model_config["year"] + 1,
                 1,
                 1, tzinfo=pytz.UTC
             )
         else:
             self.end = datetime.datetime(
-                simInput.sim_general_conf["year"],
-                simInput.sim_general_conf["month_end"],
+                simInput.demand_model_config["year"],
+                simInput.demand_model_config["month_end"],
                 1, tzinfo=pytz.UTC
             )
 
@@ -54,19 +56,17 @@ class SharedMobilitySim:
 
         self.simInput = simInput
 
-        self.available_vehicles_dict = self.simInput.available_vehicles_dict
+        self.available_vehicles_dict = self.simInput.supply_model.available_vehicles_dict
 
         self.neighbors_dict = self.simInput.neighbors_dict
 
-        if simInput.sim_scenario_conf["distributed_cps"]:
+        if simInput.supply_model_conf["distributed_cps"]:
             self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone
 
-        self.vehicles_soc_dict = self.simInput.vehicles_soc_dict
-        self.vehicles_zones = self.simInput.vehicles_zones
+        self.vehicles_soc_dict = self.simInput.supply_model.vehicles_soc_dict
+        self.vehicles_zones = self.simInput.supply_model.vehicles_zones
 
         self.env = simpy.Environment()
-
-        self.events = []
 
         self.sim_booking_requests = []
         self.sim_bookings = []
@@ -92,7 +92,6 @@ class SharedMobilitySim:
         self.list_n_vehicles_relocating = []
         self.vehicles_zones_history = []
         self.charging_return_distance = []
-
         self.charging_outward_distance = []
 
         self.vehicles_list = []
@@ -100,30 +99,31 @@ class SharedMobilitySim:
         self.zone_dict = {}
 
         for zone_id in self.simInput.valid_zones:
-            self.zone_dict[zone_id] = Zone(self.env, zone_id, self.start)
+            self.zone_dict[zone_id] = Zone(self.env, zone_id, self.start, self.available_vehicles_dict[zone_id])
 
-        if self.simInput.sim_scenario_conf["distributed_cps"]:
-            for zone_id in self.simInput.n_charging_poles_by_zone:
-                zone_n_cps = self.simInput.n_charging_poles_by_zone[zone_id]
+        self.real_n_charging_zones = 0
+        if self.simInput.supply_model_conf["distributed_cps"]:
+            for zone_id in self.simInput.supply_model.n_charging_poles_by_zone:
+                zone_n_cps = self.simInput.supply_model.n_charging_poles_by_zone[zone_id]
                 if zone_n_cps > 0:
-                    self.charging_stations_dict[zone_id] = ChargingStation(self.env, zone_n_cps, zone_id, self.start)
+                    self.charging_stations_dict[zone_id] = ChargingStation(
+                        self.env, zone_n_cps, zone_id, station_conf, self.simInput.supply_model_conf, self.start
+                    )
+                    self.real_n_charging_zones += zone_n_cps
 
         self.vehicles_list = []
         for i in range(self.simInput.n_vehicles_sim):
             vehicle_object = Vehicle(
                 self.env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
-                vehicle_conf, self.simInput.sim_scenario_conf, self.start
+                vehicle_conf, energymix_conf, self.simInput.supply_model_conf, self.start
             )
             self.vehicles_list.append(vehicle_object)
 
-        if "alpha_policy" in self.simInput.sim_scenario_conf:
-            if self.simInput.sim_scenario_conf["alpha_policy"] == "auto":
-                # self.sim_scenario_conf["alpha"] = get_soc_delta(
-                #     self.input_bookings.driving_distance.max() / 1000
-                # )
-                self.simInput.sim_scenario_conf["alpha"] = self.vehicles_list[0].consumption_to_percentage(
+        if "alpha_policy" in self.simInput.supply_model_conf:
+            if self.simInput.supply_model_conf["alpha_policy"] == "auto":
+                self.simInput.supply_model_conf["alpha"] = self.vehicles_list[0].consumption_to_percentage(
                     self.vehicles_list[0].distance_to_consumption(
-                        self.simInput.input_bookings.driving_distance.max() / 1000
+                        self.simInput.max_driving_distance / 1000
                     )
                 )
             else:
@@ -131,20 +131,27 @@ class SharedMobilitySim:
                 exit(0)
 
         self.VehicleRelocationStrategy = VehicleRelocationStrategy(self.env, self)
+        metrics_dict = {
+            "cum_relo_ret_t": "sum"
+        }
+        self.sim_metrics = SimMetrics(metrics_dict)
+
         self.chargingStrategy = ChargingStrategy(self.env, self)
-        # self.scooterRelocationStrategy = ScooterRelocationStrategy(self.env, self)
+        self.scooterRelocationStrategy = ScooterRelocationStrategy(self.env, self)
 
-
-    def schedule_booking(self, booking_request, vehicle, zone_id):
-        self.sim_bookings += [booking_request]
+    def schedule_booking (self, booking_request, vehicle, zone_id):
         self.tot_mobility_distance += booking_request["driving_distance"]
         self.tot_mobility_duration += booking_request["duration"]
+
+        if "save_history" in self.simInput.demand_model_config:
+            if self.simInput.demand_model_config["save_history"]:
+                self.sim_bookings += [booking_request]
 
         self.available_vehicles_dict[zone_id].remove(vehicle)
         del self.vehicles_zones[vehicle]
         booking_request["start_soc"] = self.vehicles_list[vehicle].soc.level
-        # booking_request["start_soc"] = self.vehicles_soc_dict[vehicle_id]
-        # del self.vehicles_soc_dict[vehicle_id]
+        #booking_request["start_soc"] = self.vehicles_soc_dict[vehicle_id]
+        #del self.vehicles_soc_dict[vehicle_id]
 
         self.n_booked_vehicles += 1
 
@@ -153,17 +160,17 @@ class SharedMobilitySim:
         # yield self.env.timeout(booking_request["duration"])
 
         self.zone_dict[booking_request["origin_id"]].remove_vehicle(booking_request["start_time"])
-        # print(self.vehicles_list[vehicle_id].soc.level)
+        #print(self.vehicles_list[vehicle_id].soc.level)
         yield self.env.process(self.vehicles_list[vehicle].booking(booking_request))
         self.zone_dict[booking_request["destination_id"]].add_vehicle(
             booking_request["start_time"] + datetime.timedelta(seconds=booking_request['duration'])
         )
-        # print(self.vehicles_list[vehicle_id].soc.level)
+        #print(self.vehicles_list[vehicle_id].soc.level)
 
-        # self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
-        # booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
+        #self.vehicles_soc_dict[vehicle_id] = booking_request["start_soc"] + booking_request["soc_delta"]
+        #booking_request["end_soc"] = self.vehicles_soc_dict[vehicle_id]
         booking_request["end_soc"] = self.vehicles_list[vehicle].soc.level
-        # self.vehicles_zones[vehicle_id] = booking_request["destination_id"]
+        #self.vehicles_zones[vehicle_id] = booking_request["destination_id"]
 
         self.n_booked_vehicles -= 1
 
@@ -202,8 +209,11 @@ class SharedMobilitySim:
         ]
         self.list_n_vehicles_relocating += [self.VehicleRelocationStrategy.n_vehicles_relocating]
         self.charging_outward_distance = [self.chargingStrategy.charging_outward_distance]
+        self.charging_return_distance = [self.chargingStrategy.charging_return_distance]
 
-        self.sim_booking_requests += [booking_request]
+        if "save_history" in self.simInput.demand_model_config:
+            if self.simInput.demand_model_config["save_history"]:
+                self.sim_booking_requests += [booking_request]
         self.n_booking_requests += 1
 
         available_vehicle_flag = False
@@ -211,16 +221,14 @@ class SharedMobilitySim:
         available_vehicle_flag_same_zone = False
         available_vehicle_flag_not_same_zone = False
 
-        def find_vehicle(zone_id):
-            # available_vehicles_soc_dict = {k: self.vehicles_soc_dict[k] for k in self.available_vehicles_dict[zone_id]}
-            available_vehicles_soc_dict = {k: self.vehicles_list[k].soc.level for k in
-                                           self.available_vehicles_dict[zone_id]}
+        def find_vehicle (zone_id):
+            #available_vehicles_soc_dict = {k: self.vehicles_soc_dict[k] for k in self.available_vehicles_dict[zone_id]}
+            available_vehicles_soc_dict = {k: self.vehicles_list[k].soc.level for k in self.available_vehicles_dict[zone_id]}
             max_soc = max(available_vehicles_soc_dict.values())
             max_soc_vehicle = max(available_vehicles_soc_dict, key=available_vehicles_soc_dict.get)
             if self.vehicles_list[max_soc_vehicle].soc.level > abs(
                     self.vehicles_list[max_soc_vehicle].consumption_to_percentage(
-                        self.vehicles_list[max_soc_vehicle].distance_to_consumption(
-                            booking_request["driving_distance"] / 1000)
+                        self.vehicles_list[max_soc_vehicle].distance_to_consumption(booking_request["driving_distance"] / 1000)
                     )
             ):
                 return True, max_soc_vehicle, max_soc
@@ -235,15 +243,14 @@ class SharedMobilitySim:
 
         if found_vehicle_flag:
             booking_request["soc_delta"] = self.vehicles_list[max_soc_vehicle_origin].consumption_to_percentage(
-                self.vehicles_list[max_soc_vehicle_origin].distance_to_consumption(
-                    booking_request["driving_distance"] / 1000
-                )
-            )
+                        self.vehicles_list[max_soc_vehicle_origin].distance_to_consumption(
+                            booking_request["driving_distance"] / 1000
+                        )
+                    )
             booking_request["welltotank_kwh"] = self.vehicles_list[max_soc_vehicle_origin].welltotank_energy_from_perc(
                 booking_request["soc_delta"]
             )
-            booking_request["tanktowheel_kwh"] = self.vehicles_list[
-                max_soc_vehicle_origin].tanktowheel_energy_from_perc(
+            booking_request["tanktowheel_kwh"] = self.vehicles_list[max_soc_vehicle_origin].tanktowheel_energy_from_perc(
                 booking_request["soc_delta"]
             )
             booking_request["soc_delta_kwh"] = booking_request["welltotank_kwh"] + booking_request["tanktowheel_kwh"]
@@ -265,7 +272,7 @@ class SharedMobilitySim:
             max_soc_vehicle_neighbors = None
             max_soc_neighbors = -1
             max_neighbor = None
-            for neighbor in self.neighbors_dict[booking_request["origin_id"]].values():
+            for neighbor in self.neighbors_dict[booking_request["origin_id"]].dropna().values:
                 if neighbor in self.available_vehicles_dict:
                     if len(self.available_vehicles_dict[neighbor]) and not found_vehicle_flag:
                         available_vehicle_flag = True
@@ -280,8 +287,25 @@ class SharedMobilitySim:
                 )
                 self.n_not_same_zone_trips += 1
 
-        if not found_vehicle_flag and self.simInput.sim_scenario_conf["vehicle_relocation"] \
-                and self.simInput.sim_scenario_conf["vehicle_relocation_strategy"] == "magic_relocation":
+        if not found_vehicle_flag and self.simInput.supply_model_conf["scooter_relocation"] \
+                and self.simInput.supply_model_conf["scooter_relocation_strategy"] == "magic_relocation":
+
+            relocated, relocation_zone_id, relocated_vehicle = \
+                self.scooterRelocationStrategy.check_scooter_relocation(booking_request)
+
+            if relocated:
+
+                available_vehicle_flag = True
+                available_vehicle_flag_same_zone = True
+                found_vehicle_flag = True
+
+                self.env.process(
+                    self.schedule_booking(booking_request, relocated_vehicle, booking_request["origin_id"])
+                )
+                self.n_same_zone_trips += 1
+
+        if not found_vehicle_flag and self.simInput.supply_model_conf["vehicle_relocation"] \
+                and self.simInput.supply_model_conf["vehicle_relocation_strategy"] == "magic_relocation":
 
             relocated, vehicle_relocation = \
                 self.VehicleRelocationStrategy.check_vehicle_relocation(booking_request)
@@ -293,15 +317,19 @@ class SharedMobilitySim:
                 found_vehicle_flag = True
 
                 self.env.process(
-                    self.schedule_booking(booking_request, vehicle_relocation["vehicle_id"],
-                                          booking_request["origin_id"])
+                    self.schedule_booking(
+                        booking_request,
+                        vehicle_relocation["vehicle_id"],
+                        booking_request["origin_id"])
                 )
                 self.n_same_zone_trips += 1
 
         if not available_vehicle_flag:
             self.n_no_close_vehicles += 1
-            self.sim_unsatisfied_requests += [booking_request]
-            self.sim_no_close_vehicle_requests += [booking_request]
+            if "save_history" in self.simInput.demand_model_config:
+                if self.simInput.demand_model_config["save_history"]:
+                    self.sim_unsatisfied_requests += [booking_request]
+                    self.sim_no_close_vehicle_requests += [booking_request]
 
         if not found_vehicle_flag and available_vehicle_flag:
             self.n_deaths += 1
@@ -320,7 +348,9 @@ class SharedMobilitySim:
             elif available_vehicle_flag_not_same_zone:
                 death["plate"] = max_soc_vehicle_neighbor
                 death["zone_id"] = max_neighbor
-            self.sim_booking_requests_deaths += [death]
+            if "save_history" in self.simInput.demand_model_config:
+                if self.simInput.demand_model_config["save_history"]:
+                    self.sim_booking_requests_deaths += [death]
 
     def run(self):
         self.env.process(self.mobility_requests_generator())

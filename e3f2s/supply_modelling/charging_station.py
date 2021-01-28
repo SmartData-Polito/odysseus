@@ -5,27 +5,32 @@ example_station_config = {
 	"fuel_cost": 1.29
 }
 
+
 class Pole(object):
 	def __init__(self, station_config):
-		self.fuel_type = example_station_config["fuel_type"] #electric, gasoline, diesel, lpg, gnc
-		self.fuel_cost = example_station_config["fuel_cost"]
+		self.fuel_type = station_config["fuel_type"] #electric, gasoline, diesel, lpg, gnc
+		self.fuel_cost = station_config["fuel_cost"]
 		if self.fuel_type == "electric":
-			self.voltage_output = example_station_config["voltage_output"]
-			self.current_output= example_station_config["current_output"]
+			self.voltage_output = station_config["voltage_output"]
+			self.current_output= station_config["current_output"]
 			self.flow_rate = self.voltage_output * self.current_output
 		elif self.fuel_type in ["gasoline","diesel", "lpg","cng"]:
 			#self.flow_rate = example_station_config["flow_rate"] #L/min, kg/min
-			if self.fuel_type == "gasoline":
-				self.energy_content = 32  # MJ/L
+			if self.fuel_type == "gasoline": #GASOLINE E5
+				self.lower_heating_value = 42.3 #MJ/kg
+				self.density = 745.8  # g/L
 				self.flow_rate = 43.491
-			elif self.fuel_type == "diesel":
-				self.energy_content = 36  # MJ/L
+			elif self.fuel_type == "diesel": #DIESEL B7
+				self.lower_heating_value = 42.7  # MJ/kg
+				self.density = 836.1  # g/L
 				self.flow_rate = 43.491
 			elif self.fuel_type == "lpg":
-				self.energy_content = 24  # MJ/L
+				self.lower_heating_value = 46  # MJ/kg
+				self.density = 550  # g/L
 				self.flow_rate = 16.247
 			elif self.fuel_type == "cng":
-				self.energy_content = 44.4  # MJ/L
+				self.lower_heating_value = 48  # MJ/kg
+				self.density = 1000  # g/kg
 				self.flow_rate = 9.485
 
 	def get_charging_time_from_energy(self,energy_mj): #energy in MegaJoules
@@ -33,7 +38,9 @@ class Pole(object):
 			energy_kwh = energy_mj / 3.6
 			charging_time = (energy_kwh / self.flow_rate) * 3600
 		elif self.fuel_type in ["gasoline", "diesel", "lpg", "cng"]:
-			liters = energy_mj / self.energy_content
+			liters = energy_mj / (
+					self.lower_heating_value / (1 / (self.density / 1000)) # converted lhv from MJ/kg to MJ/L
+			)
 			charging_time = (liters / self.flow_rate) * 60
 		return charging_time
 
@@ -43,7 +50,9 @@ class Pole(object):
 			energy_mj = energy_kwh * 3.6
 		elif self.fuel_type in ["gasoline", "diesel", "lpg", "cng"]:
 			liters = self.flow_rate * (charging_time / 60)
-			energy_mj = liters * self.energy_content
+			energy_mj = liters * (
+					self.lower_heating_value / (1 / (self.density / 1000)) # converted lhv from MJ/kg to MJ/L
+			)
 		return energy_mj
 
 	def get_fuelcost_from_energy(self,energy_mj):
@@ -51,7 +60,9 @@ class Pole(object):
 			energy_kwh = energy_mj / 3.6
 			return self.fuel_cost * energy_kwh
 		elif self.fuel_type in ["gasoline", "diesel", "lpg", "cng"]:
-			liters = energy_mj / self.energy_content
+			liters = energy_mj / (
+					self.lower_heating_value / (1 / (self.density / 1000)) # converted lhv from MJ/kg to MJ/L
+			)
 			return self.fuel_cost * liters
 
 # a=Pole(example_station_config)

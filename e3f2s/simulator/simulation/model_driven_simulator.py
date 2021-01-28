@@ -7,7 +7,7 @@ import numpy as np
 #from e3f2s.utils.vehicle_utils import soc_to_kwh
 from e3f2s.utils.geospatial_utils import get_od_distance
 from e3f2s.simulator.simulation.simulator import SharedMobilitySim
-#from e3f2s.data_structures.vehicle import Vehicle
+#from e3f2s.supply_modelling.vehicle import Vehicle
 
 np.random.seed(44)
 
@@ -82,7 +82,7 @@ class ModelDrivenSim (SharedMobilitySim):
 			)
 
 			if booking_request["euclidean_distance"] == 0:
-				booking_request["euclidean_distance"] = self.simInput.sim_general_conf["bin_side_length"]
+				booking_request["euclidean_distance"] = self.simInput.demand_model_config["bin_side_length"]
 
 			booking_request["driving_distance"] = booking_request["euclidean_distance"] * 1.4
 			booking_request["duration"] = abs(booking_request["driving_distance"] / (

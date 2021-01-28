@@ -1,36 +1,49 @@
 import os
 import pickle
 
-import numpy as np
+import os
+import pickle
 import pandas as pd
 
 
-import datetime
-import pytz
-
-#from e3f2s.utils.vehicle_utils import get_soc_delta
-from e3f2s.data_structures.vehicle import Vehicle
+from e3f2s.supply_modelling.supply_model import SupplyModel
 
 
 class SimInput:
 
 	def __init__(self, conf_tuple):
 
-		self.sim_general_conf = conf_tuple[0]
+		self.demand_model_config = conf_tuple[0]
 		self.sim_scenario_conf = conf_tuple[1]
-		self.city_obj = conf_tuple[2]
 
-		self.city = self.city_obj.city_name
-		self.grid = self.city_obj.grid
-		self.grid_matrix = self.city_obj.grid_matrix
-		self.input_bookings = self.city_obj.bookings
-		print(self.input_bookings.shape)
-		self.request_rates = self.city_obj.request_rates
-		self.avg_request_rate = self.city_obj.avg_request_rate
-		self.trip_kdes = self.city_obj.trip_kdes
-		self.valid_zones = self.city_obj.valid_zones
-		self.neighbors_dict = self.city_obj.neighbors_dict
-		self.n_vehicles_original = self.city_obj.n_vehicles_original
+		self.city = self.demand_model_config["city"]
+
+		demand_model_path = os.path.join(
+			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+			"demand_modelling",
+			"demand_models",
+			self.demand_model_config["city"],
+		)
+
+		self.grid = pickle.Unpickler(open(os.path.join(demand_model_path, "grid.pickle"), "rb")).load()
+		self.grid_matrix = pickle.Unpickler(open(os.path.join(demand_model_path, "grid_matrix.pickle"), "rb")).load()
+		self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
+		self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
+		self.valid_zones = pickle.Unpickler(open(os.path.join(demand_model_path, "valid_zones.pickle"), "rb")).load()
+		self.neighbors_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "neighbors_dict.pickle"), "rb")).load()
+		self.integers_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "integers_dict.pickle"), "rb")).load()
+
+		self.avg_request_rate = self.integers_dict["avg_request_rate"]
+		self.n_vehicles_original = self.integers_dict["n_vehicles_original"]
+		self.avg_speed_mean = self.integers_dict["avg_speed_mean"]
+		self.avg_speed_std = self.integers_dict["avg_speed_std"]
+		self.avg_speed_kmh_mean = self.integers_dict["avg_speed_kmh_mean"]
+		self.avg_speed_kmh_std = self.integers_dict["avg_speed_kmh_std"]
+		self.max_driving_distance = self.integers_dict["max_driving_distance"]
+
+		if self.demand_model_config["sim_technique"] == "traceB":
+			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings.pickle"), "rb")).load()
+			self.booking_requests_list = self.get_booking_requests_list()
 
 		if "n_requests" in self.sim_scenario_conf.keys():
 			# 30 => 1 month
@@ -58,43 +71,19 @@ class SimInput:
 		elif self.sim_scenario_conf["cps_placement_policy"] == "old_manual":
 			self.tot_n_charging_poles = len(self.sim_scenario_conf["cps_zones"]) * 4
 
-		self.hub_zone = -1
-
-		if self.sim_scenario_conf["hub"]:
-			self.n_charging_zones = 1
-			self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
-		elif self.sim_scenario_conf["distributed_cps"]:
-			if "cps_zones_percentage" in self.sim_scenario_conf:
+		if self.sim_scenario_conf["distributed_cps"]:
+			if "cps_zones_percentage" in self.sim_scenario_conf and self.sim_scenario_conf["cps_placement_policy"] != "real_positions":
 				self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
-			elif "n_charging_zones" in self.sim_scenario_conf:
+			elif "n_charging_zones" in self.sim_scenario_conf and self.sim_scenario_conf["cps_placement_policy"] != "real_positions":
 				self.n_charging_zones = self.sim_scenario_conf["n_charging_zones"]
 				self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
-			elif "cps_zones" in self.sim_scenario_conf:
+			elif "cps_zones" in self.sim_scenario_conf and self.sim_scenario_conf["cps_placement_policy"] != "real_positions":
 				self.n_charging_zones = len(self.sim_scenario_conf["cps_zones"])
 		elif self.sim_scenario_conf["battery_swap"]:
 			self.n_charging_zones = 0
-
-		if self.sim_scenario_conf["hub"] and not self.sim_scenario_conf["distributed_cps"]:
-			self.hub_n_charging_poles = int(self.tot_n_charging_poles)
-			self.n_charging_poles = 0
-		elif not self.sim_scenario_conf["hub"] and self.sim_scenario_conf["distributed_cps"]:
-			self.hub_n_charging_poles = 0
-			self.n_charging_poles = self.tot_n_charging_poles
-		elif self.sim_scenario_conf["hub"] and self.sim_scenario_conf["distributed_cps"]:
-			self.n_charging_poles = int(self.tot_n_charging_poles / 2)
-			self.hub_n_charging_poles = int(self.tot_n_charging_poles / 2)
-		elif self.sim_scenario_conf["battery_swap"]:
-			self.n_charging_poles = 0
-
-
-
-		self.avg_speed_mean = self.input_bookings.avg_speed.mean()
-		self.avg_speed_std = self.input_bookings.avg_speed.std()
-		self.avg_speed_kmh_mean = self.input_bookings.avg_speed_kmh.mean()
-		self.avg_speed_kmh_std = self.input_bookings.avg_speed_kmh.std()
+			self.tot_n_charging_poles = 0
 
 		self.n_charging_poles_by_zone = {}
-		self.booking_requests_list = []
 		self.vehicles_soc_dict = {}
 		self.vehicles_zones = {}
 		self.available_vehicles_dict = {}
@@ -104,9 +93,21 @@ class SimInput:
 		self.zones_cp_distances = pd.Series()
 		self.closest_cp_zone = pd.Series()
 
+		self.supply_model_conf = dict()
+		self.supply_model_conf.update(self.sim_scenario_conf)
+		self.supply_model_conf.update({
+			"city": self.city,
+			"data_source_id": self.demand_model_config['data_source_id'],
+			"n_vehicles": self.n_vehicles_sim,
+			"tot_n_charging_poles": self.tot_n_charging_poles,
+			"n_charging_zones": self.n_charging_zones,
+		})
+		self.supply_model = SupplyModel(self.supply_model_conf)
+		self.available_vehicles_dict = self.supply_model.available_vehicles_dict
+
 	def get_booking_requests_list(self):
 
-		self.booking_requests_list = self.input_bookings[[
+		return self.bookings[[
 			"origin_id",
 			"destination_id",
 			"start_time",
@@ -118,109 +119,16 @@ class SimInput:
 			"hour",
 			"duration",
 		]].dropna().to_dict("records")
-		return self.booking_requests_list
+		return
 
 	def init_vehicles(self):
-
-		vehicles_random_soc = list(
-			np.random.uniform(25, 100, self.n_vehicles_sim).astype(int)
-		)
-
-		self.vehicles_soc_dict = {
-			i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
-		}
-
-		top_o_zones = self.input_bookings.origin_id.value_counts().iloc[:31]
-
-		#print(len(self.valid_zones), len(self.grid), len(top_o_zones.index))
-
-		vehicles_random_zones = list(
-			np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()
-		)
-
-		self.vehicles_zones = []
-		for i in vehicles_random_zones:
-			self.vehicles_zones.append(self.grid.loc[int(top_o_zones.index[i])].zone_id)
-
-		self.vehicles_zones = {
-			i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)
-		}
-
-		self.available_vehicles_dict = {
-			int(zone): [] for zone in self.grid.zone_id
-		}
-
-		for vehicle in range(len(self.vehicles_zones)):
-			zone = self.vehicles_zones[vehicle]
-			self.available_vehicles_dict[zone] += [vehicle]
-
-		self.start = datetime.datetime(
-			self.sim_general_conf["year"],
-			self.sim_general_conf["month_start"],
-			1, tzinfo=pytz.UTC
-		)
-
-		return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
-
-	def init_hub(self):
-
-		if self.sim_scenario_conf["hub"]:
-			if self.sim_scenario_conf["hub_zone_policy"] == "manual":
-
-				if self.sim_scenario_conf["hub_zone"] in self.valid_zones:
-					self.hub_zone = self.sim_scenario_conf["hub_zone"]
-				else:
-					print("Hub zone does not exist!")
-					exit(1)
-
-			elif self.sim_scenario_conf["hub_zone_policy"] == "num_parkings":
-				self.hub_zone = int(self.input_bookings.destination_id.value_counts().iloc[:1].index[0])
-
-			else:
-				print("Hub placement policy not recognised!")
-				exit(0)
-
-			for zone in self.valid_zones:
-				if zone == self.hub_zone:
-					self.n_charging_poles_by_zone[zone] = self.n_charging_zones
-				else:
-					self.n_charging_poles_by_zone[zone] = 0
+		return self.supply_model.init_vehicles()
 
 	def init_charging_poles(self):
+		return self.supply_model.init_charging_poles()
 
-		if self.sim_scenario_conf["distributed_cps"]:
+	def init_relocation(self):
+		pass
 
-			if self.sim_scenario_conf["cps_placement_policy"] == "num_parkings":
-
-				top_dest_zones = self.input_bookings.destination_id.value_counts().iloc[:self.n_charging_zones]
-
-				self.n_charging_poles_by_zone = dict((top_dest_zones / top_dest_zones.sum() * self.n_charging_poles))
-
-				assigned_cps = 0
-				for zone_id in self.n_charging_poles_by_zone:
-					zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
-					assigned_cps += zone_n_cps
-					self.n_charging_poles_by_zone[zone_id] = zone_n_cps
-				for zone_id in self.n_charging_poles_by_zone:
-					if assigned_cps < self.n_charging_poles:
-						self.n_charging_poles_by_zone[zone_id] += 1
-						assigned_cps += 1
-
-				self.n_charging_poles_by_zone = dict(pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
-
-			elif self.sim_scenario_conf["cps_placement_policy"] == "old_manual":
-
-				for zone_id in self.sim_scenario_conf["cps_zones"]:
-					if zone_id in self.valid_zones:
-						self.n_charging_poles_by_zone[zone_id] = 4
-					else:
-						print("Zone", zone_id, "does not exist!")
-						exit(0)
-
-			zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
-
-			self.zones_cp_distances = self.grid.centroid.apply(
-				lambda x: self.grid.loc[zones_with_cps].centroid.distance(x)
-			)
-
-			self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
+	def init_workers(self):
+		pass

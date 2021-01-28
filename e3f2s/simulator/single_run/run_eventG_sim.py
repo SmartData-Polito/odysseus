@@ -1,5 +1,5 @@
 from e3f2s.simulator.simulation.model_driven_simulator import ModelDrivenSim
-from e3f2s.simulator.simulation_output.sim_output import EFFCS_SimOutput
+from e3f2s.simulator.simulation_output.sim_output import SimOutput
 from e3f2s.simulator.simulation_input.sim_input import SimInput
 
 
@@ -18,16 +18,14 @@ def run_eventG_sim (simInput):
 def get_eventG_sim_output (simInput):
     
     sim_eventG = run_eventG_sim(simInput)
-    return EFFCS_SimOutput(sim_eventG)
+    return SimOutput(sim_eventG)
 
 
 def get_eventG_sim_stats (conf_tuple):
 
     simInput = SimInput(conf_tuple)
-    simInput.get_booking_requests_list()
     simInput.init_vehicles()
-    simInput.init_hub()
     simInput.init_charging_poles()
     sim_eventG = run_eventG_sim(simInput)
-    simOutput_eventG = EFFCS_SimOutput(sim_eventG)
+    simOutput_eventG = SimOutput(sim_eventG)
     return simOutput_eventG.sim_stats
