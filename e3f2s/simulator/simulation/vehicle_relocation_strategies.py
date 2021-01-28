@@ -95,8 +95,8 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
                         duration=duration
                     )
 
-                    if "save_history" in self.simInput.sim_general_conf:
-                        if self.simInput.sim_general_conf["save_history"]:
+                    if "save_history" in self.simInput.supply_model_conf:
+                        if self.simInput.supply_model_conf["save_history"]:
                             self.sim_vehicle_relocations += [vehicle_relocation]
 
                     self.n_vehicle_relocations += 1

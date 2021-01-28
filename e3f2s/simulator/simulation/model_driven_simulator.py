@@ -46,7 +46,7 @@ class ModelDrivenSim (SharedMobilitySim):
 				and "vehicle_relocation_scheduling" in self.simInput.sim_scenario_conf.keys() \
 				and self.simInput.sim_scenario_conf["vehicle_relocation_scheduling"]:
 
-			self.VehicleRelocationStrategy.generate_relocation_schedule(self.current_daytype, self.current_hour)
+			self.vehicleRelocationStrategy.generate_relocation_schedule(self.current_daytype, self.current_hour)
 			self.update_relocation_schedule = False
 
 	def update_data_structures (self):
@@ -89,7 +89,7 @@ class ModelDrivenSim (SharedMobilitySim):
 			)
 
 			if booking_request["euclidean_distance"] == 0:
-				booking_request["euclidean_distance"] = self.simInput.sim_general_conf["bin_side_length"]
+				booking_request["euclidean_distance"] = self.simInput.demand_model_config["bin_side_length"]
 
 			booking_request["driving_distance"] = booking_request["euclidean_distance"] * 1.4
 			booking_request["duration"] = abs(booking_request["driving_distance"] / (

@@ -9,6 +9,29 @@ class ChargingStrategy(ChargingPrimitives):
 		if self.simInput.supply_model_conf["battery_swap"]:
 
 			charging_zone_id = booking_request["destination_id"]
+			charging_outward_distance = 0
+
+			if self.simInput.sim_scenario_conf["scooter_relocation"] \
+				and self.simInput.sim_scenario_conf["scooter_relocation_strategy"] == "post_battery_swap":
+
+				if operator == "system":
+					relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
+						booking_request,
+						vehicles=[vehicle.plate]
+					)
+
+					if relocated:
+						charging_zone_id = scooter_relocation["end_zone_id"]
+
+						if self.simInput.sim_scenario_conf["time_estimation"]:
+							timeout_return = scooter_relocation["duration"]
+
+					else:
+						timeout_return = 0
+
+			else:
+				timeout_return = 0
+
 
 			if operator == "system":
 				timeout_outward = np.random.exponential(
@@ -21,7 +44,6 @@ class ChargingStrategy(ChargingPrimitives):
 						"avg_service_time"
 					] * 60
 				)
-				timeout_return = 0
 				cr_soc_delta = 0
 				resource = self.workers
 
@@ -75,7 +97,7 @@ class ChargingStrategy(ChargingPrimitives):
 						random_zone_id].charging_station.capacity:
 						free_pole_flag = 1
 						charging_zone_id = random_zone_id
-						cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id ,vehicle)
+						cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id, vehicle)
 						if cr_soc_delta > booking_request["end_soc"]:
 							free_pole_flag = 0
 						else:
@@ -127,6 +149,7 @@ class ChargingStrategy(ChargingPrimitives):
 				charge["duration"] = vehicle.get_charging_time_from_perc(
 					vehicle.soc.level,
 					self.charging_stations_dict[charging_zone_id].flow_rate,
+					self.simInput.supply_model_conf["profile_type"],
 					charge["end_soc"]
 				)
 
@@ -164,7 +187,8 @@ class ChargingStrategy(ChargingPrimitives):
 			"zone_id": charging_zone_id,
 			"timeout_outward": timeout_outward,
 			"timeout_return": timeout_return,
-			"cr_soc_delta": cr_soc_delta
+			"cr_soc_delta": cr_soc_delta,
+			"charging_outward_distance": charging_outward_distance
 		}
 
 		return charge_dict
@@ -201,11 +225,26 @@ class ChargingStrategy(ChargingPrimitives):
 
 		if charge_flag and not user_charge_flag:
 
-			if not self.simInput.supply_model_conf["relocation"]:
-				relocation_zone_id = charge_dict["zone_id"]
+			relocation_zone_id = charge_dict["zone_id"]
 
-			elif self.simInput.supply_model_conf["relocation"]:
+			if self.simInput.supply_model_conf["relocation"]:
 				relocation_zone_id = booking_request["destination_id"]
+
+			elif self.simInput.supply_model_conf["battery_swap"] \
+				and self.simInput.supply_model_conf["scooter_relocation"] \
+				and "scooter_relocation_scheduling" in self.simInput.supply_model_conf:
+
+				if self.simInput.supply_model_conf["scooter_relocation_scheduling"] \
+					and dict(self.simInput.supply_model_conf["scooter_scheduled_relocation_triggers"])["post_charge"]:
+
+					relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
+						booking_request,
+						vehicles=[vehicle.plate]
+					)
+
+					if relocated:
+						relocation_zone_id = scooter_relocation["end_zone_id"]
+						yield self.env.process(self.scooterRelocationStrategy.relocate_scooter(scooter_relocation))
 
 		else:
 

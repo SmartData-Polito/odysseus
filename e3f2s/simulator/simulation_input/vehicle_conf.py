@@ -75,7 +75,11 @@ vehicle_conf = {
 		"generic e-scooter": {
 			"engine_type": "electric",
 			"fuel_capacity": 0.425,
-			"consumption": 1 / 0.011
+			"consumption": 1 / 0.011,
+			"n_seats": 1,
+			"max_charg_power": {
+				"inf": 1000000
+			}
 		}
 	}
 }

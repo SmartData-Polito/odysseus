@@ -29,12 +29,12 @@ class SimOutput():
 			self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
 			self.sim_users_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
 			self.sim_scooter_relocations = pd.DataFrame(sim.scooterRelocationStrategy.sim_scooter_relocations)
-			self.sim_vehicle_relocations = pd.DataFrame(sim.VehicleRelocationStrategy.sim_vehicle_relocations)
+			self.sim_vehicle_relocations = pd.DataFrame(sim.vehicleRelocationStrategy.sim_vehicle_relocations)
 
 			if self.sim_scenario_conf["battery_swap"]:
 				self.sim_scooter_relocations = pd.DataFrame(sim.scooterRelocationStrategy.sim_scooter_relocations)
 			else:
-				self.sim_vehicle_relocations = pd.DataFrame(sim.VehicleRelocationStrategy.sim_vehicle_relocations)
+				self.sim_vehicle_relocations = pd.DataFrame(sim.vehicleRelocationStrategy.sim_vehicle_relocations)
 
 			if "end_time" not in self.sim_system_charges_bookings:
 				self.sim_system_charges_bookings["end_time"] = pd.Series()
@@ -314,11 +314,11 @@ class SimOutput():
 					self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)
 
 		if "vehicle_relocation" in self.sim_scenario_conf and self.sim_scenario_conf["vehicle_relocation"]:
-			self.sim_stats.loc["n_vehicle_relocations"] = sim.VehicleRelocationStrategy.n_vehicle_relocations
+			self.sim_stats.loc["n_vehicle_relocations"] = sim.vehicleRelocationStrategy.n_vehicle_relocations
 			self.sim_stats.loc["tot_vehicle_relocations_distance"] = \
-				sim.VehicleRelocationStrategy.tot_vehicle_relocations_distance
+				sim.vehicleRelocationStrategy.tot_vehicle_relocations_distance
 			self.sim_stats.loc["tot_vehicle_relocations_duration"] = \
-				sim.VehicleRelocationStrategy.tot_vehicle_relocations_duration
+				sim.vehicleRelocationStrategy.tot_vehicle_relocations_duration
 
 		for key in self.sim_stats.index:
 			if key.startswith("fraction"):

@@ -73,8 +73,8 @@ class ScooterRelocationPrimitives:
         scooter_relocation["distance"] = self.get_relocation_distance(scooter_relocation)
         self.pick_up_scooter(scooter_relocation)
         self.drop_off_scooter(scooter_relocation)
-        if "save_history" in self.simInput.sim_general_conf:
-            if self.simInput.sim_general_conf["save_history"]:
+        if "save_history" in self.simInput.supply_model_conf:
+            if self.simInput.supply_model_conf["save_history"]:
                 self.sim_scooter_relocations += [scooter_relocation]
         self.n_scooter_relocations += 1
         self.tot_scooter_relocations_distance += scooter_relocation["distance"]

@@ -65,6 +65,7 @@ class ChargingPrimitives:
 		self.list_users_charging_bookings = []
 
 		self.charging_return_distance = 0
+		self.charging_outward_distance = 0
 
 		self.sim_metrics = sim.sim_metrics
 
@@ -84,7 +85,7 @@ class ChargingPrimitives:
 
 		self.sim_metrics.update_metrics("cum_relo_ret_t", timeout_return)
 
-		#charging_outward_distance = charge_dict["charging_outward_distance"]
+		self.charging_outward_distance += charge_dict["charging_outward_distance"]
 
 		def check_queuing():
 			if self.simInput.supply_model_conf["queuing"]:
