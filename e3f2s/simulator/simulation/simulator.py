@@ -136,10 +136,13 @@ class SharedMobilitySim:
         }
         self.sim_metrics = SimMetrics(metrics_dict)
 
-        self.vehicleRelocationStrategy = VehicleRelocationStrategy(self.env, self)
-        self.scooterRelocationStrategy = ScooterRelocationStrategy(self.env, self)
-        self.chargingStrategy = ChargingStrategy(self.env, self)
+        if self.simInput.supply_model_conf["battery_swap"] \
+                and self.simInput.supply_model_conf["scooter_relocation"]:
+            self.scooterRelocationStrategy = ScooterRelocationStrategy(self.env, self)
+        elif self.simInput.supply_model_conf["vehicle_relocation"]:
+            self.vehicleRelocationStrategy = VehicleRelocationStrategy(self.env, self)
 
+        self.chargingStrategy = ChargingStrategy(self.env, self)
 
     def schedule_booking (self, booking_request, vehicle, zone_id):
         self.tot_mobility_distance += booking_request["driving_distance"]
@@ -227,8 +230,13 @@ class SharedMobilitySim:
         self.list_n_vehicles_available += [
             self.simInput.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
         ]
-        self.list_n_scooters_relocating += [self.scooterRelocationStrategy.n_scooters_relocating]
-        self.list_n_vehicles_relocating += [self.vehicleRelocationStrategy.n_vehicles_relocating]
+
+        if self.simInput.supply_model_conf["battery_swap"] \
+                and self.simInput.supply_model_conf["scooter_relocation"]:
+            self.list_n_scooters_relocating += [self.scooterRelocationStrategy.n_scooters_relocating]
+        elif self.simInput.supply_model_conf["vehicle_relocation"]:
+            self.list_n_vehicles_relocating += [self.vehicleRelocationStrategy.n_vehicles_relocating]
+
         self.charging_outward_distance = [self.chargingStrategy.charging_outward_distance]
         self.charging_return_distance = [self.chargingStrategy.charging_return_distance]
 
