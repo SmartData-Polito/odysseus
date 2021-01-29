@@ -57,6 +57,10 @@ sim_scenario_conf_grid = {
             "post_trip": True,
         }.items()),
     ],
+
+    "vehicle_relocation": [False],
+    "vehicle_relocation_scheduling": [False],
+
     "n_relocation_workers": range(3, 13),
     "avg_relocation_speed": [20],  # km/h
 

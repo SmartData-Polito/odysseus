@@ -26,7 +26,9 @@ class ModelDrivenSim (SharedMobilitySim):
 		self.hours_spent += 1
 
 		self.current_datetime = self.start + datetime.timedelta(seconds=self.env.now)
-		self.current_hour = self.current_datetime.hour
+		if self.current_hour != self.current_datetime.hour:
+			self.current_hour = self.current_datetime.hour
+			self.update_relocation_schedule = True
 		self.current_weekday = self.current_datetime.weekday()
 		if self.current_weekday in [5, 6]:
 			self.current_daytype = "weekend"
