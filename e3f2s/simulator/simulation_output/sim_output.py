@@ -134,8 +134,6 @@ class SimOutput():
 			self.sim_stats.loc["tot_potential_welltowheel_co2_emissions"] = self.sim_booking_requests.tanktowheel_emissions.sum() / 1000
 			self.sim_stats.loc["tot_potential_co2_emissions_kg"] = self.sim_booking_requests.co2_emissions.sum() / 1000
 
-			self.sim_stats.loc["tot_mobility_distance"] = self.sim_bookings.driving_distance.sum()
-			self.sim_stats.loc["tot_mobility_duration"] = self.sim_bookings.duration.sum()
 			self.sim_stats.loc["tot_welltotank_energy"] = self.sim_bookings.welltotank_kwh.sum()
 			self.sim_stats.loc["tot_tanktowheel_energy"] = self.sim_bookings.tanktowheel_kwh.sum()
 			self.sim_stats.loc["tot_mobility_energy"] = self.sim_bookings.soc_delta_kwh.sum()
@@ -251,67 +249,67 @@ class SimOutput():
 					self.sim_stats.loc["tot_scooter_relocations_distance"] = 0
 
 
+			self.grid[
+				"origin_count"
+			] = self.sim_booking_requests.origin_id.value_counts()
+			self.grid[
+				"destination_count"
+			] = self.sim_booking_requests.destination_id.value_counts()
+
+			if len(self.sim_system_charges_bookings):
 				self.grid[
-					"origin_count"
-				] = self.sim_booking_requests.origin_id.value_counts()
+					"charge_needed_system_zones_count"
+				] = self.sim_system_charges_bookings.destination_id.value_counts()
+			else:
 				self.grid[
-					"destination_count"
-				] = self.sim_booking_requests.destination_id.value_counts()
+					"charge_needed_system_zones_count"
+				] = 0
+			if len(self.sim_users_charges_bookings):
+				self.grid[
+					"charge_needed_users_zones_count"
+				] = self.sim_users_charges_bookings.destination_id.value_counts()
+			else:
+				self.grid[
+					"charge_needed_users_zones_count"
+				] = 0
 
-				if len(self.sim_system_charges_bookings):
-					self.grid[
-						"charge_needed_system_zones_count"
-					] = self.sim_system_charges_bookings.destination_id.value_counts()
-				else:
-					self.grid[
-						"charge_needed_system_zones_count"
-					] = 0
-				if len(self.sim_users_charges_bookings):
-					self.grid[
-						"charge_needed_users_zones_count"
-					] = self.sim_users_charges_bookings.destination_id.value_counts()
-				else:
-					self.grid[
-						"charge_needed_users_zones_count"
-					] = 0
+			if self.sim_stats["n_unsatisfied"]:
+				self.grid[
+					"unsatisfied_demand_origins_fraction"
+				] = self.sim_unsatisfied_requests.origin_id.value_counts() / len(self.sim_unsatisfied_requests)
+			else:
+				self.grid[
+					"unsatisfied_demand_origins_fraction"
+				] = 0
 
-				if self.sim_stats["n_unsatisfied"]:
-					self.grid[
-						"unsatisfied_demand_origins_fraction"
-					] = self.sim_unsatisfied_requests.origin_id.value_counts() / len(self.sim_unsatisfied_requests)
-				else:
-					self.grid[
-						"unsatisfied_demand_origins_fraction"
-					] = 0
+			if len(self.sim_not_enough_energy_requests):
+				self.grid[
+					"not_enough_energy_origins_count"
+				] = self.sim_not_enough_energy_requests.origin_id.value_counts()
+			if len(self.sim_charge_deaths):
+				self.grid[
+					"charge_deaths_origins_count"
+				] = self.sim_charge_deaths.origin_id.value_counts()
 
-				if len(self.sim_not_enough_energy_requests):
-					self.grid[
-						"not_enough_energy_origins_count"
-					] = self.sim_not_enough_energy_requests.origin_id.value_counts()
-				if len(self.sim_charge_deaths):
-					self.grid[
-						"charge_deaths_origins_count"
-					] = self.sim_charge_deaths.origin_id.value_counts()
+			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
 
-				self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
+			self.vehicles_history = pd.DataFrame()
+			for vehicle in sim.vehicles_list:
+				vehicle_df = pd.DataFrame(vehicle.status_dict_list)
+				vehicle_df["plate"] = vehicle.plate
+				self.vehicles_history = pd.concat([self.vehicles_history, vehicle_df], ignore_index=True)
 
-				self.vehicles_history = pd.DataFrame()
-				for vehicle in sim.vehicles_list:
-					vehicle_df = pd.DataFrame(vehicle.status_dict_list)
-					vehicle_df["plate"] = vehicle.plate
-					self.vehicles_history = pd.concat([self.vehicles_history, vehicle_df], ignore_index=True)
+			self.stations_history = pd.DataFrame()
+			for key in sim.chargingStrategy.charging_stations_dict:
+				station_df = pd.DataFrame(sim.chargingStrategy.charging_stations_dict[key].status_dict_list)
+				station_df["id"] = key
+				self.stations_history = pd.concat([self.stations_history, station_df], ignore_index=True)
 
-				self.stations_history = pd.DataFrame()
-				for key in sim.chargingStrategy.charging_stations_dict:
-					station_df = pd.DataFrame(sim.chargingStrategy.charging_stations_dict[key].status_dict_list)
-					station_df["id"] = key
-					self.stations_history = pd.concat([self.stations_history, station_df], ignore_index=True)
-
-				self.zones_history = pd.DataFrame()
-				for key in sim.chargingStrategy.zone_dict:
-					zone_df = pd.DataFrame(sim.chargingStrategy.zone_dict[key].status_dict_list)
-					zone_df["zone_id"] = key
-					self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)
+			self.zones_history = pd.DataFrame()
+			for key in sim.chargingStrategy.zone_dict:
+				zone_df = pd.DataFrame(sim.chargingStrategy.zone_dict[key].status_dict_list)
+				zone_df["zone_id"] = key
+				self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)
 
 		if "vehicle_relocation" in self.sim_scenario_conf and self.sim_scenario_conf["vehicle_relocation"]:
 			self.sim_stats.loc["n_vehicle_relocations"] = sim.vehicleRelocationStrategy.n_vehicle_relocations

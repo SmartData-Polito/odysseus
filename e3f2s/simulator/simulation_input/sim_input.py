@@ -87,7 +87,6 @@ class SimInput:
 		self.n_charging_poles_by_zone = {}
 		self.vehicles_soc_dict = {}
 		self.vehicles_zones = {}
-		self.available_vehicles_dict = {}
 
 		self.start = None
 
@@ -104,7 +103,6 @@ class SimInput:
 			"n_charging_zones": self.n_charging_zones,
 		})
 		self.supply_model = SupplyModel(self.supply_model_conf)
-		self.available_vehicles_dict = self.supply_model.available_vehicles_dict
 
 	def get_booking_requests_list(self):
 
