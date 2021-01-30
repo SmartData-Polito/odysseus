@@ -150,10 +150,25 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
             next_hour_kde = self.simInput.trip_kdes[daytype][(hour + 1) % 24]
 
+            def base_round(x, base):
+                if x < 0:
+                    return 0
+                elif x > base:
+                    return base
+                else:
+                    return round(x)
+
+            def gen_relocation_zone(kde):
+                trip_sample = kde.sample()
+                origin_i = base_round(trip_sample[0][0], len(self.simInput.grid_matrix.index) - 1)
+                origin_j = base_round(trip_sample[0][1], len(self.simInput.grid_matrix.columns) - 1)
+
+                return self.simInput.grid_matrix.loc[origin_i, origin_j]
+
             for i in range(n):
-                origin_id = self.simInput.gen_trip_origin_zone_from_kde(next_hour_kde)
+                origin_id = gen_relocation_zone(next_hour_kde)
                 while origin_id not in self.simInput.valid_zones:
-                    origin_id = self.simInput.gen_trip_origin_zone_from_kde(next_hour_kde)
+                    origin_id = gen_relocation_zone(next_hour_kde)
                 ending_zone_ids.append(origin_id)
                 n_dropped_vehicles_list.append(1)
 
