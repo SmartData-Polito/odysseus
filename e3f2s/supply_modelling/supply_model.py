@@ -7,7 +7,7 @@ import geopandas as gpd
 from shapely.geometry import Point
 import datetime
 import pytz
-
+from e3f2s.supply_modelling.energymix_loader import EnergyMix
 
 
 
@@ -68,6 +68,7 @@ class SupplyModel:
 
 		self.zones_cp_distances = pd.Series()
 		self.closest_cp_zone = pd.Series()
+		self.energy_mix = EnergyMix(self.city,self.supply_model_conf["year_energymix"])
 
 	def init_vehicles(self):
 
