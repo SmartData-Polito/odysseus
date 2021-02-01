@@ -1,5 +1,7 @@
 import pandas as pd
 from e3f2s.simulator.simulation_output.sim_stats import SimStats
+from e3f2s.utils.cost_utils import insert_sim_costs, insert_scenario_costs
+from e3f2s.simulator.simulation_input.costs_conf import *
 
 
 class SimOutput():
@@ -130,10 +132,14 @@ class SimOutput():
 			self.sim_stats.loc["tot_potential_welltotank_energy"] = self.sim_booking_requests.welltotank_kwh.sum()
 			self.sim_stats.loc["tot_potential_tanktowheel_energy"] = self.sim_booking_requests.tanktowheel_kwh.sum()
 			self.sim_stats.loc["tot_potential_mobility_energy"] = self.sim_booking_requests.soc_delta_kwh.sum()
-			self.sim_stats.loc["tot_potential_welltotank_co2_emissions"] = self.sim_booking_requests.welltotank_emissions.sum() / 1000
-			self.sim_stats.loc["tot_potential_welltowheel_co2_emissions"] = self.sim_booking_requests.tanktowheel_emissions.sum() / 1000
+			self.sim_stats.loc[
+				"tot_potential_welltotank_co2_emissions"] = self.sim_booking_requests.welltotank_emissions.sum() / 1000
+			self.sim_stats.loc[
+				"tot_potential_welltowheel_co2_emissions"] = self.sim_booking_requests.tanktowheel_emissions.sum() / 1000
 			self.sim_stats.loc["tot_potential_co2_emissions_kg"] = self.sim_booking_requests.co2_emissions.sum() / 1000
 
+			self.sim_stats.loc["tot_mobility_distance"] = self.sim_bookings.driving_distance.sum()
+			self.sim_stats.loc["tot_mobility_duration"] = self.sim_bookings.duration.sum()
 			self.sim_stats.loc["tot_welltotank_energy"] = self.sim_bookings.welltotank_kwh.sum()
 			self.sim_stats.loc["tot_tanktowheel_energy"] = self.sim_bookings.tanktowheel_kwh.sum()
 			self.sim_stats.loc["tot_mobility_energy"] = self.sim_bookings.soc_delta_kwh.sum()
@@ -292,6 +298,12 @@ class SimOutput():
 				] = self.sim_charge_deaths.origin_id.value_counts()
 
 			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
+			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
+			insert_scenario_costs(self.sim_stats, self.sim_scenario_conf, vehicle_cost, charging_station_costs)
+			insert_sim_costs(self.sim_stats, self.sim_scenario_conf, fuel_costs, administrative_cost_conf,
+			                 vehicle_cost)
+			self.sim_stats.loc["profit"] = self.sim_stats["revenue"] - self.sim_stats["scenario_cost"] - \
+			                               self.sim_stats["sim_cost"]
 
 			self.vehicles_history = pd.DataFrame()
 			for vehicle in sim.vehicles_list:
