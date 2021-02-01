@@ -298,7 +298,6 @@ class SimOutput():
 				] = self.sim_charge_deaths.origin_id.value_counts()
 
 			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
-			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
 			insert_scenario_costs(self.sim_stats, self.sim_scenario_conf, vehicle_cost, charging_station_costs)
 			insert_sim_costs(self.sim_stats, self.sim_scenario_conf, fuel_costs, administrative_cost_conf,
 			                 vehicle_cost)
