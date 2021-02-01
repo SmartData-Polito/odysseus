@@ -301,7 +301,7 @@ class SimOutput():
 			insert_scenario_costs(self.sim_stats, self.sim_scenario_conf, vehicle_cost, charging_station_costs)
 			insert_sim_costs(self.sim_stats, self.sim_scenario_conf, fuel_costs, administrative_cost_conf,
 			                 vehicle_cost)
-			self.sim_stats.loc["profit"] = self.sim_stats["revenue"] - self.sim_stats["scenario_cost"] - \
+			self.sim_stats.loc["profit"] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - \
 			                               self.sim_stats["sim_cost"]
 
 			self.vehicles_history = pd.DataFrame()
