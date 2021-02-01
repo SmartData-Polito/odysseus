@@ -112,7 +112,7 @@ class SimOutput():
 					self.sim_charges.groupby("plate").date.count().mean()
 
 				self.sim_stats.loc["n_charges_by_vehicle_system_avg"] = \
-					self.sim_charges[self.sim_charges.operator == "system"]\
+					self.sim_charges[self.sim_charges.operator == "system"] \
 						.groupby("plate").date.count().mean()
 			else:
 				self.sim_stats.loc["charging_time_avg"] = 0
@@ -122,7 +122,7 @@ class SimOutput():
 
 			if len(self.sim_users_charges_bookings):
 				self.sim_stats.loc["n_charges_by_vehicle_users_avg"] = \
-					self.sim_charges[self.sim_charges.operator == "users"]\
+					self.sim_charges[self.sim_charges.operator == "users"] \
 						.groupby("plate").date.count().mean()
 			else:
 				self.sim_stats.loc["n_charges_by_vehicle_users_avg"] = 0
@@ -152,20 +152,20 @@ class SimOutput():
 			else:
 				self.sim_stats.loc["tot_charging_energy"] = 0
 
-			self.sim_stats.loc["tot_charging_return_distance"] =sim.chargingStrategy.charging_return_distance
+			self.sim_stats.loc["tot_charging_return_distance"] = sim.chargingStrategy.charging_return_distance
 
 			if len(self.sim_charges) and "system" in self.sim_charges.operator.unique():
 				self.sim_stats.loc["fraction_charges_system"] = \
-					self.sim_charges.groupby("operator")\
-					.date.count().loc["system"]\
+					self.sim_charges.groupby("operator") \
+						.date.count().loc["system"] \
 					/ len(self.sim_charges)
 				self.sim_stats.loc["fraction_energy_system"] = \
-					self.sim_charges.groupby("operator")\
-					.soc_delta_kwh.sum().loc["system"]\
+					self.sim_charges.groupby("operator") \
+						.soc_delta_kwh.sum().loc["system"] \
 					/ self.sim_stats["tot_charging_energy"]
 				self.sim_stats.loc["fraction_duration_system"] = \
-					self.sim_charges.groupby("operator")\
-					.duration.sum().loc["system"]\
+					self.sim_charges.groupby("operator") \
+						.duration.sum().loc["system"] \
 					/ self.sim_charges.duration.sum()
 			else:
 				self.sim_stats.loc["fraction_charges_system"] = 0
@@ -174,16 +174,16 @@ class SimOutput():
 
 			if len(self.sim_charges) and "users" in self.sim_charges.operator.unique():
 				self.sim_stats.loc["fraction_charges_users"] = \
-					self.sim_charges.groupby("operator")\
-					.date.count().loc["users"]\
+					self.sim_charges.groupby("operator") \
+						.date.count().loc["users"] \
 					/ len(self.sim_charges)
 				self.sim_stats.loc["fraction_energy_users"] = \
-					self.sim_charges.groupby("operator")\
-					.soc_delta_kwh.sum().loc["users"]\
+					self.sim_charges.groupby("operator") \
+						.soc_delta_kwh.sum().loc["users"] \
 					/ self.sim_stats["tot_charging_energy"]
 				self.sim_stats.loc["fraction_duration_users"] = \
-					self.sim_charges.groupby("operator")\
-					.duration.sum().loc["users"]\
+					self.sim_charges.groupby("operator") \
+						.duration.sum().loc["users"] \
 					/ self.sim_charges.duration.sum()
 			else:
 				self.sim_stats.loc["fraction_charges_users"] = 0
@@ -204,7 +204,7 @@ class SimOutput():
 					self.sim_charges.soc_delta_kwh.median()
 
 				self.sim_charges["cr_timeout"] = \
-					self.sim_charges.timeout_outward\
+					self.sim_charges.timeout_outward \
 					+ self.sim_charges.timeout_return
 
 				self.sim_stats.loc["cum_relo_out_t"] = \
