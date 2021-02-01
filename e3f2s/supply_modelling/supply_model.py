@@ -1,6 +1,6 @@
 import os
 import pickle
-
+import json
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -9,7 +9,6 @@ import datetime
 import pytz
 
 
-from e3f2s.city_data_manager.data.Torino.raw.geo.openstreetmap.stations_locations import station_locations
 
 
 def geodataframe_charging_points(city,engine_type,station_location):
@@ -136,6 +135,19 @@ class SupplyModel:
 						exit(0)
 
 			elif self.supply_model_conf["cps_placement_policy"] == "real_positions":
+				stations_path = os.path.join(
+					os.path.dirname(os.path.dirname(__file__)),
+					"city_data_manager",
+					"data",
+					self.supply_model_conf["city"],
+					"raw",
+					"geo",
+					"openstreetmap",
+					"station_locations.json"
+				)
+				f = open(stations_path,"r")
+				station_locations = json.load(f)
+				f.close()
 				cps_points = geodataframe_charging_points(
 					self.city, self.supply_model_conf["engine_type"], station_locations
 				)

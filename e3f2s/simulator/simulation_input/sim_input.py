@@ -80,6 +80,8 @@ class SimInput:
 				self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
 			elif "cps_zones" in self.sim_scenario_conf and self.sim_scenario_conf["cps_placement_policy"] != "real_positions":
 				self.n_charging_zones = len(self.sim_scenario_conf["cps_zones"])
+			elif self.sim_scenario_conf["cps_placement_policy"] == "real_positions":
+				self.n_charging_zones = 0
 		elif self.sim_scenario_conf["battery_swap"]:
 			self.n_charging_zones = 0
 			self.tot_n_charging_poles = 0
