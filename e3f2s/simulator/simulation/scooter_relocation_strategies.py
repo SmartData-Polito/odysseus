@@ -167,7 +167,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
             for i in range(n):
                 origin_id = gen_relocation_zone(next_hour_kde)
-                while origin_id not in self.simInput.valid_zones:
+                while (origin_id not in self.simInput.valid_zones) or (origin_id in self.starting_zone_ids):
                     origin_id = gen_relocation_zone(next_hour_kde)
                 ending_zone_ids.append(origin_id)
                 n_dropped_vehicles_list.append(1)
@@ -299,12 +299,12 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
         self.scheduled_scooter_relocations.clear()
         n_relocations = self.relocation_workers.capacity - self.relocation_workers.count  # free_workers
 
-        starting_zone_ids, n_picked_vehicles_list = self.choose_starting_zone(daytype=daytype, hour=hour, n=n_relocations)
-        ending_zone_ids, n_dropped_vehicles_list = self.choose_ending_zone(daytype=daytype, hour=hour, n=n_relocations)
+        self.starting_zone_ids, n_picked_vehicles_list = self.choose_starting_zone(daytype=daytype, hour=hour, n=n_relocations)
+        self.ending_zone_ids, n_dropped_vehicles_list = self.choose_ending_zone(daytype=daytype, hour=hour, n=n_relocations)
 
-        for i in range(min(n_relocations, len(starting_zone_ids), len(ending_zone_ids))):
-            starting_zone_id = starting_zone_ids[i]
-            ending_zone_id = ending_zone_ids[i]
+        for i in range(min(n_relocations, len(self.starting_zone_ids), len(self.ending_zone_ids))):
+            starting_zone_id = self.starting_zone_ids[i]
+            ending_zone_id = self.ending_zone_ids[i]
 
             n_picked_vehicles = n_picked_vehicles_list[i]
             n_dropped_vehicles = n_dropped_vehicles_list[i]

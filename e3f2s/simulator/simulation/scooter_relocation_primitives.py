@@ -52,6 +52,8 @@ class ScooterRelocationPrimitives:
         self.n_scooters_relocating = 0
 
         self.scheduled_scooter_relocations = {}
+        self.starting_zone_ids = []
+        self.ending_zone_ids = []
 
     def relocate_scooter(self, scooter_relocation):
 
