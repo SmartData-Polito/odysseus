@@ -1,5 +1,4 @@
 import datetime
-import pickle
 import os
 import json
 
@@ -11,10 +10,12 @@ print(datetime.datetime.now())
 
 with open(simulation_input_paths['sim_configs_target'], 'r') as my_file:
     data = my_file.read()
+campaign_name = json.loads(data)['campaign_name']
 conf_name = json.loads(data)['config_names'][0]
 
 versioned_conf_path = os.path.join(
     simulation_input_paths["sim_configs_versioned"],
+    campaign_name,
     conf_name
 )
 conf_path = simulation_input_paths['sim_current_config']
@@ -32,9 +33,6 @@ except FileNotFoundError:
     print('Error %s conf not present' % conf_path + f)
     exit()
 
-import pandas as pd
-
-from e3f2s.demand_modelling.demand_model import DemandModel
 
 from e3f2s.simulator.single_run.single_run import single_run
 from e3f2s.simulator.multiple_runs.multiple_runs import multiple_runs
