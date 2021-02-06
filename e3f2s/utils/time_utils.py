@@ -14,7 +14,7 @@ def get_weekday_int_from_string(s):
 
 def get_time_group_columns (trips_df_norm):
 
-	trips_df_norm = trips_df_norm.sort_values(by=["start_time"])
+	trips_df_norm = trips_df_norm.sort_values(by=["start_time"]).dropna()
 
 	try:
 		trips_df_norm.loc[:, "start_time"] = pd.to_datetime(trips_df_norm.start_time)

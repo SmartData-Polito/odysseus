@@ -113,8 +113,8 @@ class DemandModel:
         )
         self.bookings["origin_id"] = self.trips_origins.zone_id
         self.bookings["destination_id"] = self.trips_destinations.zone_id
-        self.grid["origin_count"] = self.bookings.origin_id.value_counts()
-        self.grid["destination_count"] = self.bookings.destination_id.value_counts()
+        zones["origin_count"] = self.bookings.origin_id.value_counts()
+        zones["destination_count"] = self.bookings.destination_id.value_counts()
 
     def get_input_bookings_filtered(self):
 

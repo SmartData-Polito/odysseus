@@ -85,8 +85,10 @@ from e3f2s.city_data_manager.config.config import data_paths_dict
 
 raw_data_path = os.path.join(data_paths_dict["New_York_City"]["raw"]["trips"], "citi_bike")
 os.makedirs(raw_data_path, exist_ok=True)
-gatherer = DataGatherer(
-    raw_data_path,
-    "citibike-tripdata.csv"
-)
-gatherer.download_data(2017, 1)
+
+for month in range(1, 13):
+    gatherer = DataGatherer(
+        raw_data_path,
+        "-".join([str(month), str(2017)]) + "-citibike-tripdata.csv"
+    )
+    gatherer.download_data(2017, month)

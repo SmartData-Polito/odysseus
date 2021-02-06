@@ -69,6 +69,30 @@ class BigDataDBTrips(TripsDataSource):
             ]
 
         self.trips_df_norm = super().normalise()
-        self.save_norm()
+        self.save_norm(year, month)
 
         return self.trips_df_norm
+
+    def save_norm(self, year, month):
+
+        print(self.trips_df_norm.shape)
+
+        trips_df_norm_year_month = self.trips_df_norm[
+            (self.trips_df_norm.start_year == year) & (self.trips_df_norm.start_month == month)
+            ]
+
+        print(trips_df_norm_year_month.shape)
+
+        if len(trips_df_norm_year_month):
+            trips_df_norm_year_month.to_csv(
+                os.path.join(
+                    self.norm_data_path,
+                    "_".join([str(year), str(month)]) + ".csv"
+                )
+            )
+            trips_df_norm_year_month.to_pickle(
+                os.path.join(
+                    self.norm_data_path,
+                    "_".join([str(year), str(month)]) + ".pickle"
+                )
+            )

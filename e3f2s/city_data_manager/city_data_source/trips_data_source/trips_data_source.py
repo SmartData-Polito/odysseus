@@ -61,12 +61,18 @@ class TripsDataSource:
 		return self.trips_df_norm
 
 	def save_norm(self):
-		for year in self.trips_df_norm.year.unique():
-			for month in self.trips_df_norm.month.unique():
+
+		print(self.trips_df_norm.shape)
+
+		for year in self.trips_df_norm.start_year.unique():
+			for month in self.trips_df_norm.start_month.unique():
 
 				trips_df_norm_year_month = self.trips_df_norm[
-					(self.trips_df_norm.year == year) & (self.trips_df_norm.month == month)
+					(self.trips_df_norm.start_year == year) & (self.trips_df_norm.start_month == month)
 				]
+
+				print(trips_df_norm_year_month.shape)
+
 				if len(trips_df_norm_year_month):
 					trips_df_norm_year_month.to_csv(
 						os.path.join(
@@ -87,5 +93,8 @@ class TripsDataSource:
 			self.data_source_id,
 			"_".join([str(year), str(month)]) + ".csv"
 		)
-		self.trips_df_norm = pd.read_csv(data_path, index_col=0)
-		return self.trips_df_norm
+		if os.path.exists(data_path):
+			self.trips_df_norm = pd.read_csv(data_path).iloc[:, 1:]
+			return self.trips_df_norm
+		else:
+			return pd.DataFrame()
