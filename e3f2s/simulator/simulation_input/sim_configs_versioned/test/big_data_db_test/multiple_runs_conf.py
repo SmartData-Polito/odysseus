@@ -1,13 +1,11 @@
-import datetime
 import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "requests_rate_factor": np.arange(1, 6, 1),
-    "n_vehicles_factor": np.arange(1, 6, 1),
-
+    "requests_rate_factor": [1],
+    "n_vehicles": [400],
     "engine_type": ["electric"],
-    "profile_type": ["single_phase_1"],  # works only if engine_type = electric
+    "profile_type": ["single_phase_1"],
     "vehicle_model_name": ["Smart fortwo Electric Drive 2018"],
     "country_energymix": ["Italy"],
     "year_energymix": ["2018"],
@@ -18,10 +16,7 @@ sim_scenario_conf_grid = {
     "alpha_policy": ['auto'],
     "beta": [100],
 
-    "n_poles_n_vehicles_factor": np.arange(0.01, 0.2, 0.005),
-
-    "hub": [False],
-    "hub_zone_policy": [""],
+    "n_poles_n_vehicles_factor": [0.02, 0.03, 0.04, 0.05],
 
     "distributed_cps": [True],
     "system_cps": [True],
