@@ -77,7 +77,14 @@ class DemandModel:
         self.grid["zone_id"] = self.grid.index.values
         self.map_zones_on_trips(self.grid)
 
+        print(self.grid.zone_id.values)
+        print(self.grid_matrix.values.T.flatten())
+
         self.valid_zones = self.get_valid_zones()
+        self.zones_valid_zones_distances = self.grid.centroid.apply(
+            lambda x: self.grid.loc[self.valid_zones].centroid.distance(x)
+        )
+        self.closest_valid_zone = self.zones_valid_zones_distances.idxmin(axis=1)
         self.grid = self.grid.loc[self.valid_zones]
 
         self.bookings = self.bookings.loc[
@@ -85,6 +92,12 @@ class DemandModel:
                 self.bookings.destination_id.isin(self.valid_zones)
             )
         ]
+        self.grid["origin_count"] = self.bookings.origin_id.value_counts()
+        self.grid["destination_count"] = self.bookings.destination_id.value_counts()
+        reqs_per_zone = self.bookings.origin_id.value_counts(
+            normalize=False
+        ).rename('zone_id')
+        self.grid = self.grid.join(reqs_per_zone, how='left', on='zone_id', rsuffix='_origin_count')
 
         if 'plate' in self.bookings:
             self.n_vehicles_original = len(self.bookings.plate.unique())
@@ -113,8 +126,6 @@ class DemandModel:
         )
         self.bookings["origin_id"] = self.trips_origins.zone_id
         self.bookings["destination_id"] = self.trips_destinations.zone_id
-        zones["origin_count"] = self.bookings.origin_id.value_counts()
-        zones["destination_count"] = self.bookings.destination_id.value_counts()
 
     def get_input_bookings_filtered(self):
 
@@ -214,7 +225,7 @@ class DemandModel:
 
         self.valid_zones = valid_origin_zones.index.intersection(
                 valid_dest_zones.index
-            ).astype(int)
+        ).astype(int)
 
         return self.valid_zones
 
@@ -361,6 +372,9 @@ class DemandModel:
         self.grid_matrix.to_csv(
             os.path.join(demand_model_path, "grid_matrix.csv")
         )
+        self.grid.geometry.to_file(
+            os.path.join(demand_model_path, "grid.dbf")
+        )
         self.grid.to_pickle(
             os.path.join(demand_model_path, "grid.pickle")
         )
@@ -375,6 +389,8 @@ class DemandModel:
         )
         self.bookings.to_csv(os.path.join(demand_model_path, "bookings.csv"))
         self.bookings.to_pickle(os.path.join(demand_model_path, "bookings.pickle"))
+        self.closest_valid_zone.to_csv(os.path.join(demand_model_path, "closest_valid_zone.csv"))
+        self.closest_valid_zone.to_pickle(os.path.join(demand_model_path, "closest_valid_zone.pickle"))
 
         with open(os.path.join(demand_model_path, "request_rates.pickle"), "wb") as f:
             pickle.dump(self.request_rates, f)

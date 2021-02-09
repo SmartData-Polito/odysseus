@@ -73,7 +73,11 @@ class EFFCS_SimOutputPlotter ():
 		plt.ylabel(None)
 		plt.yticks([])
 		self.grid.plot(color="white", edgecolor="black", ax=ax)
-		self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
+		self.grid['coords'] = self.grid['geometry'].apply(lambda x: x.centroid.coords[0])
+		for idx, row in self.grid.iterrows():
+			plt.annotate(
+				text=row['zone_id'], xy=row['coords'], horizontalalignment='center'
+			)
 		plt.savefig(os.path.join(self.figures_path, "city_zones.png"), transparent=True)
 		plt.close()
 

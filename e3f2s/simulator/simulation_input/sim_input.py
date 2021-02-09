@@ -33,6 +33,7 @@ class SimInput:
 		self.valid_zones = pickle.Unpickler(open(os.path.join(demand_model_path, "valid_zones.pickle"), "rb")).load()
 		self.neighbors_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "neighbors_dict.pickle"), "rb")).load()
 		self.integers_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "integers_dict.pickle"), "rb")).load()
+		self.closest_valid_zone = pickle.Unpickler(open(os.path.join(demand_model_path, "closest_valid_zone.pickle"), "rb")).load()
 
 		self.avg_request_rate = self.integers_dict["avg_request_rate"]
 		self.n_vehicles_original = self.integers_dict["n_vehicles_original"]

@@ -80,7 +80,7 @@ class SupplyModel:
 			i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
 		}
 
-		top_o_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:31]
+		top_o_zones = self.grid.zone_id_origin_count.sort_values(ascending=False).iloc[:31]
 
 		vehicles_random_zones = list(
 			np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()

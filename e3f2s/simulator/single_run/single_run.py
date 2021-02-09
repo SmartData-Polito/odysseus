@@ -68,6 +68,12 @@ def single_run(conf_tuple):
             "grid.pickle"
         )
     )
+    simOutput.grid.to_file(
+        os.path.join(
+            results_path,
+            "grid.dbf"
+        )
+    )
 
     if sim_general_conf["save_history"]:
 

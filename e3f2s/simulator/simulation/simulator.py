@@ -19,6 +19,7 @@ from e3f2s.simulator.simulation_input.energymix_conf import energymix_conf
 from e3f2s.simulator.simulation_input.station_conf import station_conf
 from e3f2s.simulator.simulation.sim_metrics import SimMetrics
 
+
 class SharedMobilitySim:
 
     def __init__(self, simInput):
@@ -59,6 +60,7 @@ class SharedMobilitySim:
         self.available_vehicles_dict = self.simInput.supply_model.available_vehicles_dict
 
         self.neighbors_dict = self.simInput.neighbors_dict
+        self.closest_valid_zone = self.simInput.closest_valid_zone
 
         if simInput.supply_model_conf["distributed_cps"]:
             self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone

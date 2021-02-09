@@ -83,30 +83,30 @@ class ModelDrivenSim (SharedMobilitySim):
 
 		booking_request["origin_id"] = self.simInput.grid_matrix.loc[origin_i, origin_j]
 		booking_request["destination_id"] = self.simInput.grid_matrix.loc[destination_i, destination_j]
-		if booking_request["origin_id"] in self.valid_zones and booking_request["destination_id"] in self.valid_zones:
-			booking_request["euclidean_distance"] = get_od_distance(
-				self.simInput.grid,
-				booking_request["origin_id"],
-				booking_request["destination_id"]
-			)
+		booking_request["origin_id"] = self.closest_valid_zone.loc[booking_request["origin_id"]]
+		booking_request["destination_id"] = self.closest_valid_zone.loc[booking_request["destination_id"]]
 
-			if booking_request["euclidean_distance"] == 0:
-				booking_request["euclidean_distance"] = self.simInput.demand_model_config["bin_side_length"]
+		booking_request["euclidean_distance"] = get_od_distance(
+			self.simInput.grid,
+			booking_request["origin_id"],
+			booking_request["destination_id"]
+		)
 
-			booking_request["driving_distance"] = booking_request["euclidean_distance"] * 1.4
-			booking_request["duration"] = abs(booking_request["driving_distance"] / (
-				(self.simInput.avg_speed_kmh_mean + np.random.normal(
-					self.simInput.avg_speed_kmh_std, self.simInput.avg_speed_kmh_std / 2
-				)) / 3.6
-			))
-			booking_request["end_time"] = self.current_datetime + datetime.timedelta(
-				seconds=booking_request["duration"]
-			)
-			#booking_request["soc_delta"] = -Vehicle.consumption_to_percentage(Vehicle.distance_to_consumption(booking_request["driving_distance"] / 1000))
-			#booking_request["soc_delta_kwh"] = soc_to_kwh(booking_request["soc_delta"])
-			self.process_booking_request(booking_request)
-		else:
-			self.create_booking_request(timeout)
+		if booking_request["euclidean_distance"] == 0:
+			booking_request["euclidean_distance"] = self.simInput.demand_model_config["bin_side_length"]
+
+		booking_request["driving_distance"] = booking_request["euclidean_distance"] * 1.4
+		booking_request["duration"] = abs(booking_request["driving_distance"] / (
+			(self.simInput.avg_speed_kmh_mean + np.random.normal(
+				self.simInput.avg_speed_kmh_std, self.simInput.avg_speed_kmh_std / 2
+			)) / 3.6
+		))
+		booking_request["end_time"] = self.current_datetime + datetime.timedelta(
+			seconds=booking_request["duration"]
+		)
+		#booking_request["soc_delta"] = -Vehicle.consumption_to_percentage(Vehicle.distance_to_consumption(booking_request["driving_distance"] / 1000))
+		#booking_request["soc_delta_kwh"] = soc_to_kwh(booking_request["soc_delta"])
+		self.process_booking_request(booking_request)
 
 	def mobility_requests_generator(self):
 
