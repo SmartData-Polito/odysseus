@@ -144,8 +144,6 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                         duration=duration
                     )
 
-                    self.update_relocation_stats(scooter_relocation)
-
         return relocated, scooter_relocation
 
     def choose_ending_zone(self, daytype=None, hour=None, n=1):
