@@ -37,17 +37,11 @@ sim_scenario_conf_grid = {
     "number of workers": [1000],
 
     "scooter_relocation": [True],
-    "scooter_relocation_strategy": ["only_scheduled"],
+    "scooter_relocation_strategy": ["proactive"],
     "scooter_relocation_technique": [
         frozenset({
-            "start": "delta",
-            "start_demand_weight": 0.9,
-            "start_vehicles_factor": 1,
-            "start_window_width": 2,
-            "end": "delta",
-            "end_demand_weight": 0.9,
-            "end_vehicles_factor": 1,
-            "end_window_width": 2,
+            "start": "aggregation",
+            "end": "kde_sampling",
         }.items()),
     ],
     "scooter_relocation_scheduling": [True],

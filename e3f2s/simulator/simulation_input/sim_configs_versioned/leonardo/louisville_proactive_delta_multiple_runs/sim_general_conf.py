@@ -6,7 +6,7 @@ sim_general_conf_grid = {
 
     "data_source_id": ["city_of_louisville"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["scooter_relocation_test"],
+    "sim_scenario_name": ["proactive_delta"],
 
     # Fleet general parameters
     "const_load_factor": [False],
