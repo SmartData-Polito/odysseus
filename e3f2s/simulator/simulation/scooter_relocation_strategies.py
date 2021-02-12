@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 from e3f2s.simulator.simulation.scooter_relocation_primitives import *
 
@@ -104,9 +106,15 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                         relocation_zone_id = scheduled_relocation[0]
                         n_relocated_vehicles = scheduled_relocation[1]
 
-                        for i in range(1, min(n_relocated_vehicles, len(self.available_vehicles_dict[booking_request["destination_id"]]))):  # first vehicle is charged vehicle
-                            relocated_vehicle = self.available_vehicles_dict[booking_request["destination_id"]].pop()
-                            relocated_vehicles.append(relocated_vehicle)
+                        if relocated_vehicles is not None:
+                            for i in range(len(relocated_vehicles), min(n_relocated_vehicles, len(self.available_vehicles_dict[booking_request["destination_id"]]))):  # first vehicles are input vehicles
+                                relocated_vehicle = self.available_vehicles_dict[booking_request["destination_id"]].pop()
+                                relocated_vehicles.append(relocated_vehicle)
+                        else:
+                            relocated_vehicles = []
+                            for i in range(0, min(n_relocated_vehicles, len(self.available_vehicles_dict[booking_request["destination_id"]]))):
+                                relocated_vehicle = self.available_vehicles_dict[booking_request["destination_id"]].pop()
+                                relocated_vehicles.append(relocated_vehicle)
 
                 else:
                     relocation_zone_ids, _ = self.choose_ending_zone(
@@ -320,3 +328,19 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 self.scheduled_scooter_relocations[starting_zone_id][ending_zone_id] = n_relocated_vehicles
             else:
                 self.scheduled_scooter_relocations[starting_zone_id][ending_zone_id] += n_relocated_vehicles
+
+        if self.simInput.supply_model_conf["scooter_relocation_scheduling"] \
+                and dict(self.simInput.supply_model_conf["scooter_scheduled_relocation_triggers"])["post_schedule_gen"]:
+            for starting_zone_id in self.scheduled_scooter_relocations:
+                fake_booking_request = {
+                    "end_time": self.start + datetime.timedelta(seconds=self.env.now),
+                    "destination_id": starting_zone_id
+                }
+
+                relocated, scooter_relocation = self.check_scooter_relocation(
+                    fake_booking_request
+                )
+
+                if relocated:
+                    self.env.process(self.relocate_scooter(scooter_relocation, move_vehicles=True))
+

@@ -26,6 +26,8 @@ class ScooterRelocationPrimitives:
 
         self.env = env
 
+        self.start = sim.start
+
         self.simInput = sim.simInput
 
         self.vehicles_soc_dict = sim.vehicles_soc_dict
@@ -55,11 +57,11 @@ class ScooterRelocationPrimitives:
         self.starting_zone_ids = []
         self.ending_zone_ids = []
 
-    def relocate_scooter(self, scooter_relocation):
+    def relocate_scooter(self, scooter_relocation, move_vehicles=False):
 
         scooter_relocation["distance"] = self.get_relocation_distance(scooter_relocation)
 
-        self.pick_up_scooter(scooter_relocation)
+        self.pick_up_scooter(scooter_relocation, move_vehicles)
 
         with self.relocation_workers.request() as relocation_worker_request:
             yield relocation_worker_request
@@ -67,7 +69,7 @@ class ScooterRelocationPrimitives:
             yield self.env.timeout(scooter_relocation["duration"])
             self.n_scooters_relocating -= 1
 
-        self.drop_off_scooter(scooter_relocation)
+        self.drop_off_scooter(scooter_relocation, move_vehicles)
 
         self.update_relocation_stats(scooter_relocation)
 
@@ -89,15 +91,31 @@ class ScooterRelocationPrimitives:
             scooter_relocation["end_zone_id"]
         )
 
-    def pick_up_scooter(self, scooter_relocation):
+    def pick_up_scooter(self, scooter_relocation, move_vehicles=False):
         self.zone_dict[scooter_relocation["start_zone_id"]].remove_vehicle(
             scooter_relocation["start_time"]
         )
+        if move_vehicles:
+            starting_zone_id = scooter_relocation["start_zone_id"]
+            relocated_vehicles = scooter_relocation["vehicle_ids"]
 
-    def drop_off_scooter(self, scooter_relocation):
+            for vehicle in relocated_vehicles:
+                if vehicle in self.available_vehicles_dict[starting_zone_id]:
+                    self.available_vehicles_dict[starting_zone_id].remove(vehicle)
+                if vehicle in self.vehicles_zones:
+                    del self.vehicles_zones[vehicle]
+
+    def drop_off_scooter(self, scooter_relocation, move_vehicles=False):
         self.zone_dict[scooter_relocation["end_zone_id"]].add_vehicle(
             scooter_relocation["start_time"]
         )
+        if move_vehicles:
+            ending_zone_id = scooter_relocation["end_zone_id"]
+            relocated_vehicles = scooter_relocation["vehicle_ids"]
+
+            for vehicle in relocated_vehicles:
+                self.available_vehicles_dict[ending_zone_id].append(vehicle)
+                self.vehicles_zones[vehicle] = ending_zone_id
 
     def update_relocation_stats(self, scooter_relocation):
 

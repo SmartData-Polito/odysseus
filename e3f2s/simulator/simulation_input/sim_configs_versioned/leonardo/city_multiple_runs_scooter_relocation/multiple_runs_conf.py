@@ -54,7 +54,8 @@ sim_scenario_conf_grid = {
     "scooter_scheduled_relocation_triggers": [
         frozenset({
             "post_charge": False,
-            "post_trip": True,
+            "post_trip": False,
+            "post_schedule_gen": True,
         }.items()),
     ],
 
