@@ -197,9 +197,11 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 window_width = 1
 
             future_origin_scores = {}
+            future_destination_scores = {}
 
             for i in range(window_width):
                 future_origin_scores[i] = self.simInput.origin_scores[daytype][(hour + 1 + i) % 24]
+                future_destination_scores[i] = self.simInput.destination_scores[daytype][(hour + 1 + i) % 24]
 
             if "end_demand_weight" in dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"]):
                 w1 = dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"])["end_demand_weight"]
@@ -213,6 +215,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 demand_prediction = 0
                 for i in range(window_width):
                     demand_prediction += future_origin_scores[i][zone]
+                    demand_prediction -= future_destination_scores[i][zone]
                 demand_prediction /= window_width
                 delta = w1 * demand_prediction - w2 * (len(vehicles) / self.simInput.n_vehicles_sim)
                 delta_by_zone[zone] = delta
