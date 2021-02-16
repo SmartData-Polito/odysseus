@@ -306,7 +306,11 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
     def generate_relocation_schedule(self, daytype, hour):
 
         self.scheduled_scooter_relocations.clear()
-        n_relocations = self.relocation_workers.capacity - self.relocation_workers.count  # free_workers
+
+        if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "proactive":
+            n_relocations = self.relocation_workers.capacity - self.relocation_workers.count  # number of free workers
+        else:
+            n_relocations = int(len(self.available_vehicles_dict)/2)  # an upper bound
 
         self.starting_zone_ids, n_picked_vehicles_list = self.choose_starting_zone(daytype=daytype, hour=hour, n=n_relocations)
         self.ending_zone_ids, n_dropped_vehicles_list = self.choose_ending_zone(daytype=daytype, hour=hour, n=n_relocations)
