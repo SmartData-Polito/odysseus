@@ -1,6 +1,7 @@
 from apis import create_app
-from e3f2s.webapp.emulate_module.simulator import Simulator
-from e3f2s.webapp.emulate_module.city_data_manager import City_data_manager
+#from e3f2s.webapp.emulate_module.simulator import Simulator
+#from e3f2s.webapp.emulate_module.city_data_manager import CityDataManager
+#from e3f2s.webapp.emulate_module.demand_modelling import DemandModelling
 
 app = create_app()
 

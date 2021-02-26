@@ -12,7 +12,7 @@ from e3f2s.city_data_manager.city_geo_trips.chicago_geo_trips import ChicagoGeoT
 from e3f2s.city_data_manager.city_geo_trips.calgary_geo_trips import CalgaryGeoTrips
 
 
-class City_data_manager():
+class CityDataManager():
     def __init__(self,cities=["Torino"],years=[2017],months=["10","11"],data_source_ids=["big_data_db"]):
         self.cities=cities
         self.years = years
@@ -20,7 +20,6 @@ class City_data_manager():
         self.data_source_ids = data_source_ids
 
     def run(self):
-
         for city in self.cities:
             for data_source_id in self.data_source_ids:
                 for year in self.years:
