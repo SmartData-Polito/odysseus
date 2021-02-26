@@ -10,7 +10,7 @@ demand_model_configs_grid = {
     "kde_bandwidth": [1],
 
     "start_month": [10],
-    "end_month": [11],
+    "end_month": [12],
 
     "year": [2017],
 
