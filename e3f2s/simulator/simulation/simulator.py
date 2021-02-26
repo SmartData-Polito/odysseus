@@ -132,7 +132,9 @@ class SharedMobilitySim:
                 exit(0)
 
         metrics_dict = {
-            "cum_relo_ret_t": "sum"
+            "cum_relo_ret_t": "sum",
+            "min_vehicles_relocated": "min",  # Minimum number of vehicles relocated at the same time
+            "max_vehicles_relocated": "max",  # Maximum number of vehicles relocated at the same time
         }
         self.sim_metrics = SimMetrics(metrics_dict)
 

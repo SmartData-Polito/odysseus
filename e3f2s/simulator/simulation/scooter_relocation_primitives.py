@@ -57,6 +57,8 @@ class ScooterRelocationPrimitives:
         self.starting_zone_ids = []
         self.ending_zone_ids = []
 
+        self.sim_metrics = sim.sim_metrics
+
     def relocate_scooter(self, scooter_relocation, move_vehicles=False):
 
         scooter_relocation["distance"] = self.get_relocation_distance(scooter_relocation)
@@ -127,3 +129,6 @@ class ScooterRelocationPrimitives:
         self.tot_scooter_relocations_distance += scooter_relocation["distance"]
         self.tot_scooter_relocations_duration += scooter_relocation["duration"]
         self.n_vehicles_tot += scooter_relocation["n_vehicles"]
+
+        self.sim_metrics.update_metrics("min_vehicles_relocated", scooter_relocation["n_vehicles"])
+        self.sim_metrics.update_metrics("max_vehicles_relocated", scooter_relocation["n_vehicles"])
