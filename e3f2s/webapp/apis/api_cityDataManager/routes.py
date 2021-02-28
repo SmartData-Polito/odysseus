@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from e3f2s.webapp.emulate_module.city_data_manager import CityDataManager
 
 api_cdm = Blueprint('api_cdm', __name__)
 
@@ -8,3 +9,8 @@ def config():
     print(data)    
     return jsonify({'hi':1})
 
+@api_cdm.route('/run',methods=['GET'])
+def run():
+    cdm = CityDataManager()
+    cdm.run()
+    return jsonify({'Done':1})
