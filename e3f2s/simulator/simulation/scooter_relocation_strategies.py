@@ -95,8 +95,9 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
                 relocation_zone_id = None
 
-                if "scooter_relocation_scheduling" in self.simInput.sim_scenario_conf.keys() \
-                        and self.simInput.sim_scenario_conf["scooter_relocation_scheduling"]:
+                if self.simInput.sim_scenario_conf["scooter_relocation_strategy"] in ["proactive",
+                                                                                      "reactive_post_charge",
+                                                                                      "reactive_post_trip"]:
 
                     if booking_request["destination_id"] in self.scheduled_scooter_relocations \
                             and len(self.scheduled_scooter_relocations[booking_request["destination_id"]]):
@@ -334,8 +335,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
             else:
                 self.scheduled_scooter_relocations[starting_zone_id][ending_zone_id] += n_relocated_vehicles
 
-        if self.simInput.supply_model_conf["scooter_relocation_scheduling"] \
-                and dict(self.simInput.supply_model_conf["scooter_scheduled_relocation_triggers"])["post_schedule_gen"]:
+        if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "proactive":
             for starting_zone_id in self.scheduled_scooter_relocations:
                 fake_booking_request = {
                     "end_time": self.start + datetime.timedelta(seconds=self.env.now),
