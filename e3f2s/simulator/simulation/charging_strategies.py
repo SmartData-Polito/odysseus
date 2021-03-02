@@ -145,6 +145,11 @@ class ChargingStrategy(ChargingPrimitives):
 					booking_request["destination_id"],
 					charging_zone_id
 				)
+				if self.simInput.supply_model_conf["relocation"]:
+					timeout_return = 2 * self.get_timeout(
+						booking_request["destination_id"],
+						charging_zone_id
+					)
 
 				charge["duration"] = vehicle.get_charging_time_from_perc(
 					vehicle.soc.level,
