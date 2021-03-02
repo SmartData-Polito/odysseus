@@ -15,7 +15,6 @@ from e3f2s.simulator.simulation.scooter_relocation_strategies import ScooterRelo
 from e3f2s.simulator.simulation.vehicle_relocation_strategies import VehicleRelocationStrategy
 
 from e3f2s.simulator.simulation_input.vehicle_conf import vehicle_conf
-from e3f2s.simulator.simulation_input.energymix_conf import energymix_conf
 from e3f2s.simulator.simulation_input.station_conf import station_conf
 from e3f2s.simulator.simulation.sim_metrics import SimMetrics
 
@@ -118,7 +117,7 @@ class SharedMobilitySim:
         for i in range(self.simInput.n_vehicles_sim):
             vehicle_object = Vehicle(
                 self.env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
-                vehicle_conf, energymix_conf, self.simInput.supply_model_conf, self.start
+                vehicle_conf, self.simInput.supply_model.energy_mix, self.simInput.supply_model_conf, self.start
             )
             self.vehicles_list.append(vehicle_object)
 

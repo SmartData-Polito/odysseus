@@ -11,9 +11,7 @@ class Vehicle(Vehicle_definition):
         engine_type = sim_scenario_conf["engine_type"]
         model = sim_scenario_conf["vehicle_model_name"]
         if engine_type == "electric":
-            country_energy_mix = sim_scenario_conf["country_energymix"]
-            year_energy_mix = sim_scenario_conf["year_energymix"]
-            energymix = energymix_conf[country_energy_mix][year_energy_mix]
+            energymix = energymix_conf
         else:
             energymix = {}
         super().__init__(vehicle_config[engine_type][model], energymix)

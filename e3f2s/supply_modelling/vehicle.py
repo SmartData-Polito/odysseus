@@ -1,31 +1,3 @@
-lca_co2_elect_sources = {
-	"nuclear":12, # g/kWh
-	"natural_gas":490, # g/kWh
-	"coal":910, # g/kWh
-	"oil":650, # g/kWh
-	"biomass":230, # g/kWh
-	"other":490, # g/kWh
-	"hydro":24, # g/kWh
-	"wind":11, # g/kWh
-	"waste":620, # g/kWh
-	"geothermal": 38, # g/kWh
-	"solar":11, # g/kWh
-}
-
-energy_electr_sources = {
-	"nuclear": 2.9,  # MJ/MJel
-	"natural_gas": 1.15,  # MJ/MJel
-	"coal": 1.69,  # MJ/MJel
-	"oil": 1.76,  # MJ/MJel
-	"biomass": 2.985,  # MJ/MJel
-	"other": 1.76,  # MJ/MJel
-	"hydro": 0,  # MJ/MJel
-	"wind": 0.07,  # MJ/MJel
-	"waste": 0,  # MJ/MJel
-	"geothermal": 0,  # MJ/MJel
-	"solar": 0,  # MJ/MJel
-}
-
 class Vehicle(object):
 	def __init__(self, vehicle_config, energy_mix_conf):
 		self.engine_type = vehicle_config["engine_type"] #gasoline, diesel, lpg, gnc, electric
@@ -83,13 +55,8 @@ class Vehicle(object):
 			self.gwp_ch4 = 25
 			self.gwp_n2o = 298
 		elif self.engine_type == "electric":
-			tot_emission = 0
-			tot_energy = 0
-			for i in list(lca_co2_elect_sources.keys()):
-				tot_emission = tot_emission + lca_co2_elect_sources[i] * energy_mix_conf[i] / 100
-				tot_energy = tot_energy + energy_electr_sources[i] * energy_mix_conf[i] / 100
-			self.welltotank_emission = tot_emission  #gCO2eq/kWh
-			self.welltotank_energy = tot_energy #MJ/MJelectricity
+			self.welltotank_emission = energy_mix_conf.evaluate_emissions()#gCO2eq/kWh
+			self.welltotank_energy = energy_mix_conf.evaluate_energy()#MJ/MJelectricity
 			self.tx_efficiency = 92.5 # %
 			self.charging_efficiency = 80 # %
 			self.supported_charge = vehicle_config["max_charg_power"]
