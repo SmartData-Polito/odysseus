@@ -110,6 +110,7 @@ class DemandModel:
         self.request_rates = self.get_requests_rates()
         self.trip_kdes = self.get_trip_kdes()
         self.origin_scores = self.get_origin_scores()
+        self.destination_scores = self.get_destination_scores()
 
     def map_zones_on_trips(self, zones):
         self.trips_origins = gpd.sjoin(
@@ -354,6 +355,29 @@ class DemandModel:
 
         return self.origin_scores
 
+    def get_destination_scores(self):
+        self.destination_scores = {}
+        for daytype, daytype_df in self.trips_destinations.groupby("end_daytype"):
+            self.destination_scores[daytype] = {}
+            for hour, hour_df in daytype_df.groupby("end_hour"):
+                self.destination_scores[daytype][hour] = {}
+                total_ends = len(hour_df)
+                for zone, zone_df in hour_df.groupby("zone_id"):
+                    if zone in self.valid_zones:
+                        self.destination_scores[daytype][hour][zone] = len(zone_df) / total_ends
+
+        for daytype in ["weekday", "weekend"]:
+            for hour in range(24):
+                for zone in self.valid_zones:
+                    if daytype not in self.destination_scores:
+                        self.destination_scores[daytype] = {}
+                    if hour not in self.destination_scores[daytype]:
+                        self.destination_scores[daytype][hour] = {}
+                    if zone not in self.destination_scores[daytype][hour]:
+                        self.destination_scores[daytype][hour][zone] = 0
+
+        return self.destination_scores
+
     def save_results(self):
 
         demand_model_path = os.path.join(
@@ -400,6 +424,8 @@ class DemandModel:
             pickle.dump(self.valid_zones, f)
         with open(os.path.join(demand_model_path, "origin_scores.pickle"), "wb") as f:
             pickle.dump(self.origin_scores, f)
+        with open(os.path.join(demand_model_path, "destination_scores.pickle"), "wb") as f:
+            pickle.dump(self.destination_scores, f)
 
         integers_dict = {
             "avg_request_rate" : self.avg_request_rate,

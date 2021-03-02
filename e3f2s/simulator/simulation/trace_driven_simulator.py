@@ -21,12 +21,29 @@ class TraceDrivenSim (SharedMobilitySim):
         self.hours_spent += 1
 
         self.current_datetime = self.start + datetime.timedelta(seconds=self.env.now)
-        self.current_hour = self.current_datetime.hour
+        if self.current_hour != self.current_datetime.hour:
+            self.current_hour = self.current_datetime.hour
+            self.update_relocation_schedule = True
         self.current_weekday = self.current_datetime.weekday()
         if self.current_weekday in [5, 6]:
             self.current_daytype = "weekend"
         else:
             self.current_daytype = "weekday"
+
+        if self.update_relocation_schedule \
+                and self.simInput.sim_scenario_conf["scooter_relocation"] \
+                and self.simInput.sim_scenario_conf["scooter_relocation_strategy"] in ["proactive",
+                                                                                       "reactive_post_charge",
+                                                                                       "reactive_post_trip"]:
+            self.scooterRelocationStrategy.generate_relocation_schedule(self.current_daytype, self.current_hour)
+            self.update_relocation_schedule = False
+
+        if self.update_relocation_schedule \
+                and self.simInput.sim_scenario_conf["vehicle_relocation"] \
+                and "vehicle_relocation_scheduling" in self.simInput.sim_scenario_conf.keys() \
+                and self.simInput.sim_scenario_conf["vehicle_relocation_scheduling"]:
+            self.vehicleRelocationStrategy.generate_relocation_schedule(self.current_daytype, self.current_hour)
+            self.update_relocation_schedule = False
     
     def mobility_requests_generator(self):
 
