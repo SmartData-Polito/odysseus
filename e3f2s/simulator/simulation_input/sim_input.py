@@ -45,7 +45,7 @@ class SimInput:
 		self.max_driving_distance = self.integers_dict["max_driving_distance"]
 
 		if self.demand_model_config["sim_technique"] == "traceB":
-			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings.pickle"), "rb")).load()
+			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings_test.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
 
 		if "n_requests" in self.sim_scenario_conf.keys():

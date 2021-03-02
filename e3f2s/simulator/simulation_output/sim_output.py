@@ -30,12 +30,9 @@ class SimOutput():
 			self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 			self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
 			self.sim_users_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
-			self.sim_scooter_relocations = pd.DataFrame(sim.scooterRelocationStrategy.sim_scooter_relocations)
-			self.sim_vehicle_relocations = pd.DataFrame(sim.vehicleRelocationStrategy.sim_vehicle_relocations)
-
-			if self.sim_scenario_conf["battery_swap"]:
+			if self.sim_scenario_conf["scooter_relocation"]:
 				self.sim_scooter_relocations = pd.DataFrame(sim.scooterRelocationStrategy.sim_scooter_relocations)
-			else:
+			if self.sim_scenario_conf["vehicle_relocation"]:
 				self.sim_vehicle_relocations = pd.DataFrame(sim.vehicleRelocationStrategy.sim_vehicle_relocations)
 
 			if "end_time" not in self.sim_system_charges_bookings:
@@ -235,7 +232,7 @@ class SimOutput():
 				self.sim_stats.loc["cum_relo_khw"] = 0
 				self.sim_stats.loc["avg_hourly_relo_t"] = 0
 
-			if self.sim_scenario_conf["battery_swap"]:
+			if self.sim_scenario_conf["scooter_relocation"]:
 				self.sim_stats.loc["n_scooter_relocations"] = \
 					len(self.sim_scooter_relocations)
 
@@ -244,7 +241,7 @@ class SimOutput():
 						self.sim_scooter_relocations.distance.sum()
 				else:
 					self.sim_stats.loc["tot_scooter_relocations_distance"] = 0
-			else:
+			elif self.sim_scenario_conf["vehicle_relocation"]:
 				self.sim_stats.loc["n_vehicle_relocations"] = \
 					len(self.sim_vehicle_relocations)
 

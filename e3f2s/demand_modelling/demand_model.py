@@ -20,57 +20,93 @@ class DemandModel:
 
         self.kde_bw = self.demand_model_config["kde_bandwidth"]
 
-        year = self.demand_model_config["year"]
-        start_month = self.demand_model_config["start_month"]
-        end_month = self.demand_model_config["end_month"]
+        year_train = self.demand_model_config["year_train"]
+        year_test = self.demand_model_config["year_test"]
+        start_month_train = self.demand_model_config["start_month_train"]
+        end_month_train = self.demand_model_config["end_month_train"]
+        start_month_test = self.demand_model_config["start_month_test"]
+        end_month_test = self.demand_model_config["end_month_test"]
 
         self.bin_side_length = self.demand_model_config["bin_side_length"]
 
-        self.bookings = pd.DataFrame()
-        self.trips_origins = pd.DataFrame()
-        self.trips_destinations = pd.DataFrame()
-        for month in range(start_month, end_month+1):
-            self.loader = Loader(self.city_name, self.data_source_id, year, month)
+        self.bookings_train = pd.DataFrame()
+        self.trips_origins_train = pd.DataFrame()
+        self.trips_destinations_train = pd.DataFrame()
+        for month in range(start_month_train, end_month_train + 1):
+            self.loader = Loader(self.city_name, self.data_source_id, year_train, month)
             bookings, origins, destinations = self.loader.read_data()
-            self.bookings = pd.concat([self.bookings, bookings], ignore_index=True)
-            self.trips_origins = pd.concat([
-                self.trips_origins, origins
+            self.bookings_train = pd.concat([self.bookings_train, bookings], ignore_index=True)
+            self.trips_origins_train = pd.concat([
+                self.trips_origins_train, origins
             ], ignore_index=True, sort=False)
-            self.trips_destinations = pd.concat([
-                self.trips_destinations, destinations
+            self.trips_destinations_train = pd.concat([
+                self.trips_destinations_train, destinations
             ], ignore_index=True, sort=False)
 
-        self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
-        self.bookings["daytype"] = self.bookings.start_daytype
-        self.bookings["city"] = self.city_name
-        self.bookings["euclidean_distance"] = self.bookings.apply(
+        self.bookings_train["date"] = self.bookings_train.start_time.apply(lambda d: d.date())
+        self.bookings_train["daytype"] = self.bookings_train.start_daytype
+        self.bookings_train["city"] = self.city_name
+        self.bookings_train["euclidean_distance"] = self.bookings_train.apply(
             lambda pp: haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
             axis=1
         )
 
-        self.bookings = self.get_input_bookings_filtered().dropna()
-        self.avg_speed_mean = self.bookings.avg_speed.mean()
-        self.avg_speed_std = self.bookings.avg_speed.std()
-        self.avg_speed_kmh_mean = self.bookings.avg_speed_kmh.mean()
-        self.avg_speed_kmh_std = self.bookings.avg_speed_kmh.std()
-        self.max_driving_distance = self.bookings.driving_distance.max()
+        self.bookings_train = self.get_input_bookings_filtered(self.bookings_train).dropna()
+
+        self.bookings_test = pd.DataFrame()
+        self.trips_origins_test = pd.DataFrame()
+        self.trips_destinations_test = pd.DataFrame()
+        for month in range(start_month_test, end_month_test + 1):
+            self.loader = Loader(self.city_name, self.data_source_id, year_test, month)
+            bookings, origins, destinations = self.loader.read_data()
+            self.bookings_test = pd.concat([self.bookings_test, bookings], ignore_index=True)
+            self.trips_origins_test = pd.concat([
+                self.trips_origins_test, origins
+            ], ignore_index=True, sort=False)
+            self.trips_destinations_test = pd.concat([
+                self.trips_destinations_test, destinations
+            ], ignore_index=True, sort=False)
+
+        self.bookings_test["date"] = self.bookings_test.start_time.apply(lambda d: d.date())
+        self.bookings_test["daytype"] = self.bookings_test.start_daytype
+        self.bookings_test["city"] = self.city_name
+        self.bookings_test["euclidean_distance"] = self.bookings_test.apply(
+            lambda pp: haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
+            axis=1
+        )
+
+        self.bookings_test = self.get_input_bookings_filtered(self.bookings_test).dropna()
+
+        self.avg_speed_mean = self.bookings_train.avg_speed.mean()
+        self.avg_speed_std = self.bookings_train.avg_speed.std()
+        self.avg_speed_kmh_mean = self.bookings_train.avg_speed_kmh.mean()
+        self.avg_speed_kmh_std = self.bookings_train.avg_speed_kmh.std()
+        self.max_driving_distance = self.bookings_train.driving_distance.max()
 
         self.grid = get_city_grid_as_gdf(
             (
-                min(self.trips_origins.start_longitude.min(), self.trips_destinations.end_longitude.min()),
-                min(self.trips_origins.start_latitude.min(), self.trips_destinations.end_latitude.min()),
-                max(self.trips_origins.start_longitude.max(), self.trips_destinations.end_longitude.max()),
-                max(self.trips_origins.start_latitude.max(), self.trips_destinations.end_latitude.max()),
+                min(self.trips_origins_train.start_longitude.min(), self.trips_destinations_train.end_longitude.min(),
+                    self.trips_origins_test.start_longitude.min(), self.trips_destinations_test.end_longitude.min()),
+                min(self.trips_origins_train.start_latitude.min(), self.trips_destinations_train.end_latitude.min(),
+                    self.trips_origins_test.start_latitude.min(), self.trips_destinations_test.end_latitude.min()),
+                max(self.trips_origins_train.start_longitude.max(), self.trips_destinations_train.end_longitude.max(),
+                    self.trips_origins_test.start_longitude.max(), self.trips_destinations_test.end_longitude.max()),
+                max(self.trips_origins_train.start_latitude.max(), self.trips_destinations_train.end_latitude.max(),
+                    self.trips_origins_test.start_latitude.max(), self.trips_destinations_test.end_latitude.max())
             ),
             "epsg:4326",
             self.bin_side_length
         )
         self.grid_matrix = get_city_grid_as_matrix(
             (
-                min(self.trips_origins.start_longitude.min(), self.trips_destinations.end_longitude.min()),
-                min(self.trips_origins.start_latitude.min(), self.trips_destinations.end_latitude.min()),
-                max(self.trips_origins.start_longitude.max(), self.trips_destinations.end_longitude.max()),
-                max(self.trips_origins.start_latitude.max(), self.trips_destinations.end_latitude.max()),
+                min(self.trips_origins_train.start_longitude.min(), self.trips_destinations_train.end_longitude.min(),
+                    self.trips_origins_test.start_longitude.min(), self.trips_destinations_test.end_longitude.min()),
+                min(self.trips_origins_train.start_latitude.min(), self.trips_destinations_train.end_latitude.min(),
+                    self.trips_origins_test.start_latitude.min(), self.trips_destinations_test.end_latitude.min()),
+                max(self.trips_origins_train.start_longitude.max(), self.trips_destinations_train.end_longitude.max(),
+                    self.trips_origins_test.start_longitude.max(), self.trips_destinations_test.end_longitude.max()),
+                max(self.trips_origins_train.start_latitude.max(), self.trips_destinations_train.end_latitude.max(),
+                    self.trips_origins_test.start_latitude.max(), self.trips_destinations_test.end_latitude.max())
             ),
             self.bin_side_length
         )
@@ -87,139 +123,154 @@ class DemandModel:
         self.closest_valid_zone = self.zones_valid_zones_distances.idxmin(axis=1)
         self.grid = self.grid.loc[self.valid_zones]
 
-        self.bookings = self.bookings.loc[
-            (self.bookings.origin_id.isin(self.valid_zones)) & (
-                self.bookings.destination_id.isin(self.valid_zones)
+        self.bookings_train = self.bookings_train.loc[
+            (self.bookings_train.origin_id.isin(self.valid_zones)) & (
+                self.bookings_train.destination_id.isin(self.valid_zones)
             )
-        ]
-        self.grid["origin_count"] = self.bookings.origin_id.value_counts()
-        self.grid["destination_count"] = self.bookings.destination_id.value_counts()
-        reqs_per_zone = self.bookings.origin_id.value_counts(
+            ]
+        self.grid["origin_count"] = self.bookings_train.origin_id.value_counts()
+        self.grid["destination_count"] = self.bookings_train.destination_id.value_counts()
+        reqs_per_zone = self.bookings_train.origin_id.value_counts(
             normalize=False
         ).rename('zone_id')
         self.grid = self.grid.join(reqs_per_zone, how='left', on='zone_id', rsuffix='_origin_count')
 
-        if 'plate' in self.bookings:
-            self.n_vehicles_original = len(self.bookings.plate.unique())
-        elif 'vehicle_id' in self.bookings:
-            self.n_vehicles_original = len(self.bookings.vehicle_id.unique())
+        if 'plate' in self.bookings_train:
+            self.n_vehicles_original = len(self.bookings_train.plate.unique())
+        elif 'vehicle_id' in self.bookings_train:
+            self.n_vehicles_original = len(self.bookings_train.vehicle_id.unique())
         else:
             self.n_vehicles_original = 100
 
         self.neighbors_dict = self.get_neighbors_dicts()
         self.request_rates = self.get_requests_rates()
+        self.get_grid_indexes()
         self.trip_kdes = self.get_trip_kdes()
         self.origin_scores = self.get_origin_scores()
         self.destination_scores = self.get_destination_scores()
 
     def map_zones_on_trips(self, zones):
-        self.trips_origins = gpd.sjoin(
-            self.trips_origins,
+        self.trips_origins_train = gpd.sjoin(
+            self.trips_origins_train,
             zones,
             how='left',
             op='intersects'
         )
-        self.trips_destinations = gpd.sjoin(
-            self.trips_destinations,
+        self.trips_destinations_train = gpd.sjoin(
+            self.trips_destinations_train,
             zones,
             how='left',
             op='intersects'
         )
-        self.bookings["origin_id"] = self.trips_origins.zone_id
-        self.bookings["destination_id"] = self.trips_destinations.zone_id
+        self.trips_origins_test = gpd.sjoin(
+            self.trips_origins_test,
+            zones,
+            how='left',
+            op='intersects'
+        )
+        self.trips_destinations_test = gpd.sjoin(
+            self.trips_destinations_test,
+            zones,
+            how='left',
+            op='intersects'
+        )
+        self.bookings_train["origin_id"] = self.trips_origins_train.zone_id
+        self.bookings_train["destination_id"] = self.trips_destinations_train.zone_id
+        self.bookings_test["origin_id"] = self.trips_origins_test.zone_id
+        self.bookings_test["destination_id"] = self.trips_destinations_test.zone_id
 
-    def get_input_bookings_filtered(self):
+    def get_input_bookings_filtered(self, bookings):
 
-        self.bookings = self.bookings.sort_values("start_time")
+        bookings = bookings.sort_values("start_time")
 
-        if "driving_distance" not in self.bookings.columns:
-            self.bookings["driving_distance"] = self.bookings.euclidean_distance * 1.4
+        if "driving_distance" not in bookings.columns:
+            bookings["driving_distance"] = bookings.euclidean_distance * 1.4
 
-        #self.bookings = get_time_group_columns(self.bookings)
-        self.bookings["hour"] = self.bookings.start_hour
-        self.bookings["daytype"] = self.bookings.start_daytype
-        self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
+        #bookings = get_time_group_columns(bookings)
+        bookings["hour"] = bookings.start_hour
+        bookings["daytype"] = bookings.start_daytype
+        bookings["date"] = bookings.start_time.apply(lambda d: d.date())
 
-        self.bookings["random_seconds_start"] = np.random.uniform(-900, 900, len(self.bookings))
-        self.bookings.start_time = pd.to_datetime(
-            self.bookings.start_time, utc=True
-        ) + self.bookings.random_seconds_start.apply(
+        bookings["random_seconds_start"] = np.random.uniform(-900, 900, len(bookings))
+        bookings.start_time = pd.to_datetime(
+            bookings.start_time, utc=True
+        ) + bookings.random_seconds_start.apply(
             lambda sec: datetime.timedelta(seconds=sec)
         )
-        self.bookings["random_seconds_end"] = np.random.uniform(-900, 900, len(self.bookings))
-        self.bookings["random_seconds_pos"] = np.random.uniform(0, 450, len(self.bookings))
+        bookings["random_seconds_end"] = np.random.uniform(-900, 900, len(bookings))
+        bookings["random_seconds_pos"] = np.random.uniform(0, 450, len(bookings))
 
-        self.bookings.end_time = pd.to_datetime(
-            self.bookings.end_time, utc=True
-        ) + self.bookings.random_seconds_end.apply(
+        bookings.end_time = pd.to_datetime(
+            bookings.end_time, utc=True
+        ) + bookings.random_seconds_end.apply(
             lambda sec: datetime.timedelta(seconds=sec)
         )
 
-        self.bookings["start_time"] = self.bookings["start_time"].dt.tz_convert(self.loader.tz)
-        self.bookings["end_time"] = self.bookings["end_time"].dt.tz_convert(self.loader.tz)
+        bookings["start_time"] = bookings["start_time"].dt.tz_convert(self.loader.tz)
+        bookings["end_time"] = bookings["end_time"].dt.tz_convert(self.loader.tz)
 
-        self.bookings = get_time_group_columns(self.bookings)
-        self.bookings["hour"] = self.bookings.start_hour
-        self.bookings["daytype"] = self.bookings.start_daytype
-        self.bookings["date"] = self.bookings.start_time.apply(lambda d: d.date())
+        bookings = get_time_group_columns(bookings)
+        bookings["hour"] = bookings.start_hour
+        bookings["daytype"] = bookings.start_daytype
+        bookings["date"] = bookings.start_time.apply(lambda d: d.date())
 
-        self.bookings.loc[self.bookings.start_time > self.bookings.end_time, "end_time"] = self.bookings.loc[
-            self.bookings.start_time > self.bookings.end_time, "start_time"
-        ] + self.bookings.loc[self.bookings.start_time > self.bookings.end_time, "random_seconds_pos"].apply(
+        bookings.loc[bookings.start_time > bookings.end_time, "end_time"] = bookings.loc[
+                                                                                                                 bookings.start_time > bookings.end_time, "start_time"
+        ] + bookings.loc[bookings.start_time > bookings.end_time, "random_seconds_pos"].apply(
             lambda sec: datetime.timedelta(seconds=sec)
         )
-        self.bookings.loc[:, "duration"] = (
-                self.bookings.end_time - self.bookings.start_time
+        bookings.loc[:, "duration"] = (
+                bookings.end_time - bookings.start_time
         ).apply(lambda x: x.total_seconds())
 
-        self.bookings = self.bookings.sort_values("start_time")
-        self.bookings.loc[:, "ia_timeout"] = (
-                self.bookings.start_time - self.bookings.start_time.shift()
+        bookings = bookings.sort_values("start_time")
+        bookings.loc[:, "ia_timeout"] = (
+                bookings.start_time - bookings.start_time.shift()
         ).apply(lambda x: x.total_seconds()).abs()
-        self.bookings = self.bookings.loc[self.bookings.ia_timeout >= 0]
+        bookings = bookings.loc[bookings.ia_timeout >= 0]
 
-        self.bookings = self.bookings[self.bookings.duration > 0]
-        self.bookings = self.bookings[self.bookings.driving_distance >= 0]
-        self.bookings.loc[self.bookings.driving_distance == 0, "driving_distance"] = self.bin_side_length
-        self.bookings["avg_speed"] = self.bookings["driving_distance"] / self.bookings["duration"]
-        self.bookings["avg_speed_kmh"] = self.bookings.avg_speed * 3.6
+        bookings = bookings[bookings.duration > 0]
+        bookings = bookings[bookings.driving_distance >= 0]
+        bookings.loc[bookings.driving_distance == 0, "driving_distance"] = self.bin_side_length
+        bookings["avg_speed"] = bookings["driving_distance"] / bookings["duration"]
+        bookings["avg_speed_kmh"] = bookings.avg_speed * 3.6
 
-        print(self.bookings[["euclidean_distance", "driving_distance", "duration", "avg_speed_kmh"]].describe())
+        print(bookings[["euclidean_distance", "driving_distance", "duration", "avg_speed_kmh"]].describe())
 
         if self.city_name in [
             "Minneapolis", "Louisville", "Austin", "Norfolk", "Kansas City", "Chicago", "Calgary"
         ] or self.data_source_id in ["citi_bike"]:
-            self.bookings = self.bookings[self.bookings.avg_speed_kmh < 30]
-            self.bookings = self.bookings[(
-                    self.bookings.duration > 60
+            bookings = bookings[bookings.avg_speed_kmh < 30]
+            bookings = bookings[(
+                                                              bookings.duration > 60
                 ) & (
-                    self.bookings.duration < 60*60
+                                                              bookings.duration < 60 * 60
                 ) & (
-                    self.bookings.euclidean_distance > 200
+                                                              bookings.euclidean_distance > 200
                 )
-            ]
+                                                      ]
         elif self.data_source_id in ["big_data_db"]:
-            self.bookings = self.bookings[self.bookings.avg_speed_kmh < 120]
-            self.bookings = self.bookings[
-                (self.bookings.duration > 3*60) & (
-                    self.bookings.duration < 60*60
+            bookings = bookings[bookings.avg_speed_kmh < 120]
+            bookings = bookings[
+                (bookings.duration > 3 * 60) & (
+                        bookings.duration < 60 * 60
                 ) & (
-                    self.bookings.euclidean_distance > 500
+                        bookings.euclidean_distance > 500
                 )
-            ]
+                ]
 
-        print(self.bookings[["driving_distance", "duration", "avg_speed_kmh"]].describe())
+        print(bookings[["driving_distance", "duration", "avg_speed_kmh"]].describe())
 
-        return self.bookings
+        return bookings
 
     def get_valid_zones(self, count_threshold=0):
 
-        # self.valid_zones = self.trips_origins.origin_id.value_counts().sort_values().tail(
+        # self.valid_zones = self.trips_origins_train.origin_id.value_counts().sort_values().tail(
         #     int(self.sim_general_conf["k_zones_factor"] * len(self.grid))
         # ).index
 
-        origin_zones_count = self.bookings.origin_id.value_counts()
-        dest_zones_count = self.bookings.destination_id.value_counts()
+        origin_zones_count = self.bookings_train.origin_id.value_counts()
+        dest_zones_count = self.bookings_train.destination_id.value_counts()
 
         valid_origin_zones = origin_zones_count[(origin_zones_count > count_threshold)]
         valid_dest_zones = dest_zones_count[(dest_zones_count > count_threshold)]
@@ -253,7 +304,7 @@ class DemandModel:
 
         self.hourly_ods = {}
 
-        for hour, hour_df in self.bookings.groupby("hour"):
+        for hour, hour_df in self.bookings_train.groupby("hour"):
             self.hourly_ods[hour] = pd.DataFrame(
                 index=self.grid.index,
                 columns=self.grid.index
@@ -273,7 +324,7 @@ class DemandModel:
 
         self.request_rates = {}
 
-        for daytype, daytype_bookings_gdf in self.bookings.groupby("daytype"):
+        for daytype, daytype_bookings_gdf in self.bookings_train.groupby("daytype"):
             self.request_rates[daytype] = {}
             for hour in range(24):
                 hour_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
@@ -290,19 +341,24 @@ class DemandModel:
 
         return self.request_rates
 
-    def get_trip_kdes(self):
-
+    def get_grid_indexes(self):
         zone_coords_dict = {}
         for i in self.grid_matrix.index:
             for j in self.grid_matrix.columns:
                 zone_coords_dict[self.grid_matrix.iloc[i, j]] = (i, j)
 
-        for zone in self.bookings.origin_id.unique():
-            self.bookings.loc[self.bookings.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
-            self.bookings.loc[self.bookings.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
-            self.bookings.loc[self.bookings.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
-            self.bookings.loc[self.bookings.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
+        for zone in self.bookings_train.origin_id.unique():
+            self.bookings_train.loc[self.bookings_train.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
+            self.bookings_train.loc[self.bookings_train.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
+            self.bookings_train.loc[self.bookings_train.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
+            self.bookings_train.loc[self.bookings_train.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
+        for zone in self.bookings_test.origin_id.unique():
+            self.bookings_test.loc[self.bookings_test.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
+            self.bookings_test.loc[self.bookings_test.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
+            self.bookings_test.loc[self.bookings_test.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
+            self.bookings_test.loc[self.bookings_test.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
 
+    def get_trip_kdes(self):
         self.trip_kdes = {}
         self.kde_columns = [
             "origin_i",
@@ -311,7 +367,7 @@ class DemandModel:
             "destination_j",
         ]
 
-        for daytype, daytype_bookings_gdf in self.bookings.groupby("daytype"):
+        for daytype, daytype_bookings_gdf in self.bookings_train.groupby("daytype"):
             self.trip_kdes[daytype] = {}
             for hour in range(24):
                 slot_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
@@ -334,7 +390,7 @@ class DemandModel:
 
     def get_origin_scores(self):
         self.origin_scores = {}
-        for daytype, daytype_df in self.trips_origins.groupby("start_daytype"):
+        for daytype, daytype_df in self.trips_origins_train.groupby("start_daytype"):
             self.origin_scores[daytype] = {}
             for hour, hour_df in daytype_df.groupby("start_hour"):
                 self.origin_scores[daytype][hour] = {}
@@ -357,7 +413,7 @@ class DemandModel:
 
     def get_destination_scores(self):
         self.destination_scores = {}
-        for daytype, daytype_df in self.trips_destinations.groupby("end_daytype"):
+        for daytype, daytype_df in self.trips_destinations_train.groupby("end_daytype"):
             self.destination_scores[daytype] = {}
             for hour, hour_df in daytype_df.groupby("end_hour"):
                 self.destination_scores[daytype][hour] = {}
@@ -411,8 +467,10 @@ class DemandModel:
         pd.DataFrame(self.neighbors_dict).to_csv(
             os.path.join(demand_model_path, "neighbors_dict.csv")
         )
-        self.bookings.to_csv(os.path.join(demand_model_path, "bookings.csv"))
-        self.bookings.to_pickle(os.path.join(demand_model_path, "bookings.pickle"))
+        self.bookings_train.to_csv(os.path.join(demand_model_path, "bookings_train.csv"))
+        self.bookings_train.to_pickle(os.path.join(demand_model_path, "bookings_train.pickle"))
+        self.bookings_test.to_csv(os.path.join(demand_model_path, "bookings_test.csv"))
+        self.bookings_test.to_pickle(os.path.join(demand_model_path, "bookings_test.pickle"))
         self.closest_valid_zone.to_csv(os.path.join(demand_model_path, "closest_valid_zone.csv"))
         self.closest_valid_zone.to_pickle(os.path.join(demand_model_path, "closest_valid_zone.pickle"))
 

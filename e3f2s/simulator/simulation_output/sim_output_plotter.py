@@ -176,7 +176,7 @@ class EFFCS_SimOutputPlotter ():
 
 	def plot_events_hourly_count_boxplot (self, which_df, start_or_end):
 
-		if which_df == "bookings":
+		if which_df == "bookings_train":
 			df = self.sim_bookings
 		if which_df == "charges":
 			df = self.sim_charges
@@ -206,7 +206,7 @@ class EFFCS_SimOutputPlotter ():
 
 	def plot_events_hourly_count_boxplot (self, which_df, start_or_end):
 
-		if which_df == "bookings":
+		if which_df == "bookings_train":
 			df = self.sim_bookings
 		if which_df == "charges":
 			df = self.sim_charges
