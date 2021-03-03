@@ -64,11 +64,11 @@ class TripsDataSource:
 
 		print(self.trips_df_norm.shape)
 
-		for year in self.trips_df_norm.start_year.unique():
-			for month in self.trips_df_norm.start_month.unique():
+		for year in self.trips_df_norm.year.unique():
+			for month in self.trips_df_norm.month.unique():
 
 				trips_df_norm_year_month = self.trips_df_norm[
-					(self.trips_df_norm.start_year == year) & (self.trips_df_norm.start_month == month)
+					(self.trips_df_norm.year == year) & (self.trips_df_norm.month == month)
 				]
 
 				print(trips_df_norm_year_month.shape)

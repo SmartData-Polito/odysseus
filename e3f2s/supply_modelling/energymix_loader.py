@@ -50,10 +50,12 @@ class EnergyMix:
 			energy_mix_conf = self.energymix_db["Italy"][self.year]
 		if self.city_name == "Amsterdam":
 			energy_mix_conf = self.energymix_db["Netherlands"][self.year]
-		if self.city_name in ["Hamburg","Berlin"]:
+		if self.city_name in ["Hamburg", "Berlin"]:
 			energy_mix_conf = self.energymix_db["Germany"][self.year]
 		if self.city_name in ["Wien"]:
 			energy_mix_conf = self.energymix_db["Austria"][self.year]
+		elif self.city_name == "Louisville" or self.city_name == "Minneapolis":
+			energy_mix_conf = self.energymix_db["US"][self.year]
 		tot_emission = 0
 		for i in list(self.lca_co2_elect_sources.keys()):
 			tot_emission = tot_emission + self.lca_co2_elect_sources[i] * energy_mix_conf[i] / 100
@@ -64,10 +66,12 @@ class EnergyMix:
 			energy_mix_conf = self.energymix_db["Italy"][self.year]
 		if self.city_name == "Amsterdam":
 			energy_mix_conf = self.energymix_db["Netherlands"][self.year]
-		if self.city_name in ["Hamburg","Berlin"]:
+		if self.city_name in ["Hamburg", "Berlin"]:
 			energy_mix_conf = self.energymix_db["Germany"][self.year]
 		if self.city_name in ["Wien"]:
 			energy_mix_conf = self.energymix_db["Austria"][self.year]
+		elif self.city_name == "Louisville" or self.city_name == "Minneapolis":
+			energy_mix_conf = self.energymix_db["US"][self.year]
 		tot_energy = 0
 		for i in list(self.lca_co2_elect_sources.keys()):
 			tot_energy = tot_energy + self.energy_electr_sources[i] * energy_mix_conf[i] / 100
