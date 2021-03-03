@@ -8,6 +8,7 @@ from shapely.geometry import Point
 import datetime
 import pytz
 from e3f2s.supply_modelling.energymix_loader import EnergyMix
+from e3f2s.demand_modelling.demand_model_configs.default_config import demand_model_configs_grid
 
 
 
@@ -29,7 +30,7 @@ def geodataframe_charging_points(city,engine_type,station_location):
 
 class SupplyModel:
 
-	def __init__(self, supply_model_conf):
+	def __init__(self, supply_model_conf,year):
 
 		self.supply_model_conf = supply_model_conf
 
@@ -68,7 +69,7 @@ class SupplyModel:
 
 		self.zones_cp_distances = pd.Series()
 		self.closest_cp_zone = pd.Series()
-		self.energy_mix = EnergyMix(self.city,self.supply_model_conf["year_energymix"])
+		self.energy_mix = EnergyMix(self.city,year)
 
 	def init_vehicles(self):
 

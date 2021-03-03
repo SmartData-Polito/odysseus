@@ -106,7 +106,7 @@ class SimInput:
 			"tot_n_charging_poles": self.tot_n_charging_poles,
 			"n_charging_zones": self.n_charging_zones,
 		})
-		self.supply_model = SupplyModel(self.supply_model_conf)
+		self.supply_model = SupplyModel(self.supply_model_conf,self.demand_model_config["year"])
 
 	def get_booking_requests_list(self):
 
