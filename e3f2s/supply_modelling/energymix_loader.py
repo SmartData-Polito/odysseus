@@ -49,6 +49,8 @@ class EnergyMix:
 	def evaluate_emissions(self):
 		if self.city_name == "Roma" or self.city_name == "Torino" or self.city_name == "Milano":
 			energy_mix_conf = self.energymix_db["Italy"][self.year]
+		elif self.city_name == "Louisville" or self.city_name == "Minneapolis":
+			energy_mix_conf = self.energymix_db["US"][self.year]
 		tot_emission = 0
 		for i in list(self.lca_co2_elect_sources.keys()):
 			tot_emission = tot_emission + self.lca_co2_elect_sources[i] * energy_mix_conf[i] / 100
@@ -57,6 +59,8 @@ class EnergyMix:
 	def evaluate_energy(self):
 		if self.city_name == "Roma" or self.city_name == "Torino" or self.city_name == "Milano":
 			energy_mix_conf = self.energymix_db["Italy"][self.year]
+		elif self.city_name == "Louisville" or self.city_name == "Minneapolis":
+			energy_mix_conf = self.energymix_db["US"][self.year]
 		tot_energy = 0
 		for i in list(self.lca_co2_elect_sources.keys()):
 			tot_energy = tot_energy + self.energy_electr_sources[i] * energy_mix_conf[i] / 100

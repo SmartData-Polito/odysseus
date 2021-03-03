@@ -67,6 +67,5 @@ sim_scenario_conf_grid = {
 
     "engine_type": ["electric"],
     "vehicle_model_name": ["generic e-scooter"],
-    "country_energymix": ["Italy"],
-    "year_energymix": ["2018"],
+    "year_energymix": ["2019"],
 }
