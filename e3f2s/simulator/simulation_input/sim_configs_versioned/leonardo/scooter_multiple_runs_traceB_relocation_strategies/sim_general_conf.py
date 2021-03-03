@@ -1,12 +1,12 @@
 sim_general_conf_grid = {
 
     # Run configuration
-    "city": ["Minneapolis"],
+    "city": ["Louisville", "Minneapolis"],
     "sim_run_mode": ["multiple_runs"],
 
-    "data_source_id": ["city_of_minneapolis"],
-    "sim_technique": ["eventG"],
-    "sim_scenario_name": ["eventG_no_relocation"],
+    "data_source_id": ["city_open_data"],
+    "sim_technique": ["traceB"],
+    "sim_scenario_name": ["traceB_relocation_strategies"],
 
     # Fleet general parameters
     "const_load_factor": [False],

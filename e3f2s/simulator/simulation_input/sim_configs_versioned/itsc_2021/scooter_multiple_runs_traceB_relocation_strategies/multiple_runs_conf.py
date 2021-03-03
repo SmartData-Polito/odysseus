@@ -2,8 +2,7 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "n_requests": [1000000],
-    "fleet_load_factor": [1000000 / 2000],
+    "n_vehicles": np.arange(100, 2001, 100),
 
     "time_estimation": [True],
     "queuing": [True],
@@ -37,11 +36,7 @@ sim_scenario_conf_grid = {
     "number of workers": [1000],
 
     "scooter_relocation": [True],
-    "scooter_relocation_strategy": ["no_relocation",
-                                    "magic_relocation",
-                                    "reactive_post_charge",
-                                    "reactive_post_trip",
-                                    "proactive"],
+    "scooter_relocation_strategy": ["reactive_post_charge", "reactive_post_trip", "proactive"],
     "scooter_relocation_technique": [
         frozenset({
             "start": "aggregation",
@@ -62,7 +57,7 @@ sim_scenario_conf_grid = {
     "vehicle_relocation": [False],
     "vehicle_relocation_scheduling": [False],
 
-    "n_relocation_workers": [12],
+    "n_relocation_workers": range(3, 13),
     "avg_relocation_speed": [20],  # km/h
 
     "engine_type": ["electric"],
