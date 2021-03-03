@@ -6,7 +6,7 @@ sim_general_conf_grid = {
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["traceB"],
-    "sim_scenario_name": ["torino_itsc2021_nchargpoles"],
+    "sim_scenario_name": ["torino_itsc2021_nvehicles"],
 
     # Fleet general parameters
     "const_load_factor": [False],
@@ -17,8 +17,8 @@ sim_general_conf_grid = {
 
     # Time general parameters
     "year": [2017],
-    "month_start": [12],
-    "month_end": [13],
+    "month_start": [11],
+    "month_end": [12],
 
     "save_history": [True]
 
