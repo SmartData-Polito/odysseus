@@ -6,7 +6,7 @@ sim_general_conf_grid = {
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["big_data_db_test"],
+    "sim_scenario_name": ["inter_bre_2"],
 
     # Fleet general parameters
     "const_load_factor": [False],
@@ -20,6 +20,6 @@ sim_general_conf_grid = {
     "month_start": [10],
     "month_end": [11],
 
-    "save_history": [False]
+    "save_history": [True]
 
 }

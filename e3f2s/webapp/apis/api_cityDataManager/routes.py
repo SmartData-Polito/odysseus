@@ -12,6 +12,7 @@ def config():
 def run():
     data = request.get_json()
     print(data)
+    # ok ho finito come return, via libera per le possibili get dei risultati
     return jsonify({'run':1})
 
 

@@ -164,6 +164,8 @@ class EFFCS_SimOutputPlotter ():
 			"n_vehicles_available", "n_vehicles_charging_system", "n_vehicles_charging_users", "n_vehicles_booked"
 		]:
 			plt.figure(figsize=(15, 5))
+			
+
 			self.sim_booking_requests.set_index("start_time")[col].plot(
 				label=col, linewidth=2, alpha=0.7
 			)
