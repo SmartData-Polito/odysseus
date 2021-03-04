@@ -2,7 +2,7 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "n_vehicles": np.arange(100, 2001, 100),
+    "n_vehicles": np.arange(50, 1001, 50),
 
     "time_estimation": [True],
     "queuing": [True],
@@ -46,5 +46,4 @@ sim_scenario_conf_grid = {
 
     "engine_type": ["electric"],
     "vehicle_model_name": ["generic e-scooter"],
-    "year_energymix": ["2019"],
 }
