@@ -215,7 +215,7 @@ class DemandModel:
         bookings["date"] = bookings.start_time.apply(lambda d: d.date())
 
         bookings.loc[bookings.start_time > bookings.end_time, "end_time"] = bookings.loc[
-                                                                                                                 bookings.start_time > bookings.end_time, "start_time"
+            bookings.start_time > bookings.end_time, "start_time"
         ] + bookings.loc[bookings.start_time > bookings.end_time, "random_seconds_pos"].apply(
             lambda sec: datetime.timedelta(seconds=sec)
         )
