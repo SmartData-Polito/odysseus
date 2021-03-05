@@ -12,3 +12,4 @@ pyspark==3.0.0
 requests==2.25.1
 haversine==2.3.0
 xmltodict==0.12.0
+flask==1.1.2
