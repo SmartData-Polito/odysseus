@@ -54,7 +54,7 @@ class EnergyMix:
 			energy_mix_conf = self.energymix_db["Germany"][self.year]
 		if self.city_name in ["Wien"]:
 			energy_mix_conf = self.energymix_db["Austria"][self.year]
-		elif self.city_name == "Louisville" or self.city_name == "Minneapolis":
+		if self.city_name in ["Louisville", "Minneapolis", "Austin", "Norfolk", "Kansas city", "Chicago", "Calgary"]:
 			energy_mix_conf = self.energymix_db["US"][self.year]
 		tot_emission = 0
 		for i in list(self.lca_co2_elect_sources.keys()):
@@ -70,7 +70,7 @@ class EnergyMix:
 			energy_mix_conf = self.energymix_db["Germany"][self.year]
 		if self.city_name in ["Wien"]:
 			energy_mix_conf = self.energymix_db["Austria"][self.year]
-		elif self.city_name == "Louisville" or self.city_name == "Minneapolis":
+		if self.city_name in ["Louisville", "Minneapolis", "Austin", "Norfolk", "Kansas city", "Chicago", "Calgary"]:
 			energy_mix_conf = self.energymix_db["US"][self.year]
 		tot_energy = 0
 		for i in list(self.lca_co2_elect_sources.keys()):
