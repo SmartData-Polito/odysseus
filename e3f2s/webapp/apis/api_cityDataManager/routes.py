@@ -17,8 +17,8 @@ def run():
     return jsonify({'run':1})
 
 
-@api_cdm.route('/run',methods=['GET'])
-def run():
-    cdm = CityDataManager()
-    cdm.run()
-    return jsonify({'Done':1})
+# @api_cdm.route('/run',methods=['GET'])
+# def run():
+#     cdm = CityDataManager()
+#     cdm.run()
+#     return jsonify({'Done':1})

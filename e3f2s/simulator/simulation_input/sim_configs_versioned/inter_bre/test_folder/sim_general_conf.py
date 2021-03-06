@@ -6,7 +6,7 @@ sim_general_conf_grid = {
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["inter_bre_2"],
+    "sim_scenario_name": ["inter_bre_save_true"],
 
     # Fleet general parameters
     "const_load_factor": [False],

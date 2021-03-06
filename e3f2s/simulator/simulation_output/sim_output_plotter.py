@@ -38,6 +38,7 @@ class EFFCS_SimOutputPlotter ():
 			"single_run",
 			sim_scenario_name,
 		)
+		
 		os.makedirs(self.figures_path, exist_ok=True)
 
 		self.sim_booking_requests = sim_output.sim_booking_requests

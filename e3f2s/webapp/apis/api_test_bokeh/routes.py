@@ -52,7 +52,7 @@ def plot1():
     select.add_tools(range_tool)
     select.toolbar.active_multi = range_tool
 
-
+    show(column(p, select))
     
     return json.dumps(json_item(p, "myplot"))
 
