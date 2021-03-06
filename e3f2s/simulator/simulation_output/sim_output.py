@@ -18,6 +18,10 @@ class SimOutput():
 		self.sim_stats = sim_stats_obj.get_stats_from_sim(sim)
 		self.sim_stats = sim_stats_obj.sim_stats
 
+		
+
+
+
 		if self.sim_general_conf["save_history"]:
 
 			self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)

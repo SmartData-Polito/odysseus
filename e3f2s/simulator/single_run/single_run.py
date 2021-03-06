@@ -98,7 +98,7 @@ def single_run(conf_tuple):
         simOutput.sim_not_enough_energy_requests.to_pickle(
             os.path.join(
                 results_path,
-                "sim_unsatisfied_no-energy.pickle"
+                "sim_unsatisfied_no-energy.pickle" # maybe change to underscore?
             )
         )
         simOutput.sim_no_close_vehicle_requests.to_pickle(
@@ -119,6 +119,7 @@ def single_run(conf_tuple):
                 "sim_system_charges_bookings.pickle"
             )
         )
+        
         simOutput.sim_users_charges_bookings.to_pickle(
             os.path.join(
                 results_path,
