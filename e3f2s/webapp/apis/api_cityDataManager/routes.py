@@ -5,20 +5,18 @@ api_cdm = Blueprint('api_cdm', __name__)
 
 @api_cdm.route('/config',methods=['POST'])
 def config():
+    print("Received post")
     data = request.get_json()
     print(data)
+    f = open("sim_general_conf.py","w")
+    f.write("sim_general_conf_grid = "+ str(data))
     return jsonify({'config':1})
 
-@api_cdm.route('/run',methods=['GET','POST'])
+@api_cdm.route('/run',methods=['GET'])
 def run():
-    data = request.get_json()
-    print(data)
-    # ok ho finito come return, via libera per le possibili get dei risultati
-    return jsonify({'run':1})
+    print("Start simulation")
+    cdm = CityDataManager()
+    cdm.run()
+    return jsonify({'Done':1})
 
 
-# @api_cdm.route('/run',methods=['GET'])
-# def run():
-#     cdm = CityDataManager()
-#     cdm.run()
-#     return jsonify({'Done':1})
