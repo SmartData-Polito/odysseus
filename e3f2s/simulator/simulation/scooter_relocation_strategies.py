@@ -318,10 +318,10 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 origin_scores_list.append(origin_scores[daytype][(hour + 1 + i) % 24])
                 destination_scores_list.append(destination_scores[daytype][(hour + 1 + i) % 24])
 
+        n_relocations = int(len(self.available_vehicles_dict) / 2)  # an upper bound
         if self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive", "predictive"]:
-            n_relocations = self.relocation_workers.capacity - self.relocation_workers.count  # number of free workers
-        else:
-            n_relocations = int(len(self.available_vehicles_dict)/2)  # an upper bound
+            n_free_workers = self.relocation_workers.capacity - self.relocation_workers.count
+            n_relocations = min(n_relocations, n_free_workers)
 
         self.starting_zone_ids, n_picked_vehicles_list = self.choose_starting_zone(n=n_relocations,
                                                                                    origin_scores_list=origin_scores_list,
