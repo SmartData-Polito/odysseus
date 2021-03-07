@@ -45,6 +45,14 @@ class ScooterRelocationPrimitives:
             capacity=self.simInput.sim_scenario_conf["n_relocation_workers"]
         )
 
+        self.current_hour_origin_count = {}
+        self.current_hour_destination_count = {}
+        self.current_hour_n_bookings = 0
+
+        self.past_hours_origin_counts = []
+        self.past_hours_destination_counts = []
+        self.past_hours_n_bookings = []
+
         self.n_scooter_relocations = 0
         self.tot_scooter_relocations_distance = 0
         self.tot_scooter_relocations_duration = 0
@@ -132,3 +140,21 @@ class ScooterRelocationPrimitives:
 
         self.sim_metrics.update_metrics("min_vehicles_relocated", scooter_relocation["n_vehicles"])
         self.sim_metrics.update_metrics("max_vehicles_relocated", scooter_relocation["n_vehicles"])
+
+    def update_current_hour_stats(self, booking_request):
+        self.current_hour_n_bookings += 1
+
+        if booking_request["origin_id"] in self.current_hour_origin_count:
+            self.current_hour_origin_count[booking_request["origin_id"]] += 1
+        else:
+            self.current_hour_origin_count[booking_request["origin_id"]] = 1
+
+        if booking_request["destination_id"] in self.current_hour_destination_count:
+            self.current_hour_destination_count[booking_request["destination_id"]] += 1
+        else:
+            self.current_hour_destination_count[booking_request["destination_id"]] = 1
+
+    def reset_current_hour_stats(self):
+        self.current_hour_n_bookings = 0
+        self.current_hour_origin_count = {}
+        self.current_hour_destination_count = {}

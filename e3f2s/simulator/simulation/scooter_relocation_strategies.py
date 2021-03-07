@@ -95,9 +95,10 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
                 relocation_zone_id = None
 
-                if self.simInput.sim_scenario_conf["scooter_relocation_strategy"] in ["proactive",
+                if self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive",
                                                                                       "reactive_post_charge",
-                                                                                      "reactive_post_trip"]:
+                                                                                      "reactive_post_trip",
+                                                                                      "predictive"]:
 
                     if booking_request["destination_id"] in self.scheduled_scooter_relocations \
                             and len(self.scheduled_scooter_relocations[booking_request["destination_id"]]):
@@ -118,10 +119,8 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                                 relocated_vehicles.append(relocated_vehicle)
 
                 else:
-                    relocation_zone_ids, _ = self.choose_ending_zone(
-                        daytype=booking_request["daytype"],
-                        hour=booking_request["hour"]
-                    )
+                    relocation_zone_ids, _ = self.choose_ending_zone(daytype=booking_request["daytype"],
+                                                                     hour=booking_request["hour"])
                     relocation_zone_id = relocation_zone_ids[0]
 
                 if relocation_zone_id and relocation_zone_id != booking_request["destination_id"]:
@@ -134,7 +133,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                         relocation_zone_id
                     )
 
-                    duration = distance / 1000 / self.simInput.sim_scenario_conf["avg_relocation_speed"] * 3600
+                    duration = distance / 1000 / self.simInput.supply_model_conf["avg_relocation_speed"] * 3600
 
                     scooter_relocation = init_scooter_relocation(
                         relocated_vehicles,
@@ -147,11 +146,11 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
         return relocated, scooter_relocation
 
-    def choose_ending_zone(self, daytype=None, hour=None, n=1):
+    def choose_ending_zone(self, n=1, origin_scores_list=None, destination_scores_list=None, daytype=None, hour=None):
 
         ending_zone_ids = []
         n_dropped_vehicles_list = []
-        technique = dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"])["end"]
+        technique = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["end"]
 
         if technique == "kde_sampling":
 
@@ -190,61 +189,39 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 ending_zone_ids.append(n_vehicles_by_zone.popitem()[0])
                 n_dropped_vehicles_list.append(1)
 
-        if technique == "delta":  # demand proxy: origin scores, current status proxy: aggregation
+        if technique == "delta":
 
-            if "end_window_width" in dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"]):
-                window_width = dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"])["end_window_width"]
+            if "end_demand_weight" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
+                demand_weight = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["end_demand_weight"]
             else:
-                window_width = 1
+                demand_weight = 0.5
 
-            future_origin_scores = {}
-            future_destination_scores = {}
-
-            for i in range(window_width):
-                future_origin_scores[i] = self.simInput.origin_scores[daytype][(hour + 1 + i) % 24]
-                future_destination_scores[i] = self.simInput.destination_scores[daytype][(hour + 1 + i) % 24]
-
-            if "end_demand_weight" in dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"]):
-                w1 = dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"])["end_demand_weight"]
-            else:
-                w1 = 0.5
-
-            w2 = 1 - w1
-
-            delta_by_zone = {}
-            for zone, vehicles in self.available_vehicles_dict.items():
-                demand_prediction = 0
-                for i in range(window_width):
-                    demand_prediction += future_origin_scores[i][zone]
-                    demand_prediction -= future_destination_scores[i][zone]
-                demand_prediction /= window_width
-                delta = w1 * demand_prediction - w2 * (len(vehicles) / self.simInput.n_vehicles_sim)
-                delta_by_zone[zone] = delta
+            delta_by_zone = self.compute_delta(origin_scores_list, destination_scores_list, demand_weight)
 
             delta_by_zone = {
                 k: v for k, v in
                 sorted(delta_by_zone.items(), key=lambda item: item[1])
             }
 
-            if "end_vehicles_factor" in dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"]):
-                end_vehicles_factor = dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"])["end_vehicles_factor"]
+            if "end_vehicles_factor" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
+                end_vehicles_factor = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["end_vehicles_factor"]
             else:
                 end_vehicles_factor = 1
 
             for i in range(min(n, len(delta_by_zone))):
                 zone, delta = delta_by_zone.popitem()
                 n_dropped_vehicles = int(delta * end_vehicles_factor * self.simInput.n_vehicles_sim)
-                if n_dropped_vehicles:
+                if n_dropped_vehicles > 0:
                     ending_zone_ids.append(zone)
                     n_dropped_vehicles_list.append(n_dropped_vehicles)
 
         return ending_zone_ids, n_dropped_vehicles_list
 
-    def choose_starting_zone(self, daytype=None, hour=None, n=1):
+    def choose_starting_zone(self, n=1, origin_scores_list=None, destination_scores_list=None):
 
         starting_zone_ids = []
         n_picked_vehicles_list = []
-        technique = dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"])["start"]
+        technique = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["start"]
 
         if technique == "aggregation":
 
@@ -257,48 +234,29 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 starting_zone_ids.append(n_vehicles_by_zone.popitem()[0])
                 n_picked_vehicles_list.append(1)
 
-        if technique == "delta":  # demand proxy: origin scores, current status proxy: aggregation
+        if technique == "delta":
 
-            if "start_window_width" in dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"]):
-                window_width = dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"])["start_window_width"]
+            if "start_demand_weight" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
+                demand_weight = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["start_demand_weight"]
             else:
-                window_width = 1
+                demand_weight = 0.5
 
-            future_origin_scores = {}
-
-            for i in range(window_width):
-                future_origin_scores[i] = self.simInput.origin_scores[daytype][(hour + i) % 24]
-
-            if "start_demand_weight" in dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"]):
-                w1 = dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"])["start_demand_weight"]
-            else:
-                w1 = 0.5
-
-            w2 = 1 - w1
-
-            delta_by_zone = {}
-            for zone, vehicles in self.available_vehicles_dict.items():
-                demand_prediction = 0
-                for i in range(window_width):
-                    demand_prediction += future_origin_scores[i][zone]
-                demand_prediction /= window_width
-                delta = w1 * demand_prediction - w2 * (len(vehicles) / self.simInput.n_vehicles_sim)
-                delta_by_zone[zone] = delta
+            delta_by_zone = self.compute_delta(origin_scores_list, destination_scores_list, demand_weight)
 
             delta_by_zone = {
                 k: v for k, v in
                 sorted(delta_by_zone.items(), key=lambda item: -item[1])
             }
 
-            if "start_vehicles_factor" in dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"]):
-                start_vehicles_factor = dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"])["start_vehicles_factor"]
+            if "start_vehicles_factor" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
+                start_vehicles_factor = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["start_vehicles_factor"]
             else:
                 start_vehicles_factor = 1
 
             for i in range(min(n, len(delta_by_zone))):
                 zone, delta = delta_by_zone.popitem()
-                n_picked_vehicles = int(abs(delta) * start_vehicles_factor * self.simInput.n_vehicles_sim)
-                if n_picked_vehicles:
+                n_picked_vehicles = int(-delta * start_vehicles_factor * self.simInput.n_vehicles_sim)
+                if n_picked_vehicles > 0:
                     starting_zone_ids.append(zone)
                     n_picked_vehicles_list.append(n_picked_vehicles)
 
@@ -308,13 +266,70 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
         self.scheduled_scooter_relocations.clear()
 
-        if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "proactive":
+        if "window_width" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
+            window_width = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["window_width"]
+        else:
+            window_width = 1
+
+        origin_scores_list = []
+        destination_scores_list = []
+
+        if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "predictive":
+
+            if self.current_hour_n_bookings:
+                self.past_hours_n_bookings.append(self.current_hour_n_bookings)
+                self.past_hours_origin_counts.append(self.current_hour_origin_count)
+                self.past_hours_destination_counts.append(self.current_hour_destination_count)
+
+                if len(self.past_hours_n_bookings) > window_width:
+                    self.past_hours_n_bookings.pop(0)
+                    self.past_hours_origin_counts.pop(0)
+                    self.past_hours_destination_counts.pop(0)
+
+                for i in range(len(self.past_hours_n_bookings)):
+                    past_n_bookings = self.past_hours_n_bookings[i]
+                    past_origin_count = self.past_hours_origin_counts[i]
+                    past_destination_count = self.past_hours_destination_counts[i]
+
+                    past_origin_scores = {}
+                    past_destination_scores = {}
+                    for zone in self.simInput.valid_zones:
+                        if zone in past_origin_count:
+                            past_origin_scores[zone] = past_origin_count[zone] / past_n_bookings
+                        else:
+                            past_origin_scores[zone] = 0
+                        if zone in past_destination_count:
+                            past_destination_scores[zone] = past_destination_count[zone] / past_n_bookings
+                        else:
+                            past_destination_scores[zone] = 0
+
+                    origin_scores_list.append(past_origin_scores)
+                    destination_scores_list.append(past_destination_scores)
+            else:
+                return
+
+            self.reset_current_hour_stats()
+
+        else:
+            origin_scores = self.simInput.origin_scores
+            destination_scores = self.simInput.destination_scores
+
+            for i in range(window_width):
+                origin_scores_list.append(origin_scores[daytype][(hour + 1 + i) % 24])
+                destination_scores_list.append(destination_scores[daytype][(hour + 1 + i) % 24])
+
+        if self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive", "predictive"]:
             n_relocations = self.relocation_workers.capacity - self.relocation_workers.count  # number of free workers
         else:
             n_relocations = int(len(self.available_vehicles_dict)/2)  # an upper bound
 
-        self.starting_zone_ids, n_picked_vehicles_list = self.choose_starting_zone(daytype=daytype, hour=hour, n=n_relocations)
-        self.ending_zone_ids, n_dropped_vehicles_list = self.choose_ending_zone(daytype=daytype, hour=hour, n=n_relocations)
+        self.starting_zone_ids, n_picked_vehicles_list = self.choose_starting_zone(n=n_relocations,
+                                                                                   origin_scores_list=origin_scores_list,
+                                                                                   destination_scores_list=destination_scores_list)
+        self.ending_zone_ids, n_dropped_vehicles_list = self.choose_ending_zone(n=n_relocations,
+                                                                                origin_scores_list=origin_scores_list,
+                                                                                destination_scores_list=destination_scores_list,
+                                                                                daytype=daytype, hour=hour)
 
         for i in range(min(n_relocations, len(self.starting_zone_ids), len(self.ending_zone_ids))):
             starting_zone_id = self.starting_zone_ids[i]
@@ -335,7 +350,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
             else:
                 self.scheduled_scooter_relocations[starting_zone_id][ending_zone_id] += n_relocated_vehicles
 
-        if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "proactive":
+        if self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive", "predictive"]:
             for starting_zone_id in self.scheduled_scooter_relocations:
                 fake_booking_request = {
                     "end_time": self.start + datetime.timedelta(seconds=self.env.now),
@@ -349,3 +364,21 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 if relocated:
                     self.env.process(self.relocate_scooter(scooter_relocation, move_vehicles=True))
 
+    def compute_delta(self, origin_scores_list, destination_scores_list, demand_weigth=0.5):
+
+        window_width = len(origin_scores_list)
+
+        w1 = demand_weigth
+        w2 = 1 - w1
+
+        delta_by_zone = {}
+        for zone, vehicles in self.available_vehicles_dict.items():
+            demand_prediction = 0
+            for i in range(window_width):
+                demand_prediction += origin_scores_list[i][zone]
+                demand_prediction -= destination_scores_list[i][zone]
+            demand_prediction /= window_width
+            delta = w1 * demand_prediction - w2 * (len(vehicles) / self.simInput.n_vehicles_sim)
+            delta_by_zone[zone] = delta
+
+        return delta_by_zone

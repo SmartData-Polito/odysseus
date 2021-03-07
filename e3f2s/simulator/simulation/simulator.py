@@ -82,6 +82,10 @@ class SharedMobilitySim:
         self.n_deaths = 0
         self.n_booked_vehicles = 0
 
+        self.current_hour_origin_count = {}
+        self.current_hour_destination_count = {}
+        self.current_hour_n_bookings = 0
+
         self.tot_mobility_distance = 0
         self.tot_mobility_duration = 0
 
@@ -150,6 +154,10 @@ class SharedMobilitySim:
     def schedule_booking (self, booking_request, vehicle, zone_id):
         self.tot_mobility_distance += booking_request["driving_distance"]
         self.tot_mobility_duration += booking_request["duration"]
+
+        if self.simInput.supply_model_conf["scooter_relocation"] \
+                and self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["predictive"]:
+            self.scooterRelocationStrategy.update_current_hour_stats(booking_request)
 
         if "save_history" in self.simInput.demand_model_config:
             if self.simInput.demand_model_config["save_history"]:
