@@ -159,6 +159,14 @@ def single_run(conf_tuple):
             )
         )
 
+        if sim_scenario_conf["scooter_relocation"]:
+            simOutput.relocation_history.to_csv(
+                os.path.join(
+                    results_path,
+                    "relocation_history.csv"
+                )
+            )
+
         print(datetime.datetime.now(), city, sim_scenario_name, "results saved!")
 
         plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
