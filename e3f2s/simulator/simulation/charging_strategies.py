@@ -245,8 +245,9 @@ class ChargingStrategy(ChargingPrimitives):
 					)
 
 					if relocated:
-						relocation_zone_id = scooter_relocation["end_zone_id"]
-						yield self.env.process(self.scooterRelocationStrategy.relocate_scooter(scooter_relocation))
+						relocation_zone_id = scooter_relocation["end_zone_ids"][0]
+						yield self.env.process(
+							self.scooterRelocationStrategy.relocate_scooter_single_zone(scooter_relocation))
 
 		else:
 

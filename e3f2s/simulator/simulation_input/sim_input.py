@@ -131,7 +131,7 @@ class SimInput:
 		return self.supply_model.init_charging_poles()
 
 	def init_relocation(self):
-		pass
+		return self.supply_model.init_relocation()
 
 	def init_workers(self):
 		pass

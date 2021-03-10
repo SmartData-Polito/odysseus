@@ -69,7 +69,9 @@ class SupplyModel:
 
 		self.zones_cp_distances = pd.Series()
 		self.closest_cp_zone = pd.Series()
-		self.energy_mix = EnergyMix(self.city,year)
+		self.energy_mix = EnergyMix(self.city, year)
+
+		self.initial_relocation_workers_positions = []
 
 	def init_vehicles(self):
 
@@ -175,7 +177,16 @@ class SupplyModel:
 			self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
 
 	def init_relocation(self):
-		pass
+		if "n_relocation_workers" in self.supply_model_conf:
+			n_relocation_workers = self.supply_model_conf["n_relocation_workers"]
+
+			top_o_zones = self.grid.zone_id_origin_count.sort_values(ascending=False).iloc[:31]
+
+			workers_random_zones = list(
+				np.random.uniform(0, 30, n_relocation_workers).astype(int).round()
+			)
+
+			self.initial_relocation_workers_positions = [self.grid.loc[int(top_o_zones.index[i])].zone_id for i in workers_random_zones]
 
 	def init_workers(self):
 		pass

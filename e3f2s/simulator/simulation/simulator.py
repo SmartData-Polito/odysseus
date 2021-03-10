@@ -207,8 +207,9 @@ class SharedMobilitySim:
                 )
 
                 if relocated:
-                    relocation_zone_id = scooter_relocation["end_zone_id"]
-                    yield self.env.process(self.scooterRelocationStrategy.relocate_scooter(scooter_relocation))
+                    relocation_zone_id = scooter_relocation["end_zone_ids"][0]
+                    yield self.env.process(
+                        self.scooterRelocationStrategy.relocate_scooter_single_zone(scooter_relocation))
 
         if self.simInput.supply_model_conf["vehicle_relocation"] \
                 and "vehicle_relocation_scheduling" in self.simInput.supply_model_conf:
@@ -360,11 +361,11 @@ class SharedMobilitySim:
 
             if relocated:
 
-                relocation_zone_id = scooter_relocation["end_zone_id"]
+                relocation_zone_id = scooter_relocation["end_zone_ids"][0]
                 vehicle = scooter_relocation["vehicle_ids"][0]
 
                 self.scooterRelocationStrategy.magically_relocate_scooter(scooter_relocation)
-                self.available_vehicles_dict[scooter_relocation["start_zone_id"]].remove(vehicle)
+                self.available_vehicles_dict[scooter_relocation["start_zone_ids"][0]].remove(vehicle)
                 self.available_vehicles_dict[relocation_zone_id].append(vehicle)
                 self.vehicles_zones[vehicle] = relocation_zone_id
 

@@ -1,7 +1,7 @@
 sim_general_conf_grid = {
 
     # Run configuration
-    "city": ["Louisville", "Minneapolis"],
+    "city": ["Louisville", "Kansas City"],
     "sim_run_mode": ["multiple_runs"],
 
     "data_source_id": ["city_open_data"],

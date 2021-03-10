@@ -5,7 +5,7 @@ sim_general_conf_grid = {
     "sim_run_mode": ["multiple_runs"],
 
     "data_source_id": ["city_open_data"],
-    "sim_technique": ["traceB"],
+    "sim_technique": ["eventG"],
     "sim_scenario_name": ["eventG_relocation_strategies"],
 
     # Fleet general parameters
