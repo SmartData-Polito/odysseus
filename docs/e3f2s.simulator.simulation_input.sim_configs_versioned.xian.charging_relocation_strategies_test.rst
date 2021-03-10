@@ -20,7 +20,6 @@ e3f2s.simulator.simulation\_input.sim\_configs\_versioned.xian.charging\_relocat
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

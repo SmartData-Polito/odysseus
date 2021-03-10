@@ -28,7 +28,6 @@ e3f2s.simulator.demand\_model\_validation.model\_validation\_utils module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

@@ -100,7 +100,6 @@ e3f2s.simulator.simulation.vehicle\_relocation\_strategies module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

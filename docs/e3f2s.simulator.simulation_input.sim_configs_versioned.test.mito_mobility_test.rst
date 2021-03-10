@@ -20,7 +20,6 @@ e3f2s.simulator.simulation\_input.sim\_configs\_versioned.test.mito\_mobility\_t
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

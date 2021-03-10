@@ -60,7 +60,6 @@ e3f2s.simulator.simulation\_input.vehicle\_conf module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

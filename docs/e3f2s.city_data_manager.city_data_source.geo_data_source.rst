@@ -68,7 +68,6 @@ e3f2s.city\_data\_manager.city\_data\_source.geo\_data\_source.norfolk\_census\_
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

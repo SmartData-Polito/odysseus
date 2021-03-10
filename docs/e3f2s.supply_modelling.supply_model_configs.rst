@@ -12,7 +12,6 @@ e3f2s.supply\_modelling.supply\_model\_configs.default\_config module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

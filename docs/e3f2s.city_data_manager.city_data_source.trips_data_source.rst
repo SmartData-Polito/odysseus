@@ -92,7 +92,6 @@ e3f2s.city\_data\_manager.city\_data\_source.trips\_data\_source.trips\_data\_so
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

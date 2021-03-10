@@ -12,7 +12,6 @@ e3f2s.demand\_modelling.demand\_model\_configs.default\_config module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

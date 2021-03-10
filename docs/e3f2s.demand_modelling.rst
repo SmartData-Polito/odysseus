@@ -28,7 +28,6 @@ e3f2s.demand\_modelling.loader module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

@@ -84,7 +84,6 @@ e3f2s.city\_data\_manager.city\_geo\_trips.nyc\_citi\_bike\_geo\_trips module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

@@ -44,7 +44,6 @@ e3f2s.utils.time\_utils module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

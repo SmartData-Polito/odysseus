@@ -44,7 +44,6 @@ e3f2s.supply\_modelling.vehicle module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

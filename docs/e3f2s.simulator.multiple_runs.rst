@@ -20,7 +20,6 @@ e3f2s.simulator.multiple\_runs.spark\_multiple\_runs module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

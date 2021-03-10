@@ -44,7 +44,6 @@ e3f2s.simulator.simulation\_output.sim\_stats module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

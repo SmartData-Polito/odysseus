@@ -20,7 +20,6 @@ e3f2s.simulator.simulation\_input.sim\_configs\_versioned.generalisation.fleet\_
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 

@@ -12,7 +12,6 @@ e3f2s.city\_data\_manager.config.config module
    :undoc-members:
    :show-inheritance:
 
-
 Module contents
 ---------------
 
