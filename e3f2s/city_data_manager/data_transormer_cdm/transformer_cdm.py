@@ -36,9 +36,19 @@ root_data_path = os.path.join(
 # data_type_ids = ["points","trips","weather","geo"]
 # data_source = ["big_data_db"]
 
+# filter_type = ["most_used_cars"], all possible options 
 
-def transform_cdm(city, data_steps_id, data_type_id, data_source, year, month, filetype):
-    transformed_json={}
+def makeitjson(usually_a_df): # can also be a series
+    result = usually_a_df.to_json(orient="index")
+    parsed = json.loads(result)
+
+    return parsed
+
+def transform_cdm(city, data_steps_id, data_type_id, data_source, year, month, filetype, *args, **kwargs):
+
+    if kwargs.get('filter_type', None):
+        filter_type = kwargs.get('filter_type', None)
+
 
     path_to__data_city_norm_trips_source_year_month_filetype = os.path.join(
         root_data_path, city, data_steps_id, data_type_id, data_source, year+"_"+month + filetype
@@ -46,90 +56,21 @@ def transform_cdm(city, data_steps_id, data_type_id, data_source, year, month, f
     )
 
     df = pd.read_csv(path_to__data_city_norm_trips_source_year_month_filetype)
-
+    # the csv file has been saved with the index, which i do not want
     df = df.drop(df.columns[0], axis=1)
 
-    print(df.head())
-
-    result = df.to_json(orient="index")
-    parsed = json.loads(result)
-
-    return parsed
-
-ppp = transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "10", ".csv")
-
-print(type(ppp))
+    if filter_type == "most_used_cars":
+        most_used = df["plate"].value_counts(ascending=False) # is a 'pandas.core.series.Series'
+        transformed = makeitjson(most_used)
 
 
+    # result = df.to_json(orient="index")
+    # parsed = json.loads(result)
+
+    return transformed
+
+ppp = transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "10", ".csv", filter_type='most_used_cars')
+
+print((ppp))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# cities = [
-# 	"Torino",
-# 	"Louisville",
-# 	"Minneapolis",
-# 	"Milano",
-# 	"New_York_City",
-# 	"Berlin",
-# 	"Vancouver",
-# 	"Amsterdam",
-# 	"Madrid",
-# 	"Roma",
-# 	"Austin",
-# 	"Norfolk",
-# 	"Kansas City",
-# 	"Chicago",
-# 	"Calgary"
-# ]
-
-
-
-
-# data_paths_dict = {}
-# for city in cities:
-# 	data_paths_dict[city] = {}
-# 	for data_step_id in data_steps_ids:
-# 		data_paths_dict[city][data_step_id] = {}
-# 		for data_type_id in data_type_ids:
-# 			data_paths_dict[city][data_step_id][data_type_id] = os.path.join(
-# 				root_data_path, city, data_step_id, data_type_id
-# 			)
-
-# print(data_paths_dict)
-
-# raw_trips_data_path = os.path.join(
-#             self.raw_data_path,
-#             "Dataset_" + self.city_name + ".csv"
-#         )
-#         self.trips_df = pd.read_csv(raw_trips_data_path)
-#         return self.trips_df
-
-
-# trips_df_norm_year_month.to_csv(
-#                 os.path.join(
-#                     self.norm_data_path,
-#                     "_".join([str(year), str(month)]) + ".csv"
-#                 )
-#             )
