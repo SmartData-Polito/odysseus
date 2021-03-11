@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-import json
 import plotly.express as px
 
 
@@ -23,7 +22,6 @@ root_data_path = os.path.join(
 # data_type_ids = ["points","trips","weather","geo"]
 # data_source = ["big_data_db"]
 
-# filter_type = ["most_used_cars"], all possible options 
 
 def makeitjson(usually_a_df): # can also be a series
     result = usually_a_df.to_json(orient="index")
@@ -45,7 +43,6 @@ def transform_cdm(city, data_steps_id, data_type_id, data_source, year, month, f
     df = df.drop(df.columns[0], axis=1)
 
     if filter_type == "most_used_cars":
-        #most_used = df["plate"].value_counts(ascending=False) # is a 'pandas.core.series.Series'
         df_plates = df.filter(["plate"], axis=1)
         df_plates["occurance"] = 1
         most_used = df_plates.groupby(by="plate").sum(["occurance"]).sort_values(by=["occurance"], ascending=[True])
@@ -53,20 +50,47 @@ def transform_cdm(city, data_steps_id, data_type_id, data_source, year, month, f
         
         transformed = makeitjson(most_used)
 
+    elif filter_type == "busy_hours":
+        df_busy = df.filter(["start_hour"], axis=1)
+        df_busy["occurance"] = 1
+        most_busy_hour = df_busy.groupby(by="start_hour").sum(["occurance"]).sort_values(by=["occurance"], ascending=[True])
+        most_busy_hour = most_busy_hour.reset_index()
+
+        transformed = makeitjson(most_busy_hour)
+
+
     return transformed
 
 
-ppp = transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "10", ".csv", filter_type='most_used_cars')
+# filter_types = [
+#         {"type":"most_used_cars","x-axis":"plate"},
+#         {"type":"busy_hours","x-axis":"start_hour"}
+#         ]
+# filter_types = [
+#         ("most_used_cars","plate"),
+#         ("busy_hours","start_hour")
+#         ]
+# filter_types = [
+#         {"most_used_cars":"plate"},
+#         {"busy_hours":"start_hour"}
+#         ]
+filter_types = {
+        "most_used_cars": {"name":"most_used_cars","x-axis":"plate", "labelx":"Plate", "labely":"Usage"},
+        "busy_hours": {"name":"busy_hours","x-axis":"start_hour", "labelx":"Start Hour", "labely":"Total"}
+}
 
 
-def simplebarchart(data):
+# ppp = transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "10", ".csv", filter_type='most_used_cars')
+ppp = transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "10", ".csv", filter_type=filter_types["busy_hours"]["name"])
+
+def simplebarchart(data, info):
     df= pd.read_json(data,orient="index")
-    fig = px.bar(df, x='plate', y='occurance',
+    fig = px.bar(df, x=info["x-axis"], y='occurance',
                     hover_data=['occurance'], color='occurance',
-                labels={'occurance':'Usage'}, height=400)
+                labels={'occurance':info["labely"], info["x-axis"]:info["labelx"]}, height=400)
     return fig
 
 
-gg = simplebarchart(ppp)
+gg = simplebarchart(ppp, filter_types["busy_hours"])
 gg.show()
 
