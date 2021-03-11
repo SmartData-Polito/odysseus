@@ -9,7 +9,13 @@ import xmltodict
 
 
 class DataGatherer:
+    """
+    Class for automatically downloading data relating to the New York Citi bike sharing operator from a remote database.
 
+            :param output_path: path in which to store the file
+            :type output_path: str
+            :param structured_dataset_name:
+            """
     def __init__(self, output_path, structured_dataset_name):
         self.root_url = 'https://s3.amazonaws.com/tripdata/'
 
@@ -37,6 +43,15 @@ class DataGatherer:
         return
 
     def download_data(self, year, month):
+        """
+        Download data for a specific month and year.
+
+        :param year: year expressed as a four-digit number (e.g. 1999)
+        :type year: int
+        :param month: month expressed as a number (e.g. for November the method expects to receive 11)
+        :type month: int
+        :return: nothing
+        """
         year = str(year)
         month = str(month)
 
@@ -70,9 +85,15 @@ class DataGatherer:
         return
 
     '''
-    download all the datasets available at offical citi bike website
+    download all the datasets available at official citi bike website
     '''
     def bulk_download(self, standardize=False):
+        """
+        download all the datasets available at official citi bike website
+        :param standardize:
+        :type standardize: bool, optional
+        :return:
+        """
         for key in self.dataset_names:
             year, month = int(key[0:4]), int(key[4:6])
             self.download_data(year, month)

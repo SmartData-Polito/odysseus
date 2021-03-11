@@ -7,7 +7,11 @@ from e3f2s.utils.path_utils import check_create_path
 
 
 class GeoDataSource:
+	"""
 
+			:param city_id:
+			:param data_source_id:
+			"""
 	def __init__(self, city_id, data_source_id):
 
 		self.city_id = city_id

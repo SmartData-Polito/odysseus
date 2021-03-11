@@ -39,7 +39,7 @@ parser.set_defaults(
     cities=["New_York_City"],
     data_source_ids=["citi_bike"],
     years=["2017"],
-    months=[str(i) for i in range(11, 13)],
+    months=[str(i) for i in range(1, 2)],
 )
 
 args = parser.parse_args()
