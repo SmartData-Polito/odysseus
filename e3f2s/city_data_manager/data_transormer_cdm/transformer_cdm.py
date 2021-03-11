@@ -1,20 +1,7 @@
 import os
 import pandas as pd
 import json
-
-
-
-
-def myfunc(a,b, *args, **kwargs):
-      c = kwargs.get('c', None)
-      d = kwargs.get('d', None)
-      print(a,b)
-      print(c,d)
-a=1
-b=2
-myfunc(a,b, c='nick', d='dog')
-
-
+import plotly.express as px
 
 
 ROOT_DIR = os.path.abspath(os.curdir) 
@@ -40,12 +27,10 @@ root_data_path = os.path.join(
 
 def makeitjson(usually_a_df): # can also be a series
     result = usually_a_df.to_json(orient="index")
-    parsed = json.loads(result)
-
-    return parsed
+    return result
 
 def transform_cdm(city, data_steps_id, data_type_id, data_source, year, month, filetype, *args, **kwargs):
-
+    transformed={}
     if kwargs.get('filter_type', None):
         filter_type = kwargs.get('filter_type', None)
 
@@ -60,17 +45,28 @@ def transform_cdm(city, data_steps_id, data_type_id, data_source, year, month, f
     df = df.drop(df.columns[0], axis=1)
 
     if filter_type == "most_used_cars":
-        most_used = df["plate"].value_counts(ascending=False) # is a 'pandas.core.series.Series'
+        #most_used = df["plate"].value_counts(ascending=False) # is a 'pandas.core.series.Series'
+        df_plates = df.filter(["plate"], axis=1)
+        df_plates["occurance"] = 1
+        most_used = df_plates.groupby(by="plate").sum(["occurance"]).sort_values(by=["occurance"], ascending=[True])
+        most_used = most_used.reset_index()
+        
         transformed = makeitjson(most_used)
-
-
-    # result = df.to_json(orient="index")
-    # parsed = json.loads(result)
 
     return transformed
 
+
 ppp = transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "10", ".csv", filter_type='most_used_cars')
 
-print((ppp))
 
+def simplebarchart(data):
+    df= pd.read_json(data,orient="index")
+    fig = px.bar(df, x='plate', y='occurance',
+                    hover_data=['occurance'], color='occurance',
+                labels={'occurance':'Usage'}, height=400)
+    return fig
+
+
+gg = simplebarchart(ppp)
+gg.show()
 
