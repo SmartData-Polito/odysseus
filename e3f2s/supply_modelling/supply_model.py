@@ -1,15 +1,15 @@
 import os
 import pickle
-
+import json
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
 import datetime
 import pytz
+from e3f2s.supply_modelling.energymix_loader import EnergyMix
+from e3f2s.demand_modelling.demand_model_configs.default_config import demand_model_configs_grid
 
-
-from e3f2s.city_data_manager.data.Torino.raw.geo.openstreetmap.stations_locations import station_locations
 
 
 def geodataframe_charging_points(city,engine_type,station_location):
@@ -30,7 +30,7 @@ def geodataframe_charging_points(city,engine_type,station_location):
 
 class SupplyModel:
 
-	def __init__(self, supply_model_conf):
+	def __init__(self, supply_model_conf,year):
 
 		self.supply_model_conf = supply_model_conf
 
@@ -69,6 +69,7 @@ class SupplyModel:
 
 		self.zones_cp_distances = pd.Series()
 		self.closest_cp_zone = pd.Series()
+		self.energy_mix = EnergyMix(self.city,year)
 
 	def init_vehicles(self):
 
@@ -136,6 +137,19 @@ class SupplyModel:
 						exit(0)
 
 			elif self.supply_model_conf["cps_placement_policy"] == "real_positions":
+				stations_path = os.path.join(
+					os.path.dirname(os.path.dirname(__file__)),
+					"city_data_manager",
+					"data",
+					self.supply_model_conf["city"],
+					"raw",
+					"geo",
+					"openstreetmap",
+					"station_locations.json"
+				)
+				f = open(stations_path,"r")
+				station_locations = json.load(f)
+				f.close()
 				cps_points = geodataframe_charging_points(
 					self.city, self.supply_model_conf["engine_type"], station_locations
 				)

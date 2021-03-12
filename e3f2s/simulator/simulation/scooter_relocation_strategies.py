@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 from e3f2s.simulator.simulation.scooter_relocation_primitives import *
 
@@ -93,8 +95,9 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
                 relocation_zone_id = None
 
-                if "scooter_relocation_scheduling" in self.simInput.sim_scenario_conf.keys() \
-                        and self.simInput.sim_scenario_conf["scooter_relocation_scheduling"]:
+                if self.simInput.sim_scenario_conf["scooter_relocation_strategy"] in ["proactive",
+                                                                                      "reactive_post_charge",
+                                                                                      "reactive_post_trip"]:
 
                     if booking_request["destination_id"] in self.scheduled_scooter_relocations \
                             and len(self.scheduled_scooter_relocations[booking_request["destination_id"]]):
@@ -104,9 +107,15 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                         relocation_zone_id = scheduled_relocation[0]
                         n_relocated_vehicles = scheduled_relocation[1]
 
-                        for i in range(1, min(n_relocated_vehicles, len(self.available_vehicles_dict[booking_request["destination_id"]]))):  # first vehicle is charged vehicle
-                            relocated_vehicle = self.available_vehicles_dict[booking_request["destination_id"]].pop()
-                            relocated_vehicles.append(relocated_vehicle)
+                        if relocated_vehicles is not None:
+                            for i in range(len(relocated_vehicles), min(n_relocated_vehicles, len(self.available_vehicles_dict[booking_request["destination_id"]]))):  # first vehicles are input vehicles
+                                relocated_vehicle = self.available_vehicles_dict[booking_request["destination_id"]].pop()
+                                relocated_vehicles.append(relocated_vehicle)
+                        else:
+                            relocated_vehicles = []
+                            for i in range(0, min(n_relocated_vehicles, len(self.available_vehicles_dict[booking_request["destination_id"]]))):
+                                relocated_vehicle = self.available_vehicles_dict[booking_request["destination_id"]].pop()
+                                relocated_vehicles.append(relocated_vehicle)
 
                 else:
                     relocation_zone_ids, _ = self.choose_ending_zone(
@@ -136,8 +145,6 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                         duration=duration
                     )
 
-                    self.update_relocation_stats(scooter_relocation)
-
         return relocated, scooter_relocation
 
     def choose_ending_zone(self, daytype=None, hour=None, n=1):
@@ -150,10 +157,25 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
             next_hour_kde = self.simInput.trip_kdes[daytype][(hour + 1) % 24]
 
+            def base_round(x, base):
+                if x < 0:
+                    return 0
+                elif x > base:
+                    return base
+                else:
+                    return round(x)
+
+            def gen_relocation_zone(kde):
+                trip_sample = kde.sample()
+                origin_i = base_round(trip_sample[0][0], len(self.simInput.grid_matrix.index) - 1)
+                origin_j = base_round(trip_sample[0][1], len(self.simInput.grid_matrix.columns) - 1)
+
+                return self.simInput.grid_matrix.loc[origin_i, origin_j]
+
             for i in range(n):
-                origin_id = self.simInput.gen_trip_origin_zone_from_kde(next_hour_kde)
-                while origin_id not in self.simInput.valid_zones:
-                    origin_id = self.simInput.gen_trip_origin_zone_from_kde(next_hour_kde)
+                origin_id = gen_relocation_zone(next_hour_kde)
+                while (origin_id not in self.simInput.valid_zones) or (origin_id in self.starting_zone_ids):
+                    origin_id = gen_relocation_zone(next_hour_kde)
                 ending_zone_ids.append(origin_id)
                 n_dropped_vehicles_list.append(1)
 
@@ -176,9 +198,11 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 window_width = 1
 
             future_origin_scores = {}
+            future_destination_scores = {}
 
             for i in range(window_width):
                 future_origin_scores[i] = self.simInput.origin_scores[daytype][(hour + 1 + i) % 24]
+                future_destination_scores[i] = self.simInput.destination_scores[daytype][(hour + 1 + i) % 24]
 
             if "end_demand_weight" in dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"]):
                 w1 = dict(self.simInput.sim_scenario_conf["scooter_relocation_technique"])["end_demand_weight"]
@@ -192,6 +216,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 demand_prediction = 0
                 for i in range(window_width):
                     demand_prediction += future_origin_scores[i][zone]
+                    demand_prediction -= future_destination_scores[i][zone]
                 demand_prediction /= window_width
                 delta = w1 * demand_prediction - w2 * (len(vehicles) / self.simInput.n_vehicles_sim)
                 delta_by_zone[zone] = delta
@@ -282,14 +307,18 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
     def generate_relocation_schedule(self, daytype, hour):
 
         self.scheduled_scooter_relocations.clear()
-        n_relocations = self.relocation_workers.capacity - self.relocation_workers.count  # free_workers
 
-        starting_zone_ids, n_picked_vehicles_list = self.choose_starting_zone(daytype=daytype, hour=hour, n=n_relocations)
-        ending_zone_ids, n_dropped_vehicles_list = self.choose_ending_zone(daytype=daytype, hour=hour, n=n_relocations)
+        if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "proactive":
+            n_relocations = self.relocation_workers.capacity - self.relocation_workers.count  # number of free workers
+        else:
+            n_relocations = int(len(self.available_vehicles_dict)/2)  # an upper bound
 
-        for i in range(min(n_relocations, len(starting_zone_ids), len(ending_zone_ids))):
-            starting_zone_id = starting_zone_ids[i]
-            ending_zone_id = ending_zone_ids[i]
+        self.starting_zone_ids, n_picked_vehicles_list = self.choose_starting_zone(daytype=daytype, hour=hour, n=n_relocations)
+        self.ending_zone_ids, n_dropped_vehicles_list = self.choose_ending_zone(daytype=daytype, hour=hour, n=n_relocations)
+
+        for i in range(min(n_relocations, len(self.starting_zone_ids), len(self.ending_zone_ids))):
+            starting_zone_id = self.starting_zone_ids[i]
+            ending_zone_id = self.ending_zone_ids[i]
 
             n_picked_vehicles = n_picked_vehicles_list[i]
             n_dropped_vehicles = n_dropped_vehicles_list[i]
@@ -305,3 +334,18 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 self.scheduled_scooter_relocations[starting_zone_id][ending_zone_id] = n_relocated_vehicles
             else:
                 self.scheduled_scooter_relocations[starting_zone_id][ending_zone_id] += n_relocated_vehicles
+
+        if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "proactive":
+            for starting_zone_id in self.scheduled_scooter_relocations:
+                fake_booking_request = {
+                    "end_time": self.start + datetime.timedelta(seconds=self.env.now),
+                    "destination_id": starting_zone_id
+                }
+
+                relocated, scooter_relocation = self.check_scooter_relocation(
+                    fake_booking_request
+                )
+
+                if relocated:
+                    self.env.process(self.relocate_scooter(scooter_relocation, move_vehicles=True))
+

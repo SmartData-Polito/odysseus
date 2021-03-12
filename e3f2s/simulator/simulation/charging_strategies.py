@@ -145,6 +145,11 @@ class ChargingStrategy(ChargingPrimitives):
 					booking_request["destination_id"],
 					charging_zone_id
 				)
+				if self.simInput.supply_model_conf["relocation"]:
+					timeout_return = 2 * self.get_timeout(
+						booking_request["destination_id"],
+						charging_zone_id
+					)
 
 				charge["duration"] = vehicle.get_charging_time_from_perc(
 					vehicle.soc.level,
@@ -231,12 +236,9 @@ class ChargingStrategy(ChargingPrimitives):
 				relocation_zone_id = booking_request["destination_id"]
 
 			elif self.simInput.supply_model_conf["battery_swap"] \
-				and self.simInput.supply_model_conf["scooter_relocation"] \
-				and "scooter_relocation_scheduling" in self.simInput.supply_model_conf:
+				and self.simInput.supply_model_conf["scooter_relocation"]:
 
-				if self.simInput.supply_model_conf["scooter_relocation_scheduling"] \
-					and dict(self.simInput.supply_model_conf["scooter_scheduled_relocation_triggers"])["post_charge"]:
-
+				if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "reactive_post_charge":
 					relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
 						booking_request,
 						vehicles=[vehicle.plate]

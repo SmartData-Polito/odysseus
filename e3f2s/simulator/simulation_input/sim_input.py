@@ -30,6 +30,7 @@ class SimInput:
 		self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
 		self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
 		self.origin_scores = pickle.Unpickler(open(os.path.join(demand_model_path, "origin_scores.pickle"), "rb")).load()
+		self.destination_scores = pickle.Unpickler(open(os.path.join(demand_model_path, "destination_scores.pickle"), "rb")).load()
 		self.valid_zones = pickle.Unpickler(open(os.path.join(demand_model_path, "valid_zones.pickle"), "rb")).load()
 		self.neighbors_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "neighbors_dict.pickle"), "rb")).load()
 		self.integers_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "integers_dict.pickle"), "rb")).load()
@@ -44,7 +45,7 @@ class SimInput:
 		self.max_driving_distance = self.integers_dict["max_driving_distance"]
 
 		if self.demand_model_config["sim_technique"] == "traceB":
-			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings.pickle"), "rb")).load()
+			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings_test.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
 
 		if "n_requests" in self.sim_scenario_conf.keys():
@@ -81,6 +82,8 @@ class SimInput:
 				self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
 			elif "cps_zones" in self.sim_scenario_conf and self.sim_scenario_conf["cps_placement_policy"] != "real_positions":
 				self.n_charging_zones = len(self.sim_scenario_conf["cps_zones"])
+			elif self.sim_scenario_conf["cps_placement_policy"] == "real_positions":
+				self.n_charging_zones = 0
 		elif self.sim_scenario_conf["battery_swap"]:
 			self.n_charging_zones = 0
 			self.tot_n_charging_poles = 0
@@ -103,7 +106,7 @@ class SimInput:
 			"tot_n_charging_poles": self.tot_n_charging_poles,
 			"n_charging_zones": self.n_charging_zones,
 		})
-		self.supply_model = SupplyModel(self.supply_model_conf)
+		self.supply_model = SupplyModel(self.supply_model_conf,self.demand_model_config["year"])
 
 	def get_booking_requests_list(self):
 

@@ -9,9 +9,12 @@ demand_model_configs_grid = {
     "k_zones_factor": [1],
     "kde_bandwidth": [1],
 
-    "start_month": [10],
-    "end_month": [12],
+    "start_month_train": [10],
+    "end_month_train": [10],
+    "start_month_test": [11],
+    "end_month_test": [11],
 
-    "year": [2017],
+    "year_train": [2017],
+    "year_test": [2017],
 
 }

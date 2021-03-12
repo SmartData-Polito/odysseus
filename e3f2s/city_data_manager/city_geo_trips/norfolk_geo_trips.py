@@ -9,12 +9,12 @@ from e3f2s.utils.geospatial_utils import get_random_point_from_shape
 
 class NorfolkGeoTrips(CityGeoTrips):
 
-    def __init__(self, city_name="Norfolk", trips_data_source_id="city_of_norfolk", year=2019, month=8):
+    def __init__(self, city_name="Norfolk", trips_data_source_id="city_open_data", year=2019, month=8):
 
         self.city_name = city_name
         super().__init__(self.city_name, trips_data_source_id, year, month)
         self.trips_ds_dict = {
-            "city_of_norfolk": NorfolkScooterTrips()
+            "city_open_data": NorfolkScooterTrips()
         }
         self.trips_df_norm = pd.DataFrame()
 
