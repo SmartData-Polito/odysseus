@@ -43,5 +43,4 @@ class MinneapolisTrailsBikes(GeoDataSource):
 				"trails.shp"
 			)
 		)
-
 		return self.gdf_norm

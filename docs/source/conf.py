@@ -55,3 +55,5 @@ html_static_path = ['_static']
 html_css_files = [
     'overrides.css',
 ]
+
+add_module_names = False
