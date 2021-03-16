@@ -105,3 +105,32 @@ def plot2():
     return json.dumps(json_item(layout, "myplot"))
 
 
+
+
+
+
+
+@api_bokeh.route('/test', methods=['POST','GET'])
+def test():
+    data = [
+        {
+            "userId":1,
+            "id":1,
+            "title":"tizio",
+            "body":"daaans",
+
+        },
+        {
+            "userId":2,
+            "id":2,
+            "title":"caio",
+            "body":"yoooo",
+        }
+    ]
+    return jsonify(data)
+
+@api_bokeh.route('/test_post', methods=['POST'])
+def test_post():
+    data = request.get_json()
+    print("The data received is: ",data)
+    return jsonify({"hi":1})
