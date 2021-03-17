@@ -6,7 +6,7 @@ from e3f2s.simulator.simulation_data_structures.worker import Worker
 from e3f2s.utils.geospatial_utils import get_od_distance
 
 
-def init_scooter_relocation(vehicle_ids, start_time, start_zone_ids, end_zone_ids, distance, duration):
+def init_scooter_relocation(vehicle_ids, start_time, start_zone_ids, end_zone_ids, distance, duration, worker_id='ND'):
 
     scooter_relocation = {
         "start_time": start_time,
@@ -19,7 +19,8 @@ def init_scooter_relocation(vehicle_ids, start_time, start_zone_ids, end_zone_id
         "start_zone_ids": start_zone_ids,
         "end_zone_ids": end_zone_ids,
         "distance": distance,
-        "duration": duration
+        "duration": duration,
+        "worker": worker_id
     }
     return scooter_relocation
 
@@ -74,8 +75,11 @@ class ScooterRelocationPrimitives:
         self.sim_metrics = sim.sim_metrics
 
         self.relocation_workers = []
-        for initial_position in self.simInput.supply_model.initial_relocation_workers_positions:
-            self.relocation_workers.append(Worker(env, initial_position))
+
+        for i in range(len(self.simInput.supply_model.initial_relocation_workers_positions)):
+            worker_id = i
+            initial_position = self.simInput.supply_model.initial_relocation_workers_positions[i]
+            self.relocation_workers.append(Worker(env, worker_id, initial_position))
 
     def relocate_scooter_single_zone(self, scooter_relocation, move_vehicles=False, worker=None):
 
@@ -157,7 +161,7 @@ class ScooterRelocationPrimitives:
                 current_time = self.start + datetime.timedelta(seconds=self.env.now)
 
                 actual_n_picked_vehicles = min(
-                    scheduled_relocation["start"][step_end],
+                    scheduled_relocation["pick_up"][step_end],
                     len(self.available_vehicles_dict[step_end])
                 )
 
@@ -192,7 +196,7 @@ class ScooterRelocationPrimitives:
                 current_time = self.start + datetime.timedelta(seconds=self.env.now)
 
                 actual_n_dropped_vehicles = min(
-                    scheduled_relocation["end"][step_end],
+                    scheduled_relocation["drop_off"][step_end],
                     len(picked_vehicles)
                 )
 
@@ -209,7 +213,7 @@ class ScooterRelocationPrimitives:
         # Save cumulative relocation stats
         scooter_relocation = init_scooter_relocation(relocated_vehicles, current_time,
                                                      collection_path[1:], distribution_path[1:],
-                                                     total_distance, total_duration)
+                                                     total_distance, total_duration, worker_id=worker.id)
 
         self.update_relocation_stats(scooter_relocation)
 

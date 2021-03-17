@@ -120,5 +120,21 @@ class SimStats():
 				else:
 					self.sim_stats.loc["avg_n_vehicles_relocated"] = 0
 
+				n_workers = 0
+				tot_jobs = 0
+				max_jobs = float('-inf')
+				min_jobs = float('inf')
+				for worker in sim.scooterRelocationStrategy.relocation_workers:
+					n_workers += 1
+					tot_jobs += worker.n_jobs
+					if worker.n_jobs > max_jobs:
+						max_jobs = worker.n_jobs
+					if worker.n_jobs < min_jobs:
+						min_jobs = worker.n_jobs
+
+				self.sim_stats.loc["avg_jobs_per_worker"] = tot_jobs / n_workers
+				self.sim_stats.loc["min_jobs_per_worker"] = min_jobs
+				self.sim_stats.loc["max_jobs_per_worker"] = max_jobs
+
 		for metrics in sim.sim_metrics.metrics_values:
 			self.sim_stats.loc[metrics] = sim.sim_metrics.metrics_values[metrics]

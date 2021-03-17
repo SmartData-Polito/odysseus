@@ -43,6 +43,13 @@ sim_scenario_conf_grid = {
 
     "n_relocation_workers": [12],
     "avg_relocation_speed": [20],  # km/h
+    "relocation_capacity": [50],
+    "relocation_vehicle_consumption": [7],  # l/100km
+    "diesel_price": [0.65],  # $/l (USA)
+    "unlock_fee": [1],  # $
+    "rent_fee": [0.15],  # $/min
+    "avg_relocation_distance": [1],  # km
+    "avg_trip_duration": [10],  # min
 
     "engine_type": ["electric"],
     "vehicle_model_name": ["generic e-scooter"],

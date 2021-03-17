@@ -36,20 +36,29 @@ sim_scenario_conf_grid = {
     "number of workers": [1000],
 
     "scooter_relocation": [True],
-    "scooter_relocation_strategy": ["proactive", "predictive"],
+    "scooter_relocation_strategy": ["proactive"],
     "scooter_relocation_technique": [
         frozenset({
             "start": "delta",
             "end": "delta",
+            "window_width": 1,
         }.items()),
     ],
 
     "vehicle_relocation": [False],
     "vehicle_relocation_scheduling": [False],
 
-    "n_relocation_workers": np.concatenate([np.arange(1, 13), [1000000]]),
+    "n_relocation_workers": np.concatenate([np.arange(1, 13), [1000]]),
     "avg_relocation_speed": [20],  # km/h
-    "relocation_capacity": [50],
+    "relocation_capacity": range(1, 51),
+
+    "relocation_profitability_check": [True],
+    "relocation_vehicle_consumption": [7],  # l/100km
+    "diesel_price": [0.65],  # $/l (USA)
+    "unlock_fee": [1],  # $
+    "rent_fee": [0.15],  # $/min
+    "avg_relocation_distance": [1],  # km
+    "avg_trip_duration": [10],  # min
 
     "engine_type": ["electric"],
     "vehicle_model_name": ["generic e-scooter"],
