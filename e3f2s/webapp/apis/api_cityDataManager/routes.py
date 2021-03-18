@@ -30,19 +30,20 @@ def run():
     cdm.run()
     return jsonify({'Done':1})
 
-@api_cdm.route('/get-cdm-data',methods=['GET']):
+@api_cdm.route('/get-cdm-data',methods=['GET'])
 def get_data(graph = 'all'):
-    param_id = request.args.get("id")
-    graph = request.args.get("graph",default = 'all',type=string)
+    param_id = request.args.get("id",default = 'TEST')
+    graph = request.args.get("graph",default = 'all')
     
     collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
     
-    if graph == 'all'
-        query = {"myId":param_id}
-        results = collection.find(query)
+    if graph == 'all':
+        query = {"_id":param_id}
+        results = list(collection.find(query))
     else:
-        query = [{"$match": {"myId":param_id}}, {"$project": {"myId" : "$myId", graph: 1}]
-        results = collection.aggregate(query)
-    return json.dump(results)
+        query = [{"$match": {"_id":param_id}}, {"$project": {"_id" : "$_id", graph: 1}}]
+        results = list(collection.aggregate(query))
+    print(results)
+    return json.dumps(list(results))
     
 
