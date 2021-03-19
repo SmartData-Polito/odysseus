@@ -45,6 +45,10 @@ def get_time_group_columns (trips_df_norm):
 		trips_df_norm.loc[:, "start_month"] = trips_df_norm.start_time.apply(lambda dt: dt.month)
 		trips_df_norm.loc[:, "end_month"] = trips_df_norm.end_time.apply(lambda dt: dt.month)
 		trips_df_norm.loc[:, "month"] = trips_df_norm.loc[:, "start_month"]
+	if "day" not in trips_df_norm:
+		trips_df_norm.loc[:, "start_day"] = trips_df_norm.start_time.apply(lambda dt: dt.day)
+		trips_df_norm.loc[:, "end_day"] = trips_df_norm.end_time.apply(lambda dt: dt.day)
+		trips_df_norm.loc[:, "day"] = trips_df_norm.loc[:, "start_day"]
 
 	if "start_hour" not in trips_df_norm:
 		trips_df_norm.loc[:, "start_hour"] = trips_df_norm.start_time.apply(lambda d: d.hour).astype(int)
@@ -366,3 +370,18 @@ def update_req_time_info(booking_request):
 		booking_request["daytype"] = "weekday"
 	return booking_request
 
+
+def month_year_iter(start_month, start_year, end_month, end_year):
+	"""
+	MonthYear Iterator. End month is included.
+	:param start_month:
+	:param start_year:
+	:param end_month:
+	:param end_year:
+	:return:
+	"""
+	ym_start = 12*start_year + start_month - 1
+	ym_end = 12*end_year + end_month
+	for ym in range(ym_start, ym_end):
+		y, m = divmod(ym, 12)
+		yield y, m+1

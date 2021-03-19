@@ -10,9 +10,29 @@ from e3f2s.demand_modelling.loader import Loader
 from e3f2s.utils.time_utils import *
 
 
+def get_in_flow_count(trips_destinations):
+
+    in_flow_count = trips_destinations[["zone_id", "year", "month", "day", "end_hour", "end_time"]].groupby(
+        ["zone_id", "year", "month", "day", "end_hour"], as_index=False
+    ).count().rename(columns={"end_time": "out_flow_count"})
+
+    return in_flow_count
+
+
+def get_out_flow_count(trips_origins):
+
+    out_flow_count = trips_origins[["zone_id", "year", "month", "day", "start_hour", "start_time"]].groupby(
+        ["zone_id", "year", "month", "day", "start_hour"], as_index=False
+    ).count().rename(columns={"start_time": "out_flow_count"})
+
+    return out_flow_count
+
+
 class DemandModel:
 
-    def __init__(self, city_name, demand_model_config):
+    def __init__(self, city_name, demand_model_config,
+                 start_year_train, start_month_train, end_year_train, end_month_train,
+                 start_year_test, start_month_test, end_year_test, end_month_test):
 
         self.city_name = city_name
         self.demand_model_config = demand_model_config
@@ -20,20 +40,14 @@ class DemandModel:
 
         self.kde_bw = self.demand_model_config["kde_bandwidth"]
 
-        year_train = self.demand_model_config["year_train"]
-        year_test = self.demand_model_config["year_test"]
-        start_month_train = self.demand_model_config["start_month_train"]
-        end_month_train = self.demand_model_config["end_month_train"]
-        start_month_test = self.demand_model_config["start_month_test"]
-        end_month_test = self.demand_model_config["end_month_test"]
-
         self.bin_side_length = self.demand_model_config["bin_side_length"]
 
         self.bookings_train = pd.DataFrame()
         self.trips_origins_train = pd.DataFrame()
         self.trips_destinations_train = pd.DataFrame()
-        for month in range(start_month_train, end_month_train + 1):
-            self.loader = Loader(self.city_name, self.data_source_id, year_train, month)
+        for year, month in month_year_iter(start_month_train, start_year_train, end_month_train, end_year_train):
+            print("train", year, month)
+            self.loader = Loader(self.city_name, self.data_source_id, year, month)
             bookings, origins, destinations = self.loader.read_data()
             self.bookings_train = pd.concat([self.bookings_train, bookings], ignore_index=True)
             self.trips_origins_train = pd.concat([
@@ -56,8 +70,9 @@ class DemandModel:
         self.bookings_test = pd.DataFrame()
         self.trips_origins_test = pd.DataFrame()
         self.trips_destinations_test = pd.DataFrame()
-        for month in range(start_month_test, end_month_test + 1):
-            self.loader = Loader(self.city_name, self.data_source_id, year_test, month)
+        for year, month in month_year_iter(start_month_test, start_year_test, end_month_test, end_year_test):
+            print("test", year, month)
+            self.loader = Loader(self.city_name, self.data_source_id, year, month)
             bookings, origins, destinations = self.loader.read_data()
             self.bookings_test = pd.concat([self.bookings_test, bookings], ignore_index=True)
             self.trips_origins_test = pd.concat([
@@ -496,3 +511,41 @@ class DemandModel:
         }
         with open(os.path.join(demand_model_path, "integers_dict.pickle"), "wb") as f:
             pickle.dump(integers_dict, f)
+
+    def save_in_flow_count(self):
+
+        demand_model_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "demand_modelling",
+            "demand_models",
+            self.demand_model_config["city"],
+        )
+
+        in_flow_count_train = get_in_flow_count(self.trips_destinations_train)
+        in_flow_count_test = get_in_flow_count(self.trips_destinations_test)
+        in_flow_count = pd.concat([in_flow_count_train, in_flow_count_test], axis=0, ignore_index=True)
+
+        print(in_flow_count.shape)
+
+        in_flow_count.sort_values(["year", "month", "day"]).reset_index(drop=True).rename(
+            columns={"end_hour": "hour"}
+        ).to_csv(os.path.join(demand_model_path, "in_flow_count.csv"))
+
+    def save_out_flow_count(self):
+
+        demand_model_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "demand_modelling",
+            "demand_models",
+            self.demand_model_config["city"],
+        )
+
+        out_flow_count_train = get_out_flow_count(self.trips_origins_train)
+        out_flow_count_test = get_out_flow_count(self.trips_origins_test)
+        out_flow_count = pd.concat([out_flow_count_train, out_flow_count_test], axis=0, ignore_index=True)
+
+        print(out_flow_count.shape)
+
+        out_flow_count.sort_values(["year", "month", "day"]).reset_index(drop=True).rename(
+            columns={"start_hour": "hour"}
+        ).to_csv(os.path.join(demand_model_path, "out_flow_count.csv"))
