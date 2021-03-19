@@ -7,7 +7,6 @@ HOST = 'mongodb://localhost:27017/'
 DATABASE = 'inter_test'
 COLLECTION = 'plots'
 
-# /Users/matteomastrota/Documents/Università/e3f2s/e3f2s/city_data_manager/data/Torino/norm/trips/big_data_db/2017_12.csv
 def set_path():
     ROOT_DIR = os.path.abspath(os.curdir) 
 
@@ -61,7 +60,6 @@ class DataTransformer:
 
         )
         if filetype==".csv":
-            print("It's a CSV!")
             df = pd.read_csv(path_to__data_city_norm_trips_source_year_month_filetype)
         elif filetype==".pickle":
             with open(path_to__data_city_norm_trips_source_year_month_filetype,"rb") as f:
@@ -99,6 +97,16 @@ class DataTransformer:
             
         return transformed
 
+    def save_to_db (self,city,data_source, year, month, data_type_id="trips",filetype=".csv",data_steps_id="norm",filter_list = ["most_used_cars","busy_hours","avg_duration"]):
+        print("start data transformer")
+        db,col = initialize_mongoDB()
+        dt = DataTransformer()
+        data_collected = {"_id":"TEST"}
+        for f in filter_list:
+            plots = dt.transform_cdm(city, data_steps_id, data_type_id, data_source, str(year), str(month), filetype, filter_type=f)
+            data_collected[f] = plots
+        insert_documents_db(col,data_collected)
+
 '''     ]
 filter_types = {
         "most_used_cars": {"name":"most_used_cars","x-axis":"plate", "labelx":"Plate", "labely":"Usage"},
@@ -108,6 +116,7 @@ filter_types = {
 
 # ppp = transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "10", ".csv", filter_type='most_used_cars')
 ppp = transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "10", ".csv", filter_type=filter_types["busy_hours"]["name"])
+'''
 '''
 filter_list = ["most_used_cars","busy_hours","avg_duration"]
 if __name__ == '__main__':
@@ -119,3 +128,4 @@ if __name__ == '__main__':
         plots = dt.transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "12", ".csv", filter_type=f)
         data_collected[f] = plots
     insert_documents_db(col,data_collected)
+'''
