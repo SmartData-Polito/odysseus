@@ -6,7 +6,7 @@ sim_general_conf_grid = {
 
     "data_source_id": ["city_open_data"],
     "sim_technique": ["traceB"],
-    "sim_scenario_name": ["scooter_traceB_relocation_strategies_fixed_capacity"],
+    "sim_scenario_name": ["scooter_traceB_relocation_strategies_set1"],
 
     # Fleet general parameters
     "const_load_factor": [False],
@@ -16,9 +16,9 @@ sim_general_conf_grid = {
     "k_zones_factor": [1],
 
     # Time general parameters
-    "year": [2019],
-    "month_start": [9],
-    "month_end": [10],
+    "year": [2020],
+    "month_start": [1],
+    "month_end": [3],
 
     "save_history": [False]
 }

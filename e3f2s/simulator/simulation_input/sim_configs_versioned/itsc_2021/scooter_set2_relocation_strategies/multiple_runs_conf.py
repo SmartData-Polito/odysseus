@@ -41,7 +41,17 @@ sim_scenario_conf_grid = {
         frozenset({
             "start": "delta",
             "end": "delta",
-            "window_width": 1,
+            "window_width": 2,
+        }.items()),
+        frozenset({
+            "start": "delta",
+            "end": "delta",
+            "window_width": 3,
+        }.items()),
+        frozenset({
+            "start": "delta",
+            "end": "delta",
+            "window_width": 4,
         }.items()),
     ],
 
@@ -50,7 +60,7 @@ sim_scenario_conf_grid = {
 
     "n_relocation_workers": np.concatenate([np.arange(1, 13), [1000]]),
     "avg_relocation_speed": [20],  # km/h
-    "relocation_capacity": range(1, 51),
+    "relocation_capacity": [30],
 
     "relocation_profitability_check": [True],
     "relocation_vehicle_consumption": [7],  # l/100km

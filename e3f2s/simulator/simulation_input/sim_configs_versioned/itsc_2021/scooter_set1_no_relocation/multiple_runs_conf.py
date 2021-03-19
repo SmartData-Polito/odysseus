@@ -2,7 +2,7 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "n_vehicles": np.arange(100, 1001, 50),
+    "n_vehicles": [850],
 
     "time_estimation": [True],
     "queuing": [True],
@@ -35,15 +35,15 @@ sim_scenario_conf_grid = {
 
     "number of workers": [1000],
 
-    "scooter_relocation": [True],
-    "scooter_relocation_strategy": ["magic_relocation"],
+    "scooter_relocation": [False],
+    "scooter_relocation_strategy": ["no_relocation"],
 
     "vehicle_relocation": [False],
     "vehicle_relocation_scheduling": [False],
 
     "n_relocation_workers": [12],
     "avg_relocation_speed": [20],  # km/h
-    "relocation_capacity": [50],
+    "relocation_capacity": [30],
     "relocation_vehicle_consumption": [7],  # l/100km
     "diesel_price": [0.65],  # $/l (USA)
     "unlock_fee": [1],  # $
