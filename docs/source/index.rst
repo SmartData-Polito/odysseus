@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-===================
-Odysseus
-===================
+==========================
+Get started with Odysseus
+==========================
 
 .. toctree::
    :hidden:
@@ -17,135 +17,75 @@ Odysseus
    supply_modelling/index
    modules
 
+Introduction
+=============
+e3f2s is a software for simulation of shared electric fleets in urban environments. It is still a prototype in active development. However, it is already stable enough to be used for research activities. In order to understand what e3f2s is capable of, please first read the three papers available in the folder */home/det_tesi/a.ciociola/input_simulator/papers*.
 
-descrizione di cosa è odysseus ...
+e3f2s is composed by three main modules:
 
+- **city_data_manager**: receives in input data from different sources and output a simulation-ready version of the same data.
+- **simulator**: contains data structures and algorithms for actual simulations.
+- **utils**: contains some utility functions used across the other modules.
 
+In this tutorial, we focus on running our first simulation with e3f2s.
 
-Installation
-============
+Setup repository, environment and data
+========================================
 
-.. note::
-  Full instructions to install the library are available in the `alecioc repository <https://github.com/scikit-mobility/scikit-mobility>`_.
-
-DA MODIFICARE, lascio lo schema
------------------------------------------------
-
-Installation with pip (python >= 3.7 required)
------------------------------------------------
-
-#. Create an environment `skmob`
+First, let's clone the public git repository and move data into the right folder. For now, we skip explanations about *city_data_manager* functionalities.
 
    .. code-block:: console
 
-     python3 -m venv skmob
+     git clone https://github.com/AleCioc/e3f2s my-e3f2s-folder
+     cp -r /home/det_tesi/a.ciociola/input_simulator/data my-e3f2s-folder/e3f2s/city_data_manager
 
-#. Activate
 
-   .. code-block:: console
-
-     source skmob/bin/activate
-
-#. Install skmob
+Then, let's install all the necessary libraries.
 
    .. code-block:: console
 
-     pip install scikit-mobility
+     pip install --user -r my-e3f2s-folder/requirements.txt
 
-#. OPTIONAL to use `scikit-mobility` on the jupyter notebook
 
-Activate the virutalenv:
+Configuring simulation input
+=============================
+
+The folder *e3f2s/simulator/simulation_input* contains configuration files for simulation.
+
+In particular:
+
+- **sim_configs_target.json**: contains the name of the configuration to run
+- **sim_configs_versioned**: contains one folder for each saved configuration e.g. *sim_configs_versioned/turin_iscc_set1* contains the configuration for the first set of simulation used in ISCC paper.
+
+Each configuration folder must contain the following Python files:
+
+- **sim_run_conf.py**: specifies used data source, run mode (single_run or multiple_runs), number of cores to use in case of multiple runs, simulation type (trace-driven or model-driven) and output folder name
+- **sim_general_conf.py**: specifies macroscopic parameters about spatial and temporal configuration, as well as fleet load factor policy.
+- **single_run_conf.py**: specifies scenario configuration for single run
+- **model_validation_conf.py**: special case of single run
+- **multiple_runs_conf.py**: specifies scenario configuration for multiple runs
+- **vehicle_config.py**: specifies vehicles characteristics
+- **cost_conf.py**: specifies cost/revenue configuration
+
+Let's create a new folder for a new configuration:
+
 
    .. code-block:: console
 
-     source skmob/bin/activate
+     cp -r /home/det_tesi/a.ciociola/input_simulator/ my-e3f2s-folder/e3f2s/simulator/simulation_input/sim_configs_versioned/
 
-Install jupyter notebook:
-
-   .. code-block:: console
-
-     pip install jupyter
-
-Run jupyter notebook
+Modify configurations as you desire, then run the simulator:
 
    .. code-block:: console
 
-     jupyter notebook
+     cd my-e3f2s-folder/
+     python -m e3f2s.simulator
 
-(Optional) install the kernel with a specific name
-
-   .. code-block:: console
-
-     ipython kernel install --user --name=skmob
-
-
-Installation with conda - miniconda
------------------------------------------------
-
-#. Create an environment `skmob` and install pip
+Let's wait for simulation to finish and let's check the results folder and the figures folder (figures are created automatically only in single run mode)
 
    .. code-block:: console
 
-     conda create -n skmob pip python=3.7 rtree
+     ls my-e3f2s-folder/simulator/results/Torino/single_run/test
+     ls my-e3f2s-folder/simulator/figures/Torino/single_run/test
 
-#. Activate
-
-   .. code-block:: console
-
-     conda activate skmob
-
-#. Install skmob
-
-   .. code-block:: console
-
-     conda install -c conda-forge scikit-mobility
-
-#. OPTIONAL to use `scikit-mobility` on the jupyter notebook
-
-Install the kernel
-
-   .. code-block:: console
-
-     conda install jupyter -c conda-forge
-
-Open a notebook and check if the kernel `skmob` is on the kernel list. If not, run the following:
-
-On Mac and Linux
-
-   .. code-block:: console
-
-     env=$(basename `echo $CONDA_PREFIX`)
-     python -m ipykernel install --user --name "$env" --display-name "Python [conda env:"$env"]"
-
-On Windows
-
-   .. code-block:: console
-     python -m ipykernel install --user --name skmob --display-name "Python [conda env: skmob]"
-
-
-You may run into dependency issues if you try to import the package in Python. If so, try installing the following packages as followed.
-
-.. code-block:: console
-
-  conda install -n skmob pyproj urllib3 chardet markupsafe
-
-
-Known Issues
-^^^^^^^^^^^^
-
-the installation of package rtree could not work with pip within a conda environment. If so, try
-
-.. code-block:: console
-
-  pip install "rtree>=0.8,<0.9"
-
-or install rtree with conda
-
-.. code-block:: console
-
-  conda install rtree
-
-
-.. warning::
-  Odysseus is an ongoing open-source project created by the research community. The library is in its first BETA release, as well as the documentation. In the case you find errors, or you simply have suggestions, please open an issue in the repository. We would love to hear from you!
-
+Done! Now we can explore our results and eventually produce other analysis and plots.

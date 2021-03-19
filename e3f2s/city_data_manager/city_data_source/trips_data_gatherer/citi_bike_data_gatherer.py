@@ -12,9 +12,9 @@ class DataGatherer:
     """
     Class for automatically downloading data relating to the New York Citi bike sharing operator from a remote database.
 
-            :param output_path: path in which to store the file
-            :type output_path: str
-            :param structured_dataset_name:
+    :param output_path: path in which to store the file
+    :type output_path: str
+    :param structured_dataset_name:
             """
     def __init__(self, output_path, structured_dataset_name):
         self.root_url = 'https://s3.amazonaws.com/tripdata/'
