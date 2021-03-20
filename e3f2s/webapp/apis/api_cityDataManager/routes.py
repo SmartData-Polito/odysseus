@@ -14,7 +14,7 @@ def set_path():
     ROOT_DIR = os.path.abspath(os.curdir)
     cdm_data_path = os.path.join(
 	    ROOT_DIR,
-        "e3f2s/city_data_manager/"
+        "e3f2s/city_data_manager/",
 	    "data"
     )
     return cdm_data_path
@@ -31,18 +31,53 @@ def extract_params (body):
     data_source_ids = body["data_source_ids"]
     return cities,years,months,data_source_ids
 
-def summary_available_data():
-    summary = {}
-    path = set_path()
+def count_trips(filename):
+    with open(filename,"rb") as f:
+        return sum(1 for line in f)
+
+def extract_format(filepath):
+    source,name = os.path.split(os.path.splitext(filepath)[0])
+    _,data_source_id = os.path.split(source)
+    year,month = name.split("_")
+    return data_source_id,year,month
+
+def retrieve_per_city(path,level="norm",datatype = "trips",):
+    data = {}
     print("PATH",path)
     for subdir, dirs, files in os.walk(path):
-        print(subdir)
         for f in files:
-            print(os.path.join(subdir,f))
-    return
+            filepath = os.path.join(subdir,f)
+            if level not in filepath or datatype not in filepath:
+                continue
+            elif level in filepath and filepath.endswith(".csv"):
+                print("FILEPATH: ",filepath)
+                data_source_id,year,month = extract_format(filepath)
+                number_trips = count_trips(filepath)
+                #if data source already added append to current data structure
+                if data_source_id in data.keys():
+                    # if year is not already present append dictionary
+                    if year not in data[data_source_id].keys():
+                        data[data_source_id][year] = {month:number_trips}
+                    else:
+                        data[data_source_id][year][month] = number_trips
+                else:
+                    data[data_source_id] = {year : {month:number_trips}}
+    print(data)
+    return data
 
-@api_cdm.route('/config',methods=['POST'])
-def config():
+def summary_available_data():
+    summary = {}
+    # Get list of cities
+    path = set_path()
+    list_subfolders_with_paths = [f.path for f in os.scandir(path) if f.is_dir()]
+    avalaible_cities = [os.path.basename(os.path.normpath(c)) for c in list_subfolders_with_paths]
+    for paths,city in zip(list_subfolders_with_paths,avalaible_cities):
+        data = retrieve_per_city(paths)
+        summary[city] = data
+    return summary
+
+@api_cdm.route('/simulate',methods=['POST'])
+def simulate():
     """
     Receive the configuration from the front end and run simulation
     """
@@ -61,13 +96,13 @@ def config():
     results = list(collection.find(query))
     return jsonify({'Result':"Success"})
 
-@api_cdm.route('/run',methods=['GET','PUT','POST'])
+@api_cdm.route('/available_data',methods=['GET'])
 def run():
     print("Start simulation")
     # cdm = CityDataManager()
     # cdm.run()
-    summary_available_data()
-    return jsonify({'Done':1})
+    summary = summary_available_data()
+    return jsonify(summary)
 
 @api_cdm.route('/get-cdm-data',methods=['GET'])
 def get_data(graph = 'all'):
