@@ -65,14 +65,14 @@ def retrieve_per_city(path,level="norm",datatype = "trips",):
     print(data)
     return data
 
-def summary_available_data():
+def summary_available_data(level='norm'):
     summary = {}
     # Get list of cities
     path = set_path()
     list_subfolders_with_paths = [f.path for f in os.scandir(path) if f.is_dir()]
     avalaible_cities = [os.path.basename(os.path.normpath(c)) for c in list_subfolders_with_paths]
     for paths,city in zip(list_subfolders_with_paths,avalaible_cities):
-        data = retrieve_per_city(paths)
+        data = retrieve_per_city(paths,level=level)
         summary[city] = data
     return summary
 
@@ -99,9 +99,10 @@ def simulate():
 @api_cdm.route('/available_data',methods=['GET'])
 def run():
     print("Start simulation")
+    level = request.args.get("level",default = 'norm')
     # cdm = CityDataManager()
     # cdm.run()
-    summary = summary_available_data()
+    summary = summary_available_data(level)
     return jsonify(summary)
 
 @api_cdm.route('/get-cdm-data',methods=['GET'])
