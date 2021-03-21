@@ -98,7 +98,7 @@ def simulate():
 
 @api_cdm.route('/available_data',methods=['GET'])
 def run():
-    print("Start simulation")
+    print("Return available data per cities")
     level = request.args.get("level",default = 'norm')
     # cdm = CityDataManager()
     # cdm.run()
