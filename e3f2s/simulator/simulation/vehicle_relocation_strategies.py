@@ -152,7 +152,7 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
 
         if technique == "delta":  # demand proxy: origin scores, current status proxy: aggregation
 
-            next_hour_origin_scores = self.simInput.origin_scores[daytype][(hour + 1) % 24]
+            next_hour_origin_scores = self.simInput.avg_out_flows_train[daytype][(hour + 1) % 24]
 
             if "end_demand_weight" in dict(self.simInput.sim_scenario_conf["vehicle_relocation_technique"]):
                 w1 = dict(self.simInput.sim_scenario_conf["vehicle_relocation_technique"])["end_demand_weight"]
@@ -206,7 +206,7 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
 
         if technique == "delta":  # demand proxy: origin scores, current status proxy: aggregation
 
-            next_hour_origin_scores = self.simInput.origin_scores[daytype][(hour + 1) % 24]
+            next_hour_origin_scores = self.simInput.avg_out_flows_train[daytype][(hour + 1) % 24]
 
             if "start_demand_weight" in dict(self.simInput.sim_scenario_conf["vehicle_relocation_technique"]):
                 w1 = dict(self.simInput.sim_scenario_conf["vehicle_relocation_technique"])["start_demand_weight"]

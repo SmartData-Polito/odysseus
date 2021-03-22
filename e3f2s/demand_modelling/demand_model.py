@@ -161,8 +161,8 @@ class DemandModel:
         self.request_rates = self.get_requests_rates()
         self.get_grid_indexes()
         self.trip_kdes = self.get_trip_kdes()
-        self.origin_scores = self.get_origin_scores()
-        self.destination_scores = self.get_destination_scores()
+        self.avg_out_flows_train = self.get_avg_out_flows()
+        self.avg_in_flows_train = self.get_avg_in_flows()
 
     def map_zones_on_trips(self, zones):
         self.trips_origins_train = gpd.sjoin(
@@ -403,51 +403,51 @@ class DemandModel:
 
         return self.trip_kdes
 
-    def get_origin_scores(self):
-        self.origin_scores = {}
+    def get_avg_out_flows(self):
+        self.avg_out_flows_train = {}
         for daytype, daytype_df in self.trips_origins_train.groupby("start_daytype"):
-            self.origin_scores[daytype] = {}
+            self.avg_out_flows_train[daytype] = {}
             for hour, hour_df in daytype_df.groupby("start_hour"):
-                self.origin_scores[daytype][hour] = {}
-                total_starts = len(hour_df)
+                self.avg_out_flows_train[daytype][hour] = {}
                 for zone, zone_df in hour_df.groupby("zone_id"):
                     if zone in self.valid_zones:
-                        self.origin_scores[daytype][hour][zone] = len(zone_df) / total_starts
+                        self.avg_out_flows_train[daytype][hour][zone] = zone_df[["day", "start_time"]].groupby("day")\
+                            .count().mean()[0]
 
         for daytype in ["weekday", "weekend"]:
             for hour in range(24):
                 for zone in self.valid_zones:
-                    if daytype not in self.origin_scores:
-                        self.origin_scores[daytype] = {}
-                    if hour not in self.origin_scores[daytype]:
-                        self.origin_scores[daytype][hour] = {}
-                    if zone not in self.origin_scores[daytype][hour]:
-                        self.origin_scores[daytype][hour][zone] = 0
+                    if daytype not in self.avg_out_flows_train:
+                        self.avg_out_flows_train[daytype] = {}
+                    if hour not in self.avg_out_flows_train[daytype]:
+                        self.avg_out_flows_train[daytype][hour] = {}
+                    if zone not in self.avg_out_flows_train[daytype][hour]:
+                        self.avg_out_flows_train[daytype][hour][zone] = 0
 
-        return self.origin_scores
+        return self.avg_out_flows_train
 
-    def get_destination_scores(self):
-        self.destination_scores = {}
+    def get_avg_in_flows(self):
+        self.avg_in_flows_train = {}
         for daytype, daytype_df in self.trips_destinations_train.groupby("end_daytype"):
-            self.destination_scores[daytype] = {}
+            self.avg_in_flows_train[daytype] = {}
             for hour, hour_df in daytype_df.groupby("end_hour"):
-                self.destination_scores[daytype][hour] = {}
-                total_ends = len(hour_df)
+                self.avg_in_flows_train[daytype][hour] = {}
                 for zone, zone_df in hour_df.groupby("zone_id"):
                     if zone in self.valid_zones:
-                        self.destination_scores[daytype][hour][zone] = len(zone_df) / total_ends
+                        self.avg_in_flows_train[daytype][hour][zone] = zone_df[["day", "end_time"]].groupby("day")\
+                            .count().mean()[0]
 
         for daytype in ["weekday", "weekend"]:
             for hour in range(24):
                 for zone in self.valid_zones:
-                    if daytype not in self.destination_scores:
-                        self.destination_scores[daytype] = {}
-                    if hour not in self.destination_scores[daytype]:
-                        self.destination_scores[daytype][hour] = {}
-                    if zone not in self.destination_scores[daytype][hour]:
-                        self.destination_scores[daytype][hour][zone] = 0
+                    if daytype not in self.avg_in_flows_train:
+                        self.avg_in_flows_train[daytype] = {}
+                    if hour not in self.avg_in_flows_train[daytype]:
+                        self.avg_in_flows_train[daytype][hour] = {}
+                    if zone not in self.avg_in_flows_train[daytype][hour]:
+                        self.avg_in_flows_train[daytype][hour][zone] = 0
 
-        return self.destination_scores
+        return self.avg_in_flows_train
 
     def save_results(self):
 
@@ -495,10 +495,10 @@ class DemandModel:
             pickle.dump(self.trip_kdes, f)
         with open(os.path.join(demand_model_path, "valid_zones.pickle"), "wb") as f:
             pickle.dump(self.valid_zones, f)
-        with open(os.path.join(demand_model_path, "origin_scores.pickle"), "wb") as f:
-            pickle.dump(self.origin_scores, f)
-        with open(os.path.join(demand_model_path, "destination_scores.pickle"), "wb") as f:
-            pickle.dump(self.destination_scores, f)
+        with open(os.path.join(demand_model_path, "avg_out_flows_train.pickle"), "wb") as f:
+            pickle.dump(self.avg_out_flows_train, f)
+        with open(os.path.join(demand_model_path, "avg_in_flows_train.pickle"), "wb") as f:
+            pickle.dump(self.avg_in_flows_train, f)
 
         integers_dict = {
             "avg_request_rate" : self.avg_request_rate,

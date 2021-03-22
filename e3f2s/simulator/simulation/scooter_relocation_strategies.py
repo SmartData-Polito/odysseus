@@ -223,43 +223,33 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
         if technique == "delta":
 
-            if "end_demand_weight" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
-                demand_weight = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["end_demand_weight"]
-            else:
-                demand_weight = 0.5
-
-            delta_by_zone = self.compute_delta(origin_scores_list, destination_scores_list, demand_weight)
+            delta_by_zone = self.compute_delta(origin_scores_list, destination_scores_list)
 
             delta_by_zone = {
-                k: v for k, v in
+                zone: delta for zone, delta in
                 sorted(delta_by_zone.items(), key=lambda item: item[1])
+                if delta > 0
             }
-
-            if "end_vehicles_factor" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
-                end_vehicles_factor = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["end_vehicles_factor"]
-            else:
-                end_vehicles_factor = 1
 
             for i in range(min(n, len(delta_by_zone))):
                 zone, delta = delta_by_zone.popitem()
-                n_dropped_vehicles = int(delta * end_vehicles_factor * self.simInput.n_vehicles_sim)
-                if n_dropped_vehicles > 0:
-                    ending_zone_ids.append(zone)
-                    n_dropped_vehicles_list.append(n_dropped_vehicles)
+                n_dropped_vehicles = int(delta)
+                ending_zone_ids.append(zone)
+                n_dropped_vehicles_list.append(n_dropped_vehicles)
 
         return ending_zone_ids, n_dropped_vehicles_list
 
-    def choose_starting_zone(self, n=1, origin_scores_list=None, destination_scores_list=None):
+    def choose_starting_zone(self, n=1, pred_out_flows_list=None, pred_in_flows_list=None):
         """
         Chooses n starting zones given a list of origin and destination scores, according to the selected zone selection
         technique. If the technique defines a priority (e.g.: vehicles aggregation or Delta value), returned lists are
         ordered by relocation priority.
         :param n: Maximum number of zones to be selected as starting zones.
-        :param origin_scores_list: List of origin scores. It is required by 'Delta' technique. Each element of this list
-        should correspond to a dictionary of probabilities for a given hour. Each value of this dictionary should be the
-        probability for a given zone to be selected as an origin zone for a trip.
-        :param destination_scores_list: List of destination scores. It is required by 'Delta' technique. Its structure
-        is similar to origin_scores_list. See the latter for further details.
+        :param pred_out_flows_list: List of hourly predicted out flows. It is required by 'Delta' technique. Each
+        element of this list should correspond to a dictionary of predicted flows for a given hour. Each value of this
+        dictionary should be the predicted out flow for a given zone.
+        :param pred_in_flows_list: List of hourly predicted in flows. It is required by 'Delta' technique. Its structure
+        is similar to out_flows_list. See the latter for further details.
         :return: A list of proposed starting zones and a list of proposed numbers of vehicles to be picked up from such
         zones. If the technique defines a priority, returned lists are ordered by relocation priority.
         """
@@ -280,29 +270,19 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
         if technique == "delta":
 
-            if "start_demand_weight" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
-                demand_weight = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["start_demand_weight"]
-            else:
-                demand_weight = 0.5
-
-            delta_by_zone = self.compute_delta(origin_scores_list, destination_scores_list, demand_weight)
+            delta_by_zone = self.compute_delta(pred_out_flows_list, pred_in_flows_list)
 
             delta_by_zone = {
-                k: v for k, v in
+                zone: delta for zone, delta in
                 sorted(delta_by_zone.items(), key=lambda item: -item[1])
+                if delta < 0
             }
-
-            if "start_vehicles_factor" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
-                start_vehicles_factor = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["start_vehicles_factor"]
-            else:
-                start_vehicles_factor = 1
 
             for i in range(min(n, len(delta_by_zone))):
                 zone, delta = delta_by_zone.popitem()
-                n_picked_vehicles = int(-delta * start_vehicles_factor * self.simInput.n_vehicles_sim)
-                if n_picked_vehicles > 0:
-                    starting_zone_ids.append(zone)
-                    n_picked_vehicles_list.append(n_picked_vehicles)
+                n_picked_vehicles = int(-delta)
+                starting_zone_ids.append(zone)
+                n_picked_vehicles_list.append(n_picked_vehicles)
 
         return starting_zone_ids, n_picked_vehicles_list
 
@@ -323,53 +303,50 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
         else:
             window_width = 1
 
-        origin_scores_list = []
-        destination_scores_list = []
+        pred_out_flows_list = []
+        pred_in_flows_list = []
 
         if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "predictive":
-            # Prepare origin and destination scores from past hours
-            if self.current_hour_n_bookings:
-                self.past_hours_n_bookings.append(self.current_hour_n_bookings)
+            # Prepare flows from past hours
+            if self.current_hour_origin_count:
                 self.past_hours_origin_counts.append(self.current_hour_origin_count)
                 self.past_hours_destination_counts.append(self.current_hour_destination_count)
 
-                if len(self.past_hours_n_bookings) > window_width:
-                    self.past_hours_n_bookings.pop(0)
+                if len(self.past_hours_origin_counts) > window_width:
                     self.past_hours_origin_counts.pop(0)
                     self.past_hours_destination_counts.pop(0)
 
-                for i in range(len(self.past_hours_n_bookings)):
-                    past_n_bookings = self.past_hours_n_bookings[i]
+                for i in range(len(self.past_hours_origin_counts)):
                     past_origin_count = self.past_hours_origin_counts[i]
                     past_destination_count = self.past_hours_destination_counts[i]
 
-                    past_origin_scores = {}
-                    past_destination_scores = {}
+                    past_origin_counts = {}
+                    past_destination_counts = {}
                     for zone in self.simInput.valid_zones:
                         if zone in past_origin_count:
-                            past_origin_scores[zone] = past_origin_count[zone] / past_n_bookings
+                            past_origin_counts[zone] = past_origin_count[zone]
                         else:
-                            past_origin_scores[zone] = 0
+                            past_origin_counts[zone] = 0
                         if zone in past_destination_count:
-                            past_destination_scores[zone] = past_destination_count[zone] / past_n_bookings
+                            past_destination_counts[zone] = past_destination_count[zone]
                         else:
-                            past_destination_scores[zone] = 0
+                            past_destination_counts[zone] = 0
 
-                    origin_scores_list.append(past_origin_scores)
-                    destination_scores_list.append(past_destination_scores)
+                    pred_out_flows_list.append(past_origin_counts)
+                    pred_in_flows_list.append(past_destination_counts)
             else:
                 return
 
             self.reset_current_hour_stats()
 
         else:
-            # Get origin and destination scores from precomputed distributions
-            origin_scores = self.simInput.origin_scores
-            destination_scores = self.simInput.destination_scores
+            # Get avg flows from past data
+            pred_out_flows = self.simInput.avg_out_flows_train
+            pred_in_flows = self.simInput.avg_in_flows_train
 
             for i in range(window_width):
-                origin_scores_list.append(origin_scores[daytype][(hour + 1 + i) % 24])
-                destination_scores_list.append(destination_scores[daytype][(hour + 1 + i) % 24])
+                pred_out_flows_list.append(pred_out_flows[daytype][(hour + 1 + i) % 24])
+                pred_in_flows_list.append(pred_in_flows[daytype][(hour + 1 + i) % 24])
 
         # Choose the maximum number of 'pick up' and 'drop off' zones proposals to be computed
         n_relocations = int(len(self.available_vehicles_dict) / 2)  # an upper bound
@@ -378,13 +355,13 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
             n_free_workers = self.relocation_workers_resource.capacity - self.relocation_workers_resource.count
             n_relocations = min(n_relocations, n_free_workers)
 
-        # Compute starting and ending zones proposals
+        # Compute proposals of starting and ending zones for relocations
         self.starting_zone_ids, self.n_picked_vehicles_list = self.choose_starting_zone(n=n_relocations,
-                                                                                        origin_scores_list=origin_scores_list,
-                                                                                        destination_scores_list=destination_scores_list)
+                                                                                        pred_out_flows_list=pred_out_flows_list,
+                                                                                        pred_in_flows_list=pred_in_flows_list)
         self.ending_zone_ids, self.n_dropped_vehicles_list = self.choose_ending_zone(n=n_relocations,
-                                                                                     origin_scores_list=origin_scores_list,
-                                                                                     destination_scores_list=destination_scores_list,
+                                                                                     origin_scores_list=pred_out_flows_list,
+                                                                                     destination_scores_list=pred_in_flows_list,
                                                                                      daytype=daytype, hour=hour)
 
         if self.starting_zone_ids and self.ending_zone_ids:
@@ -635,21 +612,18 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                                                                               final_collection_path, distribution_path,
                                                                               nearest_worker))
 
-    def compute_delta(self, origin_scores_list, destination_scores_list, demand_weight=0.5):
+    def compute_delta(self, pred_out_flows_list, pred_in_flows_list):
 
-        window_width = len(origin_scores_list)
-
-        w1 = demand_weight
-        w2 = 1 - w1
+        window_width = len(pred_out_flows_list)
 
         delta_by_zone = {}
         for zone, vehicles in self.available_vehicles_dict.items():
-            demand_prediction = 0
+            flow_prediction = 0
             for i in range(window_width):
-                demand_prediction += origin_scores_list[i][zone]
-                demand_prediction -= destination_scores_list[i][zone]
-            demand_prediction /= window_width
-            delta = w1 * demand_prediction - w2 * (len(vehicles) / self.simInput.n_vehicles_sim)
+                flow_prediction += pred_out_flows_list[i][zone]
+                flow_prediction -= pred_in_flows_list[i][zone]
+            flow_prediction /= window_width
+            delta = flow_prediction - len(vehicles)
             delta_by_zone[zone] = delta
 
         return delta_by_zone

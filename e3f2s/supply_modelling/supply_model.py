@@ -8,7 +8,6 @@ from shapely.geometry import Point
 import datetime
 import pytz
 from e3f2s.supply_modelling.energymix_loader import EnergyMix
-from e3f2s.demand_modelling.demand_model_configs.default_config import demand_model_configs_grid
 
 
 
