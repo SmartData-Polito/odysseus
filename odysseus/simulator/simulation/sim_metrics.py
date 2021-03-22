@@ -13,6 +13,11 @@ class SimMetrics:
             elif self.metrics_dict[metrics] == "max":
                 self.metrics_values[metrics] = float('-inf')
 
+            elif self.metrics_dict[metrics] == "avg":
+                self.metrics_values[metrics] = {}
+                self.metrics_values[metrics]["tot"] = 0
+                self.metrics_values[metrics]["count"] = 0
+
     def update_metrics(self, metrics, value):
         if self.metrics_dict[metrics] == "sum":
             self.metrics_values[metrics] += value
@@ -24,3 +29,14 @@ class SimMetrics:
         elif self.metrics_dict[metrics] == "max":
             if value > self.metrics_values[metrics]:
                 self.metrics_values[metrics] = value
+
+        elif self.metrics_dict[metrics] == "avg":
+            self.metrics_values[metrics]["tot"] += value
+            self.metrics_values[metrics]["count"] += 1
+
+    def metrics_iter(self):
+        for metrics in self.metrics_dict:
+            if self.metrics_dict[metrics] == "avg":
+                yield metrics, self.metrics_values[metrics]["tot"] / self.metrics_values[metrics]["count"]
+            else:
+                yield metrics, self.metrics_values[metrics]

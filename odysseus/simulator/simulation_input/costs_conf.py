@@ -49,6 +49,12 @@ vehicle_cost = {
 			"washing_cost": 8,
 			"disinfection_cost": 15,
 			"cost_permin": 0.19
+		},
+		"generic e-scooter": {
+			"leasing_cost": 0,
+			"washing_cost": 0,
+			"disinfection_cost": 0,
+			"cost_permin": 0
 		}
 	}
 }

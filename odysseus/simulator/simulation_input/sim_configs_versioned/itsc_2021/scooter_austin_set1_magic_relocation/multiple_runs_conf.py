@@ -2,7 +2,7 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "n_vehicles": np.arange(100, 2001, 100),
+    "n_vehicles": [5000],
 
     "time_estimation": [True],
     "queuing": [True],
@@ -35,16 +35,22 @@ sim_scenario_conf_grid = {
 
     "number of workers": [1000],
 
-    "scooter_relocation": [False],
-    "scooter_relocation_strategy": ["no_relocation"],
+    "scooter_relocation": [True],
+    "scooter_relocation_strategy": ["magic_relocation"],
 
     "vehicle_relocation": [False],
     "vehicle_relocation_scheduling": [False],
 
     "n_relocation_workers": [12],
     "avg_relocation_speed": [20],  # km/h
+    "relocation_capacity": [30],
+    "relocation_vehicle_consumption": [7],  # l/100km
+    "diesel_price": [0.65],  # $/l (USA)
+    "unlock_fee": [1],  # $
+    "rent_fee": [0.15],  # $/min
+    "avg_relocation_distance": [1],  # km
+    "avg_trip_duration": [10],  # min
 
     "engine_type": ["electric"],
     "vehicle_model_name": ["generic e-scooter"],
-    "year_energymix": ["2019"],
 }

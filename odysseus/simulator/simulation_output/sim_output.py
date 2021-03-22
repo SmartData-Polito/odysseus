@@ -30,8 +30,6 @@ class SimOutput():
 			self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 			self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
 			self.sim_users_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
-			if self.sim_scenario_conf["scooter_relocation"]:
-				self.sim_scooter_relocations = pd.DataFrame(sim.scooterRelocationStrategy.sim_scooter_relocations)
 			if self.sim_scenario_conf["vehicle_relocation"]:
 				self.sim_vehicle_relocations = pd.DataFrame(sim.vehicleRelocationStrategy.sim_vehicle_relocations)
 
@@ -232,26 +230,6 @@ class SimOutput():
 				self.sim_stats.loc["cum_relo_khw"] = 0
 				self.sim_stats.loc["avg_hourly_relo_t"] = 0
 
-			if self.sim_scenario_conf["scooter_relocation"]:
-				self.sim_stats.loc["n_scooter_relocations"] = \
-					len(self.sim_scooter_relocations)
-
-				if len(self.sim_scooter_relocations):
-					self.sim_stats.loc["tot_scooter_relocations_distance"] = \
-						self.sim_scooter_relocations.distance.sum()
-				else:
-					self.sim_stats.loc["tot_scooter_relocations_distance"] = 0
-			elif self.sim_scenario_conf["vehicle_relocation"]:
-				self.sim_stats.loc["n_vehicle_relocations"] = \
-					len(self.sim_vehicle_relocations)
-
-				if len(self.sim_vehicle_relocations):
-					self.sim_stats.loc["tot_vehicle_relocations_distance"] = \
-						self.sim_vehicle_relocations.distance.sum()
-				else:
-					self.sim_stats.loc["tot_scooter_relocations_distance"] = 0
-
-
 			self.grid[
 				"origin_count"
 			] = self.sim_booking_requests.origin_id.value_counts()
@@ -318,6 +296,9 @@ class SimOutput():
 				zone_df = pd.DataFrame(sim.chargingStrategy.zone_dict[key].status_dict_list)
 				zone_df["zone_id"] = key
 				self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)
+
+			if self.sim_scenario_conf["scooter_relocation"]:
+				self.relocation_history = pd.DataFrame(sim.scooterRelocationStrategy.sim_scooter_relocations)
 
 		if "vehicle_relocation" in self.sim_scenario_conf and self.sim_scenario_conf["vehicle_relocation"]:
 			self.sim_stats.loc["n_vehicle_relocations"] = sim.vehicleRelocationStrategy.n_vehicle_relocations

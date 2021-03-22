@@ -90,12 +90,51 @@ class Loader:
             self.trips = self.trips[(self.trips.start_longitude > 12) & (self.trips.start_longitude < 14)]
             self.trips = self.trips[(self.trips.end_latitude > 51) & (self.trips.end_latitude < 53)]
             self.trips = self.trips[(self.trips.end_longitude > 12) & (self.trips.end_longitude < 14)]
+        elif self.city_name == 'Minneapolis':
+            self.trips = self.trips[(self.trips.start_latitude > 44.88) & (self.trips.start_latitude < 45.06)]
+            self.trips = self.trips[(self.trips.start_longitude > -93.35) & (self.trips.start_longitude < -93.20)]
+            self.trips = self.trips[(self.trips.end_latitude > 44.88) & (self.trips.end_latitude < 45.06)]
+            self.trips = self.trips[(self.trips.end_longitude > -93.35) & (self.trips.end_longitude < -93.20)]
+        elif self.city_name == 'Austin':
+            self.trips = self.trips[(self.trips.start_latitude > 30.15) & (self.trips.start_latitude < 30.40)]
+            self.trips = self.trips[(self.trips.start_longitude > -97.85) & (self.trips.start_longitude < -97.65)]
+            self.trips = self.trips[(self.trips.end_latitude > 30.15) & (self.trips.end_latitude < 30.40)]
+            self.trips = self.trips[(self.trips.end_longitude > -97.85) & (self.trips.end_longitude < -97.65)]
+        elif self.city_name == 'Norfolk':
+            self.trips = self.trips[(self.trips.start_latitude > 36.775) & (self.trips.start_latitude < 36.975)]
+            self.trips = self.trips[(self.trips.start_longitude > -76.35) & (self.trips.start_longitude < -76.15)]
+            self.trips = self.trips[(self.trips.end_latitude > 36.775) & (self.trips.end_latitude < 36.975)]
+            self.trips = self.trips[(self.trips.end_longitude > -76.35) & (self.trips.end_longitude < -76.15)]
         elif self.city_name == 'Kansas City':
-            self.trips = self.trips[(self.trips.start_latitude > 38.95) & (self.trips.start_latitude < 39.20)]
-            self.trips = self.trips[(self.trips.end_latitude > 38.95) & (self.trips.end_latitude < 39.20)]
+            self.trips = self.trips[(self.trips.start_latitude > 38.950) & (self.trips.start_latitude < 39.150)]
+            self.trips = self.trips[(self.trips.start_longitude > -94.675) & (self.trips.start_longitude < -94.45)]
+            self.trips = self.trips[(self.trips.end_latitude > 38.950) & (self.trips.end_latitude < 39.150)]
+            self.trips = self.trips[(self.trips.end_longitude > -94.675) & (self.trips.end_longitude < -94.45)]
+        elif self.city_name == 'Chicago':
+            self.trips = self.trips[(self.trips.start_latitude > 41.80) & (self.trips.start_latitude < 41.98)]
+            self.trips = self.trips[(self.trips.start_longitude > -87.85) & (self.trips.start_longitude < -87.60)]
+            self.trips = self.trips[(self.trips.end_latitude > 41.80) & (self.trips.end_latitude < 41.98)]
+            self.trips = self.trips[(self.trips.end_longitude > -87.85) & (self.trips.end_longitude < -87.60)]
+        elif self.city_name == 'Calgary':
+            self.trips = self.trips[(self.trips.start_latitude > 50.95) & (self.trips.start_latitude < 51.10)]
+            self.trips = self.trips[(self.trips.start_longitude > -114.25) & (self.trips.start_longitude < -113.95)]
+            self.trips = self.trips[(self.trips.end_latitude > 50.95) & (self.trips.end_latitude < 51.10)]
+            self.trips = self.trips[(self.trips.end_longitude > -114.25) & (self.trips.end_longitude < -113.95)]
 
-        self.trips_origins = self.trips_origins.loc[self.trips.index]
-        self.trips_destinations = self.trips_destinations.loc[self.trips.index]
+        if "trip_id" in self.trips.columns:
+            self.trips_origins = gpd.GeoDataFrame(pd.merge(
+                self.trips_origins,
+                self.trips["trip_id"],
+            ))
+            self.trips_origins.crs = "epsg:4326"
+            self.trips_destinations = gpd.GeoDataFrame(pd.merge(
+                self.trips_destinations,
+                self.trips["trip_id"],
+            ))
+            self.trips_destinations.crs = "epsg:4326"
+        else:
+            self.trips_origins = self.trips_origins.loc[self.trips.index]
+            self.trips_destinations = self.trips_destinations.loc[self.trips.index]
 
         self.trips.start_time = pd.to_datetime(self.trips.start_time)
         self.trips_origins.start_time = self.trips.start_time

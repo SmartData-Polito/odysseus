@@ -1,12 +1,12 @@
 sim_general_conf_grid = {
 
     # Run configuration
-    "city": ["Louisville", "Minneapolis"],
+    "city": ["Austin"],
     "sim_run_mode": ["multiple_runs"],
 
     "data_source_id": ["city_open_data"],
-    "sim_technique": ["eventG"],
-    "sim_scenario_name": ["eventG_relocation_strategies"],
+    "sim_technique": ["traceB"],
+    "sim_scenario_name": ["scooter_traceB_no_relocation_set1"],
 
     # Fleet general parameters
     "const_load_factor": [False],
@@ -17,8 +17,8 @@ sim_general_conf_grid = {
 
     # Time general parameters
     "year": [2019],
-    "month_start": [7],
-    "month_end": [8],
+    "month_start": [9],
+    "month_end": [10],
 
     "save_history": [False]
 }
