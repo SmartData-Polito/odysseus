@@ -37,6 +37,9 @@ class SimMetrics:
     def metrics_iter(self):
         for metrics in self.metrics_dict:
             if self.metrics_dict[metrics] == "avg":
-                yield metrics, self.metrics_values[metrics]["tot"] / self.metrics_values[metrics]["count"]
+                if self.metrics_values[metrics]["count"]:
+                    yield metrics, self.metrics_values[metrics]["tot"] / self.metrics_values[metrics]["count"]
+                else:
+                    yield metrics, "ND"
             else:
                 yield metrics, self.metrics_values[metrics]
