@@ -136,5 +136,5 @@ class SimStats():
 				self.sim_stats.loc["min_jobs_per_worker"] = min_jobs
 				self.sim_stats.loc["max_jobs_per_worker"] = max_jobs
 
-		for metrics in sim.sim_metrics.metrics_values:
-			self.sim_stats.loc[metrics] = sim.sim_metrics.metrics_values[metrics]
+		for metrics, value in sim.sim_metrics.metrics_iter():
+			self.sim_stats.loc[metrics] = value

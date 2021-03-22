@@ -140,6 +140,7 @@ class SharedMobilitySim:
             "cum_relo_ret_t": "sum",
             "min_vehicles_relocated": "min",  # Minimum number of vehicles relocated at the same time
             "max_vehicles_relocated": "max",  # Maximum number of vehicles relocated at the same time
+            "avg_relocation_step_distance": "avg",
         }
         self.sim_metrics = SimMetrics(metrics_dict)
 
