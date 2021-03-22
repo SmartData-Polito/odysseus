@@ -1,7 +1,7 @@
 import os
-import pickle
 import datetime
 import multiprocessing as mp
+import sys
 
 import pandas as pd
 from tqdm import tqdm
@@ -61,15 +61,23 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 				pool_stats_dict[res_id] = res
 				pbar.update()
 
+			def print_error(err):
+				tqdm.write(str(datetime.datetime.now()) + " ERROR: Simulation failed! Cause: " + str(err), file=sys.stderr)
+				pbar.update()
+
 			async_results = []
 
 			if sim_technique == "eventG":
 				for conf_tuple in conf_tuples:
-					async_result = pool.apply_async(get_eventG_sim_stats, (conf_tuple,), callback=collect_result)
+					async_result = pool.apply_async(
+						get_eventG_sim_stats, (conf_tuple,), callback=collect_result, error_callback=print_error
+					)
 					async_results.append(async_result)
 			elif sim_technique == "traceB":
 				for conf_tuple in conf_tuples:
-					async_result = pool.apply_async(get_traceB_sim_stats, (conf_tuple,), callback=collect_result)
+					async_result = pool.apply_async(
+						get_traceB_sim_stats, (conf_tuple,), callback=collect_result, error_callback=print_error
+					)
 					async_results.append(async_result)
 
 			[result.wait() for result in async_results]
