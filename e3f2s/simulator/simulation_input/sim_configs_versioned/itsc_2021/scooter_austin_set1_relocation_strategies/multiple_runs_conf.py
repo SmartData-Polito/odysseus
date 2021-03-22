@@ -2,7 +2,7 @@ import numpy as np
 
 sim_scenario_conf_grid = {
 
-    "n_vehicles": [850],
+    "n_vehicles": [5000],
 
     "time_estimation": [True],
     "queuing": [True],
@@ -65,7 +65,7 @@ sim_scenario_conf_grid = {
 
     "n_relocation_workers": np.concatenate([np.arange(1, 13), [1000]]),
     "avg_relocation_speed": [20],  # km/h
-    "relocation_capacity": range(2, 51, 2),
+    "relocation_capacity": range(10, 51, 5),
 
     "relocation_profitability_check": [True],
     "relocation_vehicle_consumption": [7],  # l/100km
