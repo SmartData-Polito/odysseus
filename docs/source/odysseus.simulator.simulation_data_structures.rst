@@ -1,11 +1,11 @@
 odysseus.simulator.simulation\_data\_structures package
-====================================================
+=======================================================
 
 Submodules
 ----------
 
 odysseus.simulator.simulation\_data\_structures.charging\_station module
----------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.simulation_data_structures.charging_station
    :members:
@@ -13,7 +13,7 @@ odysseus.simulator.simulation\_data\_structures.charging\_station module
    :show-inheritance:
 
 odysseus.simulator.simulation\_data\_structures.vehicle module
------------------------------------------------------------
+---------------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.simulation_data_structures.vehicle
    :members:
@@ -21,7 +21,7 @@ odysseus.simulator.simulation\_data\_structures.vehicle module
    :show-inheritance:
 
 odysseus.simulator.simulation\_data\_structures.zone module
---------------------------------------------------------
+------------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.simulation_data_structures.zone
    :members:

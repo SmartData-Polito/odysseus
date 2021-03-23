@@ -1,11 +1,11 @@
 odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source package
-======================================================================
+==========================================================================
 
 Submodules
 ----------
 
 odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.austin\_census\_tracts module
---------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.geo_data_source.austin_census_tracts
    :members:
@@ -13,7 +13,7 @@ odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.austin\_census
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.calgary\_hexagonal\_grid module
-----------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.geo_data_source.calgary_hexagonal_grid
    :members:
@@ -21,7 +21,7 @@ odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.calgary\_hexag
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.chicago\_census\_tracts module
----------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.geo_data_source.chicago_census_tracts
    :members:
@@ -29,7 +29,7 @@ odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.chicago\_censu
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.chicago\_community\_areas module
------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.geo_data_source.chicago_community_areas
    :members:
@@ -37,7 +37,7 @@ odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.chicago\_commu
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.geo\_data\_source module
----------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.geo_data_source.geo_data_source
    :members:
@@ -45,7 +45,7 @@ odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.geo\_data\_sou
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.minneapolis\_centerlines module
-----------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.geo_data_source.minneapolis_centerlines
    :members:
@@ -53,7 +53,7 @@ odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.minneapolis\_c
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.minneapolis\_trails\_bikes module
-------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.geo_data_source.minneapolis_trails_bikes
    :members:
@@ -61,7 +61,7 @@ odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.minneapolis\_t
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.geo\_data\_source.norfolk\_census\_tracts module
----------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.geo_data_source.norfolk_census_tracts
    :members:

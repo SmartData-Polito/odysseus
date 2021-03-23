@@ -1,11 +1,11 @@
 odysseus.utils package
-===================
+======================
 
 Submodules
 ----------
 
 odysseus.utils.bookings\_utils module
-----------------------------------
+---------------------------------------
 
 .. automodule:: odysseus.utils.bookings_utils
    :members:
@@ -13,7 +13,7 @@ odysseus.utils.bookings\_utils module
    :show-inheritance:
 
 odysseus.utils.cost\_utils module
-------------------------------
+-----------------------------------
 
 .. automodule:: odysseus.utils.cost_utils
    :members:
@@ -21,7 +21,7 @@ odysseus.utils.cost\_utils module
    :show-inheritance:
 
 odysseus.utils.geospatial\_utils module
-------------------------------------
+----------------------------------------
 
 .. automodule:: odysseus.utils.geospatial_utils
    :members:
@@ -29,7 +29,7 @@ odysseus.utils.geospatial\_utils module
    :show-inheritance:
 
 odysseus.utils.path\_utils module
-------------------------------
+-----------------------------------
 
 .. automodule:: odysseus.utils.path_utils
    :members:
@@ -37,7 +37,7 @@ odysseus.utils.path\_utils module
    :show-inheritance:
 
 odysseus.utils.time\_utils module
-------------------------------
+-----------------------------------
 
 .. automodule:: odysseus.utils.time_utils
    :members:

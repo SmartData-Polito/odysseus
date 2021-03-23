@@ -1,11 +1,11 @@
 odysseus.simulator.demand\_model\_validation package
-=================================================
+=====================================================
 
 Submodules
 ----------
 
 odysseus.simulator.demand\_model\_validation.model\_validation module
-------------------------------------------------------------------
+--------------------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.demand_model_validation.model_validation
    :members:
@@ -13,7 +13,7 @@ odysseus.simulator.demand\_model\_validation.model\_validation module
    :show-inheritance:
 
 odysseus.simulator.demand\_model\_validation.model\_validation\_plot module
-------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.demand_model_validation.model_validation_plot
    :members:
@@ -21,7 +21,7 @@ odysseus.simulator.demand\_model\_validation.model\_validation\_plot module
    :show-inheritance:
 
 odysseus.simulator.demand\_model\_validation.model\_validation\_utils module
--------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.demand_model_validation.model_validation_utils
    :members:

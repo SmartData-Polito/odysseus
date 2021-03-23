@@ -11,19 +11,19 @@ from odysseus.utils.geospatial_utils import *
 
 class CityGeoTrips:
 	"""
-			This abstract class deals with managing geographic travel information (e.g. departure, arrival, distance, etc.).
-			This class is implemented by the other classes of this module. The constructor method takes as parameters:
+	This abstract class deals with managing geographic travel information (e.g. departure, arrival, distance, etc.).
+	This class is implemented by the other classes of this module. The constructor method takes as parameters:
 
 
-			:param city_name: City name. The name also serves to determine the timezone to which the city belongs
-			:type city_name: str
-			:param trips_data_source_id: Data source from which the information is taken. This allows us to have multiple data sources associated with the same city (for example from different operators)
-			:type trips_data_source_id: str
-			:param year: year expressed as a four-digit number (e.g. 1999)
-			:type year: int
-			:param month: month expressed as a number (e.g. for November the method expects to receive 11)
-			:type month: int
-			"""
+	:param city_name: City name. The name also serves to determine the timezone to which the city belongs
+	:type city_name: str
+	:param trips_data_source_id: Data source from which the information is taken. This allows us to have multiple data sources associated with the same city (for example from different operators)
+	:type trips_data_source_id: str
+	:param year: year expressed as a four-digit number (e.g. 1999)
+	:type year: int
+	:param month: month expressed as a number (e.g. for November the method expects to receive 11)
+	:type month: int
+	"""
 
 	def __init__(self, city_name, trips_data_source_id, year, month):
 

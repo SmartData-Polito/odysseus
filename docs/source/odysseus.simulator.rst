@@ -1,5 +1,5 @@
 odysseus.simulator package
-=======================
+===========================
 
 Subpackages
 -----------

@@ -22,6 +22,7 @@ copyright = '2021, ...'
 author = '...'
 
 
+
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -52,8 +53,5 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 
-html_css_files = [
-    'overrides.css',
-]
 
 add_module_names = False

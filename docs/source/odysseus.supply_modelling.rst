@@ -1,5 +1,5 @@
 odysseus.supply\_modelling package
-===============================
+===================================
 
 Subpackages
 -----------
@@ -13,7 +13,7 @@ Submodules
 ----------
 
 odysseus.supply\_modelling.charging\_station module
-------------------------------------------------
+-----------------------------------------------------
 
 .. automodule:: odysseus.supply_modelling.charging_station
    :members:
@@ -29,7 +29,7 @@ odysseus.supply\_modelling.energymix\_loader module
    :show-inheritance:
 
 odysseus.supply\_modelling.supply\_model module
---------------------------------------------
+-------------------------------------------------
 
 .. automodule:: odysseus.supply_modelling.supply_model
    :members:
@@ -37,7 +37,7 @@ odysseus.supply\_modelling.supply\_model module
    :show-inheritance:
 
 odysseus.supply\_modelling.vehicle module
---------------------------------------
+-------------------------------------------
 
 .. automodule:: odysseus.supply_modelling.vehicle
    :members:

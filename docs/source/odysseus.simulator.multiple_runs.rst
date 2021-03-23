@@ -1,11 +1,11 @@
 odysseus.simulator.multiple\_runs package
-======================================
+==========================================
 
 Submodules
 ----------
 
 odysseus.simulator.multiple\_runs.multiple\_runs module
-----------------------------------------------------
+--------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.multiple_runs.multiple_runs
    :members:
@@ -13,7 +13,7 @@ odysseus.simulator.multiple\_runs.multiple\_runs module
    :show-inheritance:
 
 odysseus.simulator.multiple\_runs.spark\_multiple\_runs module
------------------------------------------------------------
+---------------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.multiple_runs.spark_multiple_runs
    :members:

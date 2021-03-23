@@ -1,5 +1,5 @@
 odysseus.simulator.simulation\_input package
-=========================================
+============================================
 
 Subpackages
 -----------
@@ -13,7 +13,7 @@ Submodules
 ----------
 
 odysseus.simulator.simulation\_input.costs\_conf module
-----------------------------------------------------
+--------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.simulation_input.costs_conf
    :members:
@@ -21,7 +21,7 @@ odysseus.simulator.simulation\_input.costs\_conf module
    :show-inheritance:
 
 odysseus.simulator.simulation\_input.sim\_config\_grid module
-----------------------------------------------------------
+--------------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.simulation_input.sim_config_grid
    :members:
@@ -29,7 +29,7 @@ odysseus.simulator.simulation\_input.sim\_config\_grid module
    :show-inheritance:
 
 odysseus.simulator.simulation\_input.sim\_input module
----------------------------------------------------
+-------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.simulation_input.sim_input
    :members:
@@ -37,7 +37,7 @@ odysseus.simulator.simulation\_input.sim\_input module
    :show-inheritance:
 
 odysseus.simulator.simulation\_input.sim\_input\_paths module
-----------------------------------------------------------
+--------------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.simulation_input.sim_input_paths
    :members:
@@ -45,7 +45,7 @@ odysseus.simulator.simulation\_input.sim\_input\_paths module
    :show-inheritance:
 
 odysseus.simulator.simulation\_input.station\_conf module
-------------------------------------------------------
+----------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.simulation_input.station_conf
    :members:
@@ -53,7 +53,7 @@ odysseus.simulator.simulation\_input.station\_conf module
    :show-inheritance:
 
 odysseus.simulator.simulation\_input.vehicle\_conf module
-------------------------------------------------------
+----------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.simulation_input.vehicle_conf
    :members:

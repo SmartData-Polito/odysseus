@@ -1,11 +1,11 @@
 odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source package
-========================================================================
+============================================================================
 
 Submodules
 ----------
 
 odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.austin\_scooter\_trips module
-----------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.trips_data_source.austin_scooter_trips
    :members:
@@ -13,7 +13,7 @@ odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.austin\_scoo
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.big\_data\_db\_trips module
---------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.trips_data_source.big_data_db_trips
    :members:
@@ -29,7 +29,7 @@ odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.calgary\_sco
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.chicago\_scooter\_trips module
------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.trips_data_source.chicago_scooter_trips
    :members:
@@ -37,7 +37,7 @@ odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.chicago\_sco
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.kansas\_city\_scooter\_trips module
-----------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.trips_data_source.kansas_city_scooter_trips
    :members:
@@ -45,7 +45,7 @@ odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.kansas\_city
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.louisville\_scooter\_trips module
---------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.trips_data_source.louisville_scooter_trips
    :members:
@@ -53,7 +53,7 @@ odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.louisville\_
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.minneapolis\_scooter\_trips module
----------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.trips_data_source.minneapolis_scooter_trips
    :members:
@@ -61,7 +61,7 @@ odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.minneapolis\
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.new\_york\_city\_bikes\_trips module
------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.trips_data_source.new_york_city_bikes_trips
    :members:
@@ -69,7 +69,7 @@ odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.new\_york\_c
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.new\_york\_city\_taxi\_trips module
-----------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.trips_data_source.new_york_city_taxi_trips
    :members:
@@ -77,7 +77,7 @@ odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.new\_york\_c
    :show-inheritance:
 
 odysseus.city\_data\_manager.city\_data\_source.trips\_data\_source.norfolk\_scooter\_trips module
------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------
 
 .. automodule:: odysseus.city_data_manager.city_data_source.trips_data_source.norfolk_scooter_trips
    :members:
