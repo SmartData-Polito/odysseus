@@ -52,6 +52,7 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+
 autodoc_mock_imports = ["numpy", "geopandas", "rtree", "pandas"]
 
 add_module_names = False
