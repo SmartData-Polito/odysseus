@@ -36,10 +36,10 @@ odysseus.simulator.simulation\_output.sim\_output\_plotter module
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation\_output.sim\_stats module
+odysseus.simulator.simulation\_output.sim\_stats module
 ----------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation_output.sim_stats
+.. automodule:: odysseus.simulator.simulation_output.sim_stats
    :members:
    :undoc-members:
    :show-inheritance:
@@ -47,7 +47,7 @@ e3f2s.simulator.simulation\_output.sim\_stats module
 Module contents
 ---------------
 
-.. automodule:: e3f2s.simulator.simulation_output
+.. automodule:: odysseus.simulator.simulation_output
    :members:
    :undoc-members:
    :show-inheritance:

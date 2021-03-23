@@ -1,4 +1,4 @@
-e3f2s.simulator.simulation\_input.sim\_configs\_versioned.isc2 package
+odysseus.simulator.simulation\_input.sim\_configs\_versioned.isc2 package
 ======================================================================
 
 Subpackages
@@ -7,15 +7,15 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   e3f2s.simulator.simulation_input.sim_configs_versioned.isc2.isc2_set1a
-   e3f2s.simulator.simulation_input.sim_configs_versioned.isc2.isc2_set1b
-   e3f2s.simulator.simulation_input.sim_configs_versioned.isc2.isc2_set1c
-   e3f2s.simulator.simulation_input.sim_configs_versioned.isc2.isc2_set2
+   odysseus.simulator.simulation_input.sim_configs_versioned.isc2.isc2_set1a
+   odysseus.simulator.simulation_input.sim_configs_versioned.isc2.isc2_set1b
+   odysseus.simulator.simulation_input.sim_configs_versioned.isc2.isc2_set1c
+   odysseus.simulator.simulation_input.sim_configs_versioned.isc2.isc2_set2
 
 Module contents
 ---------------
 
-.. automodule:: e3f2s.simulator.simulation_input.sim_configs_versioned.isc2
+.. automodule:: odysseus.simulator.simulation_input.sim_configs_versioned.isc2
    :members:
    :undoc-members:
    :show-inheritance:

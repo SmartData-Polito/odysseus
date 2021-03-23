@@ -15,7 +15,7 @@ odysseus.simulator.simulation\_input.sim\_configs\_versioned.leonardo.louisville
 odysseus.simulator.simulation\_input.sim\_configs\_versioned.leonardo.louisville\_multiple\_runs\_eventG\_relocation\_strategies.sim\_general\_conf module
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation_input.sim_configs_versioned.leonardo.louisville_multiple_runs_eventG_relocation_strategies.sim_general_conf
+.. automodule:: odysseus.simulator.simulation_input.sim_configs_versioned.leonardo.louisville_multiple_runs_eventG_relocation_strategies.sim_general_conf
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ odysseus.simulator.simulation\_input.sim\_configs\_versioned.leonardo.louisville
 Module contents
 ---------------
 
-.. automodule:: e3f2s.simulator.simulation_input.sim_configs_versioned.leonardo.louisville_multiple_runs_eventG_relocation_strategies
+.. automodule:: odysseus.simulator.simulation_input.sim_configs_versioned.leonardo.louisville_multiple_runs_eventG_relocation_strategies
    :members:
    :undoc-members:
    :show-inheritance:

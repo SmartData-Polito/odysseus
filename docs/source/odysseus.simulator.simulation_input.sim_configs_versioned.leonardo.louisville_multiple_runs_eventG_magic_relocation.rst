@@ -12,10 +12,10 @@ odysseus.simulator.simulation\_input.sim\_configs\_versioned.leonardo.louisville
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation\_input.sim\_configs\_versioned.leonardo.louisville\_multiple\_runs\_eventG\_magic\_relocation.sim\_general\_conf module
+odysseus.simulator.simulation\_input.sim\_configs\_versioned.leonardo.louisville\_multiple\_runs\_eventG\_magic\_relocation.sim\_general\_conf module
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation_input.sim_configs_versioned.leonardo.louisville_multiple_runs_eventG_magic_relocation.sim_general_conf
+.. automodule:: odysseus.simulator.simulation_input.sim_configs_versioned.leonardo.louisville_multiple_runs_eventG_magic_relocation.sim_general_conf
    :members:
    :undoc-members:
    :show-inheritance:
@@ -23,7 +23,7 @@ e3f2s.simulator.simulation\_input.sim\_configs\_versioned.leonardo.louisville\_m
 Module contents
 ---------------
 
-.. automodule:: e3f2s.simulator.simulation_input.sim_configs_versioned.leonardo.louisville_multiple_runs_eventG_magic_relocation
+.. automodule:: odysseus.simulator.simulation_input.sim_configs_versioned.leonardo.louisville_multiple_runs_eventG_magic_relocation
    :members:
    :undoc-members:
    :show-inheritance:

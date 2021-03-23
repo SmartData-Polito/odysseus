@@ -15,31 +15,31 @@ odysseus.utils.bookings\_utils module
 odysseus.utils.cost\_utils module
 ------------------------------
 
-.. automodule:: e3f2s.utils.cost_utils
+.. automodule:: odysseus.utils.cost_utils
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.utils.geospatial\_utils module
+odysseus.utils.geospatial\_utils module
 ------------------------------------
 
-.. automodule:: e3f2s.utils.geospatial_utils
+.. automodule:: odysseus.utils.geospatial_utils
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.utils.path\_utils module
+odysseus.utils.path\_utils module
 ------------------------------
 
-.. automodule:: e3f2s.utils.path_utils
+.. automodule:: odysseus.utils.path_utils
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.utils.time\_utils module
+odysseus.utils.time\_utils module
 ------------------------------
 
-.. automodule:: e3f2s.utils.time_utils
+.. automodule:: odysseus.utils.time_utils
    :members:
    :undoc-members:
    :show-inheritance:
@@ -47,7 +47,7 @@ e3f2s.utils.time\_utils module
 Module contents
 ---------------
 
-.. automodule:: e3f2s.utils
+.. automodule:: odysseus.utils
    :members:
    :undoc-members:
    :show-inheritance:

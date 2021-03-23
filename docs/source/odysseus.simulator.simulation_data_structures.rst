@@ -4,26 +4,26 @@ odysseus.simulator.simulation\_data\_structures package
 Submodules
 ----------
 
-e3f2s.simulator.simulation\_data\_structures.charging\_station module
+odysseus.simulator.simulation\_data\_structures.charging\_station module
 ---------------------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation_data_structures.charging_station
+.. automodule:: odysseus.simulator.simulation_data_structures.charging_station
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation\_data\_structures.vehicle module
+odysseus.simulator.simulation\_data\_structures.vehicle module
 -----------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation_data_structures.vehicle
+.. automodule:: odysseus.simulator.simulation_data_structures.vehicle
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation\_data\_structures.zone module
+odysseus.simulator.simulation\_data\_structures.zone module
 --------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation_data_structures.zone
+.. automodule:: odysseus.simulator.simulation_data_structures.zone
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ e3f2s.simulator.simulation\_data\_structures.zone module
 Module contents
 ---------------
 
-.. automodule:: e3f2s.simulator.simulation_data_structures
+.. automodule:: odysseus.simulator.simulation_data_structures
    :members:
    :undoc-members:
    :show-inheritance:

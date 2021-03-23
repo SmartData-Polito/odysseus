@@ -1,4 +1,4 @@
-e3f2s package
+odysseus package
 =============
 
 Subpackages
@@ -7,16 +7,16 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   e3f2s.city_data_manager
-   e3f2s.demand_modelling
-   e3f2s.simulator
-   e3f2s.supply_modelling
-   e3f2s.utils
+   odysseus.city_data_manager
+   odysseus.demand_modelling
+   odysseus.simulator
+   odysseus.supply_modelling
+   odysseus.utils
 
 Module contents
 ---------------
 
-.. automodule:: e3f2s
+.. automodule:: odysseus
    :members:
    :undoc-members:
    :show-inheritance:

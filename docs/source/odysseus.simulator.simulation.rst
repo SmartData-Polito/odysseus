@@ -1,101 +1,101 @@
-e3f2s.simulator.simulation package
+odysseus.simulator.simulation package
 ==================================
 
 Submodules
 ----------
 
-e3f2s.simulator.simulation.charging\_primitives module
+odysseus.simulator.simulation.charging\_primitives module
 ------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.charging_primitives
+.. automodule:: odysseus.simulator.simulation.charging_primitives
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation.charging\_strategies module
+odysseus.simulator.simulation.charging\_strategies module
 ------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.charging_strategies
+.. automodule:: odysseus.simulator.simulation.charging_strategies
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation.model\_driven\_simulator module
+odysseus.simulator.simulation.model\_driven\_simulator module
 ----------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.model_driven_simulator
+.. automodule:: odysseus.simulator.simulation.model_driven_simulator
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation.relocation\_primitives module
+odysseus.simulator.simulation.relocation\_primitives module
 --------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.relocation_primitives
+.. automodule:: odysseus.simulator.simulation.relocation_primitives
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation.relocation\_strategies module
+odysseus.simulator.simulation.relocation\_strategies module
 --------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.relocation_strategies
+.. automodule:: odysseus.simulator.simulation.relocation_strategies
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation.scooter\_relocation\_primitives module
+odysseus.simulator.simulation.scooter\_relocation\_primitives module
 -----------------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.scooter_relocation_primitives
+.. automodule:: odysseus.simulator.simulation.scooter_relocation_primitives
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation.scooter\_relocation\_strategies module
+odysseus.simulator.simulation.scooter\_relocation\_strategies module
 -----------------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.scooter_relocation_strategies
+.. automodule:: odysseus.simulator.simulation.scooter_relocation_strategies
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation.sim\_metrics module
+odysseus.simulator.simulation.sim\_metrics module
 ----------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.sim_metrics
+.. automodule:: odysseus.simulator.simulation.sim_metrics
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation.simulator module
+odysseus.simulator.simulation.simulator module
 -------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.simulator
+.. automodule:: odysseus.simulator.simulation.simulator
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation.trace\_driven\_simulator module
+odysseus.simulator.simulation.trace\_driven\_simulator module
 ----------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.trace_driven_simulator
+.. automodule:: odysseus.simulator.simulation.trace_driven_simulator
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation.vehicle\_relocation\_primitives module
+odysseus.simulator.simulation.vehicle\_relocation\_primitives module
 -----------------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.vehicle_relocation_primitives
+.. automodule:: odysseus.simulator.simulation.vehicle_relocation_primitives
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.simulator.simulation.vehicle\_relocation\_strategies module
+odysseus.simulator.simulation.vehicle\_relocation\_strategies module
 -----------------------------------------------------------------
 
-.. automodule:: e3f2s.simulator.simulation.vehicle_relocation_strategies
+.. automodule:: odysseus.simulator.simulation.vehicle_relocation_strategies
    :members:
    :undoc-members:
    :show-inheritance:
@@ -103,7 +103,7 @@ e3f2s.simulator.simulation.vehicle\_relocation\_strategies module
 Module contents
 ---------------
 
-.. automodule:: e3f2s.simulator.simulation
+.. automodule:: odysseus.simulator.simulation
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,4 +1,4 @@
-e3f2s.demand\_modelling package
+odysseus.demand\_modelling package
 ===============================
 
 Subpackages
@@ -7,23 +7,23 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   e3f2s.demand_modelling.demand_model_configs
+   odysseus.demand_modelling.demand_model_configs
 
 Submodules
 ----------
 
-e3f2s.demand\_modelling.demand\_model module
+odysseus.demand\_modelling.demand\_model module
 --------------------------------------------
 
-.. automodule:: e3f2s.demand_modelling.demand_model
+.. automodule:: odysseus.demand_modelling.demand_model
    :members:
    :undoc-members:
    :show-inheritance:
 
-e3f2s.demand\_modelling.loader module
+odysseus.demand\_modelling.loader module
 -------------------------------------
 
-.. automodule:: e3f2s.demand_modelling.loader
+.. automodule:: odysseus.demand_modelling.loader
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ e3f2s.demand\_modelling.loader module
 Module contents
 ---------------
 
-.. automodule:: e3f2s.demand_modelling
+.. automodule:: odysseus.demand_modelling
    :members:
    :undoc-members:
    :show-inheritance:
