@@ -8,6 +8,6 @@ All the classes of this module are implementations of the abstract class **Trips
 TripsDataSource  class
 -------------------------------------------------------------------------------------------
 
-.. automodule:: e3f2s.city_data_manager.city_data_source.trips_data_source.trips_data_source
+.. automodule:: odysseus.city_data_manager.city_data_source.trips_data_source.trips_data_source
    :members:
    :undoc-members:

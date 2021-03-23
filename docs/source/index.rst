@@ -1,4 +1,4 @@
-.. e3f2s documentation master file, created by
+.. odysseus documentation master file, created by
    sphinx-quickstart on Wed Mar 10 10:51:22 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
@@ -19,15 +19,15 @@ Get started with Odysseus
 
 Introduction
 =============
-e3f2s is a software for simulation of shared electric fleets in urban environments. It is still a prototype in active development. However, it is already stable enough to be used for research activities. In order to understand what e3f2s is capable of, please first read the three papers available in the folder */home/det_tesi/a.ciociola/input_simulator/papers*.
+odysseus is a software for simulation of shared electric fleets in urban environments. It is still a prototype in active development. However, it is already stable enough to be used for research activities. In order to understand what odysseus is capable of, please first read the three papers available in the folder */home/det_tesi/a.ciociola/input_simulator/papers*.
 
-e3f2s is composed by three main modules:
+odysseus is composed by three main modules:
 
 - **city_data_manager**: receives in input data from different sources and output a simulation-ready version of the same data.
 - **simulator**: contains data structures and algorithms for actual simulations.
 - **utils**: contains some utility functions used across the other modules.
 
-In this tutorial, we focus on running our first simulation with e3f2s.
+In this tutorial, we focus on running our first simulation with odysseus.
 
 Setup repository, environment and data
 ========================================
@@ -36,21 +36,21 @@ First, let's clone the public git repository and move data into the right folder
 
    .. code-block:: console
 
-     git clone https://github.com/AleCioc/e3f2s my-e3f2s-folder
-     cp -r /home/det_tesi/a.ciociola/input_simulator/data my-e3f2s-folder/e3f2s/city_data_manager
+     git clone https://github.com/AleCioc/odysseus my-odysseus-folder
+     cp -r /home/det_tesi/a.ciociola/input_simulator/data my-odysseus-folder/odysseus/city_data_manager
 
 
 Then, let's install all the necessary libraries.
 
    .. code-block:: console
 
-     pip install --user -r my-e3f2s-folder/requirements.txt
+     pip install --user -r my-odysseus-folder/requirements.txt
 
 
 Configuring simulation input
 =============================
 
-The folder *e3f2s/simulator/simulation_input* contains configuration files for simulation.
+The folder *odysseus/simulator/simulation_input* contains configuration files for simulation.
 
 In particular:
 
@@ -72,20 +72,20 @@ Let's create a new folder for a new configuration:
 
    .. code-block:: console
 
-     cp -r /home/det_tesi/a.ciociola/input_simulator/ my-e3f2s-folder/e3f2s/simulator/simulation_input/sim_configs_versioned/
+     cp -r /home/det_tesi/a.ciociola/input_simulator/ my-odysseus-folder/odysseus/simulator/simulation_input/sim_configs_versioned/
 
 Modify configurations as you desire, then run the simulator:
 
    .. code-block:: console
 
-     cd my-e3f2s-folder/
-     python -m e3f2s.simulator
+     cd my-odysseus-folder/
+     python -m odysseus.simulator
 
 Let's wait for simulation to finish and let's check the results folder and the figures folder (figures are created automatically only in single run mode)
 
    .. code-block:: console
 
-     ls my-e3f2s-folder/simulator/results/Torino/single_run/test
-     ls my-e3f2s-folder/simulator/figures/Torino/single_run/test
+     ls my-odysseus-folder/simulator/results/Torino/single_run/test
+     ls my-odysseus-folder/simulator/figures/Torino/single_run/test
 
 Done! Now we can explore our results and eventually produce other analysis and plots.
