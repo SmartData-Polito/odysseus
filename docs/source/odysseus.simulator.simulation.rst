@@ -37,7 +37,7 @@ odysseus.simulator.simulation.relocation\_primitives module
    :show-inheritance:
 
 odysseus.simulator.simulation.relocation\_strategies module
---------------------------------------------------------
+------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.simulation.relocation_strategies
    :members:
@@ -45,7 +45,7 @@ odysseus.simulator.simulation.relocation\_strategies module
    :show-inheritance:
 
 odysseus.simulator.simulation.scooter\_relocation\_primitives module
---------------------------------------------------------------------
+---------------------------------------------------------------------
 
 .. automodule:: odysseus.simulator.simulation.scooter_relocation_primitives
    :members:
