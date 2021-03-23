@@ -70,7 +70,6 @@ class CityGeoTrips:
 
 		if len(self.trips):
 
-
 			self.trips["geometry"] = self.trips_df_norm.apply(
 				lambda row: shapely.geometry.LineString([
 					shapely.geometry.Point(row["start_longitude"], row["start_latitude"]),

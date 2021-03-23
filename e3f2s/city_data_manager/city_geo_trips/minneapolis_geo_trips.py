@@ -11,12 +11,12 @@ from e3f2s.utils.geospatial_utils import get_random_point_from_linestring
 
 class MinneapolisGeoTrips(CityGeoTrips):
 
-    def __init__(self, city_name="Minneapolis", trips_data_source_id="city_of_minneapolis", year=2019, month=7):
+    def __init__(self, city_name="Minneapolis", trips_data_source_id="city_open_data", year=2019, month=7):
 
         self.city_name = city_name
         super().__init__(self.city_name, trips_data_source_id, year, month)
         self.trips_ds_dict = {
-            "city_of_minneapolis": MinneapolisScooterTrips()
+            "city_open_data": MinneapolisScooterTrips()
         }
         self.trips_df_norm = pd.DataFrame()
 

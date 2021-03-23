@@ -21,6 +21,7 @@ from ModelValidation.model_validation_plot import plot_od_err
 
 
 def run_traceB_eventG (city, sim_general_conf, sim_scenario_conf):
+
     city_obj = City\
         (city,
          sim_general_conf)

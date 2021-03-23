@@ -49,32 +49,27 @@ for city in args.cities:
             for month in args.months:
                 print(datetime.datetime.now(), city, data_source_id, year, month)
 
-                if data_source_id == "city_of_louisville":
-                    geo_trips_ds = LouisvilleGeoTrips(year=int(year), month=int(month))
-
-                elif data_source_id == "city_of_minneapolis":
-                    geo_trips_ds = MinneapolisGeoTrips(year=int(year), month=int(month))
-
-                elif data_source_id == "city_of_austin":
-                    geo_trips_ds = AustinGeoTrips(year=int(year), month=int(month))
-
-                elif data_source_id == "city_of_norfolk":
-                    geo_trips_ds = NorfolkGeoTrips(year=int(year), month=int(month))
-
-                elif data_source_id == "city_of_kansas_city":
-                    geo_trips_ds = KansasCityGeoTrips(year=int(year), month=int(month))
-
-                elif data_source_id == "city_of_chicago":
-                    geo_trips_ds = ChicagoGeoTrips(year=int(year), month=int(month))
-
-                elif data_source_id == "city_of_calgary":
-                    geo_trips_ds = CalgaryGeoTrips(year=int(year), month=int(month))
-
-                elif data_source_id == "citi_bike":
+                if data_source_id == "citi_bike":
                     geo_trips_ds = NewYorkCityBikeGeoTrips(year=int(year), month=int(month))
 
                 elif data_source_id == "big_data_db":
                     geo_trips_ds = BigDataDBGeoTrips(city, data_source_id, year=int(year), month=int(month))
+
+                elif data_source_id == "city_open_data":
+                    if city == "Louisville":
+                        geo_trips_ds = LouisvilleGeoTrips(year=int(year), month=int(month))
+                    elif city == "Minneapolis":
+                        geo_trips_ds = MinneapolisGeoTrips(year=int(year), month=int(month))
+                    elif city == "Austin":
+                        geo_trips_ds = AustinGeoTrips(year=int(year), month=int(month))
+                    elif city == "Norfolk":
+                        geo_trips_ds = NorfolkGeoTrips(year=int(year), month=int(month))
+                    elif city == "Kansas City":
+                        geo_trips_ds = KansasCityGeoTrips(year=int(year), month=int(month))
+                    elif city == "Chicago":
+                        geo_trips_ds = ChicagoGeoTrips(year=int(year), month=int(month))
+                    elif city == "Calgary":
+                        geo_trips_ds = CalgaryGeoTrips(year=int(year), month=int(month))
 
                 geo_trips_ds.get_trips_od_gdfs()
                 geo_trips_ds.save_points_data()
