@@ -1,8 +1,5 @@
 import os
 import pickle
-
-import os
-import pickle
 import pandas as pd
 
 
@@ -27,8 +24,6 @@ class SimInput:
 
 		self.grid = pickle.Unpickler(open(os.path.join(demand_model_path, "grid.pickle"), "rb")).load()
 		self.grid_matrix = pickle.Unpickler(open(os.path.join(demand_model_path, "grid_matrix.pickle"), "rb")).load()
-		self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
-		self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
 		self.avg_out_flows_train = pickle.Unpickler(open(os.path.join(demand_model_path, "avg_out_flows_train.pickle"), "rb")).load()
 		self.avg_in_flows_train = pickle.Unpickler(open(os.path.join(demand_model_path, "avg_in_flows_train.pickle"), "rb")).load()
 		self.valid_zones = pickle.Unpickler(open(os.path.join(demand_model_path, "valid_zones.pickle"), "rb")).load()
@@ -49,6 +44,9 @@ class SimInput:
 		if self.demand_model_config["sim_technique"] == "traceB":
 			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings_test.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
+		elif self.demand_model_config["sim_technique"] == "eventG":
+			self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
+			self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
 
 		if "n_requests" in self.sim_scenario_conf.keys():
 			# 30 => 1 month
