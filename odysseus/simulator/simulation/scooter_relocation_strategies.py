@@ -9,6 +9,7 @@ from mlrose import TSPOpt, genetic_alg
 
 import numpy as np
 from odysseus.simulator.simulation.scooter_relocation_primitives import *
+from odysseus.simulator.simulation_input.model import build_model
 
 
 class ScooterRelocationStrategy(ScooterRelocationPrimitives):
@@ -338,6 +339,13 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 city_shape = self.simInput.grid_matrix.shape
                 max_flow = max(self.simInput.max_out_flow, self.simInput.max_in_flow)
                 mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(lambda zone_id: int(zone_id in self.simInput.valid_zones)))
+
+
+                # mmn parametro per la normalizzazione dei dati
+                prediction = build_model(X_train,  X_test, conv_filt=64, kernel_sz=(2,3,3),
+                                mask=mask, lstm=lstm, lstm_number=lstm_number, add_external_info=True,
+                                lr=lr,conv_block = conv_block, path = path_weight, max_flow)
+
 
             else:
                 return
