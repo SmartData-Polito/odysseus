@@ -16,12 +16,10 @@ from dashboards.overview.get_plots_with_menu import *
 def load_dashboard():
     st.set_page_config(layout="wide")
     # *** LOAD SIDEBAR AND DATA ***
-    #TODO
-    current_view, city_name, selected_year, selected_month = load_sidebar()
+    # from sidebar.py
+    current_view, city_name, selected_year, selected_month, selected_source = load_sidebar()
     
-    start, stop = load_slider_menu(selected_year, selected_month)
-    st.write("Si parte da "+ str(start)+" si arriva a "+str(stop))
-
+    
     # *** INTRO ***
 
     st.markdown(
@@ -42,51 +40,59 @@ def load_dashboard():
 
     st.markdown(
         """
-        <p class="big-font">Città: {}!</p>
+        <p class="big-font">City: {}!</p>
         """.format(city_name),
         unsafe_allow_html=True
     )
+
     st.markdown(
         """
-        here will go the plots with the menu
+        General Purpose Settings
         """,
         unsafe_allow_html=True
     )
     
+    # from get_widgets.py
+    start, stop = load_slider_menu(selected_year, selected_month)
+    st.write("Start Date: "+ str(start)+" End Date: "+str(stop))
 
 
-    st.markdown(
+    # st.markdown(
+    #     """
+    #     here will go the two columns with origin and destination data
+    #     """,
+    #     unsafe_allow_html=True
+    # )
+
+    # read the two csv files given the parameters chosen
+    origins, destinations = get_bookings_count_plot_data(city_chosen=city_name,\
+                                                        year_chosen=selected_year,\
+                                                        month_chosen = selected_month,  
+                                                        source_chosen =selected_source)
+
+
+    # split the page into two columns to display origins and destinations
+    col_lx, col_rx = st.beta_columns(2)
+
+    col_lx.markdown(
         """
-        here will go the two columns with origin and destination data
-        """,
-        unsafe_allow_html=True
-    )
-
-    origins,destinations = get_bookings_count_plot_data()
-
-
-
-    col_og, col_dt = st.beta_columns(2)
-
-    col_og.markdown(
-        """
-        Colonna 1 - Origins
+        Origins
         """,
         unsafe_allow_html=True
     )
 
     fig = plot_df(origins, "60Min", 'plate')
-    col_og.plotly_chart(fig, use_container_width=True)
+    col_lx.plotly_chart(fig, use_container_width=True)
 
-    col_dt.markdown(
+    col_rx.markdown(
         """
-        Colonna 2 - Destinations
+        Destinations
         """,
         unsafe_allow_html=True
     )
 
     fig = plot_df(destinations, "60Min", 'plate')
-    col_dt.plotly_chart(fig, use_container_width=True)
+    col_rx.plotly_chart(fig, use_container_width=True)
     # if bookings_count is not None:
 
     #     _max_width_()
