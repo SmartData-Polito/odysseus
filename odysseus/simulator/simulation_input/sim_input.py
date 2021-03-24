@@ -43,6 +43,8 @@ class SimInput:
 		self.avg_speed_kmh_mean = self.integers_dict["avg_speed_kmh_mean"]
 		self.avg_speed_kmh_std = self.integers_dict["avg_speed_kmh_std"]
 		self.max_driving_distance = self.integers_dict["max_driving_distance"]
+		self.max_in_flow = self.integers_dict["max_in_flow"]
+		self.max_out_flow = self.integers_dict["max_out_flow"]
 
 		if self.demand_model_config["sim_technique"] == "traceB":
 			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings_test.pickle"), "rb")).load()

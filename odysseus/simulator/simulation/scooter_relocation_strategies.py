@@ -312,7 +312,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 self.past_hours_origin_counts.append(self.current_hour_origin_count)
                 self.past_hours_destination_counts.append(self.current_hour_destination_count)
 
-                if len(self.past_hours_origin_counts) > window_width:
+                if len(self.past_hours_origin_counts) > 2:
                     self.past_hours_origin_counts.pop(0)
                     self.past_hours_destination_counts.pop(0)
 
@@ -334,6 +334,11 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
                     pred_out_flows_list.append(past_origin_counts)
                     pred_in_flows_list.append(past_destination_counts)
+
+                city_shape = self.simInput.grid_matrix.shape
+                max_flow = max(self.simInput.max_out_flow, self.simInput.max_in_flow)
+                mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(lambda zone_id: int(zone_id in self.simInput.valid_zones)))
+
             else:
                 return
 

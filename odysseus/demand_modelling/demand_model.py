@@ -14,7 +14,7 @@ def get_in_flow_count(trips_destinations):
 
     in_flow_count = trips_destinations[["zone_id", "year", "month", "day", "end_hour", "end_time"]].groupby(
         ["zone_id", "year", "month", "day", "end_hour"], as_index=False
-    ).count().rename(columns={"end_time": "out_flow_count"})
+    ).count().rename(columns={"end_time": "in_flow_count"})
 
     return in_flow_count
 
@@ -161,6 +161,9 @@ class DemandModel:
         self.request_rates = self.get_requests_rates()
         self.get_grid_indexes()
         self.trip_kdes = self.get_trip_kdes()
+
+        self.max_out_flow = float('-inf')
+        self.max_in_flow = float('-inf')
         self.avg_out_flows_train = self.get_avg_out_flows()
         self.avg_in_flows_train = self.get_avg_in_flows()
 
@@ -411,8 +414,11 @@ class DemandModel:
                 self.avg_out_flows_train[daytype][hour] = {}
                 for zone, zone_df in hour_df.groupby("zone_id"):
                     if zone in self.valid_zones:
-                        self.avg_out_flows_train[daytype][hour][zone] = zone_df[["day", "start_time"]].groupby("day")\
-                            .count().mean()[0]
+                        out_flows = zone_df[["day", "start_time"]].groupby("day").count()
+                        self.avg_out_flows_train[daytype][hour][zone] = out_flows.mean()[0]
+                        out_flows_max = out_flows.max()[0]
+                        if out_flows_max > self.max_out_flow:
+                            self.max_out_flow = out_flows_max
 
         for daytype in ["weekday", "weekend"]:
             for hour in range(24):
@@ -434,8 +440,11 @@ class DemandModel:
                 self.avg_in_flows_train[daytype][hour] = {}
                 for zone, zone_df in hour_df.groupby("zone_id"):
                     if zone in self.valid_zones:
-                        self.avg_in_flows_train[daytype][hour][zone] = zone_df[["day", "end_time"]].groupby("day")\
-                            .count().mean()[0]
+                        in_flows = zone_df[["day", "end_time"]].groupby("day").count()
+                        self.avg_in_flows_train[daytype][hour][zone] = in_flows.mean()[0]
+                        in_flows_max = in_flows.max()[0]
+                        if in_flows_max > self.max_in_flow:
+                            self.max_in_flow = in_flows_max
 
         for daytype in ["weekday", "weekend"]:
             for hour in range(24):
@@ -501,13 +510,15 @@ class DemandModel:
             pickle.dump(self.avg_in_flows_train, f)
 
         integers_dict = {
-            "avg_request_rate" : self.avg_request_rate,
-            "n_vehicles_original" : self.n_vehicles_original,
-            "avg_speed_mean" : self.avg_speed_mean,
-            "avg_speed_std" : self.avg_speed_std,
-            "avg_speed_kmh_mean" : self.avg_speed_kmh_mean,
-            "avg_speed_kmh_std" : self.avg_speed_kmh_std,
-            "max_driving_distance" : self.max_driving_distance,
+            "avg_request_rate": self.avg_request_rate,
+            "n_vehicles_original": self.n_vehicles_original,
+            "avg_speed_mean": self.avg_speed_mean,
+            "avg_speed_std": self.avg_speed_std,
+            "avg_speed_kmh_mean": self.avg_speed_kmh_mean,
+            "avg_speed_kmh_std": self.avg_speed_kmh_std,
+            "max_driving_distance": self.max_driving_distance,
+            "max_in_flow": self.max_in_flow,
+            "max_out_flow": self.max_out_flow,
         }
         with open(os.path.join(demand_model_path, "integers_dict.pickle"), "wb") as f:
             pickle.dump(integers_dict, f)
