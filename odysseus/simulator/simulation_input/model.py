@@ -67,10 +67,11 @@ def denormalization(X, max):
     X = inverse_transform(X, max)
     return X
 
-def build_model(X_train, X_test, conv_filt, kernel_sz, mask, lstm, lstm_number,
+def build_model(X_test, conv_filt, kernel_sz, mask, lstm, lstm_number,
     add_external_info, conv_block, path, max, lr=0.0001):
-    #X_train mi servono per definire le dimensioni dell'output
-    model = CLoST3D(X_train, conv_filt, kernel_sz, mask, lstm, lstm_number, add_external_info, conv_block)
+    # Model creation
+    model = CLoST3D(X_test, conv_filt, kernel_sz, mask, lstm, lstm_number, add_external_info, conv_block)
+    # Load model weights
     model.load_weights(path)
     # predict
     Y_pred = denormalization(model.predict(X_test), max) # compute predictions e denormalization

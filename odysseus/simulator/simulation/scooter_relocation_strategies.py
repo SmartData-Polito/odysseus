@@ -341,10 +341,9 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(lambda zone_id: int(zone_id in self.simInput.valid_zones)))
 
 
-                # mmn parametro per la normalizzazione dei dati
-                prediction = build_model(X_train,  X_test, conv_filt=64, kernel_sz=(2,3,3),
+                prediction = build_model(X_test, conv_filt=64, kernel_sz=(2,3,3),
                                 mask=mask, lstm=lstm, lstm_number=lstm_number, add_external_info=True,
-                                lr=lr,conv_block = conv_block, path = path_weight, max_flow)
+                                lr=lr,conv_block = conv_block, path = 'prediction_model_weights', max_flow)
 
 
             else:
