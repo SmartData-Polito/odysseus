@@ -58,22 +58,22 @@ def CLoST3D(X_train, conv_filt = 64, kernel_sz = (2, 3, 3),
     model = Model(main_inputs, x)
     return model
 
-def inverse_transform(X, mmn):
-    X = 1. * X * (mmn._max - mmn._min) + mmn._min
+def inverse_transform(X, max):
+    X = 1. * X * (max - 0) + 0
     return X
 
-def denormalization(X, mmn):
+def denormalization(X, max):
     # shape = (N , M, 2)
-    X = inverse_transform(X, mmn)
+    X = inverse_transform(X, max)
     return X
 
 def build_model(X_train, X_test, conv_filt, kernel_sz, mask, lstm, lstm_number,
-    add_external_info, conv_block, path, mmn, lr=0.0001):
+    add_external_info, conv_block, path, max, lr=0.0001):
     #X_train mi servono per definire le dimensioni dell'output
     model = CLoST3D(X_train, conv_filt, kernel_sz, mask, lstm, lstm_number, add_external_info, conv_block)
     model.load_weights(path)
     # predict
-    Y_pred = denormalization(model.predict(X_test), mmn) # compute predictions e denormalization
+    Y_pred = denormalization(model.predict(X_test), max) # compute predictions e denormalization
 
     return Y_pred
 
