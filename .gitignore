@@ -5,16 +5,17 @@ venv*/
 .vscode
 inter_env/*
 
+e3f2s*
 .streamlit*
-e3f2s/city_data_manager/data/*
-e3f2s/city_data_manager/city_data_source/data/*
+odysseus/city_data_manager/data/*
+odysseus/city_data_manager/city_data_source/data/*
 
-e3f2s/demand_modelling/demand_models/*
+odysseus/demand_modelling/demand_models/*
 
-e3f2s/simulator/data/*
-e3f2s/simulator/figures/*
-e3f2s/simulator/results/*
-e3f2s/simulator/simulation_input/sim_current_config/
+odysseus/simulator/data/*
+odysseus/simulator/figures/*
+odysseus/simulator/results/*
+odysseus/simulator/simulation_input/sim_current_config/
 
 *.pickle
 
