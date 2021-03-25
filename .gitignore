@@ -5,6 +5,7 @@ venv*/
 .vscode
 inter_env/*
 
+.streamlit*
 e3f2s/city_data_manager/data/*
 e3f2s/city_data_manager/city_data_source/data/*
 
