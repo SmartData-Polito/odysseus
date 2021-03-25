@@ -51,10 +51,10 @@ def get_city_grid_as_matrix(total_bounds, bin_side_length):
     cols = int(np.ceil((x_max - x_min) / width))
     print(rows, cols)
     grid_matrix = []
-    for j in range(cols):
-        grid_matrix.append([])
-        for i in range(rows):
-            grid_matrix[j].append(j * rows + i)
+    for i in range(rows):
+        grid_matrix.append({})
+        for j in range(cols):
+            grid_matrix[i][j] = j + i * cols
     return pd.DataFrame(grid_matrix)
 
 

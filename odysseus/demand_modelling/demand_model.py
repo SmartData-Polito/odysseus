@@ -375,12 +375,12 @@ class DemandModel:
             for i in self.grid_matrix.index:
                 zone_coords_dict[self.grid_matrix.iloc[i, j]] = (i, j)
 
-        for zone in self.bookings_train.origin_id.unique():
+        for zone in self.valid_zones:
             self.bookings_train.loc[self.bookings_train.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
             self.bookings_train.loc[self.bookings_train.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
             self.bookings_train.loc[self.bookings_train.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
             self.bookings_train.loc[self.bookings_train.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
-        for zone in set(self.bookings_test.origin_id.unique()).intersection(self.bookings_test.destination_id.unique()):
+        for zone in self.valid_zones:
             self.bookings_test.loc[self.bookings_test.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
             self.bookings_test.loc[self.bookings_test.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
             self.bookings_test.loc[self.bookings_test.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
