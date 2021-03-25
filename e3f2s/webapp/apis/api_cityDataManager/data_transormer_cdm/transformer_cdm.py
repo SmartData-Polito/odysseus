@@ -48,7 +48,6 @@ class DataTransformer:
             final_dict[key] = list_values
         return final_dict
             
-        return final_dict
     def transform_cdm(self,city, data_steps_id, data_type_id, data_source, year, month, filetype, *args, **kwargs):
         transformed={}
         if kwargs.get('filter_type', None):

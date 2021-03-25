@@ -3,7 +3,10 @@ from e3f2s.webapp.emulate_module.city_data_manager import CityDataManager
 import pymongo as pm
 import json
 import os
+from datetime import datetime
 import random
+import pandas as pd
+#pandas==1.1.3
 random.seed(42)
 from flask_cors import CORS
 api_cdm = Blueprint('api_cdm', __name__)
@@ -44,6 +47,27 @@ def extract_format(filepath):
     year,month = name.split("_")
     return data_source_id,year,month
 
+def groupby_month(filepath):
+    cols = ["init_time"]
+    df = pd.read_csv(filepath,usecols=cols)
+    df['init_time'] = pd.to_datetime(df['init_time'], unit='s').dt.to_pydatetime()
+    df["occurance"] = 1
+    df["year"] = df['init_time'].dt.year
+    df["month"] = df['init_time'].dt.month
+    count_df = df.groupby(["year","month"]).sum(["occurance"])
+    ans = build_raw_answer(count_df)
+    return ans
+
+def build_raw_answer(df):
+    final_dict = {}
+    for index, row in df.iterrows():
+        if index[0] in final_dict.keys():
+            final_dict[index[0]].update({index[1]:int(row["occurance"])})
+        else:
+            final_dict.update({index[0]:{index[1]:int(row["occurance"])}})
+    print(final_dict)
+    return final_dict
+
 def retrieve_per_city(path,level="norm",datatype = "trips",):
     data = {}
     print("PATH",path)
@@ -52,7 +76,8 @@ def retrieve_per_city(path,level="norm",datatype = "trips",):
             filepath = os.path.join(subdir,f)
             if level not in filepath or datatype not in filepath:
                 continue
-            elif level in filepath and filepath.endswith(".csv"):
+
+            elif level=="norm" and filepath.endswith(".csv"):
                 print("FILEPATH: ",filepath)
                 data_source_id,year,month = extract_format(filepath)
                 number_trips = count_trips(filepath)
@@ -65,6 +90,13 @@ def retrieve_per_city(path,level="norm",datatype = "trips",):
                         data[data_source_id][year][month] = number_trips
                 else:
                     data[data_source_id] = {year : {month:number_trips}}
+
+            elif level=="raw" and filepath.endswith(".csv"):
+                print("FILEPATH: ",filepath)
+                data_source_id,_,city = extract_format(filepath)
+
+                months_collects = groupby_month(filepath)
+                data[data_source_id] = months_collects
     print(data)
     return data
 
