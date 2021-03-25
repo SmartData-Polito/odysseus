@@ -13,7 +13,7 @@ city = st.sidebar.selectbox(
 )
 
 data_path = os.path.join(
-    "e3f2s", "city_data_manager", "data", city,
+    "odysseus", "city_data_manager", "data", city,
     "norm", "trips", "big_data_db", "2017_10.csv"
 )
 
