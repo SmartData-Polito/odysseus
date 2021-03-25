@@ -105,26 +105,3 @@ class DataTransformer:
             plots = dt.transform_cdm(city, data_steps_id, data_type_id, data_source, str(year), str(month), filetype, filter_type=f)
             data_collected[f] = plots
         insert_documents_db(col,data_collected)
-
-'''     ]
-filter_types = {
-        "most_used_cars": {"name":"most_used_cars","x-axis":"plate", "labelx":"Plate", "labely":"Usage"},
-        "busy_hours": {"name":"busy_hours","x-axis":"start_hour", "labelx":"Start Hour", "labely":"Total"}
-}
-
-
-# ppp = transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "10", ".csv", filter_type='most_used_cars')
-ppp = transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "10", ".csv", filter_type=filter_types["busy_hours"]["name"])
-'''
-'''
-filter_list = ["most_used_cars","busy_hours","avg_duration"]
-if __name__ == '__main__':
-    print("start data transformer")
-    db,col = initialize_mongoDB()
-    dt = DataTransformer()
-    data_collected = {"_id":"TEST"}
-    for f in filter_list:
-        plots = dt.transform_cdm("Torino", "norm", "trips", "big_data_db", "2017", "12", ".csv", filter_type=f)
-        data_collected[f] = plots
-    insert_documents_db(col,data_collected)
-'''

@@ -6,7 +6,6 @@ import os
 from datetime import datetime
 import random
 import pandas as pd
-#pandas==1.1.3
 random.seed(42)
 from flask_cors import CORS
 api_cdm = Blueprint('api_cdm', __name__)
