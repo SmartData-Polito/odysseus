@@ -13,7 +13,7 @@ class PredictionModel:
 
     def __init__(self, flow_volumes_shape, ext_train_shape, conv_filt, kernel_sz, mask, lstm, lstm_number,
                  add_external_info, conv_block, path, lr=0.0001):
-        # Model creation
+        # Model creationreduce(lambda e1, e2: e1 * e2, X_train.shape[2:])
         self.model = CLoST3D(flow_volumes_shape, ext_train_shape, conv_filt, kernel_sz, mask, lstm, lstm_number,
                              add_external_info, conv_block)
         # Load model weights
@@ -38,11 +38,10 @@ def CLoST3D(flow_volumes_shape, ext_train_shape, conv_filt=64, kernel_sz=(2, 3, 
     # - lstm: int. Parameter to pass to the LSTM layer. If equal to None, the LSTM layer is not added.
     # - add_external_info: bool. Parameter to insert external information or not.
 
-    X_train, ext_train = X_train  # split flow volumes and ext features
-
     main_inputs = []
-
-    start = Input(shape=(X_train.shape[1], X_train.shape[2], X_train.shape[3], 2))
+    # X_train.shape[1] = fa riferimento ai tensori concatenati quindi dipende da quante ore precedenti consideriamo
+    # variabile da inserire in configurazione
+    start = Input(shape=(X_train.shape[1], flow_volumes_shape[0], flow_volumes_shape[1], 2))
 
     main_inputs.append(start)
     main_output = main_inputs[0]
@@ -61,12 +60,12 @@ def CLoST3D(flow_volumes_shape, ext_train_shape, conv_filt=64, kernel_sz=(2, 3, 
             x = LSTM(int(lstm / (num + 1)), return_sequences=True)(x)
     x = Flatten()(x)
     if add_external_info:
-        external_input = Input(shape=ext_train.shape[1:])
+        external_input = Input(shape=(ext_train_shape,))
         main_inputs.append(external_input)
         x_ext = Dense(units=10, activation='relu')(external_input)
-        x_ext = Dense(units=reduce(lambda e1, e2: e1 * e2, X_train.shape[2:]), activation='relu')(x_ext)
+        x_ext = Dense(units=reduce(lambda e1, e2: e1 * e2, (flow_volumes_shape[0], flow_volumes_shape[1], 2), activation='relu')(x_ext)
         x = Concatenate(axis=-1)([x, x_ext])
-    x = Dense(reduce(lambda e1, e2: e1 * e2, X_train.shape[2:]))(x)
+    x = Dense(reduce(lambda e1, e2: e1 * e2, (flow_volumes_shape[0], flow_volumes_shape[1], 2))(x)
     x = Reshape(X_train.shape[2:])(x)
     x = Activation(swish)(x)
     if mask.shape[0] != 0:
