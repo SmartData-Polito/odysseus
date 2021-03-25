@@ -1,8 +1,10 @@
 import datetime
+import os
 
 import simpy
 
 from odysseus.simulator.simulation_data_structures.worker import Worker
+from odysseus.simulator.simulation_input.prediction_model import PredictionModel
 from odysseus.utils.geospatial_utils import get_od_distance
 
 
@@ -79,6 +81,28 @@ class ScooterRelocationPrimitives:
             worker_id = i
             initial_position = self.simInput.supply_model.initial_relocation_workers_positions[i]
             self.relocation_workers.append(Worker(env, worker_id, initial_position))
+
+        if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "predictive":
+
+            prediction_model_name = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])[
+                "scooter_relocation_prediction_model"]
+
+            prediction_model_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                "simulator",
+                "simulation_input",
+                "prediction_model_weights",
+                self.simInput.demand_model_config["city"],
+                prediction_model_name
+            )
+
+            city_shape = self.simInput.grid_matrix.shape
+            mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(
+                lambda zone_id: int(zone_id in self.simInput.valid_zones)))
+
+            self.prediction_model = PredictionModel(city_shape, ext_train_shape, conv_filt=64, kernel_sz=(2, 3, 3),
+                                         mask=mask, lstm=lstm, lstm_number=lstm_number, add_external_info=True,
+                                         lr=lr, conv_block=conv_block, path=prediction_model_path)
 
     def relocate_scooter_single_zone(self, scooter_relocation, move_vehicles=False, worker=None):
 

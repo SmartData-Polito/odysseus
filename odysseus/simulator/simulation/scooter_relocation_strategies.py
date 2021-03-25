@@ -1,15 +1,17 @@
 import itertools
+import os
+import sys
 from collections import deque
 from queue import PriorityQueue, Empty
 
 import six
-import sys
+
 sys.modules['sklearn.externals.six'] = six
 from mlrose import TSPOpt, genetic_alg
 
 import numpy as np
 from odysseus.simulator.simulation.scooter_relocation_primitives import *
-from odysseus.simulator.simulation_input.model import build_model
+from odysseus.simulator.simulation_input.prediction_model import timestamp2vec
 
 
 class ScooterRelocationStrategy(ScooterRelocationPrimitives):
@@ -287,11 +289,12 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
         return starting_zone_ids, n_picked_vehicles_list
 
-    def generate_relocation_schedule(self, daytype, hour):
+    def generate_relocation_schedule(self, current_datetime, daytype, hour):
         """
         It generates a relocation schedule for a given hour of a day of a given type (i.e.: 'weekday', 'weekend').
         If the relocation strategy requires it, once generation is finished, the relocation process is automatically
         triggered.
+        :param current_datetime:
         :param daytype: Current simulated type of day (i.e.: 'weekday', 'weekend')
         :param hour: Current simulated hour.
         :return: void
@@ -308,6 +311,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
         pred_in_flows_list = []
 
         if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "predictive":
+
             # Prepare flows from past hours
             if self.current_hour_origin_count:
                 self.past_hours_origin_counts.append(self.current_hour_origin_count)
@@ -336,53 +340,36 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                     pred_out_flows_list.append(past_origin_counts)
                     pred_in_flows_list.append(past_destination_counts)
 
-                city_shape = self.simInput.grid_matrix.shape
                 max_flow = max(self.simInput.max_out_flow, self.simInput.max_in_flow)
-                mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(lambda zone_id: int(zone_id in self.simInput.valid_zones)))
+                prediction_datetime = current_datetime + datetime.timedelta(hours=1)
 
                 # creazione tensore
-                d1 = np.concatenate([self.database1[['out_flow_count']].reset_index(drop=True, inplace=False).to_numpy().reshape(d2.shape[0],self.N, self.M),self.database2[['out_flow_count']].reset_index(drop=True, inplace=False).to_numpy().reshape(d2.shape[0],self.N, self.M)], axis = 1).reshape(d2.shape[0], 2, self.N, self.M)
-
-                # creazione metadata
-                def timestamp2vec(timestamps):
-                    # tm_wday range [0, 6], Monday is 0
-                    vec = [time.strptime(str(t[:8], encoding='utf-8'), '%Y%m%d').tm_wday for t in timestamps]  # python3
-                    # vec = [time.strptime(t[:8], '%Y%m%d').tm_wday for t in timestamps]  # python2
-                    ret = []
-                    for i in vec:
-                        v = [0 for _ in range(7)]
-                        v[i] = 1
-                        if i >= 5:
-                            v.append(0)  # weekend
-                        else:
-                            v.append(1)  # weekday
-                        ret.append(v)
-                    return np.asarray(ret)
+                d1 = np.concatenate([
+                    self.database1[['out_flow_count']].reset_index(drop=True,inplace=False).to_numpy().reshape(d2.shape[0], self.N, self.M),
+                    self.database2[['out_flow_count']].reset_index(drop=True,inplace=False).to_numpy().reshape(d2.shape[0], self.N, self.M)
+                ], axis=1).reshape(d2.shape[0], 2, self.N, self.M)
 
                 # Incorporamento metadata
-                    # load meta feature
-                    meta_feature = []
-                    #return timestamps
-                    if meta_data:
-                        time_feature = timestamp2vec(timestamps_Y)
-                        meta_feature.append(time_feature)
-                        if holiday_data:
-                            # load holiday
-                            holiday_feature = load_holiday(timestamps_Y, datapath)
-                            meta_feature.append(holiday_feature)
-                        if meteorol_data:
-                            # load meteorol data
-                            meteorol_feature = load_meteorol(timestamps_Y, datapath)
-                            meta_feature.append(meteorol_feature)
+                # load meta feature
+                meta_feature = []
+                #return timestamps
+                if meta_data:
+                    time_feature = timestamp2vec(timestamps_Y)
+                    meta_feature.append(time_feature)
+                    if holiday_data:
+                        # load holiday
+                        holiday_feature = load_holiday(timestamps_Y, datapath)
+                        meta_feature.append(holiday_feature)
+                    if meteorol_data:
+                        # load meteorol data
+                        meteorol_feature = load_meteorol(timestamps_Y, datapath)
+                        meta_feature.append(meteorol_feature)
 
-                        meta_feature = np.hstack(meta_feature) if len(meta_feature) > 0 else np.asarray(meta_feature)
-                        X_test.append(meta_feature)
-
+                    meta_feature = np.hstack(meta_feature) if len(meta_feature) > 0 else np.asarray(meta_feature)
+                    X_test.append(meta_feature)
 
                 # Definizione Funzione
-                prediction = build_model(X_test, conv_filt=64, kernel_sz=(2,3,3),
-                                mask=mask, lstm=lstm, lstm_number=lstm_number, add_external_info=True,
-                                lr=lr,conv_block = conv_block, path = 'prediction_model_weights', max_flow)
+                prediction = self.prediction_model.predict(X_test, max_flow)
 
 
             else:
