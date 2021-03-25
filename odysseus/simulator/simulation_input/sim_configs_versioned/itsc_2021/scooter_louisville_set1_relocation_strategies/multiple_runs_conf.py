@@ -72,7 +72,7 @@ sim_scenario_conf_grid = {
     "avg_relocation_speed": [20],  # km/h
     "relocation_capacity": range(2, 51, 2),
 
-    "relocation_profitability_check": [True, False],
+    "relocation_profitability_check": [False],
     "relocation_vehicle_consumption": [7],  # l/100km
     "diesel_price": [0.65],  # $/l (USA)
     "unlock_fee": [1],  # $
