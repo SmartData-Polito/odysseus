@@ -1,18 +1,11 @@
 import pandas as pd
 import streamlit as st
 
-import os, sys
-import streamlit as st
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-parentparentdir = os.path.dirname(os.path.dirname(currentdir))
-sys.path.append(parentparentdir)
 
-from odysseus.dashboards.load_data import *
 from odysseus.dashboards.overview.get_widgets import *
 
 
-from odysseus.city_data_manager.data_transormer_cdm.transformer_cdm import Loader
+from odysseus.city_data_manager.data_transormer_cdm.transformer_cdm import *
 
 @st.cache(allow_output_mutation=True)
 def load_origin_destination_data(citta, anno, mese, sorgente):

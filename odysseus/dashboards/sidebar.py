@@ -1,13 +1,5 @@
 
-
-# currentdir = os.path.dirname(os.path.realpath(__file__))
-# parentdir = os.path.dirname(currentdir)
-# parentparentdir = os.path.dirname(os.path.dirname(currentdir))
-# p = os.path.join(parentparentdir,'e3f2s')
-# sys.path.append(p)
-# st.write(p)
-
-from odysseus.dashboards.load_data import *
+# from odysseus.dashboards.load_data import *
 import streamlit as st
 from datetime import date
 from odysseus.city_data_manager.config.config import cities # get all possible city names from config files

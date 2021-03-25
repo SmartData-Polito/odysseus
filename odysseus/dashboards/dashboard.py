@@ -1,12 +1,3 @@
-import os, sys
-import streamlit as st
-
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-parentparentdir = os.path.dirname(os.path.dirname(currentdir))
-p = os.path.join(parentparentdir,'odysseus')
-sys.path.append(p)
-
 from odysseus.dashboards.sidebar import *
 from odysseus.dashboards.overview.get_plot_data import *
 from odysseus.dashboards.overview.get_plots_with_menu import *
@@ -14,7 +5,7 @@ from odysseus.dashboards.overview.get_plots_with_menu import *
 
 
 def load_dashboard():
-    st.set_page_config(layout="wide")
+
     # *** LOAD SIDEBAR AND DATA ***
     # from sidebar.py
     current_view, city_name, selected_year, selected_month, selected_source = load_sidebar()
