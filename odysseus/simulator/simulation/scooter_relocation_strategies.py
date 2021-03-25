@@ -10,8 +10,9 @@ sys.modules['sklearn.externals.six'] = six
 from mlrose import TSPOpt, genetic_alg
 
 import numpy as np
+import pandas as pd
 from odysseus.simulator.simulation.scooter_relocation_primitives import *
-from odysseus.simulator.simulation_input.prediction_model import timestamp2vec
+from odysseus.simulator.simulation_input.prediction_model import weekday2vec
 
 
 class ScooterRelocationStrategy(ScooterRelocationPrimitives):
@@ -317,59 +318,88 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 self.past_hours_origin_counts.append(self.current_hour_origin_count)
                 self.past_hours_destination_counts.append(self.current_hour_destination_count)
 
+                past_in_flow = []
+                past_out_flow = []
+
                 if len(self.past_hours_origin_counts) > 2:
                     self.past_hours_origin_counts.pop(0)
                     self.past_hours_destination_counts.pop(0)
 
-                for i in range(len(self.past_hours_origin_counts)):
-                    past_origin_count = self.past_hours_origin_counts[i]
-                    past_destination_count = self.past_hours_destination_counts[i]
+                if len(self.past_hours_origin_counts) >= 2:
+                    for i in range(len(self.past_hours_origin_counts)):
+                        past_origin_count = self.past_hours_origin_counts[i]
+                        past_destination_count = self.past_hours_destination_counts[i]
 
-                    past_origin_counts = {}
-                    past_destination_counts = {}
-                    for zone in self.simInput.valid_zones:
-                        if zone in past_origin_count:
-                            past_origin_counts[zone] = past_origin_count[zone]
-                        else:
-                            past_origin_counts[zone] = 0
-                        if zone in past_destination_count:
-                            past_destination_counts[zone] = past_destination_count[zone]
-                        else:
-                            past_destination_counts[zone] = 0
+                        past_origin_counts = {}
+                        past_destination_counts = {}
 
-                    pred_out_flows_list.append(past_origin_counts)
-                    pred_in_flows_list.append(past_destination_counts)
+                        for i in self.simInput.grid_matrix.index:
+                            for j in self.simInput.grid_matrix.columns:
+                                zone = self.simInput.grid_matrix.iloc[i, j]
 
-                max_flow = max(self.simInput.max_out_flow, self.simInput.max_in_flow)
-                prediction_datetime = current_datetime + datetime.timedelta(hours=1)
+                                if zone in self.simInput.valid_zones:
+                                    if zone in past_origin_count:
+                                        past_origin_counts[zone] = past_origin_count[zone]
+                                    else:
+                                        past_origin_counts[zone] = 0
+                                    if zone in past_destination_count:
+                                        past_destination_counts[zone] = past_destination_count[zone]
+                                    else:
+                                        past_destination_counts[zone] = 0
+                                else:
+                                    past_origin_counts[zone] = 0
+                                    past_destination_counts[zone] = 0
 
-                # creazione tensore
-                d1 = np.concatenate([
-                    self.database1[['out_flow_count']].reset_index(drop=True,inplace=False).to_numpy().reshape(d2.shape[0], self.N, self.M),
-                    self.database2[['out_flow_count']].reset_index(drop=True,inplace=False).to_numpy().reshape(d2.shape[0], self.N, self.M)
-                ], axis=1).reshape(d2.shape[0], 2, self.N, self.M)
+                        past_origin_counts = np.array(list(past_origin_counts.values())).reshape(1, self.city_shape[0], self.city_shape[1])
+                        past_destination_counts = np.array(list(past_destination_counts.values())).reshape(1, self.city_shape[0], self.city_shape[1])
 
-                # Incorporamento metadata
-                # load meta feature
-                meta_feature = []
-                #return timestamps
-                if meta_data:
-                    time_feature = timestamp2vec(timestamps_Y)
-                    meta_feature.append(time_feature)
-                    if holiday_data:
-                        # load holiday
-                        holiday_feature = load_holiday(timestamps_Y, datapath)
-                        meta_feature.append(holiday_feature)
-                    if meteorol_data:
-                        # load meteorol data
-                        meteorol_feature = load_meteorol(timestamps_Y, datapath)
-                        meta_feature.append(meteorol_feature)
+                        past_in_flow.append(past_origin_counts)
+                        past_out_flow.append(past_destination_counts)
 
-                    meta_feature = np.hstack(meta_feature) if len(meta_feature) > 0 else np.asarray(meta_feature)
-                    X_test.append(meta_feature)
+                    max_flow = max(self.simInput.max_out_flow, self.simInput.max_in_flow)
+                    prediction_datetime = current_datetime
+                    prediction_weekday = prediction_datetime.weekday()
 
-                # Definizione Funzione
-                prediction = self.prediction_model.predict(X_test, max_flow)
+                    past_in_flow = np.concatenate(past_in_flow, axis=0)
+                    past_out_flow = np.concatenate(past_out_flow, axis=0)
+
+                    # creazione tensore
+                    d1 = np.concatenate([
+                        np.expand_dims(past_in_flow, axis=0),
+                        np.expand_dims(past_out_flow, axis=0)
+                    ], axis=0)
+
+                    d1 = np.moveaxis(d1, source=0, destination=-1)
+
+                    X_test = [d1]
+
+                    meta_data = True
+                    holiday_data = False
+                    meteorol_data = False
+
+                    # Incorporamento metadata
+                    # load meta feature
+                    meta_feature = []
+                    #return timestamps
+                    if meta_data:
+                        time_feature = weekday2vec(prediction_weekday)
+                        meta_feature.append(time_feature)
+                        if holiday_data:
+                            pass
+                            # load holiday
+                            #holiday_feature = load_holiday(timestamps_Y, datapath)
+                            #meta_feature.append(holiday_feature)
+                        if meteorol_data:
+                            pass
+                            # load meteorol data
+                            #meteorol_feature = load_meteorol(timestamps_Y, datapath)
+                            #meta_feature.append(meteorol_feature)
+
+                        meta_feature = np.hstack(meta_feature) if len(meta_feature) > 0 else np.asarray(meta_feature)
+                        X_test.append(meta_feature)
+
+                    # Definizione Funzione
+                    prediction = self.prediction_model.predict(X_test, max_flow)
 
 
             else:
@@ -386,269 +416,271 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 pred_out_flows_list.append(pred_out_flows[daytype][(hour + 1 + i) % 24])
                 pred_in_flows_list.append(pred_in_flows[daytype][(hour + 1 + i) % 24])
 
-        # Choose the maximum number of 'pick up' and 'drop off' zones proposals to be computed
-        n_relocations = int(len(self.available_vehicles_dict) / 2)  # an upper bound
-        if self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive", "predictive"] \
-                and "relocation_capacity" not in self.simInput.supply_model_conf:
-            n_free_workers = self.relocation_workers_resource.capacity - self.relocation_workers_resource.count
-            n_relocations = min(n_relocations, n_free_workers)
+        if pred_out_flows_list and pred_in_flows_list:
 
-        # Compute proposals of starting and ending zones for relocations
-        self.starting_zone_ids, self.n_picked_vehicles_list = self.choose_starting_zone(n=n_relocations,
-                                                                                        pred_out_flows_list=pred_out_flows_list,
-                                                                                        pred_in_flows_list=pred_in_flows_list)
-        self.ending_zone_ids, self.n_dropped_vehicles_list = self.choose_ending_zone(n=n_relocations,
-                                                                                     origin_scores_list=pred_out_flows_list,
-                                                                                     destination_scores_list=pred_in_flows_list,
-                                                                                     daytype=daytype, hour=hour)
-
-        if self.starting_zone_ids and self.ending_zone_ids:
-
+            # Choose the maximum number of 'pick up' and 'drop off' zones proposals to be computed
+            n_relocations = int(len(self.available_vehicles_dict) / 2)  # an upper bound
             if self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive", "predictive"] \
-                    and "relocation_capacity" in self.simInput.supply_model_conf:
-                # Distribute proposed 'pick up' and 'drop off' zones between scheduled relocations
+                    and "relocation_capacity" not in self.simInput.supply_model_conf:
+                n_free_workers = self.relocation_workers_resource.capacity - self.relocation_workers_resource.count
+                n_relocations = min(n_relocations, n_free_workers)
 
-                relocation_capacity = self.simInput.supply_model_conf["relocation_capacity"]
+            # Compute proposals of starting and ending zones for relocations
+            self.starting_zone_ids, self.n_picked_vehicles_list = self.choose_starting_zone(n=n_relocations,
+                                                                                            pred_out_flows_list=pred_out_flows_list,
+                                                                                            pred_in_flows_list=pred_in_flows_list)
+            self.ending_zone_ids, self.n_dropped_vehicles_list = self.choose_ending_zone(n=n_relocations,
+                                                                                         origin_scores_list=pred_out_flows_list,
+                                                                                         destination_scores_list=pred_in_flows_list,
+                                                                                         daytype=daytype, hour=hour)
 
-                pick_up_zone_ids = self.starting_zone_ids.copy()
-                n_picked_vehicles_list = self.n_picked_vehicles_list.copy()
-                drop_off_zone_ids = self.ending_zone_ids.copy()
-                n_dropped_vehicles_list = self.n_dropped_vehicles_list.copy()
+            if self.starting_zone_ids and self.ending_zone_ids:
 
-                first_pick_up_zone_id = pick_up_zone_ids[0]
+                if self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive", "predictive"] \
+                        and "relocation_capacity" in self.simInput.supply_model_conf:
+                    # Distribute proposed 'pick up' and 'drop off' zones between scheduled relocations
 
-                # Create priority queues combining relocation priority and distance
-                pick_up_zone_priority_queue = self.compute_zone_priorities(first_pick_up_zone_id, pick_up_zone_ids[1:])
-                drop_off_zones_priority_queue = self.compute_zone_priorities(first_pick_up_zone_id, drop_off_zone_ids)
+                    relocation_capacity = self.simInput.supply_model_conf["relocation_capacity"]
 
-                pick_up_zone_index = 0
-                try:
-                    priority, drop_off_zone_index = drop_off_zones_priority_queue.get_nowait()
-                except Empty:
-                    return
+                    pick_up_zone_ids = self.starting_zone_ids.copy()
+                    n_picked_vehicles_list = self.n_picked_vehicles_list.copy()
+                    drop_off_zone_ids = self.ending_zone_ids.copy()
+                    n_dropped_vehicles_list = self.n_dropped_vehicles_list.copy()
 
-                satisfied_drop_off_zones_indexes = []
-                empty_queue = False
-                for i in range(n_relocations):
-                    if empty_queue:
-                        break
+                    first_pick_up_zone_id = pick_up_zone_ids[0]
 
-                    residual_capacity = relocation_capacity
-                    scheduled_relocation = {
-                        "pick_up": {},
-                        "drop_off": {}
-                    }
+                    # Create priority queues combining relocation priority and distance
+                    pick_up_zone_priority_queue = self.compute_zone_priorities(first_pick_up_zone_id, pick_up_zone_ids[1:])
+                    drop_off_zones_priority_queue = self.compute_zone_priorities(first_pick_up_zone_id, drop_off_zone_ids)
 
-                    if "relocation_profitability_check" in self.simInput.supply_model_conf:
-                        relocation_profitability_check = self.simInput.supply_model_conf["relocation_profitability_check"]
-                    else:
-                        relocation_profitability_check = True
+                    pick_up_zone_index = 0
+                    try:
+                        priority, drop_off_zone_index = drop_off_zones_priority_queue.get_nowait()
+                    except Empty:
+                        return
 
-                    if "relocation_vehicle_consumption" in self.simInput.supply_model_conf:
-                        relocation_vehicle_consumption = self.simInput.supply_model_conf["relocation_vehicle_consumption"]
-                    else:
-                        relocation_vehicle_consumption = 7  # l/100km
-
-                    if "diesel_price" in self.simInput.supply_model_conf:
-                        diesel_price = self.simInput.supply_model_conf["diesel_price"]
-                    else:
-                        diesel_price = 0.65  # $/l (USA)
-
-                    if "unlock_fee" in self.simInput.supply_model_conf:
-                        unlock_fee = self.simInput.supply_model_conf["unlock_fee"]
-                    else:
-                        unlock_fee = 1  # $
-
-                    if "rent_fee" in self.simInput.supply_model_conf:
-                        rent_fee = self.simInput.supply_model_conf["rent_fee"]
-                    else:
-                        rent_fee = 0.15  # $/min
-
-                    if "avg_relocation_distance" in self.simInput.supply_model_conf:
-                        avg_relocation_distance = self.simInput.supply_model_conf["avg_relocation_distance"]
-                    else:
-                        avg_relocation_distance = 1  # km
-
-                    if "avg_trip_duration" in self.simInput.supply_model_conf:
-                        avg_trip_duration = self.simInput.supply_model_conf["avg_trip_duration"]
-                    else:
-                        avg_trip_duration = 10  # min
-
-                    relocation_vehicle_cost_per_km = relocation_vehicle_consumption * diesel_price
-
-                    unitary_relocation_cost = avg_relocation_distance * relocation_vehicle_cost_per_km
-                    unitary_scooter_revenue = unlock_fee + rent_fee * avg_trip_duration
-
-                    tot_relocation_cost = 0
-                    tot_potential_revenues = 0
-                    n_relocated_vehicles = 0
-                    was_positive = False
-
-                    while residual_capacity > 0 and not empty_queue:
-                        if relocation_profitability_check and n_relocated_vehicles:
-                            if tot_potential_revenues - tot_relocation_cost >= 0:
-                                was_positive = True
-                            if was_positive and tot_potential_revenues - tot_relocation_cost < 0:
-                                break
-
-                        try:
-                            pick_up_zone_id = pick_up_zone_ids[pick_up_zone_index]
-                            n_picked_vehicles = n_picked_vehicles_list[pick_up_zone_index]
-                            drop_off_zone_id = drop_off_zone_ids[drop_off_zone_index]
-                            n_dropped_vehicles = n_dropped_vehicles_list[drop_off_zone_index]
-
-                            if n_picked_vehicles > residual_capacity:
-                                # Try to consume the entire residual capacity
-                                if residual_capacity > n_dropped_vehicles:
-                                    # 'Drop off' zone needs are satisfied before
-                                    n_relocated_vehicles = n_dropped_vehicles
-                                    satisfied_drop_off_zones_indexes.append(drop_off_zone_index)
-                                    priority, drop_off_zone_index = drop_off_zones_priority_queue.get_nowait()
-
-                                elif residual_capacity < n_dropped_vehicles:
-                                    # Residual capacity is totally consumed before
-                                    n_relocated_vehicles = residual_capacity
-                                    n_picked_vehicles_list[pick_up_zone_index] -= residual_capacity
-                                    n_dropped_vehicles_list[drop_off_zone_index] -= residual_capacity
-
-                                else:
-                                    # 'Drop off' zone needs coincide with residual capacity
-                                    n_relocated_vehicles = residual_capacity
-                                    n_picked_vehicles_list[pick_up_zone_index] -= residual_capacity
-                                    satisfied_drop_off_zones_indexes.append(drop_off_zone_index)
-                                    priority, drop_off_zone_index = drop_off_zones_priority_queue.get_nowait()
-
-                            else:
-                                # Try to satisfy all 'pick up' zone needs
-                                if n_picked_vehicles > n_dropped_vehicles:
-                                    # 'Drop off' zone needs are satisfied before 'pick up' ones
-                                    n_relocated_vehicles = n_dropped_vehicles
-                                    n_picked_vehicles_list[pick_up_zone_index] -= n_dropped_vehicles
-                                    satisfied_drop_off_zones_indexes.append(drop_off_zone_index)
-                                    priority, drop_off_zone_index = drop_off_zones_priority_queue.get_nowait()
-
-                                else:
-                                    # 'Pick up' zone needs totally satisfied
-                                    if n_picked_vehicles < n_dropped_vehicles:
-                                        # Starting zone needs are satisfied before ending ones
-                                        n_relocated_vehicles = n_picked_vehicles
-                                        n_dropped_vehicles_list[drop_off_zone_index] -= n_picked_vehicles
-
-                                    else:
-                                        # 'Drop off' zone needs coincide with 'pick up' zone ones
-                                        n_relocated_vehicles = n_picked_vehicles
-                                        satisfied_drop_off_zones_indexes.append(drop_off_zone_index)
-
-                                    priority, pick_up_zone_index = pick_up_zone_priority_queue.get_nowait()
-                                    new_pick_up_zone_id = pick_up_zone_ids[pick_up_zone_index]
-
-                                    # Re-compute 'drop off' zone priorities for new 'pick up' zone
-                                    for index in sorted(satisfied_drop_off_zones_indexes, reverse=True):
-                                        del drop_off_zone_ids[index]
-                                        del n_dropped_vehicles_list[index]
-                                    satisfied_drop_off_zones_indexes.clear()
-
-                                    drop_off_zones_priority_queue = self.compute_zone_priorities(new_pick_up_zone_id,
-                                                                                                 drop_off_zone_ids)
-
-                                    priority, drop_off_zone_index = drop_off_zones_priority_queue.get_nowait()
-
-                        except Empty:
-                            # Ran out of 'pick up' or 'drop off' zones
-                            empty_queue = True
+                    satisfied_drop_off_zones_indexes = []
+                    empty_queue = False
+                    for i in range(n_relocations):
+                        if empty_queue:
                             break
 
-                        finally:
-                            if pick_up_zone_id not in scheduled_relocation["pick_up"]:
-                                scheduled_relocation["pick_up"][pick_up_zone_id] = n_relocated_vehicles
-                                tot_relocation_cost += unitary_relocation_cost  # added new 'pick up' zone
-                            else:
-                                scheduled_relocation["pick_up"][pick_up_zone_id] += n_relocated_vehicles
+                        residual_capacity = relocation_capacity
+                        scheduled_relocation = {
+                            "pick_up": {},
+                            "drop_off": {}
+                        }
 
-                            scheduled_relocation["drop_off"][drop_off_zone_id] = n_relocated_vehicles
-                            tot_relocation_cost += unitary_relocation_cost  # added new 'drop off' zone
+                        if "relocation_profitability_check" in self.simInput.supply_model_conf:
+                            relocation_profitability_check = self.simInput.supply_model_conf["relocation_profitability_check"]
+                        else:
+                            relocation_profitability_check = True
 
-                            residual_capacity -= n_relocated_vehicles
-                            tot_potential_revenues += n_relocated_vehicles * unitary_scooter_revenue
+                        if "relocation_vehicle_consumption" in self.simInput.supply_model_conf:
+                            relocation_vehicle_consumption = self.simInput.supply_model_conf["relocation_vehicle_consumption"]
+                        else:
+                            relocation_vehicle_consumption = 7  # l/100km
 
-                    if relocation_profitability_check:
-                        if was_positive:
+                        if "diesel_price" in self.simInput.supply_model_conf:
+                            diesel_price = self.simInput.supply_model_conf["diesel_price"]
+                        else:
+                            diesel_price = 0.65  # $/l (USA)
+
+                        if "unlock_fee" in self.simInput.supply_model_conf:
+                            unlock_fee = self.simInput.supply_model_conf["unlock_fee"]
+                        else:
+                            unlock_fee = 1  # $
+
+                        if "rent_fee" in self.simInput.supply_model_conf:
+                            rent_fee = self.simInput.supply_model_conf["rent_fee"]
+                        else:
+                            rent_fee = 0.15  # $/min
+
+                        if "avg_relocation_distance" in self.simInput.supply_model_conf:
+                            avg_relocation_distance = self.simInput.supply_model_conf["avg_relocation_distance"]
+                        else:
+                            avg_relocation_distance = 1  # km
+
+                        if "avg_trip_duration" in self.simInput.supply_model_conf:
+                            avg_trip_duration = self.simInput.supply_model_conf["avg_trip_duration"]
+                        else:
+                            avg_trip_duration = 10  # min
+
+                        relocation_vehicle_cost_per_km = relocation_vehicle_consumption * diesel_price
+
+                        unitary_relocation_cost = avg_relocation_distance * relocation_vehicle_cost_per_km
+                        unitary_scooter_revenue = unlock_fee + rent_fee * avg_trip_duration
+
+                        tot_relocation_cost = 0
+                        tot_potential_revenues = 0
+                        n_relocated_vehicles = 0
+                        was_positive = False
+
+                        while residual_capacity > 0 and not empty_queue:
+                            if relocation_profitability_check and n_relocated_vehicles:
+                                if tot_potential_revenues - tot_relocation_cost >= 0:
+                                    was_positive = True
+                                if was_positive and tot_potential_revenues - tot_relocation_cost < 0:
+                                    break
+
+                            try:
+                                pick_up_zone_id = pick_up_zone_ids[pick_up_zone_index]
+                                n_picked_vehicles = n_picked_vehicles_list[pick_up_zone_index]
+                                drop_off_zone_id = drop_off_zone_ids[drop_off_zone_index]
+                                n_dropped_vehicles = n_dropped_vehicles_list[drop_off_zone_index]
+
+                                if n_picked_vehicles > residual_capacity:
+                                    # Try to consume the entire residual capacity
+                                    if residual_capacity > n_dropped_vehicles:
+                                        # 'Drop off' zone needs are satisfied before
+                                        n_relocated_vehicles = n_dropped_vehicles
+                                        satisfied_drop_off_zones_indexes.append(drop_off_zone_index)
+                                        priority, drop_off_zone_index = drop_off_zones_priority_queue.get_nowait()
+
+                                    elif residual_capacity < n_dropped_vehicles:
+                                        # Residual capacity is totally consumed before
+                                        n_relocated_vehicles = residual_capacity
+                                        n_picked_vehicles_list[pick_up_zone_index] -= residual_capacity
+                                        n_dropped_vehicles_list[drop_off_zone_index] -= residual_capacity
+
+                                    else:
+                                        # 'Drop off' zone needs coincide with residual capacity
+                                        n_relocated_vehicles = residual_capacity
+                                        n_picked_vehicles_list[pick_up_zone_index] -= residual_capacity
+                                        satisfied_drop_off_zones_indexes.append(drop_off_zone_index)
+                                        priority, drop_off_zone_index = drop_off_zones_priority_queue.get_nowait()
+
+                                else:
+                                    # Try to satisfy all 'pick up' zone needs
+                                    if n_picked_vehicles > n_dropped_vehicles:
+                                        # 'Drop off' zone needs are satisfied before 'pick up' ones
+                                        n_relocated_vehicles = n_dropped_vehicles
+                                        n_picked_vehicles_list[pick_up_zone_index] -= n_dropped_vehicles
+                                        satisfied_drop_off_zones_indexes.append(drop_off_zone_index)
+                                        priority, drop_off_zone_index = drop_off_zones_priority_queue.get_nowait()
+
+                                    else:
+                                        # 'Pick up' zone needs totally satisfied
+                                        if n_picked_vehicles < n_dropped_vehicles:
+                                            # Starting zone needs are satisfied before ending ones
+                                            n_relocated_vehicles = n_picked_vehicles
+                                            n_dropped_vehicles_list[drop_off_zone_index] -= n_picked_vehicles
+
+                                        else:
+                                            # 'Drop off' zone needs coincide with 'pick up' zone ones
+                                            n_relocated_vehicles = n_picked_vehicles
+                                            satisfied_drop_off_zones_indexes.append(drop_off_zone_index)
+
+                                        priority, pick_up_zone_index = pick_up_zone_priority_queue.get_nowait()
+                                        new_pick_up_zone_id = pick_up_zone_ids[pick_up_zone_index]
+
+                                        # Re-compute 'drop off' zone priorities for new 'pick up' zone
+                                        for index in sorted(satisfied_drop_off_zones_indexes, reverse=True):
+                                            del drop_off_zone_ids[index]
+                                            del n_dropped_vehicles_list[index]
+                                        satisfied_drop_off_zones_indexes.clear()
+
+                                        drop_off_zones_priority_queue = self.compute_zone_priorities(new_pick_up_zone_id,
+                                                                                                     drop_off_zone_ids)
+
+                                        priority, drop_off_zone_index = drop_off_zones_priority_queue.get_nowait()
+
+                            except Empty:
+                                # Ran out of 'pick up' or 'drop off' zones
+                                empty_queue = True
+                                break
+
+                            finally:
+                                if pick_up_zone_id not in scheduled_relocation["pick_up"]:
+                                    scheduled_relocation["pick_up"][pick_up_zone_id] = n_relocated_vehicles
+                                    tot_relocation_cost += unitary_relocation_cost  # added new 'pick up' zone
+                                else:
+                                    scheduled_relocation["pick_up"][pick_up_zone_id] += n_relocated_vehicles
+
+                                scheduled_relocation["drop_off"][drop_off_zone_id] = n_relocated_vehicles
+                                tot_relocation_cost += unitary_relocation_cost  # added new 'drop off' zone
+
+                                residual_capacity -= n_relocated_vehicles
+                                tot_potential_revenues += n_relocated_vehicles * unitary_scooter_revenue
+
+                        if relocation_profitability_check:
+                            if was_positive:
+                                self.scheduled_scooter_relocations.append(scheduled_relocation)
+                        else:
                             self.scheduled_scooter_relocations.append(scheduled_relocation)
-                    else:
+
+                else:
+                    # Associate one 'pick up' zone and one 'drop off' zone to each scheduled relocation
+
+                    for i in range(min(n_relocations, len(self.starting_zone_ids), len(self.ending_zone_ids))):
+                        pick_up_zone_id = self.starting_zone_ids[i]
+                        drop_off_zone_id = self.ending_zone_ids[i]
+
+                        n_picked_vehicles = self.n_picked_vehicles_list[i]
+                        n_dropped_vehicles = self.n_dropped_vehicles_list[i]
+
+                        tot_relocated_vehicles = min(
+                            n_picked_vehicles,
+                            n_dropped_vehicles,
+                        )
+
+                        scheduled_relocation = {
+                            "pick_up": {pick_up_zone_id: tot_relocated_vehicles},
+                            "drop_off": {drop_off_zone_id: tot_relocated_vehicles}
+                        }
+
                         self.scheduled_scooter_relocations.append(scheduled_relocation)
 
-            else:
-                # Associate one 'pick up' zone and one 'drop off' zone to each scheduled relocation
+                if self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive", "predictive"]:
+                    # Try to trigger immediately the relocation process
 
-                for i in range(min(n_relocations, len(self.starting_zone_ids), len(self.ending_zone_ids))):
-                    pick_up_zone_id = self.starting_zone_ids[i]
-                    drop_off_zone_id = self.ending_zone_ids[i]
+                    free_workers = [worker for worker in self.relocation_workers if not worker.busy]
 
-                    n_picked_vehicles = self.n_picked_vehicles_list[i]
-                    n_dropped_vehicles = self.n_dropped_vehicles_list[i]
+                    if free_workers:
 
-                    tot_relocated_vehicles = min(
-                        n_picked_vehicles,
-                        n_dropped_vehicles,
-                    )
+                        # Compute distances between workers and the first 'pick up' zone of each relocation
+                        workers_distances_by_zone = {}
+                        for (worker, scheduled_relocation) in itertools.product(free_workers, self.scheduled_scooter_relocations):
+                            first_pick_up_zone_id = list(scheduled_relocation["pick_up"].keys())[0]
+                            if first_pick_up_zone_id not in workers_distances_by_zone:
+                                workers_distances_by_zone[first_pick_up_zone_id] = {}
+                            workers_distances_by_zone[first_pick_up_zone_id][worker] = get_od_distance(
+                                self.simInput.grid,
+                                worker.current_position,
+                                first_pick_up_zone_id
+                            )
 
-                    scheduled_relocation = {
-                        "pick_up": {pick_up_zone_id: tot_relocated_vehicles},
-                        "drop_off": {drop_off_zone_id: tot_relocated_vehicles}
-                    }
+                        for i in range(min(n_relocations, len(self.scheduled_scooter_relocations))):
+                            scheduled_relocation = self.scheduled_scooter_relocations[i]
+                            first_pick_up_zone_id = list(scheduled_relocation["pick_up"].keys())[0]
 
-                    self.scheduled_scooter_relocations.append(scheduled_relocation)
+                            # Find nearest worker to the first 'pick up' zone
+                            nearest_worker = None
+                            nearest_worker_distance = float('inf')
+                            workers_distances = workers_distances_by_zone[first_pick_up_zone_id]
+                            for worker in workers_distances:
+                                if workers_distances[worker] < nearest_worker_distance:
+                                    nearest_worker = worker
+                                    nearest_worker_distance = workers_distances[worker]
 
-            if self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive", "predictive"]:
-                # Try to trigger immediately the relocation process
+                            # Compute shortest path between first 'pick up' zone and the others
+                            collection_path = self.compute_shortest_path(
+                                first_pick_up_zone_id,
+                                list(scheduled_relocation["pick_up"].keys())[1:]
+                            )
+                            # Compute shortest path between last 'pick up' zone and 'drop off' zones
+                            distribution_path = self.compute_shortest_path(
+                                collection_path[-1],
+                                scheduled_relocation["drop_off"].keys()
+                            )
 
-                free_workers = [worker for worker in self.relocation_workers if not worker.busy]
+                            # Add to collection path the step between current worker position and first 'pick up' zone
+                            final_collection_path = [nearest_worker.current_position] + collection_path
 
-                if free_workers:
-
-                    # Compute distances between workers and the first 'pick up' zone of each relocation
-                    workers_distances_by_zone = {}
-                    for (worker, scheduled_relocation) in itertools.product(free_workers, self.scheduled_scooter_relocations):
-                        first_pick_up_zone_id = list(scheduled_relocation["pick_up"].keys())[0]
-                        if first_pick_up_zone_id not in workers_distances_by_zone:
-                            workers_distances_by_zone[first_pick_up_zone_id] = {}
-                        workers_distances_by_zone[first_pick_up_zone_id][worker] = get_od_distance(
-                            self.simInput.grid,
-                            worker.current_position,
-                            first_pick_up_zone_id
-                        )
-
-                    for i in range(min(n_relocations, len(self.scheduled_scooter_relocations))):
-                        scheduled_relocation = self.scheduled_scooter_relocations[i]
-                        first_pick_up_zone_id = list(scheduled_relocation["pick_up"].keys())[0]
-
-                        # Find nearest worker to the first 'pick up' zone
-                        nearest_worker = None
-                        nearest_worker_distance = float('inf')
-                        workers_distances = workers_distances_by_zone[first_pick_up_zone_id]
-                        for worker in workers_distances:
-                            if workers_distances[worker] < nearest_worker_distance:
-                                nearest_worker = worker
-                                nearest_worker_distance = workers_distances[worker]
-
-                        # Compute shortest path between first 'pick up' zone and the others
-                        collection_path = self.compute_shortest_path(
-                            first_pick_up_zone_id,
-                            list(scheduled_relocation["pick_up"].keys())[1:]
-                        )
-                        # Compute shortest path between last 'pick up' zone and 'drop off' zones
-                        distribution_path = self.compute_shortest_path(
-                            collection_path[-1],
-                            scheduled_relocation["drop_off"].keys()
-                        )
-
-                        # Add to collection path the step between current worker position and first 'pick up' zone
-                        final_collection_path = [nearest_worker.current_position] + collection_path
-
-                        # Trigger multi-step relocation
-                        self.env.process(self.relocate_scooter_multiple_zones(scheduled_relocation,
-                                                                              final_collection_path, distribution_path,
-                                                                              nearest_worker))
+                            # Trigger multi-step relocation
+                            self.env.process(self.relocate_scooter_multiple_zones(scheduled_relocation,
+                                                                                  final_collection_path, distribution_path,
+                                                                                  nearest_worker))
 
     def compute_delta(self, pred_out_flows_list, pred_in_flows_list):
 

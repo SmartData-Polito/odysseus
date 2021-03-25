@@ -84,8 +84,7 @@ class ScooterRelocationPrimitives:
 
         if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "predictive":
 
-            prediction_model_name = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])[
-                "scooter_relocation_prediction_model"]
+            prediction_model_name = self.simInput.supply_model_conf["scooter_relocation_prediction_model"]
 
             prediction_model_path = os.path.join(
                 os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
@@ -96,7 +95,7 @@ class ScooterRelocationPrimitives:
                 prediction_model_name
             )
 
-            city_shape = self.simInput.grid_matrix.shape
+            self.city_shape = self.simInput.grid_matrix.shape
             mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(
                 lambda zone_id: int(zone_id in self.simInput.valid_zones)))
 

@@ -287,15 +287,25 @@ class DemandModel:
         #     int(self.sim_general_conf["k_zones_factor"] * len(self.grid))
         # ).index
 
-        origin_zones_count = self.bookings_train.origin_id.value_counts()
-        dest_zones_count = self.bookings_train.destination_id.value_counts()
+        origin_zones_count_train = self.bookings_train.origin_id.value_counts()
+        dest_zones_count_train = self.bookings_train.destination_id.value_counts()
+        origin_zones_count_test = self.bookings_test.origin_id.value_counts()
+        dest_zones_count_test = self.bookings_test.destination_id.value_counts()
 
-        valid_origin_zones = origin_zones_count[(origin_zones_count > count_threshold)]
-        valid_dest_zones = dest_zones_count[(dest_zones_count > count_threshold)]
+        valid_origin_zones_train = origin_zones_count_train[(origin_zones_count_train > count_threshold)]
+        valid_dest_zones_train = dest_zones_count_train[(dest_zones_count_train > count_threshold)]
+        valid_origin_zones_test = origin_zones_count_test[(origin_zones_count_test > count_threshold)]
+        valid_dest_zones_test = dest_zones_count_test[(dest_zones_count_test > count_threshold)]
 
-        self.valid_zones = valid_origin_zones.index.intersection(
-                valid_dest_zones.index
+        valid_zones_train = valid_origin_zones_train.index.intersection(
+                valid_dest_zones_train.index
         ).astype(int)
+
+        valid_zones_test = valid_origin_zones_test.index.intersection(
+            valid_dest_zones_test.index
+        ).astype(int)
+
+        self.valid_zones = valid_zones_train.intersection(valid_zones_test)
 
         return self.valid_zones
 
@@ -361,8 +371,8 @@ class DemandModel:
 
     def get_grid_indexes(self):
         zone_coords_dict = {}
-        for i in self.grid_matrix.index:
-            for j in self.grid_matrix.columns:
+        for j in self.grid_matrix.columns:
+            for i in self.grid_matrix.index:
                 zone_coords_dict[self.grid_matrix.iloc[i, j]] = (i, j)
 
         for zone in self.bookings_train.origin_id.unique():
@@ -370,7 +380,7 @@ class DemandModel:
             self.bookings_train.loc[self.bookings_train.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
             self.bookings_train.loc[self.bookings_train.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
             self.bookings_train.loc[self.bookings_train.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
-        for zone in self.bookings_test.origin_id.unique():
+        for zone in set(self.bookings_test.origin_id.unique()).intersection(self.bookings_test.destination_id.unique()):
             self.bookings_test.loc[self.bookings_test.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
             self.bookings_test.loc[self.bookings_test.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
             self.bookings_test.loc[self.bookings_test.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
