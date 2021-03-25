@@ -18,9 +18,6 @@ def create_app():
 
     from e3f2s.webapp.apis.api_test_bokeh.routes import api_bokeh
     app.register_blueprint(api_bokeh, url_prefix='/api_bokeh')
-
-    from e3f2s.webapp.apis.api_auth.routes import api_auth
-    app.register_blueprint(api_auth, url_prefix='/auth')
     
 
     return app

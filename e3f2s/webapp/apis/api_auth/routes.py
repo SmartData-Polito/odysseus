@@ -1,5 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_cors import CORS
+
+api_cdm = Blueprint('auth', __name__)
+CORS(api_cdm)
 
 @auth.route('/login', methods=['POST'])
 def login_post():
