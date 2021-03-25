@@ -369,7 +369,11 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                         np.expand_dims(past_out_flow, axis=0)
                     ], axis=0)
 
-                    d1 = np.moveaxis(d1, source=0, destination=-1)
+                    # flux dimension displaced at the end of the tensor
+                    d1 = np.moveaxis(d1, 0, -1)
+
+                    # adding a dimension
+                    d1 = d1[np.newaxis,...]
 
                     X_test = [d1]
 
@@ -377,10 +381,8 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                     holiday_data = False
                     meteorol_data = False
 
-                    # Incorporamento metadata
-                    # load meta feature
+                    # metadata
                     meta_feature = []
-                    #return timestamps
                     if meta_data:
                         time_feature = weekday2vec(prediction_weekday)
                         meta_feature.append(time_feature)
@@ -398,7 +400,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                         meta_feature = np.hstack(meta_feature) if len(meta_feature) > 0 else np.asarray(meta_feature)
                         X_test.append(meta_feature)
 
-                    # Definizione Funzione
+                    # Predcition function
                     prediction = self.prediction_model.predict(X_test, max_flow)
 
 
