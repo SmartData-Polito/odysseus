@@ -88,6 +88,3 @@ def load_dashboard():
 
     #     _max_width_()
     #     load_charts_with_menu(bookings_by_hour)
-
-
-load_dashboard()

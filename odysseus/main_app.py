@@ -1,18 +1,18 @@
+import streamlit as st
+st.set_page_config(layout="wide")
+
 import os, sys
 import webbrowser
-
-from odysseus.dashboards.session_state import get
-from odysseus.login.login import *
-from odysseus.dashboards.dashboard import load_dashboard
-
-st.set_page_config(layout="wide")
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 for module_dir in os.listdir(parentdir):
     sys.path.append(os.path.join(parentdir, module_dir))
-st.write(parentdir)
+
+from odysseus.dashboards.session_state import get
+from odysseus.login.login import *
+from odysseus.dashboards.dashboard import *
 
 session_state = get(password='', username='')
 
