@@ -12,7 +12,7 @@ from mlrose import TSPOpt, genetic_alg
 import numpy as np
 import pandas as pd
 from odysseus.simulator.simulation.scooter_relocation_primitives import *
-#from odysseus.simulator.simulation_input.prediction_model import weekday2vec
+from odysseus.simulator.simulation_input.prediction_model import weekday2vec
 
 
 class ScooterRelocationStrategy(ScooterRelocationPrimitives):
@@ -318,8 +318,8 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 self.past_hours_origin_counts.append(self.current_hour_origin_count)
                 self.past_hours_destination_counts.append(self.current_hour_destination_count)
 
-                past_in_flow = []
-                past_out_flow = []
+                past_in_flow = np.zeros((2, self.city_shape[0], self.city_shape[1]))
+                past_out_flow = np.zeros((2, self.city_shape[0], self.city_shape[1]))
 
                 if len(self.past_hours_origin_counts) > 2:
                     self.past_hours_origin_counts.pop(0)
@@ -330,50 +330,31 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                         past_origin_count = self.past_hours_origin_counts[i]
                         past_destination_count = self.past_hours_destination_counts[i]
 
-                        past_origin_counts = {}
-                        past_destination_counts = {}
-
-                        for i in self.simInput.grid_matrix.index:
-                            for j in self.simInput.grid_matrix.columns:
-                                zone = self.simInput.grid_matrix.iloc[i, j]
+                        for j in self.simInput.grid_matrix.index:
+                            for k in self.simInput.grid_matrix.columns:
+                                zone = self.simInput.grid_matrix.iloc[j, k]
 
                                 if zone in self.simInput.valid_zones:
                                     if zone in past_origin_count:
-                                        past_origin_counts[zone] = past_origin_count[zone]
-                                    else:
-                                        past_origin_counts[zone] = 0
+                                        past_in_flow[i][j][k] = past_origin_count[zone]
                                     if zone in past_destination_count:
-                                        past_destination_counts[zone] = past_destination_count[zone]
-                                    else:
-                                        past_destination_counts[zone] = 0
-                                else:
-                                    past_origin_counts[zone] = 0
-                                    past_destination_counts[zone] = 0
-
-                        past_origin_counts = np.array(list(past_origin_counts.values())).reshape(1, self.city_shape[0], self.city_shape[1])
-                        past_destination_counts = np.array(list(past_destination_counts.values())).reshape(1, self.city_shape[0], self.city_shape[1])
-
-                        past_in_flow.append(past_origin_counts)
-                        past_out_flow.append(past_destination_counts)
+                                        past_out_flow[i][j][k] = past_destination_count[zone]
 
                     max_flow = max(self.simInput.max_out_flow, self.simInput.max_in_flow)
                     prediction_datetime = current_datetime
                     prediction_weekday = prediction_datetime.weekday()
 
-                    past_in_flow = np.concatenate(past_in_flow, axis=0)
-                    past_out_flow = np.concatenate(past_out_flow, axis=0)
-
-                    # creazione tensore
+                    # Tensor creation
                     d1 = np.concatenate([
                         np.expand_dims(past_in_flow, axis=0),
                         np.expand_dims(past_out_flow, axis=0)
                     ], axis=0)
 
-                    # flux dimension displaced at the end of the tensor
+                    # Flux dimension displaced at the end of the tensor
                     d1 = np.moveaxis(d1, 0, -1)
 
-                    # adding a dimension
-                    d1 = d1[np.newaxis,...]
+                    # Adding a dimension
+                    d1 = d1[np.newaxis, ...]
 
                     X_test = [d1]
 
@@ -381,10 +362,10 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                     holiday_data = False
                     meteorol_data = False
 
-                    # metadata
+                    # Adding metadata
                     meta_feature = []
                     if meta_data:
-                        time_feature = weekday2vec(prediction_weekday)
+                        time_feature = weekday2vec([prediction_weekday])
                         meta_feature.append(time_feature)
                         if holiday_data:
                             pass
@@ -400,9 +381,18 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                         meta_feature = np.hstack(meta_feature) if len(meta_feature) > 0 else np.asarray(meta_feature)
                         X_test.append(meta_feature)
 
-                    # Predcition function
                     prediction = self.prediction_model.predict(X_test, max_flow)
 
+                    pred_in_flows = {}
+                    pred_out_flows = {}
+                    for j in self.simInput.grid_matrix.index:
+                        for k in self.simInput.grid_matrix.columns:
+                            zone = self.simInput.grid_matrix.iloc[j, k]
+                            pred_in_flows[zone] = prediction[0][j][k][0]
+                            pred_out_flows[zone] = prediction[0][j][k][1]
+
+                    pred_in_flows_list.append(pred_in_flows)
+                    pred_out_flows_list.append(pred_out_flows)
 
             else:
                 return

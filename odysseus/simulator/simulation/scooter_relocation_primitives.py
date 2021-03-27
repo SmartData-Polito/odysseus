@@ -1,7 +1,9 @@
 import datetime
+import json
 import os
 
 import simpy
+import numpy as np
 
 from odysseus.simulator.simulation_data_structures.worker import Worker
 from odysseus.simulator.simulation_input.prediction_model import PredictionModel
@@ -84,24 +86,26 @@ class ScooterRelocationPrimitives:
 
         if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "predictive":
 
-            prediction_model_name = self.simInput.supply_model_conf["scooter_relocation_prediction_model"]
-
-            prediction_model_path = os.path.join(
+            prediction_model_dir = os.path.join(
                 os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
                 "simulator",
                 "simulation_input",
-                "prediction_model_weights",
-                self.simInput.demand_model_config["city"],
-                prediction_model_name
+                "prediction_model",
+                self.simInput.demand_model_config["city"]
             )
+
+            prediction_model_path = os.path.join(prediction_model_dir, "model.h5")
+
+            with open(os.path.join(prediction_model_dir, "params.json"), "r") as f:
+                prediction_model_config = json.load(f)
 
             self.city_shape = self.simInput.grid_matrix.shape
             mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(
-                lambda zone_id: int(zone_id in self.simInput.valid_zones)))
+                lambda zone_id: int(zone_id in self.simInput.valid_zones))).to_numpy()
+            mask = np.repeat(mask[:, :, np.newaxis], 2, axis=2)
 
-            self.prediction_model = PredictionModel(self.city_shape, ext_train_shape, conv_filt=64, kernel_sz=(2, 3, 3),
-                                         mask=mask, lstm=lstm, lstm_number=lstm_number, add_external_info=True,
-                                         lr=lr, conv_block=conv_block, path=prediction_model_path)
+            self.prediction_model = PredictionModel(prediction_model_config, self.city_shape, 8,
+                                                    mask=mask, path=prediction_model_path)
 
     def relocate_scooter_single_zone(self, scooter_relocation, move_vehicles=False, worker=None):
 

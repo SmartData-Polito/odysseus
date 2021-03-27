@@ -11,11 +11,17 @@ from keras.models import Model
 
 class PredictionModel:
 
-    def __init__(self, flow_volumes_shape, ext_train_shape, conv_filt, kernel_sz, mask, lstm, lstm_number,
-                 add_external_info, conv_block, path, lr=0.0001):
+    def __init__(self, prediction_model_config, flow_volumes_shape, ext_train_shape, mask, path):
         # Model creationreduce(lambda e1, e2: e1 * e2, X_train.shape[2:])
-        self.model = CLoST3D(past_window, flow_volumes_shape, ext_train_shape, conv_filt, kernel_sz, mask, lstm,
-                             lstm_number, add_external_info, conv_block)
+        self.model = CLoST3D(prediction_model_config["past_window"],
+                             flow_volumes_shape, ext_train_shape,
+                             prediction_model_config["conv_filt"],
+                             tuple(prediction_model_config["kernel_sz"]),
+                             mask,
+                             prediction_model_config["lstm"],
+                             prediction_model_config["lstm_number"],
+                             prediction_model_config["add_external_info"],
+                             prediction_model_config["conv_block"])
         # Load model weights
         self.model.load_weights(path)
 
@@ -41,7 +47,7 @@ def CLoST3D(past_window, flow_volumes_shape, ext_train_shape, conv_filt=64, kern
     main_inputs = []
     # X_train.shape[1] = fa riferimento ai tensori concatenati quindi dipende da quante ore precedenti consideriamo
     # variabile da inserire in configurazione
-    start = Input(shape=(X_train.shape[1], flow_volumes_shape[0], flow_volumes_shape[1], 2))
+    start = Input(shape=(past_window, flow_volumes_shape[0], flow_volumes_shape[1], 2))
 
     main_inputs.append(start)
     main_output = main_inputs[0]
@@ -63,11 +69,11 @@ def CLoST3D(past_window, flow_volumes_shape, ext_train_shape, conv_filt=64, kern
         external_input = Input(shape=(ext_train_shape,))
         main_inputs.append(external_input)
         x_ext = Dense(units=10, activation='relu')(external_input)
-        x_ext = Dense(units=reduce(lambda e1, e2: e1 * e2, (flow_volumes_shape[0], flow_volumes_shape[1], 2), activation='relu')(x_ext)
+        x_ext = Dense(units=reduce(lambda e1, e2: e1 * e2, (flow_volumes_shape[0], flow_volumes_shape[1], 2)), activation='relu')(x_ext)
         x = Concatenate(axis=-1)([x, x_ext])
-    x = Dense(reduce(lambda e1, e2: e1 * e2, (flow_volumes_shape[0], flow_volumes_shape[1], 2))(x)
-    x = Reshape(X_train.shape[2:])(x)
-    x = Activation(swish)(x)
+    x = Dense(reduce(lambda e1, e2: e1 * e2, (flow_volumes_shape[0], flow_volumes_shape[1], 2)))(x)
+    x = Reshape((flow_volumes_shape[0], flow_volumes_shape[1], 2))(x)
+    x = Activation("relu")(x)
     if mask.shape[0] != 0:
         x = Lambda(lambda el: el * mask)(x)
     model = Model(main_inputs, x)
@@ -83,23 +89,6 @@ def denormalization(X, max):
     # shape = (N , M, 2)
     X = inverse_transform(X, max)
     return X
-
-
-# creazione metadata
-def timestamp2vec(timestamps):
-    # tm_wday range [0, 6], Monday is 0
-    vec = [time.strptime(str(t[:8], encoding='utf-8'), '%Y%m%d').tm_wday for t in timestamps]  # python3
-    # vec = [time.strptime(t[:8], '%Y%m%d').tm_wday for t in timestamps]  # python2
-    ret = []
-    for i in vec:
-        v = [0 for _ in range(7)]
-        v[i] = 1
-        if i >= 5:
-            v.append(0)  # weekend
-        else:
-            v.append(1)  # weekday
-        ret.append(v)
-    return np.asarray(ret)
 
 
 def weekday2vec(weekdays):
