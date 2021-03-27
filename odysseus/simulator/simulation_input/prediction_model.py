@@ -14,8 +14,8 @@ class PredictionModel:
     def __init__(self, flow_volumes_shape, ext_train_shape, conv_filt, kernel_sz, mask, lstm, lstm_number,
                  add_external_info, conv_block, path, lr=0.0001):
         # Model creationreduce(lambda e1, e2: e1 * e2, X_train.shape[2:])
-        self.model = CLoST3D(flow_volumes_shape, ext_train_shape, conv_filt, kernel_sz, mask, lstm, lstm_number,
-                             add_external_info, conv_block)
+        self.model = CLoST3D(past_window, flow_volumes_shape, ext_train_shape, conv_filt, kernel_sz, mask, lstm,
+                             lstm_number, add_external_info, conv_block)
         # Load model weights
         self.model.load_weights(path)
 
@@ -29,7 +29,7 @@ def swish(x, beta=1):
     return (x * sigmoid(beta * x))
 
 
-def CLoST3D(flow_volumes_shape, ext_train_shape, conv_filt=64, kernel_sz=(2, 3, 3),
+def CLoST3D(past_window, flow_volumes_shape, ext_train_shape, conv_filt=64, kernel_sz=(2, 3, 3),
             mask=np.empty(0),
             lstm=None, lstm_number=0,
             add_external_info=False, conv_block=2):

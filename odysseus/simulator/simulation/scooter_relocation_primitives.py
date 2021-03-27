@@ -99,7 +99,7 @@ class ScooterRelocationPrimitives:
             mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(
                 lambda zone_id: int(zone_id in self.simInput.valid_zones)))
 
-            self.prediction_model = PredictionModel(city_shape, ext_train_shape, conv_filt=64, kernel_sz=(2, 3, 3),
+            self.prediction_model = PredictionModel(self.city_shape, ext_train_shape, conv_filt=64, kernel_sz=(2, 3, 3),
                                          mask=mask, lstm=lstm, lstm_number=lstm_number, add_external_info=True,
                                          lr=lr, conv_block=conv_block, path=prediction_model_path)
 

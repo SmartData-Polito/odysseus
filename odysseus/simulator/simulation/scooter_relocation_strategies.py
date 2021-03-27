@@ -12,7 +12,7 @@ from mlrose import TSPOpt, genetic_alg
 import numpy as np
 import pandas as pd
 from odysseus.simulator.simulation.scooter_relocation_primitives import *
-from odysseus.simulator.simulation_input.prediction_model import weekday2vec
+#from odysseus.simulator.simulation_input.prediction_model import weekday2vec
 
 
 class ScooterRelocationStrategy(ScooterRelocationPrimitives):
@@ -636,6 +636,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                 if self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive", "predictive"]:
                     # Try to trigger immediately the relocation process
 
+                    n_free_workers = self.relocation_workers_resource.capacity - self.relocation_workers_resource.count
                     free_workers = [worker for worker in self.relocation_workers if not worker.busy]
 
                     if free_workers:
@@ -652,7 +653,8 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                                 first_pick_up_zone_id
                             )
 
-                        for i in range(min(n_relocations, len(self.scheduled_scooter_relocations))):
+                        for i in range(min(n_relocations, len(self.scheduled_scooter_relocations), n_free_workers)):
+
                             scheduled_relocation = self.scheduled_scooter_relocations[i]
                             first_pick_up_zone_id = list(scheduled_relocation["pick_up"].keys())[0]
 
