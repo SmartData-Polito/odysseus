@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from e3f2s.webapp.emulate_module.city_data_manager import CityDataManager
+from odysseus.webapp.emulate_module.city_data_manager import CityDataManager
 import pymongo as pm
 import json
 import os

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from e3f2s.webapp.emulate_module.city_data_manager import CityDataManager
+from odysseus.webapp.emulate_module.city_data_manager import CityDataManager
 import pymongo as pm
 import json
 import os
@@ -19,7 +19,7 @@ def set_path():
     ROOT_DIR = os.path.abspath(os.curdir)
     cdm_data_path = os.path.join(
 	    ROOT_DIR,
-        "e3f2s/city_data_manager/",
+        "odysseus/city_data_manager/",
 	    "data"
     )
     return cdm_data_path
@@ -114,20 +114,26 @@ def summary_available_data(level='norm'):
 def simulate():
     """
     Receive the configuration from the front end and run simulation
+    {
+    "years": ["2017"],
+    "months": ["8"],
+    "cities": ["Torino"],
+    "data_source_ids": ["big_data_db"]
+    }
     """
     print("Received post")
     request.get_data()
     data = json.loads(request.data)
-    print(data)
+    print("heeeereeee",data)
     # f = open("sim_general_conf.py","w")
     # f.write("sim_general_conf_grid = "+ str(data))
     cities,years,months,data_source_ids = extract_params(data)
     cdm = CityDataManager(cities,years,months,data_source_ids)
     cdm.run()
-    collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
-    param_id="placeholder"
-    query = {"_id":param_id}
-    results = list(collection.find(query))
+    # collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
+    # param_id="placeholder"
+    # query = {"_id":param_id}
+    # results = list(collection.find(query))
     return jsonify({'Result':"Success"})
 
 @api_cdm.route('/available_data',methods=['GET'])

@@ -97,11 +97,12 @@ class DataTransformer:
         return transformed
 
     def save_to_db (self,city,data_source, year, month, data_type_id="trips",filetype=".csv",data_steps_id="norm",filter_list = ["most_used_cars","busy_hours","avg_duration"]):
-        print("start data transformer")
-        db,col = initialize_mongoDB()
-        dt = DataTransformer()
-        data_collected = {"_id":"TEST"}
-        for f in filter_list:
-            plots = dt.transform_cdm(city, data_steps_id, data_type_id, data_source, str(year), str(month), filetype, filter_type=f)
-            data_collected[f] = plots
-        insert_documents_db(col,data_collected)
+        pass
+        # print("start data transformer")
+        # db,col = initialize_mongoDB()
+        # dt = DataTransformer()
+        # data_collected = {"_id":"TEST"}
+        # for f in filter_list:
+        #     plots = dt.transform_cdm(city, data_steps_id, data_type_id, data_source, str(year), str(month), filetype, filter_type=f)
+        #     data_collected[f] = plots
+        # insert_documents_db(col,data_collected)

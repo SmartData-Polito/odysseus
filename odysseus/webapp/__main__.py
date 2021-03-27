@@ -1,4 +1,4 @@
-from e3f2s.webapp.apis import create_app
+from odysseus.webapp.apis import create_app
 
 
 app = create_app()

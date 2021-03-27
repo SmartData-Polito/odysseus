@@ -10,13 +10,13 @@ def create_app():
     app.config["DATABASE"] = 'inter_test'
     app.config["COLLECTION"] = 'plots'
 
-    from e3f2s.webapp.apis.api_cityDataManager.routes import api_cdm
+    from odysseus.webapp.apis.api_cityDataManager.routes import api_cdm
     app.register_blueprint(api_cdm, url_prefix='/api_cdm')
 
-    from e3f2s.webapp.apis.api_simulator.routes import api_sim
+    from odysseus.webapp.apis.api_simulator.routes import api_sim
     app.register_blueprint(api_sim, url_prefix='/api_sim')
 
-    from e3f2s.webapp.apis.api_test_bokeh.routes import api_bokeh
+    from odysseus.webapp.apis.api_test_bokeh.routes import api_bokeh
     app.register_blueprint(api_bokeh, url_prefix='/api_bokeh')
     
 
