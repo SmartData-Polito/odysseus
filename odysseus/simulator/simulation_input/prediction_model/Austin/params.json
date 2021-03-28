@@ -1,0 +1,11 @@
+{
+  "batch_size": 4,
+  "conv_block": 3,
+  "lr": 0.0001,
+  "lstm": 150,
+  "lstm_number": 2,
+  "past_window": 2,
+  "add_external_info": false,
+  "conv_filt": 64,
+  "kernel_sz": [2, 3, 3]
+}
