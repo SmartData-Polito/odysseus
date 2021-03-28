@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, redirect
 from odysseus.webapp.emulate_module.city_data_manager import CityDataManager
 import pymongo as pm
 import json
@@ -118,7 +118,7 @@ def simulate():
     "years": ["2017"],
     "months": ["8"],
     "cities": ["Torino"],
-    "data_source_ids": ["big_data_db"]
+    "data_source_ids": ["big_data_db"]cd 
     }
     """
     print("Received post")
@@ -216,6 +216,18 @@ def bretest():
                         "11": random.randint(0,1000), 
                         "12": random.randint(0,1000)
                     }
+                },
+                "brendan_db": {
+                    "2017": {
+                        "10": random.randint(0,1000), 
+                        "11": random.randint(0,1000), 
+                        "12": random.randint(0,1000)
+                    },
+                    "2019": {
+                        "10": random.randint(0,1000), 
+                        "11": random.randint(0,1000), 
+                        "12": random.randint(0,1000)
+                    }
                 }
             }
         }
@@ -232,3 +244,11 @@ def bretest():
         # }
 
     return jsonify(risultato)
+
+
+
+@api_cdm.route('/config-test',methods=['GET','POST'])
+def configTest():
+    data = request.get_json()
+    print("data received", data)
+    return redirect("http://www.example.com", code=302)
