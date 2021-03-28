@@ -15,3 +15,12 @@ def load_origin_destination_data(citta, anno, mese, sorgente):
     df_origins, df_destinations =  gigi.read_data()
 
     return df_origins, df_destinations 
+
+@st.cache(allow_output_mutation=True)
+
+def filter_date(df, inizio, fine, time_col):
+
+    df[time_col] = pd.to_datetime(df[time_col], utc=True)
+    filtered_df = df.loc[(df[time_col] >= inizio)
+                        & (df[time_col] < fine)]
+    return filtered_df
