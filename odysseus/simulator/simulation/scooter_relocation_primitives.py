@@ -2,8 +2,8 @@ import datetime
 import json
 import os
 
-import simpy
 import numpy as np
+import simpy
 
 from odysseus.simulator.simulation_data_structures.worker import Worker
 from odysseus.simulator.simulation_input.prediction_model import PredictionModel
@@ -94,18 +94,34 @@ class ScooterRelocationPrimitives:
                 self.simInput.demand_model_config["city"]
             )
 
-            prediction_model_path = os.path.join(prediction_model_dir, "model.h5")
-
             with open(os.path.join(prediction_model_dir, "params.json"), "r") as f:
-                prediction_model_config = json.load(f)
+                prediction_model_configs = json.load(f)
 
             self.city_shape = self.simInput.grid_matrix.shape
             mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(
                 lambda zone_id: int(zone_id in self.simInput.valid_zones))).to_numpy()
             mask = np.repeat(mask[:, :, np.newaxis], 2, axis=2)
 
-            self.prediction_model = PredictionModel(prediction_model_config, self.city_shape, 8,
-                                                    mask=mask, path=prediction_model_path)
+            prediction_model_path = os.path.join(prediction_model_dir,
+                                                 prediction_model_configs["time_horizon_two"]["weights"])
+
+            self.prediction_model_time_horizon_two = PredictionModel(prediction_model_configs["time_horizon_two"],
+                                                                     self.city_shape,
+                                                                     8, mask=mask, path=prediction_model_path)
+
+            if "window_width" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
+                self.window_width = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["window_width"]
+            else:
+                self.window_width = 1
+
+            if self.window_width == 2:
+                prediction_model_path = os.path.join(prediction_model_dir,
+                                                     prediction_model_configs["time_horizon_three"]["weights"])
+
+                self.prediction_model_time_horizon_three = PredictionModel(
+                    prediction_model_configs["time_horizon_three"], self.city_shape,
+                    8, mask=mask, path=prediction_model_path)
+
 
     def relocate_scooter_single_zone(self, scooter_relocation, move_vehicles=False, worker=None):
 

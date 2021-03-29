@@ -73,7 +73,7 @@ def CLoST3D(past_window, flow_volumes_shape, ext_train_shape, conv_filt=64, kern
         x = Concatenate(axis=-1)([x, x_ext])
     x = Dense(reduce(lambda e1, e2: e1 * e2, (flow_volumes_shape[0], flow_volumes_shape[1], 2)))(x)
     x = Reshape((flow_volumes_shape[0], flow_volumes_shape[1], 2))(x)
-    x = Activation("relu")(x)
+    x = Activation(swish)(x)
     if mask.shape[0] != 0:
         x = Lambda(lambda el: el * mask)(x)
     model = Model(main_inputs, x)

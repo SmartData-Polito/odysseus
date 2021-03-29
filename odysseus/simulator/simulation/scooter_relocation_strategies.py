@@ -303,11 +303,6 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
         self.scheduled_scooter_relocations.clear()
 
-        if "window_width" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
-            window_width = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["window_width"]
-        else:
-            window_width = 1
-
         pred_out_flows_list = []
         pred_in_flows_list = []
 
@@ -381,7 +376,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                         meta_feature = np.hstack(meta_feature) if len(meta_feature) > 0 else np.asarray(meta_feature)
                         X_test.append(meta_feature)
 
-                    prediction = self.prediction_model.predict(X_test, max_flow)
+                    prediction = self.prediction_model_time_horizon_two.predict(X_test, max_flow)
 
                     pred_in_flows = {}
                     pred_out_flows = {}
@@ -394,6 +389,21 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                     pred_in_flows_list.append(pred_in_flows)
                     pred_out_flows_list.append(pred_out_flows)
 
+                    if self.window_width > 1:
+
+                        prediction = self.prediction_model_time_horizon_three.predict(X_test, max_flow)
+
+                        pred_in_flows = {}
+                        pred_out_flows = {}
+                        for j in self.simInput.grid_matrix.index:
+                            for k in self.simInput.grid_matrix.columns:
+                                zone = self.simInput.grid_matrix.iloc[j, k]
+                                pred_in_flows[zone] = prediction[0][j][k][0]
+                                pred_out_flows[zone] = prediction[0][j][k][1]
+
+                        pred_in_flows_list.append(pred_in_flows)
+                        pred_out_flows_list.append(pred_out_flows)
+
             else:
                 return
 
@@ -404,7 +414,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
             pred_out_flows = self.simInput.avg_out_flows_train
             pred_in_flows = self.simInput.avg_in_flows_train
 
-            for i in range(window_width):
+            for i in range(self.window_width):
                 pred_out_flows_list.append(pred_out_flows[daytype][(hour + 1 + i) % 24])
                 pred_in_flows_list.append(pred_in_flows[daytype][(hour + 1 + i) % 24])
 

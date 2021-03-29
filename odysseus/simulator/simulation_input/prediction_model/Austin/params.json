@@ -7,5 +7,6 @@
   "past_window": 2,
   "add_external_info": false,
   "conv_filt": 64,
-  "kernel_sz": [2, 3, 3]
+  "kernel_sz": [2, 3, 3],
+  "weights": "ScooterAS6.c2.p0.t0.lstm_150.lstmnumber_2.lr_0.0001.batchsize_4.best.h5"
 }
