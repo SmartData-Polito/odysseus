@@ -68,7 +68,7 @@ sim_scenario_conf_grid = {
     "vehicle_relocation": [False],
     "vehicle_relocation_scheduling": [False],
 
-    "n_relocation_workers": [1, 1000],
+    "n_relocation_workers": [1, 10],
     "avg_relocation_speed": [20],  # km/h
     "relocation_capacity": range(10, 51, 5),
 
