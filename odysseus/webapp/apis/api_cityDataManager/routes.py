@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, redirect
+from flask import Blueprint, jsonify, request, redirect, Response, make_response
 from odysseus.webapp.emulate_module.city_data_manager import CityDataManager
 import pymongo as pm
 import json
@@ -251,4 +251,23 @@ def bretest():
 def configTest():
     data = request.get_json()
     print("data received", data)
-    return redirect("http://www.example.com", code=302)
+    payload =   {
+                "link": "https://www.google.com"
+                }
+        
+    # response = Response(js, status=302)
+    # response.headers.add('Access-Control-Allow-Origin', 'http://127.0.0.1:8501')
+    # response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    # response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    # response.headers.add('Access-Control-Allow-Credentials', 'true')
+    
+    code = 302
+    response = make_response(jsonify(payload), code)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+    response.status_code = 302
+
+    return response
+    # return redirect("https://www.google.com", code=302)
+    # return jsonify({"ok":"go to google"})
