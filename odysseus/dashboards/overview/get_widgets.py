@@ -17,7 +17,8 @@ def load_slider_menu(year, month):
 
     start_date=date(year, month, 1)
     stop_date=date(year, month, last_day_list[month])
-    inizio, fine = st.slider("Choose start and end dates", min_value=start_date, max_value=stop_date, value=(start_date, stop_date))
+    inizio, fine = st.date_input("Choose start and end dates", [start_date, start_date])
+    #inizio, fine = st.slider("Choose start and end dates", min_value=start_date, max_value=stop_date, value=(start_date, stop_date))
     return inizio, fine
 
 
