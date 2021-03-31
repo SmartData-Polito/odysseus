@@ -29,7 +29,7 @@ def initialize_mongoDB(host,database,collection):
     db = client[database]
     return db[collection]
 
-def extract_params (body):
+def extract_params(body):
     cities = body["cities"]
     years = body["years"]
     months = body["months"]
@@ -110,26 +110,68 @@ def summary_available_data(level='norm'):
         summary[city] = data
     return summary
 
-@api_cdm.route('/simulate',methods=['POST'])
-def simulate():
+@api_cdm.route('/run_cdm', methods=['POST'])
+def run_cdm():
+    print("hey")
     """
     Receive the configuration from the front end and run simulation
     {
     "years": ["2017"],
     "months": ["8"],
     "cities": ["Torino"],
-    "data_source_ids": ["big_data_db"]cd 
+    "data_source_ids": ["big_data_db"]
     }
     """
-    print("Received post")
-    request.get_data()
-    data = json.loads(request.data)
-    print("heeeereeee",data)
-    # f = open("sim_general_conf.py","w")
-    # f.write("sim_general_conf_grid = "+ str(data))
-    cities,years,months,data_source_ids = extract_params(data)
-    cdm = CityDataManager(cities,years,months,data_source_ids)
-    cdm.run()
+    # request.get_data()
+    # data = json.loads(request.data)
+    # # f = open("sim_general_conf.py","w")
+    # # f.write("sim_general_conf_grid = "+ str(data))
+    # cities,years,months,data_source_ids = extract_params(data)
+    
+    
+    # data received {'formData': {'cities': 'Milano', 'data_source_ids': 'big_data_db', 'years': '2016', 'months': '10'}}
+    try:
+        data = request.get_json()
+        print("data received from the form", data)
+        form_inputs = data["formData"]
+        cities = []
+        years = []
+        months = []
+        data_source_ids = []
+        cities.append(form_inputs["cities"])
+        years.append(form_inputs["years"])
+        months.append(form_inputs["months"])
+        data_source_ids.append(form_inputs["data_source_ids"])
+
+        print("EXTRACTED DATA",cities,years,months,data_source_ids)
+
+        cdm = CityDataManager(cities,years,months,data_source_ids)
+        cdm.run()
+        payload =   {
+                "link": "http://127.0.0.1:8501" # "https://www.google.com"
+                }
+        code = 302
+        response = make_response(jsonify(payload), code)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+        response.status_code = 302
+    except:
+        payload =   {
+                "error": "something went wrong"
+                }
+        code = 404
+        response = make_response(jsonify(payload), code)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+        response.status_code = 404
+    return response
+
+
+
+    
+    # db stuff that we will use later (mikey mouse)
     # collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
     # param_id="placeholder"
     # query = {"_id":param_id}
@@ -137,21 +179,19 @@ def simulate():
     return jsonify({'Result':"Success"})
 
 @api_cdm.route('/available_data',methods=['GET'])
-def run():
+def available_data():
     print("Return available data per cities")
-    level = request.args.get("level",default = 'norm')
-    # cdm = CityDataManager()
-    # cdm.run()
+    level = request.args.get("level", default = 'raw')
     summary = summary_available_data(level)
     print(summary)
     return jsonify(summary)
 
 @api_cdm.route('/get-cdm-data',methods=['GET'])
-def get_data(graph = 'all'):
+def get_cdm_data(graph = 'all'):
     param_id = request.args.get("id",default = 'TEST')
     graph = request.args.get("graph",default = 'all')
     
-    collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
+    #collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
     
     if graph == 'all':
         query = {"_id":param_id}
@@ -164,7 +204,6 @@ def get_data(graph = 'all'):
     
 @api_cdm.route('/available_data_test',methods=['GET'])
 def bretest():
-
     risultato  = {
         "Torino": {
                 "big_data_db": {
@@ -232,35 +271,35 @@ def bretest():
             }
         }
 
-        # risultato2 = {
-        #     {
-        #         "city":"Torino",
-        #         "datasource":"bigdatadb",
-        #         "values":
-        #     },
-        #     {
-
-        #     }
-        # }
-
     return jsonify(risultato)
-
 
 
 @api_cdm.route('/config-test',methods=['GET','POST'])
 def configTest():
-    data = request.get_json()
-    print("data received", data)
-    payload =   {
-                "link": "https://www.google.com"
+    # data received {'formData': {'cities': 'Milano', 'data_source_ids': 'big_data_db', 'years': '2016', 'months': '10'}}
+    try:
+        data = request.get_json()
+        print("data received from form", data)
+        form_inputs = data["formData"]
+        cities = form_inputs["city"]
+        years = form_inputs["year"]
+        months = form_inputs["month"]
+        data_source_ids = form_inputs["source"]
+
+    except:
+        payload =   {
+                "error": "something went wrong"
                 }
-        
-    # response = Response(js, status=302)
-    # response.headers.add('Access-Control-Allow-Origin', 'http://127.0.0.1:8501')
-    # response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    # response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    # response.headers.add('Access-Control-Allow-Credentials', 'true')
-    
+        code = 404
+        response = make_response(jsonify(payload), code)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+        response.status_code = 404
+
+    payload =   {
+                "link": "http://127.0.0.1:8501" # "https://www.google.com"
+                }
     code = 302
     response = make_response(jsonify(payload), code)
     response.headers['Access-Control-Allow-Origin'] = '*'
@@ -269,5 +308,3 @@ def configTest():
     response.status_code = 302
 
     return response
-    # return redirect("https://www.google.com", code=302)
-    # return jsonify({"ok":"go to google"})
