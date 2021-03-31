@@ -115,13 +115,13 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
                     scheduled_relocation = None
                     for proposed_relocation in self.scheduled_scooter_relocations:
-                        if booking_request["destination_id"] in proposed_relocation["start"]:
+                        if booking_request["destination_id"] in proposed_relocation["pick_up"]:
                             scheduled_relocation = proposed_relocation
 
                     if scheduled_relocation:
                         self.scheduled_scooter_relocations.remove(scheduled_relocation)
 
-                        relocation_zone_id, n_relocated_vehicles = scheduled_relocation["end"].popitem()
+                        relocation_zone_id, n_relocated_vehicles = scheduled_relocation["drop_off"].popitem()
 
                         if relocated_vehicles is not None:
                             for i in range(

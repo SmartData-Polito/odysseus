@@ -84,11 +84,10 @@ class ScooterRelocationPrimitives:
             initial_position = self.simInput.supply_model.initial_relocation_workers_positions[i]
             self.relocation_workers.append(Worker(env, worker_id, initial_position))
 
-        if self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive", "predictive"]:
-            if "window_width" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
-                self.window_width = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["window_width"]
-            else:
-                self.window_width = 1
+        if "window_width" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
+            self.window_width = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["window_width"]
+        else:
+            self.window_width = 1
 
         if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "predictive":
 
