@@ -45,6 +45,7 @@ def get_bookings_count_plot_data(city_chosen,year_chosen,month_chosen,source_cho
 
     return fig_origins, fig_destinations
 
+@st.cache(allow_output_mutation=True)
 def get_bookings_map(city, data, od):
     if od =='origin':
         data = data.rename(columns={'start_latitude':'lat', 'start_longitude':'lng', 'start_time':'datetime'})
@@ -52,7 +53,16 @@ def get_bookings_map(city, data, od):
         data = data.rename(columns={'end_latitude':'lat', 'end_longitude':'lng', 'end_time':'datetime'})
 
     locations = {
-    "Torino": [45.0781, 7.6761]
+    "Torino": [45.0781, 7.6761],
+    "Amsterdam": [52.3676, 4.9041],
+    "Austin": [30.2672, -97.7431],
+    "Berlin": [52.5200, 13.4050],
+    "Calgary": [51.0447, -114.0719],
+    "Columbus": [39.9612, -82.9988],
+    "Denver": [39.7392, -104.9903],
+    "Firenze": [43.7696, 11.2558],
+    "Frankfurt": [50.1109, 8.6821],
+    "Hamburg": [53.5511, 9.9937]
     }
     """ 
     _map = folium.Map(location=locations[city],
@@ -60,7 +70,7 @@ def get_bookings_map(city, data, od):
 
     data.apply(lambda row:folium.Marker(location=[row["lat"], row["lng"]]).add_to(_map),
             axis=1)
-"""
+    """
     _map = folium.Map(location=locations[city],
                     zoom_start = 12) 
  
@@ -77,3 +87,40 @@ def get_bookings_map(city, data, od):
     HeatMap(heat_data).add_to(_map)
 
     return _map
+
+@st.cache(allow_output_mutation=True)
+def get_bookings_by_hour(city,data,start_date,end_date,data_source_id,od="origins"):
+    start_year = start_date.year
+    start_month = start_date.month
+    end_year = start_date.year
+    end_month = start_date.month
+
+    if od == "origins":
+        df,_ = load_origin_destination_data(city, start_year, start_month, data_source_id)
+        filtro = "start_hour"
+    else:
+        _,df = load_origin_destination_data(city, start_year, start_month, data_source_id)
+        filtro = "end_hour"
+
+    df_busy = df.filter([filtro], axis=1)
+    df_busy["occurance"] = 1
+    most_busy_hour = df_busy.groupby(by=filtro).sum(["occurance"]).sort_values(by=["occurance"], ascending=[True])
+    most_busy_hour = most_busy_hour.reset_index()
+    return  px.bar(most_busy_hour, x=filtro, y='occurance')
+
+@st.cache(allow_output_mutation=True)
+def get_most_used_cars(city,data,start_date,end_date,data_source_id):
+    start_year = start_date.year
+    start_month = start_date.month
+    end_year = start_date.year
+    end_month = start_date.month
+
+    df,_ = load_origin_destination_data(city, start_year, start_month, data_source_id)
+
+    df_plates = pd.DataFrame()
+    df_plates["plate"]=df.plate#filter(["plate"], axis=1)
+    df_plates["occurance"] = 1
+    most_used = df_plates.groupby(by="plate").sum(["occurance"]).sort_values(by=["occurance"], ascending=[False]).head(10)
+    most_used = most_used.reset_index()
+
+    return  px.bar(most_used, x="occurance", y='plate',orientation='h')

@@ -71,7 +71,7 @@ def load_dashboard():
                                                         month_chosen = selected_month,  
                                                         source_chosen =selected_source)
  """
-
+    
     # split the page into two columns to display origins and destinations
     col_lx, col_rx = st.beta_columns(2)
 
@@ -83,8 +83,9 @@ def load_dashboard():
     )
 
     fig_origins = plot_df(df_origin, "60Min", 'plate')
-    origins_map = get_bookings_map('Torino', df_origin, 'origin')
-    
+    origins_map = get_bookings_map(city_name, df_origin, 'origin')
+    busy_hours = get_bookings_by_hour(city_name,df_origin,start,stop,selected_source)
+    col_lx.plotly_chart(busy_hours, use_container_width=True)
     col_lx.plotly_chart(fig_origins, use_container_width=True)
     with col_lx:
         
@@ -98,8 +99,9 @@ def load_dashboard():
     )
     
     fig_destinations = plot_df(df_destinations, "60Min", 'plate')
-    destination_map = get_bookings_map('Torino', df_destinations, 'destination')
-
+    destination_map = get_bookings_map(city_name, df_destinations, 'destination')
+    busy_hours = get_bookings_by_hour(city_name,df_origin,start,stop,selected_source,"destination")
+    col_rx.plotly_chart(busy_hours, use_container_width=True)
     col_rx.plotly_chart(fig_destinations, use_container_width=True)
     with col_rx:
         
@@ -109,3 +111,12 @@ def load_dashboard():
 
     #     _max_width_()
     #     load_charts_with_menu(bookings_by_hour)
+
+    st.markdown(
+        """
+        <center class="mid-small-font">General Information on usage</center>
+        """,
+        unsafe_allow_html=True
+    )
+    most_used = get_most_used_cars(city_name,df_origin,start,stop,selected_source).update_layout(width=1500,height=600)
+    st.write(most_used)
