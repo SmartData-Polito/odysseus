@@ -50,7 +50,7 @@ def run_cdm():
         cdm = CityDataManager(cities,years,months,data_source_ids)
         cdm.run()
         payload =   {
-                "link": "http://127.0.0.1:8501" # "https://www.google.com"
+                "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"#"https://www.google.com"  # "http://127.0.0.1:8501"
                 }
         code = 302
         response = make_response(jsonify(payload), code)
