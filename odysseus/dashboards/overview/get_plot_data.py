@@ -202,7 +202,7 @@ def get_average_duration(city,data,start_date,end_date,data_source_id):
 
 
 @st.cache(allow_output_mutation=True)
-def bubble_plot(city,data_gdf,start_date,end_date,data_source_id):
+def bubble_plot_2(city,data_gdf,start_date,end_date,data_source_id):
     
     data = pd.DataFrame(data_gdf)
 
