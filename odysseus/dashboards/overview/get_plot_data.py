@@ -124,3 +124,34 @@ def get_most_used_cars(city,data,start_date,end_date,data_source_id):
     most_used = most_used.reset_index()
 
     return  px.bar(most_used, x="occurance", y='plate',orientation='h')
+
+
+
+@st.cache(allow_output_mutation=True)
+def get_average_duration(city,data,start_date,end_date,data_source_id):
+    start_year = start_date.year
+    start_month = start_date.month
+
+    df,_ = load_origin_destination_data(city, start_year, start_month, data_source_id)
+    filtro = "start_hour"
+    
+    df_duration = df.filter([filtro,"duration"], axis=1)
+    avg_duration = df_duration.groupby(by=filtro).mean(["duration"]).sort_values(by=[filtro], ascending=[True])
+    avg_duration = avg_duration.reset_index()
+
+
+    fig = px.bar(avg_duration, x=filtro, y="duration")
+
+    fig.update_layout(
+    title="Average Duration of Trips by Start Hour",
+    xaxis_title="Hours",
+    yaxis_title="Average Time",
+    # legend_title="Legend Title",
+    font=dict(
+        family="Courier New, monospace",
+        size=18,
+        color="White"
+        )
+    )
+
+    return fig

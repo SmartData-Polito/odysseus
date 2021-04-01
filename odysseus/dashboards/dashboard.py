@@ -120,3 +120,9 @@ def load_dashboard():
     )
     most_used = get_most_used_cars(city_name,df_origin,start,stop,selected_source).update_layout(width=1500,height=600)
     st.write(most_used)
+
+
+    avg_duration = get_average_duration(city_name,df_origin,start,stop,selected_source).update_layout(width=1500,height=600)
+    st.write(avg_duration)
+
+
