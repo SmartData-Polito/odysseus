@@ -70,7 +70,7 @@ def load_dashboard():
                                                         year_chosen=selected_year,\
                                                         month_chosen = selected_month,  
                                                         source_chosen =selected_source)
- """
+    """
     
     # split the page into two columns to display origins and destinations
     col_lx, col_rx = st.beta_columns(2)
@@ -125,4 +125,5 @@ def load_dashboard():
     avg_duration = get_average_duration(city_name,df_origin,start,stop,selected_source).update_layout(width=1500,height=600)
     st.write(avg_duration)
 
-
+    bubble_origins = bubble_plot(city_name,df_origin,start,stop,selected_source)#.update_layout(width=1500,height=600)
+    st.write(bubble_origins)

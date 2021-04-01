@@ -1,5 +1,9 @@
 import os, sys
 import streamlit as st
+from datetime import datetime 
+from datetime import date
+import pytz
+import pandas as pd
 
 
 currentdir = os.path.dirname(os.path.realpath(__file__))
@@ -155,3 +159,92 @@ def get_average_duration(city,data,start_date,end_date,data_source_id):
     )
 
     return fig
+
+
+
+
+
+
+# @st.cache(allow_output_mutation=True)
+# def bubble_plot(city,data,start_date,end_date,data_source_id,od):
+
+#     if od =='origin':
+#         data = data.rename(columns={'start_latitude':'lat', 'start_longitude':'lon', 'start_time':'datetime'}).filter(["lat","lon"],axis=1)
+#     else:
+#         data = data.rename(columns={'end_latitude':'lat', 'end_longitude':'lon', 'end_time':'datetime'}).filter(["lat","lon"],axis=1)
+        
+    
+#     data["total_from_point"]=1
+#     data_results = data.groupby(by=["lat","lon"]).sum(["total_from_point"])
+#     data_results["lat"] = [index[0] for index,row in data_results.iterrows()]
+#     data_results["lon"] = [index[1] for index,row in data_results.iterrows()]
+
+#     locations = {
+#     "Torino": [45.0781, 7.6761],
+#     "Amsterdam": [52.3676, 4.9041],
+#     "Austin": [30.2672, -97.7431],
+#     "Berlin": [52.5200, 13.4050],
+#     "Calgary": [51.0447, -114.0719],
+#     "Columbus": [39.9612, -82.9988],
+#     "Denver": [39.7392, -104.9903],
+#     "Firenze": [43.7696, 11.2558],
+#     "Frankfurt": [50.1109, 8.6821],
+#     "Hamburg": [53.5511, 9.9937]
+#     }
+#     print(data_results.head(10))
+#     fig = px.scatter_geo(data_results, 
+#                     lat = data_results["lat"] ,
+#                     lon = data_results["lon"] ,
+#                     size=data_results["total_from_point"],
+#                     projection="natural earth")
+#     gigi  =1
+#     return  gigi
+
+
+@st.cache(allow_output_mutation=True)
+def bubble_plot(city,data_gdf,start_date,end_date,data_source_id):
+    
+    data = pd.DataFrame(data_gdf)
+
+    data = data.rename(columns={'start_latitude':'lat', 'start_longitude':'lon'}).filter(["lat","lon","start_time","end_time"],axis=1)
+    data["end_time_datatime"] = pd.to_datetime(data['end_time'], format= "%Y-%m-%d %H:%M:%S", utc=True)
+
+
+
+    start_date_dt = datetime.combine(start_date, datetime.min.time())
+    start_date_dt_aware = pytz.utc.localize(start_date_dt)
+
+    end_date_dt = datetime.combine(end_date, datetime.min.time())
+    end_date_dt_aware = pytz.utc.localize(end_date_dt)
+
+    mask = ( data['start_time'] > start_date_dt_aware) & (data['end_time_datatime'] < end_date_dt_aware)
+    data = data.loc[mask] 
+
+    data["total_from_point"]=1
+    data = data.groupby(by=["lat","lon"]).sum(["total_from_point"])
+
+    data["lat"] = [index[0] for index,row in data.iterrows()]
+    data["lon"] = [index[1] for index,row in data.iterrows()]
+
+    locations = {
+    "Torino": [45.0781, 7.6761],
+    "Amsterdam": [52.3676, 4.9041],
+    "Austin": [30.2672, -97.7431],
+    "Berlin": [52.5200, 13.4050],
+    "Calgary": [51.0447, -114.0719],
+    "Columbus": [39.9612, -82.9988],
+    "Denver": [39.7392, -104.9903],
+    "Firenze": [43.7696, 11.2558],
+    "Frankfurt": [50.1109, 8.6821],
+    "Hamburg": [53.5511, 9.9937]
+    }
+
+    fig = px.scatter_geo(data, 
+                    lat = data["lat"] ,
+                    lon = data["lon"] ,
+                    size=data["total_from_point"],
+                    projection="natural earth")
+
+    return  fig
+
+
