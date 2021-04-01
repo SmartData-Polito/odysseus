@@ -84,8 +84,8 @@ def generate_button_choice(username):
         dashboard_button_block = st.empty()
     with col5:
         react_button_block = st.empty()
-    dashboard_button = dashboard_button_block.button('GO!',key=1)
-    react_button = react_button_block.button('GO!',key=2)
+    dashboard_button = dashboard_button_block.button('GO Stramlit!')
+    react_button = react_button_block.button('GO React!')
 
     if dashboard_button:
         dashboard_button_block.empty()
@@ -112,5 +112,5 @@ if not is_authenticated(session_state.username, session_state.password):
             """
         )
 else:
-    load_dashboard()
+    generate_button_choice(session_state.username)
 
