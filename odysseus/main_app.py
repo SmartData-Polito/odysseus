@@ -84,7 +84,7 @@ def generate_button_choice(username):
         dashboard_button_block = st.empty()
     with col5:
         react_button_block = st.empty()
-    dashboard_button = dashboard_button_block.button('GO Stramlit!')
+    dashboard_button = dashboard_button_block.button('GO Streamlit!')
     react_button = react_button_block.button('GO React!')
 
     if dashboard_button:
