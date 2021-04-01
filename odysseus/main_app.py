@@ -93,6 +93,8 @@ def generate_button_choice(username):
         load_dashboard()
 
     if react_button:
+        dashboard_button_block.empty()
+        react_button_block.empty()
         webbrowser.open_new_tab('http://localhost:3000')
 
 
