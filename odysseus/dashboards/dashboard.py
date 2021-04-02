@@ -125,5 +125,5 @@ def load_dashboard():
     avg_duration = get_average_duration(city_name,df_origin,start,stop,selected_source).update_layout(width=1500,height=600)
     st.write(avg_duration)
 
-    bubble_origins = bubble_plot(city_name,df_origin,start,stop,selected_source)#.update_layout(width=1500,height=600)
-    st.write(bubble_origins)
+    # bubble_origins = bubble_plot(city_name,df_origin,start,stop,selected_source)#.update_layout(width=1500,height=600)
+    # st.write(bubble_origins)
