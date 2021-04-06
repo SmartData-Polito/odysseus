@@ -312,6 +312,7 @@ class ScooterRelocationPrimitives:
 
         self.sim_metrics.update_metrics("min_vehicles_relocated", scooter_relocation["n_vehicles"])
         self.sim_metrics.update_metrics("max_vehicles_relocated", scooter_relocation["n_vehicles"])
+        self.sim_metrics.update_metrics("tot_vehicles_moved", scooter_relocation["n_vehicles"])
 
     def update_current_hour_stats(self, booking_request):
 
