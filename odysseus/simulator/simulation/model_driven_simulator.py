@@ -98,9 +98,9 @@ class ModelDrivenSim (SharedMobilitySim):
 
 		booking_request["driving_distance"] = booking_request["euclidean_distance"] * 1.4
 		booking_request["duration"] = abs(booking_request["driving_distance"] / (
-			(self.simInput.avg_speed_kmh_mean + np.random.normal(
-				self.simInput.avg_speed_kmh_std, self.simInput.avg_speed_kmh_std / 2
-			)) / 3.6
+			 (self.simInput.avg_speed_kmh_mean) / 3.6 # + np.random.normal(
+			# 	self.simInput.avg_speed_kmh_std, self.simInput.avg_speed_kmh_std / 2
+			# )) / 3.6
 		))
 		booking_request["end_time"] = self.current_datetime + datetime.timedelta(
 			seconds=booking_request["duration"]

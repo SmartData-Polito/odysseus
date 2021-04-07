@@ -167,6 +167,51 @@ class SupplyModel:
 				self.tot_n_charging_poles = value
 				self.n_charging_zones = len(self.n_charging_poles_by_zone.keys())
 
+			elif self.supply_model_conf["cps_placement_policy"] == "realpos_numpark":
+				stations_path = os.path.join(
+					os.path.dirname(os.path.dirname(__file__)),
+					"city_data_manager",
+					"data",
+					self.supply_model_conf["city"],
+					"raw",
+					"geo",
+					"openstreetmap",
+					"station_locations.json"
+				)
+				f = open(stations_path, "r")
+				station_locations = json.load(f)
+				f.close()
+				cps_points = geodataframe_charging_points(
+					self.city, self.supply_model_conf["engine_type"], station_locations
+				)
+				self.n_charging_poles_by_zone_inf = {}
+
+				for (p, n) in zip(cps_points.geometry, cps_points.n_poles):
+					for (geom, zone) in zip(self.grid.geometry, self.grid.zone_id):
+						if geom.intersects(p):
+							if zone in self.n_charging_poles_by_zone.keys():
+								self.n_charging_poles_by_zone_inf[zone] += n
+							else:
+								self.n_charging_poles_by_zone_inf[zone] = n
+
+				top_dest_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:self.n_charging_zones]
+				self.n_charging_poles_by_zone = dict(
+					(top_dest_zones / top_dest_zones.sum() * self.tot_n_charging_poles))
+				assigned_cps = 0
+				for zone_id in self.n_charging_poles_by_zone:
+					if zone_id in self.n_charging_poles_by_zone_inf.keys():
+						zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
+						assigned_cps += zone_n_cps
+						self.n_charging_poles_by_zone[zone_id] = zone_n_cps
+				for zone_id in self.n_charging_poles_by_zone:
+					if zone_id in self.n_charging_poles_by_zone_inf.keys():
+						if assigned_cps < self.tot_n_charging_poles:
+							self.n_charging_poles_by_zone[zone_id] += 1
+							assigned_cps += 1
+
+				self.n_charging_poles_by_zone = dict(
+					pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
+
 			zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
 
 			self.zones_cp_distances = self.grid.centroid.apply(
