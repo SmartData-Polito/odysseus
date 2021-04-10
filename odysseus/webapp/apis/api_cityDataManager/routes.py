@@ -84,7 +84,13 @@ def run_cdm():
 def available_data():
     print("Return available data per cities")
     level = request.args.get("level", default = 'norm')
-    summary = summary_available_data(level)
+    #summary = summary_available_data(level)
+    filename = os.path.join(
+	    os.path.abspath(os.curdir),
+        "odysseus","webapp","apis","api_cityDataManager",f"{level}-data.json"
+        )
+    with open(filename, 'r') as f:
+            summary = json.load(f)
     print(summary)
     return jsonify(summary)
 
