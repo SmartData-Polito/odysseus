@@ -64,16 +64,6 @@ class TripsDataSource:
 		elif self.city_name == "Calgary":
 			self.tz = pytz.timezone("Canada/Mountain")
 
-	def concat_raw(self):
-
-		self.trips_df = pd.DataFrame()
-		for filename in os.listdir(self.raw_data_path):
-			if filename.endswith(".csv"):
-				self.trips_df = pd.concat([
-					self.trips_df, pd.read_csv(os.path.join(self.raw_data_path, filename))
-				])
-		self.trips_df.to_csv(os.path.join(self.raw_data_path, "Dataset_" + self.city_name + ".csv"))
-
 	def load_raw(self):
 		"""
 		Method for loading the data to be preprocessed. Since the data format differs in the various datasets, the method
