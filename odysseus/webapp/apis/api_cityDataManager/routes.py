@@ -139,10 +139,21 @@ def simulate():
 @api_cdm.route('/available_data',methods=['GET'])
 def run():
     print("Return available data per cities")
-    level = request.args.get("level",default = 'norm')
-    # cdm = CityDataManager()
-    # cdm.run()
-    summary = summary_available_data(level)
+#<<<<<<< HEAD
+#    level = request.args.get("level",default = 'norm')
+#    # cdm = CityDataManager()
+#    # cdm.run()
+#    summary = summary_available_data(level)
+#=======
+    level = request.args.get("level", default = 'norm')
+    #summary = summary_available_data(level)
+    filename = os.path.join(
+	    os.path.abspath(os.curdir),
+        "odysseus","webapp","apis","api_cityDataManager",f"{level}-data.json"
+        )
+    with open(filename, 'r') as f:
+            summary = json.load(f)
+#>>>>>>> 17b2e1b81a48107008d19babe98e185b9f9f7a84
     print(summary)
     return jsonify(summary)
 
