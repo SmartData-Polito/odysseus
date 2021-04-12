@@ -13,6 +13,9 @@ def create_app():
     from odysseus.webapp.apis.api_cityDataManager.routes import api_cdm
     app.register_blueprint(api_cdm, url_prefix='/api_cdm')
 
+    from odysseus.webapp.apis.api_DemandModelling.routes import api_dm
+    app.register_blueprint(api_dm, url_prefix='/api_dm')
+
     from odysseus.webapp.apis.api_simulator.routes import api_sim
     app.register_blueprint(api_sim, url_prefix='/api_sim')
 
