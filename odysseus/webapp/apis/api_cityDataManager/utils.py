@@ -37,8 +37,13 @@ def count_trips(filename):
 def extract_format(filepath):
     source,name = os.path.split(os.path.splitext(filepath)[0])
     _,data_source_id = os.path.split(source)
-    year,month = name.split("_")
-    return data_source_id,year,month
+    names_list = name.split("_")
+    if len(names_list)<=2:
+        year,month = name.split("_")
+        return data_source_id,year,month
+    else:
+        city = "_".join([n for n in names_list[1:]])
+        return data_source_id,"",city
 
 def groupby_month(filepath):
     cols = ["init_time"]
