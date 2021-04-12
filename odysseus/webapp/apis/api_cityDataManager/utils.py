@@ -39,7 +39,8 @@ def extract_format(filepath):
     _,data_source_id = os.path.split(source)
     names_list = name.split("_")
     if len(names_list)<=2:
-        year,month = name.split("_")
+        year = names_list[0]
+        month = names_list[1]
         return data_source_id,year,month
     else:
         city = "_".join([n for n in names_list[1:]])
