@@ -14,23 +14,9 @@ CORS(api_cdm)
 
 @api_cdm.route('/run_cdm', methods=['POST'])
 def run_cdm():
-    print("hey")
     """
     Receive the configuration from the front end and run simulation
-    {
-    "years": ["2017"],
-    "months": ["8"],
-    "cities": ["Torino"],
-    "data_source_ids": ["big_data_db"]
-    }
     """
-    # request.get_data()
-    # data = json.loads(request.data)
-    # # f = open("sim_general_conf.py","w")
-    # # f.write("sim_general_conf_grid = "+ str(data))
-    # cities,years,months,data_source_ids = extract_params(data)
-    
-    
     # data received {'formData': {'cities': 'Milano', 'data_source_ids': 'big_data_db', 'years': '2016', 'months': '10'}}
     try:
         data = request.get_json()
@@ -71,8 +57,6 @@ def run_cdm():
     return response
 
 
-
-    
     # db stuff that we will use later (mikey mouse)
     # collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
     # param_id="placeholder"
@@ -103,7 +87,8 @@ def get_cdm_data(graph = 'all'):
         results = list(collection.aggregate(query))
     print(results)
     return json.dumps(list(results))
-    
+
+
 @api_cdm.route('/available_data_test',methods=['GET'])
 def bretest():
     risultato  = {
@@ -210,3 +195,5 @@ def configTest():
     response.status_code = 302
 
     return response
+
+
