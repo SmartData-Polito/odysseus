@@ -12,8 +12,8 @@ from flask_cors import CORS
 api_cdm = Blueprint('api_cdm', __name__)
 CORS(api_cdm)
 
-@api_cdm.route('/simulate',methods=['POST'])
-def simulate():
+@api_cdm.route('/run_cdm',methods=['POST'])
+def run_cdm():
     """
     Receive the configuration from the front end and run simulation
     """
