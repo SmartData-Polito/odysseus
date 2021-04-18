@@ -9,11 +9,11 @@ HOST = 'mongodb://localhost:27017/'
 DATABASE = 'inter_test'
 COLLECTION = 'plots'
 
-def set_path():
+def set_path(api):
     ROOT_DIR = os.path.abspath(os.curdir)
     cdm_data_path = os.path.join(
 	    ROOT_DIR,
-        "odysseus/city_data_manager/",
+        f"odysseus/{api}/",
 	    "data"
     )
     return cdm_data_path
@@ -57,27 +57,30 @@ def groupby_month(filepath):
     ans = build_raw_answer(count_df)
     return ans
 
-def build_raw_answer(df):
+def build_raw_answer(df,DEBUG=False):
     final_dict = {}
     for index, row in df.iterrows():
         if index[0] in final_dict.keys():
             final_dict[index[0]].update({index[1]:int(row["occurance"])})
         else:
             final_dict.update({index[0]:{index[1]:int(row["occurance"])}})
-    print(final_dict)
+    if DEBUG:
+        print(final_dict)
     return final_dict
 
-def retrieve_per_city(path,level="norm",datatype = "trips",):
+def retrieve_per_city(path,level="norm",datatype = "trips",DEBUG=False):
     data = {}
-    print("PATH",path)
+    if DEBUG:
+        print("PATH",path)
     for subdir, dirs, files in os.walk(path):
         for f in files:
             filepath = os.path.join(subdir,f)
-            if level not in filepath or datatype not in filepath:
+            if os.path.join(level,datatype,"big_data_db") not in filepath:
                 continue
 
             elif level=="norm" and filepath.endswith(".csv"):
-                print("FILEPATH: ",filepath)
+                if DEBUG:
+                    print("FILEPATH: ",filepath)
                 data_source_id,year,month = extract_format(filepath)
                 number_trips = count_trips(filepath)
                 #if data source already added append to current data structure
@@ -91,18 +94,20 @@ def retrieve_per_city(path,level="norm",datatype = "trips",):
                     data[data_source_id] = {year : {month:number_trips}}
 
             elif level=="raw" and filepath.endswith(".csv"):
-                print("FILEPATH: ",filepath)
+                if DEBUG:
+                    print("FILEPATH: ",filepath)
                 data_source_id,_,city = extract_format(filepath)
 
                 months_collects = groupby_month(filepath)
                 data[data_source_id] = months_collects
-    print(data)
+    if DEBUG:
+        print(data)
     return data
 
-def summary_available_data(level='norm'):
+def summary_available_data(level='norm',api="city_data_manager"):
     summary = {}
     # Get list of cities
-    path = set_path()
+    path = set_path(api)
     list_subfolders_with_paths = [f.path for f in os.scandir(path) if f.is_dir()]
     avalaible_cities = [os.path.basename(os.path.normpath(c)) for c in list_subfolders_with_paths]
     for paths,city in zip(list_subfolders_with_paths,avalaible_cities):
