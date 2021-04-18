@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request,make_response
 from odysseus.webapp.emulate_module.city_data_manager import CityDataManager
 from odysseus.webapp.apis.api_cityDataManager.utils import *
 import pymongo as pm
@@ -19,7 +19,7 @@ def run_cdm():
     """
     # data received {'formData': {'cities': 'Milano', 'data_source_ids': 'big_data_db', 'years': '2016', 'months': '10'}}
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)
         print("data received from the form", data)
         form_inputs = data["formData"]
         cities = []
@@ -44,7 +44,8 @@ def run_cdm():
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
         response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
         response.status_code = 302
-    except:
+    except Exception:
+        print(e)
         payload =   {
                 "error": "something went wrong"
                 }

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, make_response
-from odysseus.webapp.emulate_module.city_data_manager import CityDataManager
+from odysseus.webapp.emulate_module.demand_modelling import DemandModelling
 from odysseus.webapp.apis.api_cityDataManager.utils import *
 import pymongo as pm
 import json
@@ -29,29 +29,19 @@ def available_data():
 @api_dm.route('/run_dm',methods=['POST'])
 def run_dm():
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)
         print("data received from the form", data)
 
-        # {'values': {
-        #     'city': 'Torino', 
-        #     'datasource': 'big_data_db', 
-        #     'datasources': [{'value': 'big_data_db', 'label': 'big_data_db'}], 
-        #     'year': 2017, 
-        #     'allYears': [{'value': '2016', 'label': '2016'}, {'value': '2017', 'label': '2017'}], 
-        #     'yearTest': 2017, 
-        #     'allYearsTest': [{'value': '2017', 'label': '2017'}], 
-        #     'month': 4, 
-        #     'allMonths': [{'value': '4', 'label': '4'}, {'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
-        #     'endMonth': 5, 
-        #     'allEndMonths': [{'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
-        #     'monthTest': 5, 
-        #     'allMonthsTest': [{'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
-        #     'endMonthTest': 7, 
-        #     'allEndMonthsTest': [{'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
-        #     'demandModelType': 'Kde Poisson', 
-        #     'bin_side_lenght': '100', 
-        #     'k_zones_factor': '1', 
-        #     'kde_bandwidth': '1'}
+
+        # {'values': 
+        #     cities=["Torino", "Milano", "Vancouver"],         
+        #      data_source_ids=["big_data_db"],
+        #      sim_techniques=["eventG"],
+        #      bin_side_lengths=["500"],
+        #      zones_factors=["1"],
+        #      kde_bandwidths=["1"],
+        #      train_range=["2017", "10", "2017", "10"],
+        #     test_range=["2017", "11", "2017", "11"],
         # }
         
 
@@ -69,23 +59,32 @@ def run_dm():
         # months.append(form_inputs["months"])
         # data_source_ids.append(form_inputs["data_source_ids"])
 
-        # print("EXTRACTED DATA",cities,years,months,data_source_ids)
+        dm = DemandModelling(form_inputs)
+        print("Start Run")
+        status = dm.run()
 
-     
-        # payload =   {
-        #         "link": "http://127.0.0.1:8501"
-        #         }      
-        # testing form submission
-        payload =   {
-                "link": "http://127.0.0.1:3000/demand"
-                }
+        payload =   status.update({
+                "link": "http://127.0.0.1:8501",
+                })
         code = 302
         response = make_response(jsonify(payload), code)
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
         response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
         response.status_code = 302
-    except:
+        
+        # testing form submission
+        # payload =   {
+        #         "link": "http://127.0.0.1:3000"
+        #         }
+        # code = 302
+        # response = make_response(jsonify(payload), code)
+        # response.headers['Access-Control-Allow-Origin'] = '*'
+        # response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        # response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+        # response.status_code = 302
+    except Exception as e:
+        print(e)
         payload =   {
                 "error": "something went wrong"
                 }
