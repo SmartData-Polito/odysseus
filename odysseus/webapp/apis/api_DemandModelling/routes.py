@@ -13,12 +13,6 @@ api_dm = Blueprint('api_dm', __name__)
 CORS(api_dm)
 
 
-@api_dm.route('/hi',methods=['GET','POST'])
-def hi():
-    return jsonify({"hi":1})
-
-
-
 @api_dm.route('/available_data',methods=['GET'])
 def available_data():
     level = request.args.get("level", default = 'norm')
@@ -49,10 +43,22 @@ def run_dm():
         #      train_range=["2017", "10", "2017", "10"],
         #     test_range=["2017", "11", "2017", "11"],
         # }
-
         
-        form_inputs = data["formData"]
 
+        # The values needed to run the Demand Modelling are:
+        # city, datasource, year, month, endMonth, sim_technique, bin_side_lenght, k_zones_factor, kde_bandwidth
+
+
+        form_inputs = data["formData"]
+        # cities = []
+        # years = []
+        # months = []
+        # data_source_ids = []
+        # cities.append(form_inputs["cities"])
+        # years.append(form_inputs["years"])
+        # months.append(form_inputs["months"])
+        # data_source_ids.append(form_inputs["data_source_ids"])
+        print(form_inputs)
         dm = DemandModelling(form_inputs)
         print("Start Run")
         status = dm.run()
