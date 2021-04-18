@@ -65,7 +65,7 @@ def run_dm():
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
         response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
-        response.status_code = 302
+        response.status_code = code
         
         # testing form submission
         # payload =   {
@@ -88,7 +88,6 @@ def run_dm():
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
         response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
         response.status_code = 500
-    
     
     return response
 
