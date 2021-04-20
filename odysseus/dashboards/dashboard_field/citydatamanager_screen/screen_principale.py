@@ -13,9 +13,10 @@ import shapely
 import datetime
 from functools import partial
 import streamlit as st
+from streamlit.report_thread import add_report_ctx
 
 
-class ScreenPrincipale(DashboardScreen):
+class ScreenDataManager(DashboardScreen):
     def __init__(self, title, name, month, year, city, db="big_data_db", chart_list=None, subtitle=None, widget_list = None):
         super().__init__(title,name,chart_list,subtitle, widget_list)
         self.chart_dict = {}
@@ -134,19 +135,29 @@ class ScreenPrincipale(DashboardScreen):
         start, end = self.show_widgets()[0]
         filtered_df = self.filter_data(self.data, start, end)
         #self.filter_data(self.data, start, end)
+
+        map_df = filtered_df.rename(columns={'start_latitude':'lat', 'start_longitude':'lng', 'start_time':'datetime'})
         ChartTemp(filtered_df, 'Bookings Count', 'Here is a time series showing how many cars within our fleet are booked at any given time. You can see how it behaves based on different frequencies and zoom in during specific periods in the month! Have fun!').show_bookings_count()
 
         ChartTemp(filtered_df, 'Hourly Bookings', "here is a bar plot showing the distribution of the usage of cars in our fleet based on the hour in which were booked during the specified month. Isn't it cool?").show_bookings_by_hour()
 
         ChartTemp(filtered_df, 'Bubble Plot', 'What a peculiar graph we have here! this is a bubble plot here each bubble is bigger the more bookings we had during a specific hour and a specific day of the week. Can you spot the biggest one?').show_bubble_plot()
+        
+        thread1 = ChartMap(map_df, 'Heat Map', "This is a heatmap of the bookings during the month in exam. You can change the time interval also! The data analyst who thought about it is pretty smart, don't you think?", tipo='heatmap', parametro=self.city_name)
+        add_report_ctx(thread1)
+        thread1.start()
+        
+        thread2 = ChartMap(map_df, 'Andamento Spazio-temporale', 'Ho finito le battute, tieni il grafico, vedi tu. premi play, premi il play al contrario boh',tipo='heatmapWithTime', parametro=self.city_name)
+        add_report_ctx(thread2)
+        thread2.start()
 
-        ChartMap(self.data, 'Heat Map', "This is a heatmap of the bookings during the month in exam. You can change the time interval also! The data analyst who thought about it is pretty smart, don't you think?", parametro=self.city_name).show_heatmap()
+        thread1.join()
+        thread2.join()
 
-        ChartMap(self.data, 'Andamento Spazio-temporale', 'Ho finito le battute, tieni il grafico, vedi tu. premi play, premi il play al contrario boh', parametro=self.city_name).show_heatmapWithTime()
-
+    @st.cache(allow_output_mutation=True)
     def filter_data(self, df, start, end):
         df['start_time'] = pd.to_datetime(df['start_time'], utc=True)
         filtered_df = df.loc[(df['start_time'] >= start)
                         & (df['start_time'] < end)]
-
+        
         return filtered_df
