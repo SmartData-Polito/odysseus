@@ -11,7 +11,7 @@ from odysseus.simulator.single_run.run_eventG_sim import get_eventG_sim_stats
 from odysseus.simulator.single_run.run_traceB_sim import get_traceB_sim_stats
 
 
-def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
+def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name, n_cpus=mp.cpu_count()):
 
 	sim_technique = sim_general_conf["sim_technique"]
 	city = sim_general_conf["city"]
@@ -25,7 +25,7 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 	)
 	os.makedirs(results_path, exist_ok=True)
 
-	with mp.Pool(mp.cpu_count(), maxtasksperchild=1) as pool:
+	with mp.Pool(n_cpus, maxtasksperchild=1) as pool:
 
 		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
 
@@ -54,7 +54,7 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name):
 					sim_scenario_conf,
 				)]
 
-		with tqdm(total=len(conf_tuples), unit="sim", postfix=str(mp.cpu_count())+" cpu(s)", smoothing=0) as pbar:
+		with tqdm(total=len(conf_tuples), unit="sim", postfix=str(n_cpus)+" cpu(s)", smoothing=0, dynamic_ncols=True) as pbar:
 
 			def collect_result(res):
 				res_id = res["conf_id"]

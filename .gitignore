@@ -14,6 +14,7 @@ odysseus/simulator/results/*
 odysseus/simulator/simulation_input/sim_current_config/
 
 *.pickle
+*.h5
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
