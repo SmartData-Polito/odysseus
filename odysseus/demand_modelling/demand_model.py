@@ -14,7 +14,7 @@ def get_in_flow_count(trips_destinations):
 
     in_flow_count = trips_destinations[["zone_id", "year", "month", "day", "end_hour", "end_time"]].groupby(
         ["zone_id", "year", "month", "day", "end_hour"], as_index=False
-    ).count().rename(columns={"end_time": "out_flow_count"})
+    ).count().rename(columns={"end_time": "in_flow_count"})
 
     return in_flow_count
 
@@ -161,6 +161,9 @@ class DemandModel:
         self.request_rates = self.get_requests_rates()
         self.get_grid_indexes()
         self.trip_kdes = self.get_trip_kdes()
+
+        self.max_out_flow = float('-inf')
+        self.max_in_flow = float('-inf')
         self.avg_out_flows_train = self.get_avg_out_flows()
         self.avg_in_flows_train = self.get_avg_in_flows()
 
@@ -284,15 +287,25 @@ class DemandModel:
         #     int(self.sim_general_conf["k_zones_factor"] * len(self.grid))
         # ).index
 
-        origin_zones_count = self.bookings_train.origin_id.value_counts()
-        dest_zones_count = self.bookings_train.destination_id.value_counts()
+        origin_zones_count_train = self.bookings_train.origin_id.value_counts()
+        dest_zones_count_train = self.bookings_train.destination_id.value_counts()
+        origin_zones_count_test = self.bookings_test.origin_id.value_counts()
+        dest_zones_count_test = self.bookings_test.destination_id.value_counts()
 
-        valid_origin_zones = origin_zones_count[(origin_zones_count > count_threshold)]
-        valid_dest_zones = dest_zones_count[(dest_zones_count > count_threshold)]
+        valid_origin_zones_train = origin_zones_count_train[(origin_zones_count_train > count_threshold)]
+        valid_dest_zones_train = dest_zones_count_train[(dest_zones_count_train > count_threshold)]
+        valid_origin_zones_test = origin_zones_count_test[(origin_zones_count_test > count_threshold)]
+        valid_dest_zones_test = dest_zones_count_test[(dest_zones_count_test > count_threshold)]
 
-        self.valid_zones = valid_origin_zones.index.intersection(
-                valid_dest_zones.index
+        valid_zones_train = valid_origin_zones_train.index.intersection(
+                valid_dest_zones_train.index
         ).astype(int)
+
+        valid_zones_test = valid_origin_zones_test.index.intersection(
+            valid_dest_zones_test.index
+        ).astype(int)
+
+        self.valid_zones = valid_zones_train.intersection(valid_zones_test)
 
         return self.valid_zones
 
@@ -358,16 +371,16 @@ class DemandModel:
 
     def get_grid_indexes(self):
         zone_coords_dict = {}
-        for i in self.grid_matrix.index:
-            for j in self.grid_matrix.columns:
+        for j in self.grid_matrix.columns:
+            for i in self.grid_matrix.index:
                 zone_coords_dict[self.grid_matrix.iloc[i, j]] = (i, j)
 
-        for zone in self.bookings_train.origin_id.unique():
+        for zone in self.valid_zones:
             self.bookings_train.loc[self.bookings_train.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
             self.bookings_train.loc[self.bookings_train.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
             self.bookings_train.loc[self.bookings_train.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
             self.bookings_train.loc[self.bookings_train.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
-        for zone in self.bookings_test.origin_id.unique():
+        for zone in self.valid_zones:
             self.bookings_test.loc[self.bookings_test.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
             self.bookings_test.loc[self.bookings_test.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
             self.bookings_test.loc[self.bookings_test.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
@@ -411,8 +424,11 @@ class DemandModel:
                 self.avg_out_flows_train[daytype][hour] = {}
                 for zone, zone_df in hour_df.groupby("zone_id"):
                     if zone in self.valid_zones:
-                        self.avg_out_flows_train[daytype][hour][zone] = zone_df[["day", "start_time"]].groupby("day")\
-                            .count().mean()[0]
+                        out_flows = zone_df[["day", "start_time"]].groupby("day").count()
+                        self.avg_out_flows_train[daytype][hour][zone] = out_flows.mean()[0]
+                        out_flows_max = out_flows.max()[0]
+                        if out_flows_max > self.max_out_flow:
+                            self.max_out_flow = out_flows_max
 
         for daytype in ["weekday", "weekend"]:
             for hour in range(24):
@@ -434,8 +450,11 @@ class DemandModel:
                 self.avg_in_flows_train[daytype][hour] = {}
                 for zone, zone_df in hour_df.groupby("zone_id"):
                     if zone in self.valid_zones:
-                        self.avg_in_flows_train[daytype][hour][zone] = zone_df[["day", "end_time"]].groupby("day")\
-                            .count().mean()[0]
+                        in_flows = zone_df[["day", "end_time"]].groupby("day").count()
+                        self.avg_in_flows_train[daytype][hour][zone] = in_flows.mean()[0]
+                        in_flows_max = in_flows.max()[0]
+                        if in_flows_max > self.max_in_flow:
+                            self.max_in_flow = in_flows_max
 
         for daytype in ["weekday", "weekend"]:
             for hour in range(24):
@@ -501,13 +520,15 @@ class DemandModel:
             pickle.dump(self.avg_in_flows_train, f)
 
         integers_dict = {
-            "avg_request_rate" : self.avg_request_rate,
-            "n_vehicles_original" : self.n_vehicles_original,
-            "avg_speed_mean" : self.avg_speed_mean,
-            "avg_speed_std" : self.avg_speed_std,
-            "avg_speed_kmh_mean" : self.avg_speed_kmh_mean,
-            "avg_speed_kmh_std" : self.avg_speed_kmh_std,
-            "max_driving_distance" : self.max_driving_distance,
+            "avg_request_rate": self.avg_request_rate,
+            "n_vehicles_original": self.n_vehicles_original,
+            "avg_speed_mean": self.avg_speed_mean,
+            "avg_speed_std": self.avg_speed_std,
+            "avg_speed_kmh_mean": self.avg_speed_kmh_mean,
+            "avg_speed_kmh_std": self.avg_speed_kmh_std,
+            "max_driving_distance": self.max_driving_distance,
+            "max_in_flow": self.max_in_flow,
+            "max_out_flow": self.max_out_flow,
         }
         with open(os.path.join(demand_model_path, "integers_dict.pickle"), "wb") as f:
             pickle.dump(integers_dict, f)
