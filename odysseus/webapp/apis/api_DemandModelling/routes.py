@@ -15,7 +15,10 @@ CORS(api_dm)
 
 @api_dm.route('/available_data',methods=['GET'])
 def available_data():
-    level = request.args.get("level", default = 'norm')
+    """
+    The demand modelling module can be run only on data that has been normalized 
+    """
+    level = 'norm'#request.args.get("level", default = 'norm')
     filename = os.path.join(
 	    os.path.abspath(os.curdir),
         "odysseus","webapp","apis","api_cityDataManager",f"{level}-data.json"
@@ -24,7 +27,32 @@ def available_data():
             summary = json.load(f)
     return jsonify(summary)
 
-
+@api_dm.route('/existing_models',methods=['GET'])
+def existing_models():
+    """
+    the module cannot be run if it's already present a model for that city, independent from time period
+    """
+    ROOT_DIR = os.path.abspath(os.curdir)
+    demand_model_path = os.path.join(
+        ROOT_DIR,
+        "odysseus",
+        "demand_modelling",
+        "demand_models",
+    )
+    avalaible_cities = []
+    for f in os.scandir(demand_model_path):
+        if f.is_dir() and os.path.exists(os.path.join(f.path,"city_obj.pickle")):
+            avalaible_cities.append(os.path.basename(os.path.normpath(f.path)))
+    payload =   {
+                "cities": avalaible_cities,
+                }
+    code = 200
+    response = make_response(jsonify(payload), code)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+    response.status_code = code
+    return response
 
 @api_dm.route('/run_dm',methods=['POST'])
 def run_dm():

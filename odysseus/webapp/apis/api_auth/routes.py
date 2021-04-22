@@ -2,10 +2,10 @@ from flask import Blueprint, render_template, redirect, url_for, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
 
-api_cdm = Blueprint('auth', __name__)
-CORS(api_cdm)
+api_auth = Blueprint('api_auth', __name__)
+CORS(api_auth)
 
-@auth.route('/login', methods=['POST'])
+@api_auth.route('/login', methods=['POST'])
 def login_post():
     email = request.form.get('email')
     password = request.form.get('password')
