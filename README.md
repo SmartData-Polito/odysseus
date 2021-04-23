@@ -46,4 +46,4 @@ https://odysseus-simulator.readthedocs.io/en/latest/index.html
 
 [5] - Luca Pappalardo, Filippo Simini, Gianni Barlacchi and Roberto Pellungrini (2019). scikit-mobility: a Python library for the analysis, generation and risk assessment of mobility data, https://arxiv.org/abs/1907.07062
 
-[6] - S. Fiorini, G. Pilotti, M. Ciavotta,  and A. Maurino, (2020) “3D-CLoST:  ACNN-LSTM  Approach  for  Mobility  Dynamics  Prediction  in  SmartCities,” In: 2020 IEEE Big Data.
+[6] - S. Fiorini, G. Pilotti, M. Ciavotta,  and A. Maurino, (2020) “3D-CLoST:  A CNN-LSTM  Approach  for  Mobility  Dynamics  Prediction  in  SmartCities,” In: 2020 IEEE Big Data.
