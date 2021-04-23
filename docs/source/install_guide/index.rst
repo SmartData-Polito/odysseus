@@ -7,7 +7,7 @@ Installation Guide
 =================================
 
 Setup repository, environment and data
-========================================
+---------------------------------------
 
 First, let's clone the public git repository and move data into the right folder. For now, we skip explanations about *city_data_manager* functionalities.
 
@@ -25,7 +25,7 @@ Then, let's install all the necessary libraries.
 
 
 Configuring simulation input
-=============================
+-----------------------------
 
 The folder *odysseus/simulator/simulation_input* contains configuration files for simulation.
 
