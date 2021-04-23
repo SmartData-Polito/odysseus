@@ -3,7 +3,8 @@
 
 venv*/
 .vscode
-inter_env/*
+#Databases
+*.db
 
 e3f2s*
 .streamlit*
@@ -112,6 +113,7 @@ venv3/
 ENV/
 env.bak/
 venv.bak/
+inter_env/*
 
 # Spyder project settings
 .spyderproject

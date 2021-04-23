@@ -64,7 +64,7 @@ def run_cdm():
     # param_id="placeholder"
     # query = {"_id":param_id}
     # results = list(collection.find(query))
-    return jsonify({'Result':"Success"})
+    #return jsonify({'Result':"Success"})
 
 
 @api_cdm.route('/available_data',methods=['GET'])
