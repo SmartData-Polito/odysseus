@@ -12,7 +12,6 @@ Get started with Odysseus
    :maxdepth: 2
    :caption: API Reference:
 
-   install_guide/index
    city_data_manager/index
    demand_modelling/index
    supply_modelling/index
