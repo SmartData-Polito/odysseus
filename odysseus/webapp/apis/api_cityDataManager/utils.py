@@ -3,6 +3,7 @@ from datetime import datetime
 import random
 import pandas as pd
 import pymongo as pm
+import json
 
 
 HOST = 'mongodb://localhost:27017/'
@@ -104,13 +105,23 @@ def retrieve_per_city(path,level="norm",datatype = "trips",DEBUG=False):
         print(data)
     return data
 
-def summary_available_data(level='norm',api="city_data_manager"):
+def summary_available_data(level='norm',api="city_data_manager",DEBUG=False):
     summary = {}
     # Get list of cities
     path = set_path(api)
     list_subfolders_with_paths = [f.path for f in os.scandir(path) if f.is_dir()]
     avalaible_cities = [os.path.basename(os.path.normpath(c)) for c in list_subfolders_with_paths]
     for paths,city in zip(list_subfolders_with_paths,avalaible_cities):
-        data = retrieve_per_city(paths,level=level)
+        data = retrieve_per_city(paths,level=level,DEBUG=DEBUG)
         summary[city] = data
     return summary
+
+def create_predefined_file(formato=["norm","raw"],DEBUG=False):
+    for f in formato:
+        summary = summary_available_data(f,DEBUG=DEBUG)
+        filename = os.path.join(
+	    os.path.abspath(os.curdir),
+        "odysseus","webapp","apis","api_cityDataManager",f"{f}-data.json"
+        )
+        with open(filename, 'w+') as f:
+            json.dump(summary, f) 

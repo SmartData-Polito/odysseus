@@ -1,6 +1,9 @@
 from odysseus.dashboards.dashboard_field.dashboard_chart import DashboardChart
 from odysseus.dashboards.dashboard_field.utils import st_functional_columns
 
+from threading import Thread
+
+
 import streamlit as st
 from functools import partial
 import pandas as pd
@@ -15,27 +18,25 @@ from folium.plugins import HeatMapWithTime
 import datetime 
 from streamlit_folium import folium_static
 
-class ChartMap(DashboardChart):
+class ChartMap(DashboardChart, Thread):
 
-    def __init__(self, data, title, subtitle, tipo="Altair", parametro='Torino'):
-        super().__init__(title, name=title, subtitle=subtitle)
+    def __init__(self, data, title, subtitle, tipo="heatmap", parametro='Torino'):
+        
+        Thread.__init__(self)
+        DashboardChart.__init__(self, title, name=title, subtitle=subtitle)
         self.data = data
         self.parametro=parametro
         self.tipo = tipo
         
-        min = datetime.datetime.fromisoformat(str(self.data['start_time'].min()))
-        max = datetime.datetime.fromisoformat(str(self.data['start_time'].max()))
+#        min = datetime.datetime.fromisoformat(str(self.data['start_time'].min()))
+#        max = datetime.datetime.fromisoformat(str(self.data['start_time'].max()))
 
-        args = [["slider", "Va che bello questo slider", min, max, (min, max)]]
-        self.widget_list = [partial(st_functional_columns, args)]
+#        args = [["slider", "Va che bello questo slider", min, max, (min, max)]]
+#        self.widget_list = [partial(st_functional_columns, args)]
 
-    def get_heatmap(self, start, end):
-
-        df = self.data
-        df["start_time"] = pd.to_datetime(df["start_time"], utc=True)
-        filtered_df = df.loc[(df["start_time"] >= start)
-                        & (df["start_time"] < end)]
-        data = filtered_df.rename(columns={'start_latitude':'lat', 'start_longitude':'lng', 'start_time':'datetime'})
+    def get_heatmap(self):
+        
+        data = self.data
 
         locations = {
         "Torino": [45.0781, 7.6761],
@@ -75,9 +76,7 @@ class ChartMap(DashboardChart):
 
     def get_heatmapWithTime(self):
 
-        df = self.data
-
-        data = df.rename(columns={'start_latitude':'lat', 'start_longitude':'lng', 'start_time':'datetime'})
+        data = self.data
         data['hour']=data['datetime'].apply(lambda x: x.hour)
         locations = {
         "Torino": [45.0781, 7.6761],
@@ -116,12 +115,23 @@ class ChartMap(DashboardChart):
 
 
     def show_heatmap(self):
+        with st.spinner("Sto creando la heatmap..."):
+            fig = self.get_heatmap()
         self.show_heading()
-        start, end = self.show_widgets()[0][0]
-        fig = self.get_heatmap(start, end)
         folium_static(fig)
 
     def show_heatmapWithTime(self):
+        
+        with st.spinner("Sto creando la heatmap temporale..."):
+            fig = self.get_heatmapWithTime()
         self.show_heading()
-        fig = self.get_heatmapWithTime()
         folium_static(fig)
+
+    def run(self):
+        print ("Thread '" + self.tipo + "' avviato")
+        if (self.tipo == "heatmap"):
+            self.show_heatmap()
+        else:
+            self.show_heatmapWithTime()
+        
+        print ("Thread '" + self.name + "' terminato")

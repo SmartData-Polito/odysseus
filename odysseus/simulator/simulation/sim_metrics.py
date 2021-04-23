@@ -40,6 +40,6 @@ class SimMetrics:
                 if self.metrics_values[metrics]["count"]:
                     yield metrics, self.metrics_values[metrics]["tot"] / self.metrics_values[metrics]["count"]
                 else:
-                    yield metrics, "ND"
+                    yield metrics, "NA"
             else:
                 yield metrics, self.metrics_values[metrics]

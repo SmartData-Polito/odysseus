@@ -44,7 +44,10 @@ def run_cdm():
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
         response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
         response.status_code = 302
-    except Exception:
+
+        create_predefined_file()
+
+    except Exception as e:
         print(e)
         payload =   {
                 "error": "something went wrong"
@@ -61,7 +64,7 @@ def run_cdm():
     # param_id="placeholder"
     # query = {"_id":param_id}
     # results = list(collection.find(query))
-    return jsonify({'Result':"Success"})
+    #return jsonify({'Result':"Success"})
 
 
 @api_cdm.route('/available_data',methods=['GET'])

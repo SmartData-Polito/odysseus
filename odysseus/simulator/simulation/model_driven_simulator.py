@@ -41,7 +41,8 @@ class ModelDrivenSim (SharedMobilitySim):
 																					   "reactive_post_charge",
 																					   "reactive_post_trip",
 																					   "predictive"]:
-			self.scooterRelocationStrategy.generate_relocation_schedule(self.current_daytype, self.current_hour)
+			self.scooterRelocationStrategy.generate_relocation_schedule(self.current_datetime, self.current_daytype,
+                                                                        self.current_hour)
 			self.update_relocation_schedule = False
 
 		if self.update_relocation_schedule \
@@ -49,7 +50,8 @@ class ModelDrivenSim (SharedMobilitySim):
 				and "vehicle_relocation_scheduling" in self.simInput.sim_scenario_conf.keys() \
 				and self.simInput.sim_scenario_conf["vehicle_relocation_scheduling"]:
 
-			self.vehicleRelocationStrategy.generate_relocation_schedule(self.current_daytype, self.current_hour)
+			self.vehicleRelocationStrategy.generate_relocation_schedule(self.current_datetime, self.current_daytype,
+                                                                        self.current_hour)
 			self.update_relocation_schedule = False
 
 	def update_data_structures (self):
@@ -98,9 +100,9 @@ class ModelDrivenSim (SharedMobilitySim):
 
 		booking_request["driving_distance"] = booking_request["euclidean_distance"] * 1.4
 		booking_request["duration"] = abs(booking_request["driving_distance"] / (
-			(self.simInput.avg_speed_kmh_mean + np.random.normal(
-				self.simInput.avg_speed_kmh_std, self.simInput.avg_speed_kmh_std / 2
-			)) / 3.6
+			 (self.simInput.avg_speed_kmh_mean) / 3.6 # + np.random.normal(
+			# 	self.simInput.avg_speed_kmh_std, self.simInput.avg_speed_kmh_std / 2
+			# )) / 3.6
 		))
 		booking_request["end_time"] = self.current_datetime + datetime.timedelta(
 			seconds=booking_request["duration"]

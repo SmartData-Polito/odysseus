@@ -25,22 +25,19 @@ class ChartTemp(DashboardChart):
 
         self.widget_list= [partial(st_functional_columns, arg)]
 
-    @st.cache
+    @st.cache(allow_output_mutation=True)
     def get_bookings_count(self, count_col, agg_freq_):
 
-        #self.show_heading()
-        #self.data.plot_dashboard_st(type=self.parametro, regione=self.regione, tipo=self.tipo)
         df = self.data
         plot_df = df[['start_time', count_col]].set_index('start_time').resample(
             agg_freq_
         ).count().asfreq(agg_freq_, fill_value=0)
+
         fig = px.line(plot_df)
 
         return fig
 
-        #st.plotly_chart(fig, use_container_width=True)
-
-    @st.cache
+    @st.cache(allow_output_mutation=True)
     def get_bookings_by_hour(self):
 
         #self.show_heading()
@@ -57,7 +54,7 @@ class ChartTemp(DashboardChart):
         #st.plotly_chart(fig, use_container_width=True)
 
 
-    @st.cache
+    @st.cache(allow_output_mutation=True)
     def get_bubble_plot(self):
 
         #self.show_heading()
