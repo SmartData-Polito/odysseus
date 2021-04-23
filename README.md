@@ -1,74 +1,49 @@
-# Get started with e3f2s
+# ODySSEUS: an Origin-Destination Simulator of Shared E-mobility in Urban Scenarios
 
 ## Introduction
 
-e3f2s is a software for simulation of shared electric fleets in urban environments.
-It is still a prototype in active development. However, it is already stable enough to be used for research activities.
-In order to understand what e3f2s is capable of, please first read the three papers available in the folder /home/det_tesi/a.ciociola/input_simulator/papers.
+ODySSEUS is a data management and simulation software for mobility data, focused mostly on shared fleets in urban environments. 
 
-e3f2s is composed by three main modules:
-* city_data_manager: receives in input data from different sources and output a simulation-ready version of the same data.
-* simulator: contains data structures and algorithms for actual simulations.
-* utils: contains some utility functions used across the other modules.
+Its goal is to provide a general, easy-to-use framework to simulate shared mobility scenarios across different cities using real-world data.
 
-In this tutorial, we focus on running our first simulation with e3f2s.
+Internally, it makes use of several open-source Python libraries for geospatial and mobility analysis, such as geopandas (https://geopandas.org/) and scikit-mobility [5] (https://scikit-mobility.github.io/scikit-mobility/).
 
-## Setup repository, environment and data
+ODySSEUS is composed by four main functional modules, each one coming with its own API, command line interface and GUI:
 
-First, let's clone the public git repository and move data into the right folder.
-For now, we skip explanations about city_data_manager functionalities.
+* City Data Manager (previously UMAP [4])
+   * Upload or collect raw input data from different sources.
+   * Provide utilities to normalise data into a common format (e.g. column naming).
+   * Provide a unified interface to access and analyse normalised data.
 
-```console
-git clone https://github.com/AleCioc/e3f2s my-e3f2s-folder
-cp -r /home/det_tesi/a.ciociola/input_simulator/data my-e3f2s-folder/e3f2s/city_data_manager
-```
+* Demand Modelling
+   * Create different demand models using:
+      * Standard mathematical models [5] (random walk models, exploration and preferential return model, etc.)
+      * Migration models [5] (gravity model, radiation model, etc.).
+      * Data-driven (e.g. Poisson/KDE estimation [3], Deep Learning [6]) 
+   * Evaluate the goodness of a demand model under different viewpoints and compare different demand models.
+   * Create demand-side simulation scenarios.
 
-Then, let's install all the necessary libraries.
+* Supply Modelling
+   * Create fleets choosing between different modes and vehicles.
+   * Create and configure refueling/charging infrastrucures and energy mix for electricity production.
 
-```console
-pip install --user -r my-e3f2s-folder/requirements.txt
-```
+* Simulator
+   * Create and run simulation scenarios based on supply and demand configurations.
+   * Support for trip-level simulations (single_run) and timeframe-level simulations (multiple_runs).
+   * Collect several performance metrics (satisfied demand, fleet handling cost, equivalent CO2 emissions, gross profit, ...)
+   * Detailed interface to analyse simulation results
 
+At the following link you can find a User Guide and the API reference:
+https://odysseus-simulator.readthedocs.io/en/latest/index.html
 
-## Configuring simulation input
+[1] - Alessandro Ciociola, Michele Cocca, Danilo Giordano, Luca Vassio, Marco Mellia (2020) E-Scooter Sharing: Leveraging Open Data for System Design, In: 2020 IEEE/ACM 24th International Symposium on Distributed Simulation and Real Time Applications (DS-RT), pages 1-8, ISBN: 978-1-7281-7343-6
 
-The folder e3f2s/simulator/simulation_input contains configuration files for simulation.
+[2] - Michelangelo Barulli, Alessandro Ciociola, Michele Cocca, Luca Vassio, Danilo Giordano, Marco Mellia (2020) On Scalability of Electric Car Sharing in Smart Cities, In: 2020 IEEE International Smart Cities Conference (ISC2), pages 1-8, ISBN: 978-1-7281-8294-0
 
-In particular:
+[3] - Alessandro Ciociola, Dena Markudova, Luca Vassio, Danilo Giordano, Marco Mellia, Michela Meo (2020) Impact of Charging Infrastructure and Policies on Electric Car Sharing Systems, In: 2020 IEEE 23rd International Conference on Intelligent Transportation Systems (ITSC), pages 1-6, ISBN: 978-1-7281-4149-7
 
-* sim_configs_target.json: contains the name of the configuration to run
-* sim_configs_versioned: contains one folder for each saved configuration
-    * e.g. sim_configs_versioned/turin_iscc_set1 contains the configuration for the first set of simulation used in ISCC paper.
+[4] - Alessandro Ciociola, Michele Cocca, Danilo Giordano, Marco Mellia, Andrea Morichetta, Andrian Putina, Flavia Salutari (2017) UMAP: Urban Mobility Analysis Platform to Harvest Car Sharing Data, In: Proceedings of the IEEE Conference on Smart City Innovations, ISBN: 978-1-5386-0435-9
 
-Each configuration folder must contain the following Python files:
+[5] - Luca Pappalardo, Filippo Simini, Gianni Barlacchi and Roberto Pellungrini (2019). scikit-mobility: a Python library for the analysis, generation and risk assessment of mobility data, https://arxiv.org/abs/1907.07062
 
-* sim_run_conf.py: specifies used data source, run mode (single_run or multiple_runs), number of cores to use in case of multiple runs, simulation type (trace-driven or model-driven) and output folder name
-* sim_general_conf.py: specifies macroscopic parameters about spatial and temporal configuration, as well as fleet load factor policy.
-* single_run_conf.py: specifies scenario configuration for single run
-    * model_validation_conf.py: special case of single run
-* multiple_runs_conf.py: specifies scenario configuration for multiple runs
-* vehicle_config.py: specifies vehicles characteristics
-* cost_conf.py: specifies cost/revenue configuration
-
-Let's create a new folder for a new configuration:
-
-```console
-cp -r /home/det_tesi/a.ciociola/input_simulator/ my-e3f2s-folder/e3f2s/simulator/simulation_input/sim_configs_versioned/
-```
-
-Modify configurations as you desire, then run the simulator:
-
-```console
-cd my-e3f2s-folder/
-python -m e3f2s.simulator
-```
-
-Let's wait for simulation to finish and let's check the results folder and the figures folder (figures are created automatically only in single run mode)
-
-```console
-ls my-e3f2s-folder/simulator/results/Torino/single_run/test
-ls my-e3f2s-folder/simulator/figures/Torino/single_run/test
-```
-
-Done! Now we can explore our results and eventually produce other analysis and plots.
-
+[6] - S. Fiorini, G. Pilotti, M. Ciavotta,  and A. Maurino, (2020) “3D-CLoST:  A CNN-LSTM  Approach  for  Mobility  Dynamics  Prediction  in  SmartCities,” In: 2020 IEEE Big Data.
