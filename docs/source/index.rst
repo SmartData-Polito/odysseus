@@ -20,10 +20,17 @@ Get started with Odysseus
 
 Introduction
 =============
-odysseus is a software for simulation of shared electric fleets in urban environments. It is still a prototype in active development. However, it is already stable enough to be used for research activities. In order to understand what odysseus is capable of, please first read the three papers available in the folder */home/det_tesi/a.ciociola/input_simulator/papers*.
 
-odysseus is composed by three main modules:
+ODySSEUS is a data management and simulation software for mobility data, focused mostly on shared fleets in urban environments.
 
-- **city_data_manager**: receives in input data from different sources and output a simulation-ready version of the same data.
-- **simulator**: contains data structures and algorithms for actual simulations.
-- **utils**: contains some utility functions used across the other modules.
+Its goal is to provide a general, easy-to-use framework to simulate shared mobility scenarios across different cities using real-world data.
+
+Internally, it makes use of several open-source Python libraries for geospatial and mobility analysis, such as geopandas (https://geopandas.org/) and scikit-mobility [5] (https://scikit-mobility.github.io/scikit-mobility/).
+
+ODySSEUS is composed by four main functional modules, each one coming with its own API, command line interface and GUI:
+
+- **City Data Manager**
+- **Demand Modelling**
+- **Supply Modelling**
+- **Simulator**
+
