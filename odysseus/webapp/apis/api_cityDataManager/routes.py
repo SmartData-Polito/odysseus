@@ -96,6 +96,22 @@ def get_data(graph = 'all'):
     return json.dumps(list(results))
 
 
+
+@api_cdm.route('/streamlit', methods=["POST"])
+def streamlit_redirect():
+    payload =   {
+                "link": "http://127.0.0.1:8501"
+                }
+    code = 302
+    response = make_response(jsonify(payload), code)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+    response.status_code = 302
+
+    return response
+
+
 @api_cdm.route('/available_data_test',methods=['GET'])
 def bretest():
 
