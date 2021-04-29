@@ -1,11 +1,7 @@
 import datetime
 
-import pandas as pd
-
 from odysseus.simulator.simulation.simulator import SharedMobilitySim
 from odysseus.utils.time_utils import update_req_time_info
-#from odysseus.utils.vehicle_utils import *
-#from odysseus.supply_modelling.vehicle import Vehicle
 
 
 class TraceDrivenSim (SharedMobilitySim):

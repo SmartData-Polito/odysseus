@@ -1,8 +1,8 @@
 sim_general_conf_grid = {
 
     # Run configuration
-    "city": ["Torino"],
-    "sim_run_mode": ["multiple_runs"],
+    "city": ["Amsterdam"],
+    "sim_run_mode": ["single_run"],
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["eventG"],
