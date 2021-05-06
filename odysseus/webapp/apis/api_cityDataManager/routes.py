@@ -12,6 +12,10 @@ from flask_cors import CORS
 api_cdm = Blueprint('api_cdm', __name__)
 CORS(api_cdm)
 
+HOST = 'mongodb://localhost:27017/'
+DATABASE = 'inter_test'
+COLLECTION = 'bookings_per_hour'
+
 @api_cdm.route('/run_cdm',methods=['POST'])
 def run_cdm():
     """
@@ -59,7 +63,7 @@ def run_cdm():
         response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
         response.status_code = 500
     return response
-
+    # Collect from mongo
     # collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
     # param_id="placeholder"
     # query = {"_id":param_id}

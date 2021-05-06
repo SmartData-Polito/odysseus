@@ -58,5 +58,5 @@ class CityDataManager():
                         geo_trips_ds.get_trips_od_gdfs()
                         geo_trips_ds.save_points_data()
                         geo_trips_ds.save_trips()
-                        #self.dt.save_to_db(city,data_source_id, year, month)
+                        self.dt.save_to_db(city,data_source_id, year, month,filter_list=["general_sum"])
         print(datetime.datetime.now(), "Done")
