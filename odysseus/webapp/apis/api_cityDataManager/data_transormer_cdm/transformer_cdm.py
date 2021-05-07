@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import plotly.express as px
 import pymongo as pm
+import datetime
 
 HOST = 'mongodb://localhost:27017/'
 DATABASE = 'inter_test'
@@ -86,7 +87,7 @@ class DataTransformer:
             avg_duration = avg_duration.reset_index()
 
         elif filter_type == "general_sum":
-            generaldf = df.filter("start_time")
+            generaldf = df.filter(["start_time"],axis=1)
             print (generaldf)
             generaldf['starting_date'] = generaldf['start_time'].apply(lambda x:  datetime.datetime.strptime(x,'%Y-%m-%d %H:%M:%S%z'))
             self.sim_booking_requests = generaldf.fillna(0).set_index("starting_date").iloc[:, 0].resample("60Min").count()

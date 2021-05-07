@@ -54,7 +54,7 @@ def run_cdm():
     except Exception as e:
         print(e)
         payload =   {
-                "error": "something went wrong"
+                "error": "something went wrong "
                 }
         code = 500
         response = make_response(jsonify(payload), code)
@@ -180,3 +180,35 @@ def bretest():
     return jsonify(risultato)
 
 
+
+
+@api_cdm.route('/map-data',methods=['GET'])
+def mapdata():
+    result =  [
+        {
+            "id":1,
+            "description":"Nice City",
+            "name":"Torino",
+            "lat":45.0703,
+            "long":7.6869,
+            "total_trips":39082
+        },
+        {
+            "id":2,
+            "description":"Nice City",
+            "name":"Milano",
+            "lat":45.4642,
+            "long":9.1900,
+            "total_trips":647168
+        },
+        {
+            "id":3,
+            "description":"Nice City",
+            "name":"New York City",
+            "lat":40.7128,
+            "long":-74.0060,
+            "total_trips":647168
+        }
+    ]
+   
+    return jsonify(result)
