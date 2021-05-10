@@ -1,12 +1,12 @@
 sim_general_conf_grid = {
 
     # Run configuration
-    "city": ["Amsterdam"],
-    "sim_run_mode": ["single_run"],
+    "city": ["Torino"],
+    "sim_run_mode": ["multiple_runs"],
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["big_data_db_test"],
+    "sim_scenario_name": ["electric_torino_numparkings_eventG_nvehicles_ncharpol"],
 
     # Fleet general parameters
     "const_load_factor": [False],
@@ -18,8 +18,8 @@ sim_general_conf_grid = {
     # Time general parameters
     "year": [2017],
     "month_start": [10],
-    "month_end": [11],
+    "month_end": [13],
 
-    "save_history": [False]
+    "save_history": [True]
 
 }

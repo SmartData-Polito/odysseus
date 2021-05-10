@@ -5,53 +5,56 @@ import geopandas as gpd
 from math import radians, cos, sin, asin, sqrt
 
 
-def get_city_grid_as_gdf (total_bounds, crs, bin_side_length):
-
+def get_city_grid_as_gdf(total_bounds, crs, bin_side_length):
     x_min, y_min, x_max, y_max = total_bounds
     width = bin_side_length / 111320 * 1.2
     height = bin_side_length / 111320 * 1.2
     # width = bin_side_length / 0.706
     # height = bin_side_length / 0.706
-    rows = int(np.ceil((y_max-y_min) / height))
-    cols = int(np.ceil((x_max-x_min) / width))
+    rows = int(np.ceil((y_max - y_min) / height))
+    cols = int(np.ceil((x_max - x_min) / width))
+    print(rows, cols)
     x_left = x_min
     x_right = x_min + width
+    y_top = y_max
+    y_bottom = y_max - height
     polygons = []
-    for i in range(cols):
-        y_top = y_max
-        y_bottom = y_max - height
-        for j in range(rows):
-            polygons.append(Polygon([(x_left, y_top), (x_right, y_top), (x_right, y_bottom), (x_left, y_bottom)]))
-            y_top = y_top - height
-            y_bottom = y_bottom - height
-        x_left = x_left + width
-        x_right = x_right + width
+    for j in range(cols):
+        x_left = x_min
+        x_right = x_min + width
+        for i in range(rows):
+            polygons.append(
+                Polygon([
+                    (x_left, y_top),
+                    (x_right, y_top),
+                    (x_right, y_bottom),
+                    (x_left, y_bottom)]))
+            x_left = x_left + width
+            x_right = x_right + width
+        y_top = y_top - height
+        y_bottom = y_bottom - height
+
     grid = gpd.GeoDataFrame({"geometry": polygons})
 
-    grid["zone_id"] = range(len(grid))
     grid.crs = crs
 
     return grid
 
 
-def get_city_grid_as_matrix (total_bounds, bin_side_length):
-
+def get_city_grid_as_matrix(total_bounds, bin_side_length):
     x_min, y_min, x_max, y_max = total_bounds
     width = bin_side_length / 111320 * 1.2
     height = bin_side_length / 111320 * 1.2
     # width = bin_side_length / 0.706
     # height = bin_side_length / 0.706
-    rows = int(np.ceil((y_max-y_min) / height))
-    cols = int(np.ceil((x_max-x_min) / width))
+    rows = int(np.ceil((y_max - y_min) / height))
+    cols = int(np.ceil((x_max - x_min) / width))
+    print(rows, cols)
     grid_matrix = []
-    row = 0
     for i in range(rows):
-        grid_matrix.append([])
-        col = 0
+        grid_matrix.append({})
         for j in range(cols):
-            grid_matrix[i].append(col * rows + row)
-            col += 1
-        row += 1
+            grid_matrix[i][j] = j + i * cols
     return pd.DataFrame(grid_matrix)
 
 

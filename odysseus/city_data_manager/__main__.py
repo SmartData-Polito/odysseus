@@ -40,7 +40,7 @@ parser.set_defaults(
     cities=["Amsterdam"],
     data_source_ids=["big_data_db"],
     years=["2017"],
-    months=[str(i) for i in range(1, 2)],
+    months=[str(i) for i in range(1, 3)],
 )
 
 args = parser.parse_args()

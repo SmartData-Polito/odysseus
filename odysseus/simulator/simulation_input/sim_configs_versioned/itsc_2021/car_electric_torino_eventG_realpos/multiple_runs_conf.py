@@ -3,10 +3,10 @@ import numpy as np
 sim_scenario_conf_grid = {
 
     "requests_rate_factor": [1],
-    "n_vehicles": [400],
-    "engine_type": ["gasoline"],
-    "profile_type": ["single_phase_1"],
-    "vehicle_model_name": ["Seat Leon 1.5 TSI 2020"],
+    "n_vehicles": np.arange(1,400,6),#np.arange(1,407,15),##[400],
+    "engine_type": ["electric"],
+    "profile_type":["wall_plug","single_phase_1","single_phase_2","three_phase_1","three_phase_2","three_phase_3","dcfc_1","dcfc_2"],
+    "vehicle_model_name": ["VW e-Golf 2018"],
     "country_energymix": ["Italy"],
     "year_energymix": ["2018"],
 
@@ -16,11 +16,12 @@ sim_scenario_conf_grid = {
     "alpha_policy": ['auto'],
     "beta": [100],
 
-    "n_poles_n_vehicles_factor": [0.02, 0.03, 0.04, 0.05],
+    #"n_poles_n_vehicles_factor": [0.02, 0.03, 0.04, 0.05],
+    "tot_n_charging_poles":[200],#np.arange(1,60,2), #
 
     "distributed_cps": [True],
     "system_cps": [True],
-    "cps_placement_policy": ["num_parkings"],
+    "cps_placement_policy": ["real_positions"],
     "cps_zones_percentage": [0.2],
 
     "battery_swap": [False],
@@ -28,7 +29,7 @@ sim_scenario_conf_grid = {
     "avg_service_time": [0],
 
     "n_workers": [1000],
-    "relocation": [False],
+    "relocation": [False,True],
 
     "user_contribution": [False],
     "willingness": [0],

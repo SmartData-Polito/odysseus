@@ -1,8 +1,12 @@
 import datetime
+import json
+import os
 
+import numpy as np
 import simpy
 
 from odysseus.simulator.simulation_data_structures.worker import Worker
+from odysseus.simulator.simulation_input.prediction_model import PredictionModel
 from odysseus.utils.geospatial_utils import get_od_distance
 
 
@@ -79,6 +83,45 @@ class ScooterRelocationPrimitives:
             worker_id = i
             initial_position = self.simInput.supply_model.initial_relocation_workers_positions[i]
             self.relocation_workers.append(Worker(env, worker_id, initial_position))
+
+        if "window_width" in dict(self.simInput.supply_model_conf["scooter_relocation_technique"]):
+            self.window_width = dict(self.simInput.supply_model_conf["scooter_relocation_technique"])["window_width"]
+        else:
+            self.window_width = 1
+
+        if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "predictive":
+
+            prediction_model_dir = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                "simulator",
+                "simulation_input",
+                "prediction_model",
+                self.simInput.demand_model_config["city"]
+            )
+
+            with open(os.path.join(prediction_model_dir, "params.json"), "r") as f:
+                prediction_model_configs = json.load(f)
+
+            self.city_shape = self.simInput.grid_matrix.shape
+            mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(
+                lambda zone_id: int(zone_id in self.simInput.valid_zones))).to_numpy()
+            mask = np.repeat(mask[:, :, np.newaxis], 2, axis=2)
+
+            prediction_model_path = os.path.join(prediction_model_dir,
+                                                 prediction_model_configs["time_horizon_two"]["weights"])
+
+            self.prediction_model_time_horizon_two = PredictionModel(prediction_model_configs["time_horizon_two"],
+                                                                     self.city_shape,
+                                                                     8, mask=mask, path=prediction_model_path)
+
+            if self.window_width == 2:
+                prediction_model_path = os.path.join(prediction_model_dir,
+                                                     prediction_model_configs["time_horizon_three"]["weights"])
+
+                self.prediction_model_time_horizon_three = PredictionModel(
+                    prediction_model_configs["time_horizon_three"], self.city_shape,
+                    8, mask=mask, path=prediction_model_path)
+
 
     def relocate_scooter_single_zone(self, scooter_relocation, move_vehicles=False, worker=None):
 
@@ -269,6 +312,7 @@ class ScooterRelocationPrimitives:
 
         self.sim_metrics.update_metrics("min_vehicles_relocated", scooter_relocation["n_vehicles"])
         self.sim_metrics.update_metrics("max_vehicles_relocated", scooter_relocation["n_vehicles"])
+        self.sim_metrics.update_metrics("tot_vehicles_moved", scooter_relocation["n_vehicles"])
 
     def update_current_hour_stats(self, booking_request):
 

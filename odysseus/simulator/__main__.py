@@ -1,8 +1,16 @@
 import datetime
 import os
 import json
+import argparse
 
-from shutil import copy
+parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "--n_cpus",
+    help="specify max number of cpus to be used"
+)
+
+args = parser.parse_args()
 
 from odysseus.simulator.simulation_input.sim_input_paths import simulation_input_paths
 
@@ -18,24 +26,11 @@ versioned_conf_path = os.path.join(
     campaign_name,
     conf_name
 )
-conf_path = simulation_input_paths['sim_current_config']
-os.makedirs(conf_path, exist_ok=True)
-
-try:
-    for f in os.listdir(versioned_conf_path):
-        if os.path.isfile(os.path.join(versioned_conf_path, f)):
-            copy(
-                os.path.join(versioned_conf_path, f),
-                os.path.join(conf_path)
-            )
-
-except FileNotFoundError:
-    print('Error %s conf not present' % conf_path + f)
-    exit()
+conf_path = versioned_conf_path
 
 
 from odysseus.simulator.single_run.single_run import single_run
-from odysseus.simulator.multiple_runs.multiple_runs import multiple_runs
+#from odysseus.simulator.multiple_runs.multiple_runs import multiple_runs
 from odysseus.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 
 from odysseus.simulator.simulation_input.sim_current_config.sim_general_conf import sim_general_conf_grid
@@ -59,8 +54,16 @@ for sim_general_conf in sim_general_conf_list:
             sim_general_conf["sim_scenario_name"]
         ))
     elif sim_run_mode == "multiple_runs":
-        multiple_runs(
-            sim_general_conf,
-            confs_dict[sim_general_conf["sim_run_mode"]],
-            sim_general_conf["sim_scenario_name"]
-        )
+        if args.n_cpus is not None:
+            multiple_runs(
+                sim_general_conf,
+                confs_dict[sim_general_conf["sim_run_mode"]],
+                sim_general_conf["sim_scenario_name"],
+                n_cpus=int(args.n_cpus)
+            )
+        else:
+            multiple_runs(
+                sim_general_conf,
+                confs_dict[sim_general_conf["sim_run_mode"]],
+                sim_general_conf["sim_scenario_name"],
+            )
