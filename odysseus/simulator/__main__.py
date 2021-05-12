@@ -2,6 +2,7 @@ import datetime
 import os
 import json
 import argparse
+import shutil
 
 parser = argparse.ArgumentParser()
 
@@ -26,11 +27,11 @@ versioned_conf_path = os.path.join(
     campaign_name,
     conf_name
 )
-conf_path = versioned_conf_path
-
+shutil.rmtree(simulation_input_paths["sim_current_config"])
+shutil.copytree(versioned_conf_path, simulation_input_paths["sim_current_config"])
 
 from odysseus.simulator.single_run.single_run import single_run
-#from odysseus.simulator.multiple_runs.multiple_runs import multiple_runs
+from odysseus.simulator.multiple_runs.multiple_runs import multiple_runs
 from odysseus.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 
 from odysseus.simulator.simulation_input.sim_current_config.sim_general_conf import sim_general_conf_grid
