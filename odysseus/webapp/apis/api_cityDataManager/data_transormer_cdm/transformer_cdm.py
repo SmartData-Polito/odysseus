@@ -1,4 +1,5 @@
 import os
+from threading import current_thread
 import pandas as pd
 import plotly.express as px
 import pymongo as pm
@@ -46,7 +47,8 @@ class DataTransformer:
             list_values=list(start_dict[key].values())
             final_dict[key] = list_values
         return final_dict
-            
+    
+
     def transform_cdm(self,city, data_steps_id, data_type_id, data_source, year, month, filetype, *args, **kwargs):
         transformed={}
         if kwargs.get('filter_type', None):
@@ -93,7 +95,7 @@ class DataTransformer:
             self.sim_booking_requests = generaldf.fillna(0).set_index("starting_date").iloc[:, 0].resample("60Min").count()
             #if self.DEBUG:
             print(self.sim_booking_requests)
-            transformed =  self.sim_booking_requests.to_json()
+            transformed =  self.sim_booking_requests#.to_json()
         #print(transformed)
         return transformed
 
@@ -106,5 +108,25 @@ class DataTransformer:
             print(f)
             results = dt.transform_cdm(city, data_steps_id, data_type_id, data_source, str(year), str(month), filetype, filter_type=f)
             data_collected[f] = results
+            current_month=None
+            prev_month=None
+            count = []
+            current_day=None
+            prev_day = None
+            for index,item in results.items():
+                if current_month==None:
+                    prev_month = index.month
+                    prev_day=index.day
 
-        insert_documents_db(col,data_collected)
+                current_month = index.month
+                current_day = index.day
+                count.append(item)
+
+                if current_day != prev_day:
+                    document = {"year": index.year,"month":index.month,"day":index.day,"count":count}
+                    insert_documents_db(col,document)
+                    count = []
+                prev_month = current_month
+                prev_day = current_day
+
+       # insert_documents_db(col,data_collected)
