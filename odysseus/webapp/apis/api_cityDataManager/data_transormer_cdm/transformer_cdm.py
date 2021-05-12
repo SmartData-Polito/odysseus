@@ -90,11 +90,11 @@ class DataTransformer:
 
         elif filter_type == "general_sum":
             generaldf = df.filter(["start_time"],axis=1)
-            print (generaldf)
+            #print (generaldf)
             generaldf['starting_date'] = generaldf['start_time'].apply(lambda x:  datetime.datetime.strptime(x,'%Y-%m-%d %H:%M:%S%z'))
             self.sim_booking_requests = generaldf.fillna(0).set_index("starting_date").iloc[:, 0].resample("60Min").count()
-            #if self.DEBUG:
-            print(self.sim_booking_requests)
+            if self.DEBUG:
+                print(self.sim_booking_requests)
             transformed =  self.sim_booking_requests#.to_json()
         #print(transformed)
         return transformed
@@ -110,23 +110,29 @@ class DataTransformer:
             data_collected[f] = results
             current_month=None
             prev_month=None
+            current_year = None
             count = []
             current_day=None
             prev_day = None
+            prev_year = None
             for index,item in results.items():
                 if current_month==None:
                     prev_month = index.month
                     prev_day=index.day
-
+                    prev_year = index.year
+                    
+                current_year = index.year
                 current_month = index.month
                 current_day = index.day
-                count.append(item)
 
                 if current_day != prev_day:
-                    document = {"year": index.year,"month":index.month,"day":index.day,"count":count}
+                    document = {"year": prev_year,"month":prev_month,"day":prev_day,"count":count}
                     insert_documents_db(col,document)
                     count = []
+                
+                count.append(item)
                 prev_month = current_month
                 prev_day = current_day
+                prev_year = current_year
 
        # insert_documents_db(col,data_collected)
