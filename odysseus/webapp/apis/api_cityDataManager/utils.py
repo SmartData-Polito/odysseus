@@ -59,7 +59,6 @@ def groupby_month(filepath):
     return ans
 
 def groupby_day_hour(filepath):
-    print("ERRORE: ",filepath)
     cols = ["start_time"]
     df = pd.read_csv(filepath,usecols=cols)
     df['start_time'] = pd.to_datetime(df['start_time'],utc=True).dt.to_pydatetime()
@@ -85,18 +84,39 @@ def build_raw_answer(df,DEBUG=False):
 
 def build_raw_answer_hour(df,DEBUG=False):
     final_dict = {}
+    prev_hour = -1
+    prev_day = 0
     for index, row in df.iterrows():
         if index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() and index[2] in final_dict[index[0]][index[1]].keys():
-            final_dict[index[0][index[1]][index[2]]].append(int(row["occurance"]))
-            print(final_dict)
+            if prev_day == index[2]:
+                if abs(prev_hour - index[3]) > 1:
+                    for _ in range(1, abs(prev_hour - index[3]) ):
+                        final_dict[index[0]][index[1]][index[2]].append(0)
+                else:
+                    final_dict[index[0]][index[1]][index[2]].append(int(row["occurance"]))  
+            elif abs(prev_day - index[2]) > 1:
+                for gg in range(1, abs(prev_day - index[2]) ):
+                    michael_jordan_zeros = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                    final_dict[index[0]][index[1]].update({prev_day+gg:michael_jordan_zeros})
+            elif abs(prev_day - index[2]) == 1:
+                for _ in range(0, abs(prev_hour - 23)):
+                    final_dict[index[0]][index[1]][index[2]].append(0)
+                for _ in range(0,index[2]):
+                    final_dict[index[0]][index[1]][index[2]].append(0)
+            
+
         elif index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() :
             final_dict[index[0]][index[1]].update({index[2]:[int(row["occurance"])]})
         elif index[0] in final_dict.keys() :
             final_dict[index[0]].update({[index[1]]:{index[2]:[int(row["occurance"])]}})
         else:
             final_dict.update({index[0]:{index[1]:{}}})
-    if DEBUG:
-        print(final_dict)
+        prev_hour = index[3]
+        prev_day = index[2]
+
+    if 2017 in final_dict.keys():
+        print([ [len(final_dict[2017][y][x]) for x in final_dict[2017][y].keys() ] for y in final_dict[2017].keys()])
+
     return final_dict
 
 def retrieve_per_city(path,level="norm",datatype = "trips",aggregate_level="month",DEBUG=False):
