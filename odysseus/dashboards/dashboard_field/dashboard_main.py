@@ -10,6 +10,7 @@ from odysseus.dashboards.dashboard_field.simulator_screen.screen_principale impo
 
 from odysseus.city_data_manager.config.config import cities # get all possible city names from config files
 from functools import partial
+import pymongo
 
 class DashboardMain(DashboardField):
 
@@ -84,7 +85,8 @@ class DashboardMain(DashboardField):
         self.show_heading()
 
         name, city, month, year, db = self.show_widgets()
-
+        client = pymongo.MongoClient("localhost", 27017)
+        mongo_db = client["city_data_manager"]
         main_screen= self.get_main_screen(name, month, year, city, db)
         main_screen.show_heading()
         main_screen.show_charts()

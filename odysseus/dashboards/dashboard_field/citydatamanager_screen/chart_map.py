@@ -14,29 +14,27 @@ import folium
 from folium import plugins
 from folium.plugins import HeatMap
 from folium.plugins import HeatMapWithTime
+import branca.colormap
+from collections import defaultdict
 
 import datetime 
 from streamlit_folium import folium_static
 
 class ChartMap(DashboardChart, Thread):
 
-    def __init__(self, data, title, subtitle, tipo="heatmap", parametro='Torino'):
+    def __init__(self, og_data, title, subtitle, tipo="heatmap", parametro='Torino'):
         
         Thread.__init__(self)
         DashboardChart.__init__(self, title, name=title, subtitle=subtitle)
-        self.data = data
+        self.og_data = og_data
+        #self.dest_data = dest_data
         self.parametro=parametro
         self.tipo = tipo
-        
-#        min = datetime.datetime.fromisoformat(str(self.data['start_time'].min()))
-#        max = datetime.datetime.fromisoformat(str(self.data['start_time'].max()))
-
-#        args = [["slider", "Va che bello questo slider", min, max, (min, max)]]
-#        self.widget_list = [partial(st_functional_columns, args)]
 
     def get_heatmap(self):
         
-        data = self.data
+        data_og = self.og_data
+        #data_dest = self.dest_data
 
         locations = {
         "Torino": [45.0781, 7.6761],
@@ -50,33 +48,32 @@ class ChartMap(DashboardChart, Thread):
         "Frankfurt": [50.1109, 8.6821],
         "Hamburg": [53.5511, 9.9937]
         }
-        """ 
-        _map = folium.Map(location=locations[city],
-            tiles='Stamen Toner', zoom_start=12)
 
-        data.apply(lambda row:folium.Marker(location=[row["lat"], row["lng"]]).add_to(_map),
-                axis=1)
-        """
         _map = folium.Map(location=locations[self.parametro],
-                        zoom_start = 12) 
+                        zoom_start = 11) 
     
-        # Ensure you're handing it floats
+        og_points = data_og[['lat','lng']]
+        og_points = og_points.dropna(axis=0, subset=['lat','lng'])
+        heat_og = [[row["lat"], row["lng"]] for index, row in og_points.iterrows()]
+        
+        """ dest_points = data_dest[['end_lat','end_long']]
+        dest_points = dest_points.dropna(axis=0, subset=['end_lat','end_long'])
+        heat_dest = [[row["end_lat"], row["end_long"]] for index, row in dest_points.iterrows()] """
 
-        # Filter the DF for rows, then columns, then remove NaNs
-        heat_df = data[['lat','lng']]
-        heat_df = heat_df.dropna(axis=0, subset=['lat','lng'])
+        steps=20
+        colormap = branca.colormap.linear.YlOrRd_09.scale(0, 1).to_step(steps)
+        gradient_map=defaultdict(dict)
+        for i in range(steps):
+            gradient_map[1/steps*i] = colormap.rgb_hex_str(1/steps*i)
+        colormap.add_to(_map)
 
-        # List comprehension to make out list of lists
-        heat_data = [[row["lat"], row["lng"]] for index, row in heat_df.iterrows()]
-
-        # Plot it on the map
-        HeatMap(heat_data).add_to(_map)
-
+        HeatMap(heat_og, radius=17).add_to(_map)
+        #HeatMap(heat_dest, radius=17).add_to(_map)
         return _map
 
     def get_heatmapWithTime(self):
 
-        data = self.data
+        data = self.og_data
         data['hour']=data['datetime'].apply(lambda x: x.hour)
         locations = {
         "Torino": [45.0781, 7.6761],
@@ -95,9 +92,6 @@ class ChartMap(DashboardChart, Thread):
                         tiles='Stamen Toner', 
                         zoom_start = 12) 
     
-        # Ensure you're handing it floats
-
-        # Filter the DF for rows, then columns, then remove NaNs
         heat_df = data[['hour','lat','lng']]
         heat_df = heat_df.dropna(axis=0, subset=['hour','lat','lng'])
 
@@ -109,7 +103,7 @@ class ChartMap(DashboardChart, Thread):
             lat_long_list.append(temp)
 
 
-        HeatMapWithTime(lat_long_list,radius=5,auto_play=True,position='bottomright').add_to(_map)
+        HeatMapWithTime(lat_long_list,radius=7,auto_play=True, position='bottomright').add_to(_map)
 
         return _map
 

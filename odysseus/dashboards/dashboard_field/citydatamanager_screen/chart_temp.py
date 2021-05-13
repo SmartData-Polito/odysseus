@@ -7,70 +7,88 @@ import pandas as pd
 import datetime
 
 import plotly.express as px
+import pymongo
 
 
 class ChartTemp(DashboardChart):
 
-    def __init__(self, data, title, subtitle, tipo="Altair", parametro='plate'):
+    def __init__(self, data, year, month, start, end, title, subtitle, tipo="Altair", parametro='plate'):
         super().__init__(title, name=title, subtitle=subtitle)
         self.data = data
+        self.temp_data = self.get_data()
         self.parametro=parametro
         self.tipo = tipo
-
-
-        min = datetime.datetime.fromisoformat(str(self.data['start_time'].min()))
-        max = datetime.datetime.fromisoformat(str(self.data['start_time'].max()))
+        self.year= year
+        self.month = month
+        self.startDay = start
+        self.endDay = end
         arg = [[    "selectbox", "Scegli il parametro", ['plate']], 
-                ["selectbox", "Scegli aggregazione", ["60Min", "2H", "1D"]]]
+                ["selectbox", "Scegli aggregazione", ["1H", "3H", "6H", "12H","1D", "2D", "3D"]]]
 
         self.widget_list= [partial(st_functional_columns, arg)]
 
-    @st.cache(allow_output_mutation=True)
-    def get_bookings_count(self, count_col, agg_freq_):
+    def get_bookings_count(self, agg_freq_):
 
-        df = self.data
-        plot_df = df[['start_time', count_col]].set_index('start_time').resample(
+        plot_df = self.temp_data.set_index('timestamp').resample(
             agg_freq_
-        ).count().asfreq(agg_freq_, fill_value=0)
+        ).sum().asfreq(agg_freq_, fill_value=0)
 
+        plot_df = plot_df.loc[self.startDay:self.endDay]
         fig = px.line(plot_df)
+        fig.update_layout(
+            xaxis_title="Time series",
+            yaxis_title="Number of Trips",
+            font=dict(
+                family="Courier New, monospace",
+                size=18,
+                color="MediumSlateBlue"
+            )
+        )
 
         return fig
 
-    @st.cache(allow_output_mutation=True)
     def get_bookings_by_hour(self):
 
-        #self.show_heading()
-        filtro = "start_hour"
-
-        df_busy = self.data.filter([filtro], axis=1)
-        df_busy["occurance"] = 1
-        most_busy_hour = df_busy.groupby(by=filtro).sum(["occurance"]).sort_values(by=["occurance"], ascending=[True])
-        most_busy_hour = most_busy_hour.reset_index()
-        fig = px.bar(most_busy_hour, x=filtro, y='occurance')
-
+        bar_plot = self.temp_data.groupby(self.temp_data.timestamp.dt.hour).N_trips.sum()
+        fig = px.bar(bar_plot)
+        fig.update_layout(
+            xaxis_title="Hour of the day",
+            yaxis_title="Number of trips",
+            legend_title="Legend Title",
+            font=dict(
+                family="Courier New, monospace",
+                size=18,
+                color="MediumSlateBlue"
+            )
+        )
         return fig
 
-        #st.plotly_chart(fig, use_container_width=True)
 
-
-    @st.cache(allow_output_mutation=True)
     def get_bubble_plot(self):
 
-        #self.show_heading()
-        df = self.data
-        df = df.groupby(['start_weekday','start_hour']).size().to_frame('counts').reset_index()
-        fig = px.scatter(df, y="start_weekday", x="start_hour", size="counts")
-
+        bubble_plot = self.temp_data
+        bubble_plot['dayOfWeek'] = self.temp_data.timestamp.dt.dayofweek
+        days = {0:'Mon',1:'Tue',2:'Wed',3:'Thu',4:'Fri', 5:'Sat',6:'Sun'}
+        bubble_plot['dayOfWeek'] = bubble_plot['dayOfWeek'].apply(lambda x: days[x])
+        bubble_plot['hour'] = self.temp_data.timestamp.dt.hour
+        fig = px.scatter(bubble_plot, y="dayOfWeek", x="hour", size="N_trips")
+        fig.update_layout(
+            xaxis_title="Hour of the day",
+            yaxis_title="Day Of the Week",
+            legend_title="Legend Title",
+            font=dict(
+                family="Courier New, monospace",
+                size=18,
+                color="MediumSlateBlue"
+            )
+        )
         return fig
-
-        #st.plotly_chart(fig, use_container_width=True)
 
 
     def show_bookings_count(self):
         self.show_heading()
         count_col, agg_freq_= self.show_widgets()[0]
-        fig = self.get_bookings_count(count_col, agg_freq_)
+        fig = self.get_bookings_count(agg_freq_)
         st.plotly_chart(fig, use_container_width=True)
 
     def show_bookings_by_hour(self):
@@ -82,3 +100,29 @@ class ChartTemp(DashboardChart):
         self.show_heading()
         fig = self.get_bubble_plot()
         st.plotly_chart(fig, use_container_width=True)
+
+    def get_data(self):
+        
+        pipeline = [
+                {'$project':
+                    {
+                        '_id':0,
+                        'stats':'$Stats'
+                    }
+                },
+                { '$unwind' : "$stats" },
+                { '$replaceRoot': { 'newRoot': "$stats" } },
+            #{'$group':{'_id':'$stats.timestamp','res':'$stats.N_trips'}}
+                {  
+                    '$project':{ 
+                        '_id':0, 
+                        'N_trips':1,
+                        'timestamp': 1
+                    }
+                },
+                
+            ]
+
+        res = pd.DataFrame(list(self.data.aggregate(pipeline)))
+        res['timestamp'] = res['timestamp'].apply(lambda x: datetime.datetime.utcfromtimestamp(x / 1000))
+        return res
