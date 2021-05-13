@@ -11,11 +11,12 @@ import geopandas as gpd
 
 import skmob
 from skmob.tessellation import tilers
+from bson import json_util
 
 
 HOST = 'mongodb://localhost:27017/'
 DATABASE = 'inter_test'
-COLLECTION = 'plots'
+COLLECTION = 'test'
 
 def set_path(api):
     ROOT_DIR = os.path.abspath(os.curdir)
@@ -26,10 +27,12 @@ def set_path(api):
     )
     return cdm_data_path
 
-def initialize_mongoDB(host,database,collection):
+
+def initialize_mongoDB(host=HOST,database=DATABASE,collection=COLLECTION):
     client = pm.MongoClient(host)
     db = client[database]
-    return db[collection]
+    col = db[collection]
+    return db,col
 
 def extract_params (body):
     cities = body["cities"]
@@ -87,44 +90,57 @@ def build_raw_answer(df,DEBUG=False):
             final_dict.update({index[0]:{index[1]:int(row["occurance"])}})
     if DEBUG:
         print(final_dict)
-    return final_dict
+    return final_dict 
 
 def build_raw_answer_hour(df,DEBUG=False):
     final_dict = {}
     prev_hour = -1
     prev_day = 0
     for index, row in df.iterrows():
+        #index[0] =year
+        #index[1] = month
+        #index[2] = day
+        #index[3] = hour
+        print("DAY: ",index)
         if index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() and index[2] in final_dict[index[0]][index[1]].keys():
-            if prev_day == index[2]:
-                if abs(prev_hour - index[3]) > 1:
-                    for _ in range(1, abs(prev_hour - index[3]) ):
-                        final_dict[index[0]][index[1]][index[2]].append(0)
-                else:
-                    final_dict[index[0]][index[1]][index[2]].append(int(row["occurance"]))  
-            elif abs(prev_day - index[2]) > 1:
-                for gg in range(1, abs(prev_day - index[2]) ):
-                    michael_jordan_zeros = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-                    final_dict[index[0]][index[1]].update({prev_day+gg:michael_jordan_zeros})
-            elif abs(prev_day - index[2]) == 1:
-                for _ in range(0, abs(prev_hour - 23)):
+            if index[2]!=1:
+                if len(final_dict[index[0]][index[1]][index[2]-1])!=24:
+                    print(final_dict[index[0]][index[1]][index[2]-1])
+                    a=1/0
+            if abs(prev_hour - index[3])> 1 and prev_day==index[2]:
+                for _ in range(1, abs(prev_hour - index[3]) ):
                     final_dict[index[0]][index[1]][index[2]].append(0)
-                for _ in range(0,index[2]):
-                    final_dict[index[0]][index[1]][index[2]].append(0)
+            # else:
+            #     final_dict[index[0]][index[1]][index[2]].append(int(row["occurance"]))  
             
-
         elif index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() :
-            final_dict[index[0]][index[1]].update({index[2]:[int(row["occurance"])]})
+            final_dict[index[0]][index[1]].update({index[2]:[]})
+            for _ in range(0, abs(23 - prev_hour)):
+                final_dict[index[0]][index[1]][prev_day].append(0)
+            for gg in range(1, abs(prev_day - index[2]) ):
+                michael_jordan_zeros = [0 for x in range(24)]
+                final_dict[index[0]][index[1]].update({prev_day+gg:michael_jordan_zeros})
+            for _ in range(0,index[3]):
+                final_dict[index[0]][index[1]][index[2]].append(0)
+            #final_dict[index[0]][index[1]][index[2]].append(int(row["occurance"]))
+
         elif index[0] in final_dict.keys() :
-            final_dict[index[0]].update({[index[1]]:{index[2]:[int(row["occurance"])]}})
+            final_dict[index[0]].update({index[1]:{index[2]:[]}})
+            for _ in range(0,index[3]):
+                final_dict[index[0]][index[1]][index[2]].append(0)
+            #final_dict[index[0]][index[1]][index[2]].append([int(row["occurance"])])
         else:
-            final_dict.update({index[0]:{index[1]:{}}})
+            final_dict.update({index[0]:{index[1]:{index[2]:[]}}})
+            for _ in range(0,index[3]):
+                final_dict[index[0]][index[1]][index[2]].append(0)
+        final_dict[index[0]][index[1]][index[2]].append(int(row["occurance"]))
         prev_hour = index[3]
         prev_day = index[2]
 
-    if 2017 in final_dict.keys():
-        print([ [len(final_dict[2017][y][x]) for x in final_dict[2017][y].keys() ] for y in final_dict[2017].keys()])
-
+    db,col = initialize_mongoDB()
+    id_object = col.insert_one(json.loads(json_util.dumps(final_dict)))
     return final_dict
+
 
 def retrieve_per_city(path,level="norm",datatype = "trips",aggregate_level="month",DEBUG=False):
     data = {}
@@ -306,3 +322,35 @@ def groupby_zone_ods(filepath):
     ).sum(["occurance"])
     
     return origin_counts, destination_counts
+
+
+def build_raw_answer_monthly_zone(df, DEBUG=False):
+
+    if all([c in df.columns for c in ['start_day', 'start_hour', 'origin_id']]):
+        df = df.drop(['start_day', 'start_hour'], axis=1)
+        df = df.groupby(
+                ['year', 'month', 'origin_id']
+            ).sum(["occurrance"])
+        
+    elif all([c in df.columns for c in ['end_day', 'end_hour', 'destination_id']]):
+        df = df.drop(['end_day', 'end_hour'], axis=1)
+        df = df.groupby(
+            ['year', 'month', 'destination_id']
+        ).sum(["occurance"])
+    else:
+        print('Errore')
+        
+    final_dict = {}
+    for index, row in df.iterrows():
+        value = row['occurrance']
+        
+        if index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() and index[2] in final_dict[index[0]][index[1]].keys():
+            final_dict[index[0]][index[1]][index[2]].append(0)
+        elif index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() :
+            final_dict[index[0]][index[1]].update({index[2]:[value]})
+        elif index[0] in final_dict.keys() :
+            final_dict[index[0]].update({index[1]:{index[2]:[value]}})
+        else:
+            final_dict.update({index[0]:{index[1]:{index[2]:[value]}}})
+            
+    return final_dict
