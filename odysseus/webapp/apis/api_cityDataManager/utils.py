@@ -5,6 +5,13 @@ import pandas as pd
 import pymongo as pm
 import json
 
+from shapely.geometry import Point, LineString, Polygon
+import geopandas as gpd
+
+
+import skmob
+from skmob.tessellation import tilers
+
 
 HOST = 'mongodb://localhost:27017/'
 DATABASE = 'inter_test'
@@ -207,3 +214,95 @@ def create_predefined_file(formato=["norm","raw"],DEBUG=False):
         )
         with open(filename, 'w+') as f:
             json.dump(summary, f) 
+
+
+def groupby_zone_ods(filepath):    
+    cols = ["start_time", "end_time", 'start_longitude', 'start_latitude', 'end_longitude', 'end_latitude']
+
+    df = pd.read_csv(filepath, usecols=cols)
+    
+    df['start_time'] = pd.to_datetime(df['start_time'],utc=True).dt.to_pydatetime()
+    df['end_time'] = pd.to_datetime(df['end_time'],utc=True).dt.to_pydatetime()
+
+    df['year'] = df['end_time'].dt.year
+    df['month'] = df['end_time'].dt.month
+    df["end_day"] = df['end_time'].dt.day
+    df["end_hour"] = df['end_time'].dt.hour
+
+    df['year'] = df['start_time'].dt.year
+    df['month'] = df['start_time'].dt.month
+    df["start_day"] = df['start_time'].dt.day
+    df["start_hour"] = df['start_time'].dt.hour
+
+    origin_df = df[['start_time', 'start_longitude', 'start_latitude']]
+    destination_df = df[['end_time', 'end_longitude', 'end_latitude']]
+    destination_df['year'] = destination_df['end_time'].dt.year
+    destination_df['month'] = destination_df['end_time'].dt.month
+    origin_df['year'] = origin_df['start_time'].dt.year
+    origin_df['month'] = origin_df['start_time'].dt.month
+
+    
+    tessellation = tilers.tiler.get("squared", base_shape="Turin, Italy", meters=500)
+
+    trips_origins = gpd.GeoDataFrame(
+        origin_df, geometry=gpd.points_from_xy(origin_df.start_longitude, origin_df.start_latitude))
+    trips_origins.crs = "epsg:4326"
+
+
+    trips_destinations = gpd.GeoDataFrame(
+        destination_df, geometry=gpd.points_from_xy(destination_df.end_longitude, destination_df.end_latitude))
+    trips_destinations.crs = "epsg:4326"
+
+    tessellation["tile_ID"] = tessellation.index.values
+
+    trips_origins = gpd.sjoin(
+        trips_origins,
+        tessellation,
+        how='left',
+        op='intersects'
+    )
+    trips_destinations = gpd.sjoin(
+        trips_destinations,
+        tessellation,
+        how='left',
+        op='intersects'
+    )
+
+    df['destination_id'] = trips_destinations.tile_ID
+    df['origin_id'] = trips_origins.tile_ID
+
+    # valid zones
+    count_threshold=0
+
+    origin_zones_count = df.origin_id.value_counts()
+    dest_zones_count = df.destination_id.value_counts()
+
+
+    valid_origin_zones = origin_zones_count[(origin_zones_count > count_threshold)]
+    valid_dest_zones = dest_zones_count[(dest_zones_count > count_threshold)]
+
+
+    valid_zones = valid_origin_zones.index.intersection(
+                    valid_dest_zones.index
+            ).astype(int)
+
+    tessellation = tessellation.loc[valid_zones]
+
+    df = df.loc[
+                (df.origin_id.isin(valid_zones)) & (
+                    df.destination_id.isin(valid_zones)
+                )]
+
+    origin_counts = df [['year', 'month', 'start_day', 'start_hour', 'origin_id']]
+    origin_counts['occurrance'] = 1
+    origin_counts = origin_counts.groupby(
+        ['year', 'month', 'start_day', 'start_hour', 'origin_id'], as_index=False
+    ).sum(["occurance"])
+    
+    destination_counts = df [['year', 'month', 'end_day', 'end_hour', 'destination_id']]
+    destination_counts['occurrance'] = 1
+    destination_counts = destination_counts.groupby(
+        ['year', 'month', 'end_day', 'end_hour', 'destination_id'], as_index=False
+    ).sum(["occurance"])
+    
+    return origin_counts, destination_counts
