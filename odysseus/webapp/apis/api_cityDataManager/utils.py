@@ -58,6 +58,20 @@ def groupby_month(filepath):
     ans = build_raw_answer(count_df)
     return ans
 
+def groupby_day_hour(filepath):
+    print("ERRORE: ",filepath)
+    cols = ["start_time"]
+    df = pd.read_csv(filepath,usecols=cols)
+    df['start_time'] = pd.to_datetime(df['start_time'],utc=True).dt.to_pydatetime()
+    df["occurance"] = 1
+    df["year"] = df['start_time'].dt.year
+    df["month"] = df['start_time'].dt.month
+    df["day"] = df['start_time'].dt.day
+    df["hour"] = df['start_time'].dt.hour
+    count_df = df.groupby(["year","month","day","hour"]).sum(["occurance"])
+    ans = build_raw_answer_hour(count_df)
+    return ans
+
 def build_raw_answer(df,DEBUG=False):
     final_dict = {}
     for index, row in df.iterrows():
@@ -69,7 +83,23 @@ def build_raw_answer(df,DEBUG=False):
         print(final_dict)
     return final_dict
 
-def retrieve_per_city(path,level="norm",datatype = "trips",DEBUG=False):
+def build_raw_answer_hour(df,DEBUG=False):
+    final_dict = {}
+    for index, row in df.iterrows():
+        if index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() and index[2] in final_dict[index[0]][index[1]].keys():
+            final_dict[index[0][index[1]][index[2]]].append(int(row["occurance"]))
+            print(final_dict)
+        elif index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() :
+            final_dict[index[0]][index[1]].update({index[2]:[int(row["occurance"])]})
+        elif index[0] in final_dict.keys() :
+            final_dict[index[0]].update({[index[1]]:{index[2]:[int(row["occurance"])]}})
+        else:
+            final_dict.update({index[0]:{index[1]:{}}})
+    if DEBUG:
+        print(final_dict)
+    return final_dict
+
+def retrieve_per_city(path,level="norm",datatype = "trips",aggregate_level="month",DEBUG=False):
     data = {}
     if DEBUG:
         print("PATH",path)
@@ -83,7 +113,8 @@ def retrieve_per_city(path,level="norm",datatype = "trips",DEBUG=False):
                 if DEBUG:
                     print("FILEPATH: ",filepath)
                 data_source_id,year,month = extract_format(filepath)
-                number_trips = count_trips(filepath)
+                if aggregate_level =="month":
+                    number_trips = count_trips(filepath)
                 #if data source already added append to current data structure
                 if data_source_id in data.keys():
                     # if year is not already present append dictionary
@@ -98,9 +129,29 @@ def retrieve_per_city(path,level="norm",datatype = "trips",DEBUG=False):
                 if DEBUG:
                     print("FILEPATH: ",filepath)
                 data_source_id,_,city = extract_format(filepath)
-
-                months_collects = groupby_month(filepath)
+                if aggregate_level=="month":
+                    months_collects = groupby_month(filepath)
                 data[data_source_id] = months_collects
+    if DEBUG:
+        print(data)
+    return data
+
+def retrieve_per_city_per_hour(city,path,level="od_trips",datatype = "trips",data_source_id="big_data_db",DEBUG=False):
+    data = {}
+    if DEBUG:
+        print("PATH",path)
+    for subdir, dirs, files in os.walk(path):
+        for f in files:
+            filepath = os.path.join(subdir,f)
+            if os.path.join(level,datatype,data_source_id) not in filepath:
+                continue
+
+            elif level=="od_trips" and filepath.endswith(".csv"):
+                if DEBUG:
+                    print("FILEPATH: ",filepath)
+                #data_source_id,_,city = extract_format(filepath)
+                day_collect = groupby_day_hour(filepath)
+                data[data_source_id] = day_collect
     if DEBUG:
         print(data)
     return data
@@ -113,6 +164,17 @@ def summary_available_data(level='norm',api="city_data_manager",DEBUG=False):
     avalaible_cities = [os.path.basename(os.path.normpath(c)) for c in list_subfolders_with_paths]
     for paths,city in zip(list_subfolders_with_paths,avalaible_cities):
         data = retrieve_per_city(paths,level=level,DEBUG=DEBUG)
+        summary[city] = data
+    return summary
+
+def summary_available_data_per_hour(level='od_trips',api="city_data_manager",DEBUG=False):
+    summary = {}
+    # Get list of cities
+    path = set_path(api)
+    list_subfolders_with_paths = [f.path for f in os.scandir(path) if f.is_dir()]
+    avalaible_cities = [os.path.basename(os.path.normpath(c)) for c in list_subfolders_with_paths]
+    for paths,city in zip(list_subfolders_with_paths,avalaible_cities):
+        data = retrieve_per_city_per_hour(city,paths,level=level,DEBUG=DEBUG)
         summary[city] = data
     return summary
 
