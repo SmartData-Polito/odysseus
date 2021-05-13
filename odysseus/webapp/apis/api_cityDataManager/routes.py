@@ -12,6 +12,10 @@ from flask_cors import CORS
 api_cdm = Blueprint('api_cdm', __name__)
 CORS(api_cdm)
 
+HOST = 'mongodb://localhost:27017/'
+DATABASE = 'inter_test'
+COLLECTION = 'bookings_per_hour'
+
 @api_cdm.route('/run_cdm',methods=['POST'])
 def run_cdm():
     """
@@ -26,10 +30,22 @@ def run_cdm():
         years = []
         months = []
         data_source_ids = []
-        cities.append(form_inputs["cities"])
-        years.append(form_inputs["years"])
-        months.append(form_inputs["months"])
-        data_source_ids.append(form_inputs["data_source_ids"])
+        if type(form_inputs["cities"])==list:
+            cities = form_inputs["cities"]
+        else:
+            cities.append(form_inputs["cities"])
+        if type(form_inputs["years"])==list:
+            years = form_inputs["years"]
+        else:
+            years.append(form_inputs["years"])
+        if type(form_inputs["months"])==list:
+            months = form_inputs["months"]
+        else:
+            months.append(form_inputs["months"])
+        if type(form_inputs["data_source_ids"])==list:
+            data_source_ids = form_inputs["data_source_ids"]
+        else:
+            data_source_ids.append(form_inputs["data_source_ids"])
 
         print("EXTRACTED DATA",cities,years,months,data_source_ids)
 
@@ -50,7 +66,7 @@ def run_cdm():
     except Exception as e:
         print(e)
         payload =   {
-                "error": "something went wrong"
+                "error": "something went wrong "
                 }
         code = 500
         response = make_response(jsonify(payload), code)
@@ -59,7 +75,7 @@ def run_cdm():
         response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
         response.status_code = 500
     return response
-
+    # Collect from mongo
     # collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
     # param_id="placeholder"
     # query = {"_id":param_id}
@@ -83,18 +99,25 @@ def available_data():
 
 
 @api_cdm.route('/get-cdm-data',methods=['GET'])
-def get_data(graph = 'all'):
+def get_data():
     param_id = request.args.get("id",default = 'TEST')
     graph = request.args.get("graph",default = 'all')
-    
+    month = json.loads(request.args.get("month",default = "[8]"))
+    print(month)
+    print(type(month))
     collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
-    
+
+    query = [{"$match": {"month":{"$in":month}}},{"$project": {"year":1,"month":1,"day":1, "count": 1,"_id": 0}},
+            {"$sort":{"year":1,"month":1,"day":1}}]
+    results = list(collection.aggregate(query))
+    '''
     if graph == 'all':
         query = {"_id":param_id}
         results = list(collection.find(query))
     else:
         query = [{"$match": {"_id":param_id}}, {"$project": {"_id" : "$_id", graph: 1}}]
         results = list(collection.aggregate(query))
+    '''
     print(results)
     return json.dumps(list(results))
 
