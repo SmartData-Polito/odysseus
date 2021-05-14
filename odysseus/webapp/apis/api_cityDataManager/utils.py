@@ -68,7 +68,7 @@ def groupby_month(filepath):
     ans = build_raw_answer(count_df)
     return ans
 
-def groupby_day_hour(filepath):
+def groupby_day_hour(filepath,city):
     cols = ["start_time"]
     df = pd.read_csv(filepath,usecols=cols)
     df['start_time'] = pd.to_datetime(df['start_time'],utc=True).dt.to_pydatetime()
@@ -78,7 +78,7 @@ def groupby_day_hour(filepath):
     df["day"] = df['start_time'].dt.day
     df["hour"] = df['start_time'].dt.hour
     count_df = df.groupby(["year","month","day","hour"]).sum(["occurance"])
-    ans = build_raw_answer_hour(count_df)
+    ans = build_raw_answer_hour(count_df,city)
     return ans
 
 def build_raw_answer(df,DEBUG=False):
@@ -92,7 +92,7 @@ def build_raw_answer(df,DEBUG=False):
         print(final_dict)
     return final_dict 
 
-def build_raw_answer_hour(df,DEBUG=False):
+def build_raw_answer_hour(df,city,DEBUG=False):
     final_dict = {}
     prev_hour = -1
     prev_day = 0
@@ -136,7 +136,7 @@ def build_raw_answer_hour(df,DEBUG=False):
         final_dict[index[0]][index[1]][index[2]].append(int(row["occurance"]))
         prev_hour = index[3]
         prev_day = index[2]
-
+    final_dict.update({"city":city})
     db,col = initialize_mongoDB()
     id_object = col.insert_one(json.loads(json_util.dumps(final_dict)))
     return final_dict
@@ -193,7 +193,7 @@ def retrieve_per_city_per_hour(city,path,level="od_trips",datatype = "trips",dat
                 if DEBUG:
                     print("FILEPATH: ",filepath)
                 #data_source_id,_,city = extract_format(filepath)
-                day_collect = groupby_day_hour(filepath)
+                day_collect = groupby_day_hour(filepath,city)
                 data[data_source_id] = day_collect
     if DEBUG:
         print(data)
