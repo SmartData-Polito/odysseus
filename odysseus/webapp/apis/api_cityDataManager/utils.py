@@ -34,6 +34,11 @@ def initialize_mongoDB(host=HOST,database=DATABASE,collection=COLLECTION):
     col = db[collection]
     return db,col
 
+def upload_to_mongoDB(document,host=HOST,database=DATABASE,collection=COLLECTION):
+    db,col = initialize_mongoDB(host=host,database=database,collection=collection)
+    id_object = col.insert_one(json.loads(json_util.dumps(document)))
+    return id_object
+
 def extract_params (body):
     cities = body["cities"]
     years = body["years"]
@@ -93,42 +98,44 @@ def build_raw_answer(df,DEBUG=False):
     return final_dict 
 
 def build_raw_answer_hour(df,city,DEBUG=False):
+    # Assume the df contains value for a single month
     final_dict = {}
+    document = {"city":city}
     prev_hour = -1
     prev_day = 0
+    year = 0
+    month = 0
     for index, row in df.iterrows():
+        year = index[0]
+        month = index[1]
         #index[0] =year
         #index[1] = month
         #index[2] = day
         #index[3] = hour
         print("DAY: ",index)
         if index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() and index[2] in final_dict[index[0]][index[1]].keys():
-            if index[2]!=1:
-                if len(final_dict[index[0]][index[1]][index[2]-1])!=24:
-                    print(final_dict[index[0]][index[1]][index[2]-1])
-                    a=1/0
+            #If there is a gap fill the gap
             if abs(prev_hour - index[3])> 1 and prev_day==index[2]:
                 for _ in range(1, abs(prev_hour - index[3]) ):
                     final_dict[index[0]][index[1]][index[2]].append(0)
-            # else:
-            #     final_dict[index[0]][index[1]][index[2]].append(int(row["occurance"]))  
-            
         elif index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() :
+            #Start a new day initialize it
             final_dict[index[0]][index[1]].update({index[2]:[]})
+            #Fill previous day if not complete 24 hour
             for _ in range(0, abs(23 - prev_hour)):
                 final_dict[index[0]][index[1]][prev_day].append(0)
+            #Fill empty days
             for gg in range(1, abs(prev_day - index[2]) ):
-                michael_jordan_zeros = [0 for x in range(24)]
-                final_dict[index[0]][index[1]].update({prev_day+gg:michael_jordan_zeros})
+                empty_day = [0 for x in range(24)]
+                final_dict[index[0]][index[1]].update({prev_day+gg:empty_day})
+            #Fill current day up to first hour with data
             for _ in range(0,index[3]):
                 final_dict[index[0]][index[1]][index[2]].append(0)
-            #final_dict[index[0]][index[1]][index[2]].append(int(row["occurance"]))
-
-        elif index[0] in final_dict.keys() :
-            final_dict[index[0]].update({index[1]:{index[2]:[]}})
-            for _ in range(0,index[3]):
-                final_dict[index[0]][index[1]][index[2]].append(0)
-            #final_dict[index[0]][index[1]][index[2]].append([int(row["occurance"])])
+            # The previous day is complete -> upload to mongo
+            for gg in range(0, abs(prev_day - index[2])):
+                document.update({"year":year,"month":month,"day":prev_day+gg,"n_booking":final_dict[index[0]][index[1]][prev_day+gg]})
+                id=upload_to_mongoDB(document)
+                document = {"city":city}
         else:
             final_dict.update({index[0]:{index[1]:{index[2]:[]}}})
             for _ in range(0,index[3]):
@@ -136,9 +143,10 @@ def build_raw_answer_hour(df,city,DEBUG=False):
         final_dict[index[0]][index[1]][index[2]].append(int(row["occurance"]))
         prev_hour = index[3]
         prev_day = index[2]
-    final_dict.update({"city":city})
-    db,col = initialize_mongoDB()
-    id_object = col.insert_one(json.loads(json_util.dumps(final_dict)))
+    document.update({"year":year,"month":month,"day":prev_day,"n_booking":final_dict[index[0]][index[1]][prev_day]})
+    id=upload_to_mongoDB(document)
+    # db,col = initialize_mongoDB()
+    # id_object = col.insert_one(json.loads(json_util.dumps(document)))
     return final_dict
 
 
@@ -436,6 +444,6 @@ def build_raw_answer_monthly_zone(df, DEBUG=False):
         else:
             final_dict.update({index[0]:{index[1]:{index[2]:value}}})
     
-    #db,col = initialize_mongoDB()
-    #id_object = col.insert_one(json.loads(json_util.dumps(final_dict)))
+    db,col = initialize_mongoDB()
+    id_object = col.insert_one(json.loads(json_util.dumps(final_dict)))
     return final_dict
