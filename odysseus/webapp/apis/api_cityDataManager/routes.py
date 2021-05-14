@@ -103,6 +103,14 @@ def test():
     summary = summary_available_data_per_hour(DEBUG=False)
     return jsonify(summary)
 
+
+@api_cdm.route('/zones_test',methods=['GET'])
+def zone_test():
+    print("Return available data per cities")
+    summary = summary_available_data_per_zone(DEBUG=False)
+    return jsonify(summary)
+
+
 @api_cdm.route('/get-cdm-data',methods=['GET'])
 def get_data():
     param_id = request.args.get("id",default = 'TEST')
