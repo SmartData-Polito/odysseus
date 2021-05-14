@@ -4,7 +4,7 @@ import random
 import pandas as pd
 import pymongo as pm
 import json
-
+import numpy as np
 from shapely.geometry import Point, LineString, Polygon
 import geopandas as gpd
 
@@ -231,6 +231,74 @@ def create_predefined_file(formato=["norm","raw"],DEBUG=False):
         with open(filename, 'w+') as f:
             json.dump(summary, f) 
 
+# *******************************************************
+## SPACE STATS 
+# ********************************************************
+
+def summary_available_data_per_zone(level='od_trips',api="city_data_manager",DEBUG=False):
+    summary = {}
+    # Get list of cities
+    path = set_path(api)
+    list_subfolders_with_paths = [f.path for f in os.scandir(path) if f.is_dir()]
+    avalaible_cities = [os.path.basename(os.path.normpath(c)) for c in list_subfolders_with_paths]
+    for paths,city in zip(list_subfolders_with_paths,avalaible_cities):
+        data = retrieve_per_city_per_zone(city,paths,level=level,DEBUG=DEBUG)
+        summary[city] = data
+    return summary
+
+def retrieve_per_city_per_zone(city,path,level="od_trips",datatype = "trips",data_source_id="big_data_db",DEBUG=False):
+    data = {}
+    if DEBUG:
+        print("PATH",path)
+    for subdir, dirs, files in os.walk(path):
+        for f in files:
+            filepath = os.path.join(subdir,f)
+            if os.path.join(level,datatype,data_source_id) not in filepath:
+                continue
+
+            elif level=="od_trips" and filepath.endswith(".csv"):
+                if DEBUG:
+                    print("FILEPATH: ",filepath)
+                day_collect = groupby_zone_ods(filepath)
+                data[data_source_id] = day_collect
+    if DEBUG:
+        print(data)
+    return data
+
+def get_city_grid_as_gdf(total_bounds, crs, bin_side_length):
+    x_min, y_min, x_max, y_max = total_bounds
+    width = bin_side_length / 111320 * 1.2
+    height = bin_side_length / 111320 * 1.2
+    # width = bin_side_length / 0.706
+    # height = bin_side_length / 0.706
+    rows = int(np.ceil((y_max - y_min) / height))
+    cols = int(np.ceil((x_max - x_min) / width))
+    print(rows, cols)
+    x_left = x_min
+    x_right = x_min + width
+    y_top = y_max
+    y_bottom = y_max - height
+    polygons = []
+    for j in range(cols):
+        x_left = x_min
+        x_right = x_min + width
+        for i in range(rows):
+            polygons.append(
+                Polygon([
+                    (x_left, y_top),
+                    (x_right, y_top),
+                    (x_right, y_bottom),
+                    (x_left, y_bottom)]))
+            x_left = x_left + width
+            x_right = x_right + width
+        y_top = y_top - height
+        y_bottom = y_bottom - height
+
+    grid = gpd.GeoDataFrame({"geometry": polygons})
+
+    grid.crs = crs
+
+    return grid
 
 def groupby_zone_ods(filepath):    
     cols = ["start_time", "end_time", 'start_longitude', 'start_latitude', 'end_longitude', 'end_latitude']
@@ -258,8 +326,20 @@ def groupby_zone_ods(filepath):
     origin_df['month'] = origin_df['start_time'].dt.month
 
     
-    tessellation = tilers.tiler.get("squared", base_shape="Turin, Italy", meters=500)
-
+    tessellation = get_city_grid_as_gdf(
+            (
+                min(origin_df.start_longitude.min(), destination_df.end_longitude.min(),
+                    origin_df.start_longitude.min(), destination_df.end_longitude.min()),
+                min(origin_df.start_latitude.min(), destination_df.end_latitude.min(),
+                   origin_df.start_latitude.min(), destination_df.end_latitude.min()),
+                max(origin_df.start_longitude.max(), destination_df.end_longitude.max(),
+                  origin_df.start_longitude.max(), destination_df.end_longitude.max()),
+                max(origin_df.start_latitude.max(), destination_df.end_latitude.max(),
+                    origin_df.start_latitude.max(), destination_df.end_latitude.max())
+            ),
+            "epsg:4326",
+            500
+        )
     trips_origins = gpd.GeoDataFrame(
         origin_df, geometry=gpd.points_from_xy(origin_df.start_longitude, origin_df.start_latitude))
     trips_origins.crs = "epsg:4326"
@@ -321,8 +401,11 @@ def groupby_zone_ods(filepath):
         ['year', 'month', 'end_day', 'end_hour', 'destination_id'], as_index=False
     ).sum(["occurance"])
     
-    return origin_counts, destination_counts
+    og_ans = build_raw_answer_monthly_zone(origin_counts)
+    dest_ans = build_raw_answer_monthly_zone(destination_counts)
 
+    
+    return og_ans, dest_ans
 
 def build_raw_answer_monthly_zone(df, DEBUG=False):
 
@@ -342,15 +425,17 @@ def build_raw_answer_monthly_zone(df, DEBUG=False):
         
     final_dict = {}
     for index, row in df.iterrows():
-        value = row['occurrance']
+        value = int(row['occurrance'])
         
         if index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() and index[2] in final_dict[index[0]][index[1]].keys():
             final_dict[index[0]][index[1]][index[2]].append(0)
         elif index[0] in final_dict.keys() and index[1] in final_dict[index[0]].keys() :
-            final_dict[index[0]][index[1]].update({index[2]:[value]})
+            final_dict[index[0]][index[1]].update({index[2]:value})
         elif index[0] in final_dict.keys() :
-            final_dict[index[0]].update({index[1]:{index[2]:[value]}})
+            final_dict[index[0]].update({index[1]:{index[2]:value}})
         else:
-            final_dict.update({index[0]:{index[1]:{index[2]:[value]}}})
-            
+            final_dict.update({index[0]:{index[1]:{index[2]:value}}})
+    
+    #db,col = initialize_mongoDB()
+    #id_object = col.insert_one(json.loads(json_util.dumps(final_dict)))
     return final_dict
