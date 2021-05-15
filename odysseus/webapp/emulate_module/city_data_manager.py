@@ -11,6 +11,7 @@ from odysseus.city_data_manager.city_geo_trips.kansas_city_geo_trips import Kans
 from odysseus.city_data_manager.city_geo_trips.chicago_geo_trips import ChicagoGeoTrips
 from odysseus.city_data_manager.city_geo_trips.calgary_geo_trips import CalgaryGeoTrips
 from odysseus.webapp.apis.api_cityDataManager.data_transormer_cdm.transformer_cdm import DataTransformer
+from odysseus.webapp.apis.api_cityDataManager.utils import *
 
 class CityDataManager():
     def __init__(self,cities=["Torino"],years=[2017],months=["10","11"],data_source_ids=["big_data_db"]):
@@ -58,5 +59,11 @@ class CityDataManager():
                         geo_trips_ds.get_trips_od_gdfs()
                         geo_trips_ds.save_points_data()
                         geo_trips_ds.save_trips()
-                        self.dt.save_to_db(city,data_source_id, year, month,filter_list=["general_sum"])
+                        #self.dt.save_to_db(city,data_source_id, year, month,filter_list=["n_bookings"])
+                        cdm_path = set_path("city_data_manager")
+                        filepath = os.path.join(
+                            cdm_path,
+                            city, "od_trips","trips",data_source_id, f"{year}_{month}","trips.csv"
+                        )
+                        groupby_day_hour(filepath,city)
         print(datetime.datetime.now(), "Done")

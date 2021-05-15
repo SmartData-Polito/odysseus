@@ -14,7 +14,7 @@ CORS(api_cdm)
 
 HOST = 'mongodb://localhost:27017/'
 DATABASE = 'inter_test'
-COLLECTION = 'bookings_per_hour'
+COLLECTION = 'booking_duration'
 
 @api_cdm.route('/run_cdm',methods=['POST'])
 def run_cdm():
@@ -115,13 +115,16 @@ def zone_test():
 def get_data():
     param_id = request.args.get("id",default = 'TEST')
     graph = request.args.get("graph",default = 'all')
+    city = request.args.get("city",default = "Torino")
+    year = json.loads(request.args.get("year",default = "[2017]"))
     month = json.loads(request.args.get("month",default = "[8]"))
-    print(month)
+    print(city," ",year,"-",month)
     print(type(month))
-    collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
-
-    query = [{"$match": {"month":{"$in":month}}},{"$project": {"year":1,"month":1,"day":1, "count": 1,"_id": 0}},
-            {"$sort":{"year":1,"month":1,"day":1}}]
+    print(type(city))
+    print(type(year))
+    _,collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
+    print(collection)
+    query = [{"$match": {"city":str(city),"year":{"$in":year},"month":{"$in":month}}},{"$project": {"city":1,"year":1,"month":1,"day":1, "n_booking": 1,"avg_duration":1,"_id": 0}},{"$sort":{"year":1,"month":1,"day":1}}]
     results = list(collection.aggregate(query))
     '''
     if graph == 'all':

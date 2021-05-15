@@ -4,10 +4,12 @@ import pandas as pd
 import plotly.express as px
 import pymongo as pm
 import datetime
+from bson import json_util
+import json
 
 HOST = 'mongodb://localhost:27017/'
 DATABASE = 'inter_test'
-COLLECTION = 'bookings_per_hour'
+COLLECTION = 'MATTEOTEST'
 
 def set_path():
     ROOT_DIR = os.path.abspath(os.curdir) 
@@ -28,6 +30,11 @@ def initialize_mongoDB(host=HOST,database=DATABASE,collection=COLLECTION):
 def insert_documents_db(collection,dict_object):
     print(dict_object)
     id_object = collection.insert_one(dict_object)
+    return id_object
+
+def upload_to_mongoDB(document,host=HOST,database=DATABASE,collection=COLLECTION):
+    _,col = initialize_mongoDB(host=host,database=database,collection=collection)
+    id_object = col.insert_one(json.loads(json_util.dumps(document)))
     return id_object
 
 class DataTransformer:
@@ -88,7 +95,7 @@ class DataTransformer:
             avg_duration = df_duration.groupby(by="start_hour").mean(["duration"]).sort_values(by=["start_hour"], ascending=[True])
             avg_duration = avg_duration.reset_index()
 
-        elif filter_type == "general_sum":
+        elif filter_type == "n_bookings":
             generaldf = df.filter(["start_time"],axis=1)
             #print (generaldf)
             generaldf['starting_date'] = generaldf['start_time'].apply(lambda x:  datetime.datetime.strptime(x,'%Y-%m-%d %H:%M:%S%z'))
@@ -99,7 +106,7 @@ class DataTransformer:
         #print(transformed)
         return transformed
 
-    def save_to_db (self,city,data_source, year, month, data_type_id="trips",filetype=".csv",data_steps_id="norm",filter_list = ["general_sum","most_used_cars","busy_hours","avg_duration"]):
+    def save_to_db (self,city,data_source, year, month, data_type_id="trips",filetype=".csv",data_steps_id="norm",filter_list = ["n_bookings","most_used_cars","busy_hours","avg_duration"]):
         print("start data transformer")
         db,col = initialize_mongoDB()
         dt = DataTransformer()
@@ -135,4 +142,4 @@ class DataTransformer:
                 prev_day = current_day
                 prev_year = current_year
 
-       # insert_documents_db(col,data_collected)
+        insert_documents_db(col,data_collected)
