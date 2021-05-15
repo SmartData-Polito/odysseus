@@ -14,7 +14,7 @@ import datetime
 from functools import partial
 import streamlit as st
 from streamlit.report_thread import add_report_ctx
-import pymongo
+import pymongo as pm
 
 
 class ScreenDataManager(DashboardScreen):
@@ -32,22 +32,24 @@ class ScreenDataManager(DashboardScreen):
 
         self.temp_data = self.get_temp_collection()
 
-        timestamp_list = self.temp_data.find({}, {'Stats.timestamp':1, '_id':0})#.limit(1)
-        #last = coll.find({}, {'day':1, '_id':0}).sort('day', -1).limit(1)
-        date_list = [datetime.datetime.utcfromtimestamp(x['timestamp']/1000) for x in timestamp_list[0]['Stats']]
+        _list = self.temp_data.find({}, {'year':1, 'month': 1, 'day':1, '_id':0})#last = coll.find({}, {'day':1, '_id':0}).sort('day', -1).limit(1)
+        date_list = [datetime.datetime(x['year'], x['month'], x['day']) for x in _list]
         _min = min(date_list)
         _max= max(date_list)
-
-        #args = [["slider", "Va che bello questo slider", _min, max, (_min, max)]]
 
         self.widget_list = [partial(st.slider, "slider test", _min, _max, (_min, _max))]
     
     @st.cache(allow_output_mutation=True)
     def get_temp_collection(self):
-        client = pymongo.MongoClient("localhost", 27017)
-        mongo_db = client["odysseus"]
-        collection = mongo_db['time_stats']
-        return collection
+
+        HOST = 'mongodb://localhost:27017/'
+        DATABASE = 'inter_test'
+        COLLECTION = 'test'
+
+        client = pm.MongoClient(HOST)
+        db = client[DATABASE]
+        col = db[COLLECTION]
+        return col
 
     def show_charts(self):
 
