@@ -36,7 +36,6 @@ def run_cdm():
     }
 
     """
-    # data received {'formData': {'cities': 'Milano', 'data_source_ids': 'big_data_db', 'years': '2016', 'months': '10'}}
     try:
         data = request.get_json(force=True)
         print("data received from the form", data)
