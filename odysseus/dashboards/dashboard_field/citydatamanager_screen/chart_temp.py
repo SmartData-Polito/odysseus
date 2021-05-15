@@ -29,7 +29,7 @@ class ChartTemp(DashboardChart):
 
     def get_bookings_count(self, agg_freq_):
 
-        plot_df = self.temp_data.set_index('timestamp').resample(
+        plot_df = self.temp_data.set_index('date').resample(
             agg_freq_
         ).sum().asfreq(agg_freq_, fill_value=0)
 
@@ -49,7 +49,7 @@ class ChartTemp(DashboardChart):
 
     def get_bookings_by_hour(self):
 
-        bar_plot = self.temp_data.groupby(self.temp_data.timestamp.dt.hour).N_trips.sum()
+        bar_plot = self.temp_data.groupby(self.temp_data.date.dt.hour).n_bookings.sum()
         fig = px.bar(bar_plot)
         fig.update_layout(
             xaxis_title="Hour of the day",
@@ -67,11 +67,11 @@ class ChartTemp(DashboardChart):
     def get_bubble_plot(self):
 
         bubble_plot = self.temp_data
-        bubble_plot['dayOfWeek'] = self.temp_data.timestamp.dt.dayofweek
+        bubble_plot['dayOfWeek'] = self.temp_data.date.dt.dayofweek
         days = {0:'Mon',1:'Tue',2:'Wed',3:'Thu',4:'Fri', 5:'Sat',6:'Sun'}
         bubble_plot['dayOfWeek'] = bubble_plot['dayOfWeek'].apply(lambda x: days[x])
-        bubble_plot['hour'] = self.temp_data.timestamp.dt.hour
-        fig = px.scatter(bubble_plot, y="dayOfWeek", x="hour", size="N_trips")
+        bubble_plot['hour'] = self.temp_data.date.dt.hour
+        fig = px.scatter(bubble_plot, y="dayOfWeek", x="hour", size="n_bookings")
         fig.update_layout(
             xaxis_title="Hour of the day",
             yaxis_title="Day Of the Week",
@@ -107,22 +107,27 @@ class ChartTemp(DashboardChart):
                 {'$project':
                     {
                         '_id':0,
-                        'stats':'$Stats'
                     }
                 },
-                { '$unwind' : "$stats" },
-                { '$replaceRoot': { 'newRoot': "$stats" } },
-            #{'$group':{'_id':'$stats.timestamp','res':'$stats.N_trips'}}
-                {  
-                    '$project':{ 
-                        '_id':0, 
-                        'N_trips':1,
-                        'timestamp': 1
-                    }
+                { 
+                    '$unwind' :  {
+                                'path': "$n_bookings",
+                                'includeArrayIndex': "hour"
+                            }
                 },
-                
+                {
+                    '$project':
+                    { 
+                        'date': {
+                                '$dateFromParts': {
+                        'year' : '$year', 'month' : '$month', 'day' : '$day', 'hour' : '$hour'
+                                }
+                        },
+                        'n_bookings':1
+                    
+                    }
+                }
             ]
 
         res = pd.DataFrame(list(self.data.aggregate(pipeline)))
-        res['timestamp'] = res['timestamp'].apply(lambda x: datetime.datetime.utcfromtimestamp(x / 1000))
         return res

@@ -9,8 +9,8 @@ from shapely.geometry import Point, LineString, Polygon
 import geopandas as gpd
 
 
-import skmob
-from skmob.tessellation import tilers
+# import skmob
+# from skmob.tessellation import tilers
 from bson import json_util
 
 
