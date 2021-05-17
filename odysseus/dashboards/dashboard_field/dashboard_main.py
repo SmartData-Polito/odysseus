@@ -40,11 +40,17 @@ class DashboardMain(DashboardField):
         ym_dir = os.listdir( ym_path )
         
         splitList=set([item.split(".")[0] for item in ym_dir])
+        print(splitList)
 
         years = set([item.split("_")[0] for item in splitList])
         year = st.sidebar.selectbox("Scegli l'anno", list(years))
+        print(splitList)
+        print(type(splitList))
+        # {'2017_4', '2017_8', '2017_7', '2017_5', '2017_9', '2017_11', '2018_1', '2016_12', '2017_12', '2017_10'}
 
-        months = set([item.split(year+"_")[1] for item in splitList])
+        
+        months = set([item.split("_")[1] for item in splitList if item.split("_")[0] == year])
+        months = sorted(months)
         month = st.sidebar.selectbox("Scegli l'mese", list(months))
         
         ret = [name, city, month, year, db]
