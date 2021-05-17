@@ -61,36 +61,51 @@ def run_dm():
         print("data received from the form", data)
 
 
-        # {'values': 
-        #     cities=["Torino", "Milano", "Vancouver"],         
-        #      data_source_ids=["big_data_db"],
-        #      sim_techniques=["eventG"],
-        #      bin_side_lengths=["500"],
-        #      zones_factors=["1"],
-        #      kde_bandwidths=["1"],
-        #      train_range=["2017", "10", "2017", "10"],
-        #     test_range=["2017", "11", "2017", "11"],
-        # }
+        {'values': 
+            {'city': 'Torino', 
+            'datasource': 'big_data_db', 
+            'datasources': [{'value': 'big_data_db', 'label': 'big_data_db'}], 
+            'year': 2017, 
+            'allYears': [{'value': '2016', 'label': '2016'}, {'value': '2017', 'label': '2017'}, {'value': '2018', 'label': '2018'}], 
+            'yearTest': 2017, 
+            'allYearsTest': [{'value': '2017', 'label': '2017'}, {'value': '2018', 'label': '2018'}], 
+            'month': 4, 
+            'allMonths': [{'value': '4', 'label': '4'}, {'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
+            'endMonth': 5, 
+            'allEndMonths': [{'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
+            'monthTest': 5, 
+            'allMonthsTest': [{'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
+            'endMonthTest': 7, 
+            'allEndMonthsTest': [{'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
+            'demandModelType': 'Kde Poisson', 
+            'bin_side_lenght': '500', 
+            'k_zones_factor': '1', 
+            'kde_bandwidth': '0.5'}
+        }
         
 
         # The values needed to run the Demand Modelling are:
         # city, datasource, year, month, endMonth, sim_technique, bin_side_lenght, k_zones_factor, kde_bandwidth
 
 
-        form_inputs = data["formData"]
-        # cities = []
-        # years = []
-        # months = []
-        # data_source_ids = []
-        # cities.append(form_inputs["cities"])
-        # years.append(form_inputs["years"])
-        # months.append(form_inputs["months"])
-        # data_source_ids.append(form_inputs["data_source_ids"])
-        print(form_inputs)
-        dm = DemandModelling(form_inputs)
+        form_inputs = data["values"]
+        
+        dict_for_dm_modelling = {
+            "cities":[form_inputs["city"]],
+            "data_source_ids":[form_inputs["datasource"]],
+            "sim_techniques":[form_inputs["demandModelType"]],
+            "bin_side_lengths":[str(form_inputs["bin_side_lenght"])],
+            "zones_factors":[str(form_inputs["k_zones_factor"])],
+            "kde_bandwidths":[str(form_inputs["kde_bandwidth"])],
+            "train_range":[str(form_inputs["year"]), str(form_inputs["month"]), str(form_inputs["year"]), str(form_inputs["endMonth"])],
+            "test_range":[str(form_inputs["yearTest"]), str(form_inputs["monthTest"]), str(form_inputs["yearTest"]), str(form_inputs["endMonthTest"])]
+        }
+
+        print("STARTING THE DEMAND MODELLING MODULE WITH CONFIG",dict_for_dm_modelling )
+        dm = DemandModelling(dict_for_dm_modelling)
         print("Start Run")
         status = dm.run()
-
+ 
         payload =   status.update({
                 "link": "http://127.0.0.1:8501",
                 })

@@ -17,6 +17,7 @@ DEFAULT_FORM = {
 
 class DemandModelling:
     def __init__(self, form_inputs=DEFAULT_FORM):
+
         self.cities = form_inputs["cities"]
         self.data_source_ids = form_inputs["data_source_ids"]
         self.sim_techniques = form_inputs["sim_techniques"]
@@ -25,6 +26,7 @@ class DemandModelling:
         self.kde_bandwidths=form_inputs["kde_bandwidths"]
         self.train_range = form_inputs["train_range"]
         self.test_range = form_inputs["test_range"]
+        
         self.demand_model_configs_grid = {
             "city": self.cities,
 
@@ -38,10 +40,10 @@ class DemandModelling:
     def run(self):
         
         demand_model_configs_list = EFFCS_SimConfGrid(self.demand_model_configs_grid).conf_list
-
+        print("demand_model_configs_list", demand_model_configs_list)
         for demand_model_config in demand_model_configs_list:
 
-            print(demand_model_config)
+            print("demand_model_config",demand_model_config)
 
             # demand_model_path = os.path.join(
             #     os.path.dirname(os.path.dirname(__file__)),
@@ -50,7 +52,7 @@ class DemandModelling:
             #     demand_model_config["city"],
             # )
             ROOT_DIR = os.path.abspath(os.curdir)
-            print()
+            
             demand_model_path = os.path.join(
                 ROOT_DIR,
                 "odysseus",
