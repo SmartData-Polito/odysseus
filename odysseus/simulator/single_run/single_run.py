@@ -17,6 +17,10 @@ def single_run(conf_tuple):
     sim_general_conf = conf_tuple[0]
     sim_scenario_conf = conf_tuple[1]
     sim_scenario_name = conf_tuple[2]
+    if len(conf_tuple) == 4:
+        supply_model_object = conf_tuple[3]
+    else:
+        supply_model_object = None
 
     city = sim_general_conf["city"]
     sim_type = sim_general_conf["sim_technique"]
@@ -34,7 +38,7 @@ def single_run(conf_tuple):
 
     if sim_type == "eventG":
 
-        simInput_eventG = get_eventG_input((sim_general_conf, sim_scenario_conf))
+        simInput_eventG = get_eventG_input((sim_general_conf, sim_scenario_conf, supply_model_object))
         sim_eventG = run_eventG_sim(simInput=simInput_eventG)
         simOutput_eventG = SimOutput(sim_eventG)
         sim_stats = simOutput_eventG.sim_stats

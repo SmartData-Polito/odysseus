@@ -36,6 +36,7 @@ class DemandModel:
 
         self.city_name = city_name
         self.demand_model_config = demand_model_config
+
         self.data_source_id = demand_model_config["data_source_id"]
 
         self.kde_bw = self.demand_model_config["kde_bandwidth"]
@@ -166,6 +167,8 @@ class DemandModel:
         self.max_in_flow = float('-inf')
         self.avg_out_flows_train = self.get_avg_out_flows()
         self.avg_in_flows_train = self.get_avg_in_flows()
+
+
 
     def map_zones_on_trips(self, zones):
         self.trips_origins_train = gpd.sjoin(
