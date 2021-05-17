@@ -5,6 +5,7 @@ warnings.simplefilter("ignore", UserWarning)
 import os
 import json
 import argparse
+import shutil
 from odysseus.simulator.simulation_input.sim_input_paths import simulation_input_paths
 from odysseus.simulator.single_run.single_run import single_run
 from odysseus.simulator.multiple_runs.multiple_runs import multiple_runs
@@ -74,6 +75,8 @@ versioned_conf_path = os.path.join(
     campaign_name,
     conf_name
 )
+shutil.rmtree(simulation_input_paths["sim_current_config"])
+shutil.copytree(versioned_conf_path, simulation_input_paths["sim_current_config"])
 conf_path = versioned_conf_path
 
 #guided parameter configuration
@@ -89,8 +92,7 @@ if args.set_general_parameters:
     sim_run_mode = [input("Sim run mode? [single_run] \t\t") or "single_run"]
     sim_technique = [input("Simulation technique? [eventG] \t\t") or "eventG"]
     sim_scenario_name = [input("Simulation scenario name? ["+str(args.conf_names[0])+"] ") or str(args.conf_names[0])]
-
-    #probabilmente inutili
+   #probabilmente inutili
     const_load_factor = [str2bool(input("Const load factor? [False] \t\t") or False)]
     bin_side_length = [int(input("Bin side length [500] \t\t\t") or 500)]
     k_zones_factor = [int(input("K zones factor? [1] \t\t\t") or 1)]
@@ -145,6 +147,7 @@ sim_general_conf_list = EFFCS_SimConfGrid(sim_general_conf_grid).conf_list
 for sim_general_conf in sim_general_conf_list:
     sim_run_mode = sim_general_conf["sim_run_mode"]
     print(sim_general_conf)
+
     if sim_run_mode == "single_run":
         single_run((
             sim_general_conf,

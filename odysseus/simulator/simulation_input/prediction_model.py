@@ -9,6 +9,8 @@ from keras.layers import (
 from keras.models import Model
 
 
+from odysseus.utils.time_utils import weekday2vec
+
 class PredictionModel:
 
     def __init__(self, prediction_model_config, flow_volumes_shape, ext_train_shape, mask, path):
@@ -91,20 +93,4 @@ def denormalization(X, max):
     return X
 
 
-def weekday2vec(weekdays):
-    """
-    Weekdays to one-hot vector
-    :param weekdays: Array of integer weekdays, where Monday is 0 and Sunday is 6.
-    :return: Array of one-hot vectors, representing weekdays.
-    """
 
-    ret = []
-    for i in weekdays:
-        v = [0 for _ in range(7)]
-        v[i] = 1
-        if i >= 5:
-            v.append(0)  # weekend
-        else:
-            v.append(1)  # weekday
-        ret.append(v)
-    return np.asarray(ret)
