@@ -16,6 +16,10 @@ import streamlit as st
 from streamlit.report_thread import add_report_ctx
 import pymongo as pm
 
+import requests
+from bson import json_util
+import json
+
 
 class ScreenDataManager(DashboardScreen):
     def __init__(self, title, name, month, year, city, db="big_data_db", chart_list=None, subtitle=None, widget_list = None):
@@ -31,25 +35,30 @@ class ScreenDataManager(DashboardScreen):
         self.trips_origins = None
 
         self.temp_data = self.get_temp_collection()
-
-        _list = self.temp_data.find({}, {'year':1, 'month': 1, 'day':1, '_id':0})#last = coll.find({}, {'day':1, '_id':0}).sort('day', -1).limit(1)
-        date_list = [datetime.datetime(x['year'], x['month'], x['day']) for x in _list]
-        _min = min(date_list)
-        _max= max(date_list)
+        _min = min(self.temp_data.date).to_pydatetime()
+        _max = max(self.temp_data.date).to_pydatetime()
+        #_list = self.temp_data.find({}, {'year':1, 'month': 1, 'day':1, '_id':0})
+        #date_list = [datetime.datetime(x['year'], x['month'], x['day']) for x in _list]
+        #_min = min(date_list)
+        #_max= max(date_list)
 
         self.widget_list = [partial(st.slider, "slider test", _min, _max, (_min, _max))]
     
     @st.cache(allow_output_mutation=True)
     def get_temp_collection(self):
 
-        HOST = 'mongodb://localhost:27017/'
-        DATABASE = 'inter_test'
-        COLLECTION = 'test'
+        year_list =[]
+        year_list.append(self.year)
+        
 
-        client = pm.MongoClient(HOST)
-        db = client[DATABASE]
-        col = db[COLLECTION]
-        return col
+        month_list =[]
+        month_list.append(self.month)
+
+        settings = {'id': 'TEST', 'city': self.city_name, 'year': str(year_list), 'month': str(month_list)}
+        r = requests.get('http://127.0.0.1:5000/api_cdm/get-cdm-data', params=settings)
+        json_df = pd.DataFrame(json.loads(r.text, object_hook=json_util.object_hook))
+        json_df['date'] = pd.to_datetime(json_df['date'],utc=True).dt.to_pydatetime()
+        return json_df
 
     def show_charts(self):
 
