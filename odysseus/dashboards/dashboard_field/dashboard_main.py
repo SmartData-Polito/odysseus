@@ -29,17 +29,20 @@ class DashboardMain(DashboardField):
         
         name = st.sidebar.selectbox("Scegli quale schermata visualizzare", ["Home Page", "City Data Manager", "Demand Modelling", "Supply Modelling", "Simulator"])
 
+
         city_path = os.path.join(os.curdir, "odysseus", "city_data_manager", "data")
-        city_dir = os.listdir( city_path )
+        city_dir = [f.name for f in os.scandir(city_path) if (f.is_dir() and not f.name.endswith(".DS_Store"))]
         city =  st.sidebar.selectbox("Scegli quale città", city_dir)
 
+
         db_path = os.path.join(os.curdir, "odysseus", "city_data_manager", "data", city, "od_trips", "points")
-        db_dir = os.listdir( db_path )
+        db_dir = [f.name for f in os.scandir(db_path) if (f.is_dir() and not f.name.endswith(".DS_Store"))]
         db = st.sidebar.selectbox("Scegli la data source", db_dir)
 
+
         ym_path = os.path.join(os.curdir, "odysseus", "city_data_manager", "data", city, "od_trips", "points", db)
-        ym_dir = os.listdir( ym_path )
-        
+        ym_dir = [f.name for f in os.scandir(ym_path) if (f.is_dir() and not f.name.endswith(".DS_Store"))]
+
         splitList=set([item.split(".")[0] for item in ym_dir])
 
         years = set([item.split("_")[0] for item in splitList])

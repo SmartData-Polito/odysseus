@@ -12,4 +12,4 @@ class ScreenHome(DashboardScreen):
 
 
     def show_charts(self):
-        st.success("Ciao Ale Cioc")
+        st.success("Salve Prof Mellia")
