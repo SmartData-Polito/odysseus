@@ -5,7 +5,7 @@ from odysseus.demand_modelling.demand_model_configs.default_config import demand
 from odysseus.webapp.apis.api_cityDataManager.utils import *
 
 DEFAULT_FORM = {
-    "cities":["Torino", "Milano", "Vancouver"],
+    "cities":["Torino"],
     "data_source_ids":["big_data_db"],
     "sim_techniques":["eventG"],
     "bin_side_lengths":["500"],
@@ -26,6 +26,8 @@ class DemandModelling:
         self.kde_bandwidths=form_inputs["kde_bandwidths"]
         self.train_range = form_inputs["train_range"]
         self.test_range = form_inputs["test_range"]
+        self.in_flow = True
+        self.out_flow = True
         
         self.demand_model_configs_grid = {
             "city": self.cities,

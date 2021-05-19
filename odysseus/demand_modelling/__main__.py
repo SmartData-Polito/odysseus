@@ -60,7 +60,7 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    cities=["Torino", "Milano", "Vancouver"],
+    cities=["Torino"],
     data_source_ids=["big_data_db"],
     sim_techniques=["eventG"],
     bin_side_lengths=["500"],
