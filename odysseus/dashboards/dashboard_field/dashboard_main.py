@@ -10,7 +10,8 @@ from odysseus.dashboards.dashboard_field.simulator_screen.screen_principale impo
 
 from odysseus.city_data_manager.config.config import cities # get all possible city names from config files
 from functools import partial
-import pymongo
+
+import webbrowser
 
 class DashboardMain(DashboardField):
 
@@ -34,26 +35,25 @@ class DashboardMain(DashboardField):
 
         db_path = os.path.join(os.curdir, "odysseus", "city_data_manager", "data", city, "od_trips", "points")
         db_dir = os.listdir( db_path )
-        db = st.sidebar.selectbox("Scegli quale città", db_dir)
+        db = st.sidebar.selectbox("Scegli la data source", db_dir)
 
         ym_path = os.path.join(os.curdir, "odysseus", "city_data_manager", "data", city, "od_trips", "points", db)
         ym_dir = os.listdir( ym_path )
         
         splitList=set([item.split(".")[0] for item in ym_dir])
-        print(splitList)
 
         years = set([item.split("_")[0] for item in splitList])
         year = st.sidebar.selectbox("Scegli l'anno", list(years))
-        print(splitList)
-        print(type(splitList))
-        # {'2017_4', '2017_8', '2017_7', '2017_5', '2017_9', '2017_11', '2018_1', '2016_12', '2017_12', '2017_10'}
-
         
         months = set([item.split("_")[1] for item in splitList if item.split("_")[0] == year])
         months = sorted(months)
-        month = st.sidebar.selectbox("Scegli l'mese", list(months))
+        month = st.sidebar.selectbox("Scegli il mese", list(months))
         
         ret = [name, city, month, year, db]
+        col1, col2, col3 = st.sidebar.beta_columns([1,1,1])
+        if col2.button('Go to React'):
+            webbrowser.open_new_tab('127.0.0.1:3000')
+
         return tuple(ret)
 
 
@@ -91,8 +91,6 @@ class DashboardMain(DashboardField):
         self.show_heading()
 
         name, city, month, year, db = self.show_widgets()
-        client = pymongo.MongoClient("localhost", 27017)
-        mongo_db = client["city_data_manager"]
         main_screen= self.get_main_screen(name, month, year, city, db)
         main_screen.show_heading()
         main_screen.show_charts()
