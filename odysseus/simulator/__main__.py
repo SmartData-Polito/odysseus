@@ -18,9 +18,6 @@ def str2bool(string):
         return string
     return True if string.lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh'] else False
 
-
-
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument(

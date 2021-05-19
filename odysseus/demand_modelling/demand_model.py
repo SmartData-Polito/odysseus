@@ -171,6 +171,7 @@ class DemandModel:
 
 
     def map_zones_on_trips(self, zones):
+
         self.trips_origins_train = gpd.sjoin(
             self.trips_origins_train,
             zones,
@@ -533,8 +534,11 @@ class DemandModel:
             "max_in_flow": self.max_in_flow,
             "max_out_flow": self.max_out_flow,
         }
+        print(integers_dict)
         with open(os.path.join(demand_model_path, "integers_dict.pickle"), "wb") as f:
             pickle.dump(integers_dict, f)
+
+
 
     def save_in_flow_count(self):
 

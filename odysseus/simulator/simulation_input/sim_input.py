@@ -37,6 +37,7 @@ class SimInput:
 		self.integers_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "integers_dict.pickle"), "rb")).load()
 		self.closest_valid_zone = pickle.Unpickler(open(os.path.join(demand_model_path, "closest_valid_zone.pickle"), "rb")).load()
 
+
 		self.avg_request_rate = self.integers_dict["avg_request_rate"]
 		self.n_vehicles_original = self.integers_dict["n_vehicles_original"]
 		self.avg_speed_mean = self.integers_dict["avg_speed_mean"]
@@ -44,6 +45,7 @@ class SimInput:
 		self.avg_speed_kmh_mean = self.integers_dict["avg_speed_kmh_mean"]
 		self.avg_speed_kmh_std = self.integers_dict["avg_speed_kmh_std"]
 		self.max_driving_distance = self.integers_dict["max_driving_distance"]
+
 		self.max_in_flow = self.integers_dict["max_in_flow"]
 		self.max_out_flow = self.integers_dict["max_out_flow"]
 
