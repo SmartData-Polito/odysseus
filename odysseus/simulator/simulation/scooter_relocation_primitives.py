@@ -6,7 +6,6 @@ import numpy as np
 import simpy
 
 from odysseus.simulator.simulation_data_structures.worker import Worker
-from odysseus.simulator.simulation_input.prediction_model import PredictionModel
 from odysseus.utils.geospatial_utils import get_od_distance
 
 
@@ -90,6 +89,8 @@ class ScooterRelocationPrimitives:
             self.window_width = 1
 
         if self.simInput.supply_model_conf["scooter_relocation_strategy"] == "predictive":
+
+            from odysseus.simulator.simulation_input.prediction_model import PredictionModel
 
             prediction_model_dir = os.path.join(
                 os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
