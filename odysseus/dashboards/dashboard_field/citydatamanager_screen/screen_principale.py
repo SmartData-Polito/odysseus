@@ -1,22 +1,10 @@
-import os
-import plotly.express as px
-from odysseus.dashboards.dashboard_field.dashboard_screen import DashboardScreen
 from odysseus.dashboards.dashboard_field.citydatamanager_screen.chart_temp import ChartTemp
-from odysseus.dashboards.dashboard_field.citydatamanager_screen.chart_map import ChartMap
 
 from odysseus.dashboards.dashboard_field.utils import *
 
-from odysseus.city_data_manager.config.config import *
 import pandas as pd
-
-import pytz
-import geopandas as gpd
-import shapely
-import datetime
 from functools import partial
 import streamlit as st
-from streamlit.report_thread import add_report_ctx
-import pymongo as pm
 
 import requests
 from bson import json_util
