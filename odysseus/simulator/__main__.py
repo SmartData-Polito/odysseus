@@ -87,7 +87,7 @@ if args.set_general_parameters:
     print("Welcome to the automatic parameter setting. Press enter to select the default values between squares or enter your choice")
     input("Press enter to continue")
     print("\n---------------SIM GENERAL CONFIG---------------")
-    city = [input("City? [Amsterdam] \t\t\t") or "Amsterdam"]
+    city = [input("City? [Torino] \t\t\t") or "Torino"]
     data_source_id = [input("Data source id? [big_data_db] \t\t") or "big_data_db"]
     year = [int(input("Year? [2017] \t\t\t\t") or 2017)]
     month_start = [int(input("Starting month? [10] \t\t\t") or 10)]
@@ -145,8 +145,8 @@ else:
 
 #retrieving an existing DemandModel template
 
-folder = args.existing_demand_model_folder
-folder_path = os.path.join(os.curdir, "odysseus", "demand_modelling", "demand_models", sim_general_conf_grid["city"][0], folder[0])
+demand_folder = args.existing_demand_model_folder[0]
+folder_path = os.path.join(os.curdir, "odysseus", "demand_modelling", "demand_models", sim_general_conf_grid["city"][0], demand_folder)
 
 if not os.path.exists(os.path.join(os.curdir, "odysseus", "demand_modelling", "demand_models",
                                sim_general_conf_grid["city"][0])):
@@ -154,7 +154,7 @@ if not os.path.exists(os.path.join(os.curdir, "odysseus", "demand_modelling", "d
     exit(2)
 
 if not os.path.exists(folder_path):
-    print("Non-existent folder.")
+    print("Non-existent demand model folder.")
     print("Available folders", str(os.listdir(os.path.join(os.curdir, "odysseus", "demand_modelling", "demand_models", sim_general_conf_grid["city"][0]))))
     exit(1)
 
@@ -168,26 +168,26 @@ for sim_general_conf in sim_general_conf_list:
     sim_run_mode = sim_general_conf["sim_run_mode"]
     print(sim_general_conf)
 
+    parameters_dict = {
+        "sim_general_conf":sim_general_conf,
+        "sim_scenario_conf":confs_dict[sim_general_conf["sim_run_mode"]],
+        "sim_scenario_name":sim_general_conf["sim_scenario_name"],
+        "supply_model_object":supply_model,
+        "demand_model_folder":demand_folder
+    }
+
     if sim_run_mode == "single_run":
-        single_run((
-            sim_general_conf,
-            confs_dict[sim_general_conf["sim_run_mode"]],
-            sim_general_conf["sim_scenario_name"],
-            supply_model
-        )
+        single_run(
+            parameters_dict
         )
 
     elif sim_run_mode == "multiple_runs":
         if args.n_cpus is not None:
+            parameters_dict["n_cpus"] = int(args.n_cpus)
             multiple_runs(
-                sim_general_conf,
-                confs_dict[sim_general_conf["sim_run_mode"]],
-                sim_general_conf["sim_scenario_name"],
-                n_cpus=int(args.n_cpus)
+                parameters_dict
             )
         else:
             multiple_runs(
-                sim_general_conf,
-                confs_dict[sim_general_conf["sim_run_mode"]],
-                sim_general_conf["sim_scenario_name"],
+                parameters_dict
             )

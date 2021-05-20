@@ -12,15 +12,13 @@ from odysseus.simulator.simulation_output.sim_output import SimOutput
 from odysseus.simulator.simulation_output.sim_output_plotter import EFFCS_SimOutputPlotter
 
 
-def single_run(conf_tuple):
+def single_run(conf_dict):
 
-    sim_general_conf = conf_tuple[0]
-    sim_scenario_conf = conf_tuple[1]
-    sim_scenario_name = conf_tuple[2]
-    if len(conf_tuple) == 4:
-        supply_model_object = conf_tuple[3]
-    else:
-        supply_model_object = None
+    sim_general_conf = conf_dict["sim_general_conf"]
+    sim_scenario_conf = conf_dict["sim_scenario_conf"]
+    sim_scenario_name = conf_dict["sim_scenario_name"]
+    supply_model_object = conf_dict["supply_model_object"]
+    demand_model_folder = conf_dict["demand_model_folder"]
 
     city = sim_general_conf["city"]
     sim_type = sim_general_conf["sim_technique"]
@@ -36,9 +34,15 @@ def single_run(conf_tuple):
 
     print(city, datetime.datetime.now(), "City initialised!")
 
-    if sim_type == "eventG":
+    input_parameters = {
+        "sim_general_conf":sim_general_conf,
+        "sim_scenario_conf":sim_scenario_conf,
+        "supply_model_object":supply_model_object,
+        "demand_model_folder":demand_model_folder
+    }
 
-        simInput_eventG = get_eventG_input((sim_general_conf, sim_scenario_conf, supply_model_object))
+    if sim_type == "eventG":
+        simInput_eventG = get_eventG_input(input_parameters)
         sim_eventG = run_eventG_sim(simInput=simInput_eventG)
         simOutput_eventG = SimOutput(sim_eventG)
         sim_stats = simOutput_eventG.sim_stats
@@ -46,7 +50,7 @@ def single_run(conf_tuple):
 
     elif sim_type == "traceB":
 
-        simInput_traceB = get_traceB_input((sim_general_conf, sim_scenario_conf))
+        simInput_traceB = get_traceB_input(input_parameters)
         sim_traceB = run_traceB_sim (simInput=simInput_traceB)
         simOutput_traceB = SimOutput(sim_traceB)
         sim_stats = simOutput_traceB.sim_stats

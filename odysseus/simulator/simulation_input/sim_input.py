@@ -8,15 +8,14 @@ from odysseus.supply_modelling.supply_model import SupplyModel
 
 class SimInput:
 
-	def __init__(self, conf_tuple):
+	def __init__(self, conf_dict):
 
-		self.demand_model_config = conf_tuple[0]
-		self.sim_scenario_conf = conf_tuple[1]
 
-		if len(conf_tuple) == 3:
-			supply_model = conf_tuple[2]
-		else:
-			supply_model = None
+		self.demand_model_config = conf_dict["sim_general_conf"]
+		self.sim_scenario_conf = conf_dict["sim_scenario_conf"]
+		supply_model = conf_dict["supply_model_object"]
+		self.demand_model_folder = conf_dict["demand_model_folder"]
+
 
 		self.city = self.demand_model_config["city"]
 
@@ -25,6 +24,7 @@ class SimInput:
 			"demand_modelling",
 			"demand_models",
 			self.demand_model_config["city"],
+			self.demand_model_folder
 		)
 
 		#demand modelling
@@ -121,7 +121,7 @@ class SimInput:
 			self.supply_model = supply_model
 			self.n_vehicles_sim = supply_model.n_vehicles_sim
 		else:
-			self.supply_model = SupplyModel(self.supply_model_conf,self.demand_model_config["year"])
+			self.supply_model = SupplyModel(self.supply_model_conf,self.demand_model_config["year"], demand_model_folder=self.demand_model_folder)
 
 
 	def get_booking_requests_list(self):

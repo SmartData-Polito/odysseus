@@ -11,7 +11,17 @@ from odysseus.simulator.single_run.run_eventG_sim import get_eventG_sim_stats
 from odysseus.simulator.single_run.run_traceB_sim import get_traceB_sim_stats
 
 
-def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name, n_cpus=mp.cpu_count()):
+def multiple_runs(conf_dict):
+	sim_general_conf = conf_dict["sim_general_conf"]
+	sim_scenario_conf_grid = conf_dict["sim_scenario_conf"]
+	sim_scenario_name = conf_dict["sim_scenario_name"]
+	supply_model_object = conf_dict["supply_model_object"]
+	demand_model_folder = conf_dict["demand_model_folder"]
+
+	if "n_cpus" not in conf_dict:
+		n_cpus = mp.cpu_count()
+	else:
+		n_cpus = conf_dict["n_cpus"]
 
 	sim_technique = sim_general_conf["sim_technique"]
 	city = sim_general_conf["city"]
@@ -42,16 +52,22 @@ def multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_name, n
 						conf_tuples += [(
 							sim_general_conf,
 							sim_scenario_conf,
+							demand_model_folder,
+							supply_model_object
 						)]
 				else:
 					conf_tuples += [(
 						sim_general_conf,
 						sim_scenario_conf,
+						demand_model_folder,
+						supply_model_object
 					)]
 			else:
 				conf_tuples += [(
 					sim_general_conf,
 					sim_scenario_conf,
+					demand_model_folder,
+					supply_model_object
 				)]
 
 		with tqdm(total=len(conf_tuples), unit="sim", postfix=str(n_cpus)+" cpu(s)", smoothing=0, dynamic_ncols=True) as pbar:

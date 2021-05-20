@@ -29,7 +29,7 @@ def geodataframe_charging_points(city,engine_type,station_location):
 
 class SupplyModel:
 
-    def __init__(self, supply_model_conf,year):
+    def __init__(self, supply_model_conf,year, demand_model_folder = "default_demand_model"):
 
         self.supply_model_conf = supply_model_conf
 
@@ -40,6 +40,7 @@ class SupplyModel:
             "demand_modelling",
             "demand_models",
             self.supply_model_conf["city"],
+            demand_model_folder
         )
 
         self.grid = pickle.Unpickler(open(os.path.join(demand_model_path, "grid.pickle"), "rb")).load()
