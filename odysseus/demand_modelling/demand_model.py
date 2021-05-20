@@ -62,7 +62,7 @@ class DemandModel:
         self.bookings_train["daytype"] = self.bookings_train.start_daytype
         self.bookings_train["city"] = self.city_name
         self.bookings_train["euclidean_distance"] = self.bookings_train.apply(
-            lambda pp: haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
+            lambda pp: my_haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
             axis=1
         )
 
@@ -87,7 +87,7 @@ class DemandModel:
         self.bookings_test["daytype"] = self.bookings_test.start_daytype
         self.bookings_test["city"] = self.city_name
         self.bookings_test["euclidean_distance"] = self.bookings_test.apply(
-            lambda pp: haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
+            lambda pp: my_haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
             axis=1
         )
 

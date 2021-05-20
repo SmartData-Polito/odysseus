@@ -66,8 +66,8 @@ parser.set_defaults(
     bin_side_lengths=["500"],
     zones_factors=["1"],
     kde_bandwidths=["1"],
-    train_range=["2017", "10", "2017", "10"],
-    test_range=["2017", "11", "2017", "11"],
+    train_range=["2017", "10", "2017", "12"],
+    test_range=["2017", "10", "2017", "12"],
 )
 
 args = parser.parse_args()

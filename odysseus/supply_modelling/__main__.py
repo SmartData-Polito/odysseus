@@ -50,7 +50,10 @@ parser.add_argument(
 
 parser.add_argument(
     "-r", "--recover_supply_model", nargs="+",
-    help="specify the folder from which recover an existing supply model. The folder must be in odysseus/supply_modelling/supply_models/<CITYNAME> "
+    help="""
+        specify the folder from which recover an existing supply model. 
+        The folder must be in odysseus/supply_modelling/supply_models/<CITYNAME> 
+        """
 )
 
 
