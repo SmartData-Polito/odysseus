@@ -58,6 +58,11 @@ parser.add_argument(
     help="compute out flows"
 )
 
+parser.add_argument(
+    "-f", "--folder_name", nargs="+",
+    help="Specify saving folder name "
+)
+
 
 parser.set_defaults(
     cities=["Torino"],
@@ -68,6 +73,7 @@ parser.set_defaults(
     kde_bandwidths=["1"],
     train_range=["2017", "10", "2017", "10"],
     test_range=["2017", "11", "2017", "11"],
+    folder_name=["default_demand_model"]
 )
 
 args = parser.parse_args()
@@ -94,6 +100,7 @@ for demand_model_config in demand_model_configs_list:
         "demand_modelling",
         "demand_models",
         demand_model_config["city"],
+        args.folder_name[0]
     )
     os.makedirs(demand_model_path, exist_ok=True)
 
@@ -102,7 +109,8 @@ for demand_model_config in demand_model_configs_list:
                                    int(args.train_range[0]), int(args.train_range[1]),
                                    int(args.train_range[2]), int(args.train_range[3]),
                                    int(args.test_range[0]), int(args.test_range[1]),
-                                   int(args.test_range[2]), int(args.test_range[3]))
+                                   int(args.test_range[2]), int(args.test_range[3]),
+                                   save_folder = args.folder_name[0])
         demand_model.save_results()
         if args.in_flow:
             demand_model.save_in_flow_count()

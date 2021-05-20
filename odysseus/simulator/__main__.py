@@ -54,11 +54,17 @@ parser.add_argument(
     nargs="+",
     help="Specify the folder in which is stored a supply model"
 )
+parser.add_argument(
+    "-d", "--existing_demand_model_folder",
+    nargs="+",
+    help="Specify the folder in which is stored a supply model"
+)
 parser.set_defaults(
     campaign_name=["inter_bre"],
     conf_names=["test_folder"],
     set_general_parameters = False,
-    existing_supply_model_folder = None
+    existing_supply_model_folder = None,
+    existing_demand_model_folder = "default_demand_model"
 )
 
 args = parser.parse_args()
@@ -135,6 +141,23 @@ if args.existing_supply_model_folder is not None:
 else:
     #modello di offerta inesistente
     supply_model = None
+
+
+#retrieving an existing DemandModel template
+
+folder = args.existing_demand_model_folder
+folder_path = os.path.join(os.curdir, "odysseus", "demand_modelling", "demand_models", sim_general_conf_grid["city"][0], folder[0])
+
+if not os.path.exists(os.path.join(os.curdir, "odysseus", "demand_modelling", "demand_models",
+                               sim_general_conf_grid["city"][0])):
+    print("No "+args.cities[0]+" data stored.")
+    exit(2)
+
+if not os.path.exists(folder_path):
+    print("Non-existent folder.")
+    print("Available folders", str(os.listdir(os.path.join(os.curdir, "odysseus", "demand_modelling", "demand_models", sim_general_conf_grid["city"][0]))))
+    exit(1)
+
 
 confs_dict = {}
 confs_dict["multiple_runs"] = sim_scenario_conf_grid

@@ -32,10 +32,12 @@ class DemandModel:
 
     def __init__(self, city_name, demand_model_config,
                  start_year_train, start_month_train, end_year_train, end_month_train,
-                 start_year_test, start_month_test, end_year_test, end_month_test):
+                 start_year_test, start_month_test, end_year_test, end_month_test, save_folder = "default_demand_model"):
 
         self.city_name = city_name
         self.demand_model_config = demand_model_config
+        self.save_folder = save_folder
+
 
         self.data_source_id = demand_model_config["data_source_id"]
 
@@ -479,6 +481,7 @@ class DemandModel:
             "demand_modelling",
             "demand_models",
             self.demand_model_config["city"],
+            self.save_folder
         )
 
         with open(os.path.join(demand_model_path, "city_obj.pickle"), "wb") as f:
@@ -547,6 +550,7 @@ class DemandModel:
             "demand_modelling",
             "demand_models",
             self.demand_model_config["city"],
+            self.save_folder
         )
 
         in_flow_count_train = get_in_flow_count(self.trips_destinations_train)
@@ -566,6 +570,7 @@ class DemandModel:
             "demand_modelling",
             "demand_models",
             self.demand_model_config["city"],
+            self.save_folder
         )
 
         out_flow_count_train = get_out_flow_count(self.trips_origins_train)
