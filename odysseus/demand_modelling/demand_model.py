@@ -36,6 +36,7 @@ class DemandModel:
 
         self.city_name = city_name
         self.demand_model_config = demand_model_config
+
         self.data_source_id = demand_model_config["data_source_id"]
 
         self.kde_bw = self.demand_model_config["kde_bandwidth"]
@@ -61,7 +62,7 @@ class DemandModel:
         self.bookings_train["daytype"] = self.bookings_train.start_daytype
         self.bookings_train["city"] = self.city_name
         self.bookings_train["euclidean_distance"] = self.bookings_train.apply(
-            lambda pp: haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
+            lambda pp: my_haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
             axis=1
         )
 
@@ -86,7 +87,7 @@ class DemandModel:
         self.bookings_test["daytype"] = self.bookings_test.start_daytype
         self.bookings_test["city"] = self.city_name
         self.bookings_test["euclidean_distance"] = self.bookings_test.apply(
-            lambda pp: haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
+            lambda pp: my_haversine(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
             axis=1
         )
 
@@ -167,7 +168,10 @@ class DemandModel:
         self.avg_out_flows_train = self.get_avg_out_flows()
         self.avg_in_flows_train = self.get_avg_in_flows()
 
+
+
     def map_zones_on_trips(self, zones):
+
         self.trips_origins_train = gpd.sjoin(
             self.trips_origins_train,
             zones,
@@ -530,8 +534,11 @@ class DemandModel:
             "max_in_flow": self.max_in_flow,
             "max_out_flow": self.max_out_flow,
         }
+        print(integers_dict)
         with open(os.path.join(demand_model_path, "integers_dict.pickle"), "wb") as f:
             pickle.dump(integers_dict, f)
+
+
 
     def save_in_flow_count(self):
 

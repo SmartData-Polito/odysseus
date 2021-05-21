@@ -2,7 +2,7 @@ import os
 import datetime
 
 import pandas as pd
-from odysseus.utils.geospatial_utils import haversine
+from odysseus.utils.geospatial_utils import my_haversine
 
 from odysseus.city_data_manager.city_data_source.trips_data_source.trips_data_source import TripsDataSource
 
@@ -59,7 +59,7 @@ class NewYorkCityBikeTrips(TripsDataSource):
         ]
 
         self.trips_df_norm['distance'] = self.trips_df_norm.apply(
-            lambda x: haversine(
+            lambda x: my_haversine(
                 x.start_station_latitude,
                 x.start_station_longitude,
                 x.end_station_latitude,

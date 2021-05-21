@@ -1,8 +1,6 @@
 import os
-import datetime
 
 import pandas as pd
-from odysseus.utils.geospatial_utils import haversine
 
 from odysseus.city_data_manager.city_data_source.trips_data_source.trips_data_source import TripsDataSource
 
