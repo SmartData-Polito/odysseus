@@ -12,7 +12,7 @@ from mlrose import TSPOpt, genetic_alg
 import numpy as np
 import pandas as pd
 from odysseus.simulator.simulation.scooter_relocation_primitives import *
-from odysseus.simulator.simulation_input.prediction_model import weekday2vec
+from odysseus.utils.time_utils import weekday2vec
 
 
 class ScooterRelocationStrategy(ScooterRelocationPrimitives):

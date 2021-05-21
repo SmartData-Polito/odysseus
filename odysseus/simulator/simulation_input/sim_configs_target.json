@@ -1,4 +1,4 @@
 {
-  "campaign_name": "inter_bre",
-  "config_names": ["test_folder"]
+  "campaign_name": "test",
+  "config_names": ["big_data_db_test"]
 }

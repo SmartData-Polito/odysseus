@@ -264,6 +264,8 @@ class SharedMobilitySim:
 
         def find_vehicle(zone_id):
             # available_vehicles_soc_dict = {k: self.vehicles_soc_dict[k] for k in self.available_vehicles_dict[zone_id]}
+
+
             available_vehicles_soc_dict = {k: self.vehicles_list[k].soc.level for k in
                                            self.available_vehicles_dict[zone_id]}
             max_soc = max(available_vehicles_soc_dict.values())
