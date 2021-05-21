@@ -26,6 +26,7 @@ class DemandModelling:
         self.kde_bandwidths=form_inputs["kde_bandwidths"]
         self.train_range = form_inputs["train_range"]
         self.test_range = form_inputs["test_range"]
+        self.save_folder = form_inputs["save_folder"]
         self.in_flow = True
         self.out_flow = True
         
@@ -61,6 +62,7 @@ class DemandModelling:
                 "demand_modelling",
                 "demand_models",
                 demand_model_config["city"],
+                self.save_folder[0]
             )
             os.makedirs(demand_model_path, exist_ok=True)
 
@@ -69,7 +71,8 @@ class DemandModelling:
                                         int(self.train_range[0]), int(self.train_range[1]),
                                         int(self.train_range[2]), int(self.train_range[3]),
                                         int(self.test_range[0]), int(self.test_range[1]),
-                                        int(self.test_range[2]), int(self.test_range[3]))
+                                        int(self.test_range[2]), int(self.test_range[3]),
+                                        self.save_folder[0])
                 demand_model.save_results()
                 if self.in_flow:
                     demand_model.save_in_flow_count()
