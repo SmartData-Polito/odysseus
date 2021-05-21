@@ -23,7 +23,20 @@ def get_traceB_sim_output(simInput):
 
 def get_traceB_sim_stats(conf_tuple):
 
-    simInput = SimInput(conf_tuple)
+    sim_general_conf = conf_tuple[0]
+    sim_scenario_conf = conf_tuple[1]
+    demand_model_folder = conf_tuple[2]
+    supply_model_object = conf_tuple[3]
+
+    parameters_input = {
+        "sim_general_conf": sim_general_conf,
+        "sim_scenario_conf": sim_scenario_conf,
+        "supply_model_object": supply_model_object,
+        "demand_model_folder": demand_model_folder
+
+    }
+
+    simInput = SimInput(parameters_input)
     simInput.get_booking_requests_list()
     simInput.init_vehicles()
     simInput.init_charging_poles()

@@ -6,8 +6,9 @@ venv*/
 #Databases
 *.db
 
-e3f2s*
-.streamlit*
+odysseus/webapp/apis/api_cityDataManager/norm-data.json
+odysseus/webapp/apis/api_cityDataManager/raw-data.json
+
 odysseus/city_data_manager/data/*
 odysseus/city_data_manager/city_data_source/data/*
 
