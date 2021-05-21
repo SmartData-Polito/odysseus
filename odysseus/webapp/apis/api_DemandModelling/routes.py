@@ -39,13 +39,14 @@ def existing_models():
         "demand_modelling",
         "demand_models",
     )
-    avalaible_cities = []
+    avalaible_cities = {}
     for f in os.scandir(demand_model_path):
-        if f.is_dir() and os.path.exists(os.path.join(f.path,"city_obj.pickle")):
-            avalaible_cities.append(os.path.basename(os.path.normpath(f.path)))
-    payload =   {
-                "cities": avalaible_cities,
-                }
+        if f.is_dir():
+            avalaible_cities[f]=[]
+            for models in os.scandir(os.path.join(demand_model_path,f)):
+                if models.is_dir() and os.path.exists(os.path.join(models.path,"city_obj.pickle")):
+                    avalaible_cities[f].append(os.path.basename(os.path.normpath(models.path)))
+    payload =   avalaible_cities
     code = 200
     response = make_response(jsonify(payload), code)
     response.headers['Access-Control-Allow-Origin'] = '*'
