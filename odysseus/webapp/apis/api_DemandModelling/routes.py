@@ -39,7 +39,8 @@ def existing_models():
         "demand_modelling",
         "demand_models",
     )
-    avalaible_cities = []
+    avalaible_cities = {}
+    models_available = []
     for f in os.scandir(demand_model_path):
         if f.is_dir() and os.path.exists(os.path.join(f.path,"city_obj.pickle")):
             avalaible_cities.append(os.path.basename(os.path.normpath(f.path)))
