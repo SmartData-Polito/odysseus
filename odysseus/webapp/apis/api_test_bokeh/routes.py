@@ -26,7 +26,7 @@ CORS(api_bokeh)
 
 @api_bokeh.route('/plot1',methods=['POST','GET'])
 def plot1():
-    sim_charges_df = pd.read_csv("/Users/brendanpolidori/Desktop/project_repos/inter_webapp.nosync/e3f2s/e3f2s/webapp/apis/api_test_bokeh/sim_booking_requests_test_bre.csv")
+    sim_charges_df = pd.read_csv("/Users/brendanpolidori/Desktop/project_repos/inter_webapp.nosync/odysseus/odysseus/webapp/apis/api_test_bokeh/sim_booking_requests_test_bre.csv")
 
     dates = np.array(sim_charges_df["start_time"],dtype=np.datetime64)
     source = ColumnDataSource(data=dict(date=np.array(sim_charges_df["start_time"],dtype=np.datetime64), close=list(sim_charges_df["n_vehicles_available"])))

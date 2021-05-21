@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, request
-from e3f2s.webapp.emulate_module.city_data_manager import CityDataManager
+from flask import Blueprint, jsonify, request,make_response
+from odysseus.webapp.emulate_module.city_data_manager import CityDataManager
+from odysseus.webapp.apis.api_cityDataManager.utils import *
 import pymongo as pm
 import json
 import os
@@ -13,149 +14,206 @@ CORS(api_cdm)
 
 HOST = 'mongodb://localhost:27017/'
 DATABASE = 'inter_test'
-COLLECTION = 'plots'
+COLLECTION = 'booking_duration'
 
-def set_path():
-    ROOT_DIR = os.path.abspath(os.curdir)
-    cdm_data_path = os.path.join(
-	    ROOT_DIR,
-        "e3f2s/city_data_manager/",
-	    "data"
-    )
-    return cdm_data_path
-
-def initialize_mongoDB(host,database,collection):
-    client = pm.MongoClient(host)
-    db = client[database]
-    return db[collection]
-
-def extract_params (body):
-    cities = body["cities"]
-    years = body["years"]
-    months = body["months"]
-    data_source_ids = body["data_source_ids"]
-    return cities,years,months,data_source_ids
-
-def count_trips(filename):
-    with open(filename,"rb") as f:
-        return sum(1 for line in f)
-
-def extract_format(filepath):
-    source,name = os.path.split(os.path.splitext(filepath)[0])
-    _,data_source_id = os.path.split(source)
-    year,month = name.split("_")
-    return data_source_id,year,month
-
-def groupby_month(filepath):
-    cols = ["init_time"]
-    df = pd.read_csv(filepath,usecols=cols)
-    df['init_time'] = pd.to_datetime(df['init_time'], unit='s').dt.to_pydatetime()
-    df["occurance"] = 1
-    df["year"] = df['init_time'].dt.year
-    df["month"] = df['init_time'].dt.month
-    count_df = df.groupby(["year","month"]).sum(["occurance"])
-    ans = build_raw_answer(count_df)
-    return ans
-
-def build_raw_answer(df):
-    final_dict = {}
-    for index, row in df.iterrows():
-        if index[0] in final_dict.keys():
-            final_dict[index[0]].update({index[1]:int(row["occurance"])})
-        else:
-            final_dict.update({index[0]:{index[1]:int(row["occurance"])}})
-    print(final_dict)
-    return final_dict
-
-def retrieve_per_city(path,level="norm",datatype = "trips",):
-    data = {}
-    print("PATH",path)
-    for subdir, dirs, files in os.walk(path):
-        for f in files:
-            filepath = os.path.join(subdir,f)
-            if level not in filepath or datatype not in filepath:
-                continue
-
-            elif level=="norm" and filepath.endswith(".csv"):
-                print("FILEPATH: ",filepath)
-                data_source_id,year,month = extract_format(filepath)
-                number_trips = count_trips(filepath)
-                #if data source already added append to current data structure
-                if data_source_id in data.keys():
-                    # if year is not already present append dictionary
-                    if year not in data[data_source_id].keys():
-                        data[data_source_id][year] = {month:number_trips}
-                    else:
-                        data[data_source_id][year][month] = number_trips
-                else:
-                    data[data_source_id] = {year : {month:number_trips}}
-
-            elif level=="raw" and filepath.endswith(".csv"):
-                print("FILEPATH: ",filepath)
-                data_source_id,_,city = extract_format(filepath)
-
-                months_collects = groupby_month(filepath)
-                data[data_source_id] = months_collects
-    print(data)
-    return data
-
-def summary_available_data(level='norm'):
-    summary = {}
-    # Get list of cities
-    path = set_path()
-    list_subfolders_with_paths = [f.path for f in os.scandir(path) if f.is_dir()]
-    avalaible_cities = [os.path.basename(os.path.normpath(c)) for c in list_subfolders_with_paths]
-    for paths,city in zip(list_subfolders_with_paths,avalaible_cities):
-        data = retrieve_per_city(paths,level=level)
-        summary[city] = data
-    return summary
-
-@api_cdm.route('/simulate',methods=['POST'])
-def simulate():
+@api_cdm.route('/run_cdm',methods=['POST'])
+def run_cdm():
     """
     Receive the configuration from the front end and run simulation
+    
+    {'values': 
+        {
+            'city': 'Torino', 
+            'datasource': 'big_data_db', 
+            'datasources': [{'value': 'big_data_db', 'label': 'big_data_db'}], 
+            'year': '2018', 
+            'allYears': [{'value': '2016', 'label': '2016'}, {'value': '2017', 'label': '2017'}, {'value': '2018', 'label': '2018'}], 
+            'month': 1, 
+            'allMonths': [{'value': '1', 'label': '1'}], 
+            'endMonth': 1, 
+            'allEndMonths': [{'value': '1', 'label': '1'}]
+        }
+    }
+
     """
-    print("Received post")
-    request.get_data()
-    data = json.loads(request.data)
-    print(data)
-    # f = open("sim_general_conf.py","w")
-    # f.write("sim_general_conf_grid = "+ str(data))
-    cities,years,months,data_source_ids = extract_params(data)
-    cdm = CityDataManager(cities,years,months,data_source_ids)
-    cdm.run()
-    collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
-    param_id="placeholder"
-    query = {"_id":param_id}
-    results = list(collection.find(query))
-    return jsonify({'Result':"Success"})
+    try:
+        data = request.get_json(force=True)
+        print("data received from the form", data)
+        form_inputs = data["values"]
+        city = []
+        year = []
+        months = []
+        datasource = []
+        if type(form_inputs["city"])==list:
+            city = form_inputs["city"]
+        else:
+            city.append(form_inputs["city"])
+        if type(form_inputs["year"])==list:
+            year = form_inputs["year"]
+        else:
+            year.append(form_inputs["year"])
+        if type(form_inputs["month"])==list:
+            months = form_inputs["month"]
+        else:
+            if form_inputs["month"] == form_inputs["endMonth"]:
+                months.append(str(form_inputs["month"]))
+                    
+            else:
+                for i in range(form_inputs["month"], form_inputs["endMonth"]+1):
+                    months.append(str(i))
+                    i+=1
+
+
+        if type(form_inputs["datasource"])==list:
+            datasource = form_inputs["datasource"]
+        else:
+            datasource.append(form_inputs["datasource"])
+
+        print("EXTRACTED DATA",city,year,months,datasource)
+
+        cdm = CityDataManager(city,year,months,datasource)
+        cdm.run()
+        payload =   {
+                "link": "http://127.0.0.1:8501"
+                }
+        code = 302
+        response = make_response(jsonify(payload), code)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+        response.status_code = 302
+
+        create_predefined_file()
+
+    except Exception as e:
+        print(e)
+        payload =   {
+                "error": "something went wrong "
+                }
+        code = 500
+        response = make_response(jsonify(payload), code)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+        response.status_code = 500
+    return response
+    # Collect from mongo
+    # collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
+    # param_id="placeholder"
+    # query = {"_id":param_id}
+    # results = list(collection.find(query))
+    #return jsonify({'Result':"Success"})
+
 
 @api_cdm.route('/available_data',methods=['GET'])
-def run():
+def available_data():
     print("Return available data per cities")
-    level = request.args.get("level",default = 'norm')
-    # cdm = CityDataManager()
-    # cdm.run()
-    summary = summary_available_data(level)
+    level = request.args.get("level", default = 'norm')
+    #summary = summary_available_data(level)
+    filename = os.path.join(
+	    os.path.abspath(os.curdir),
+        "odysseus","webapp","apis","api_cityDataManager",f"{level}-data.json"
+        )
+    with open(filename, 'r') as f:
+            summary = json.load(f)
     print(summary)
     return jsonify(summary)
 
+@api_cdm.route('/test',methods=['GET'])
+def test():
+    print("Return available data per cities")
+    summary = summary_available_data_per_hour(DEBUG=False)
+    return jsonify(summary)
+
+
+@api_cdm.route('/zones_test',methods=['GET'])
+def zone_test():
+    print("Return available data per cities")
+    summary = summary_available_data_per_zone(DEBUG=False)
+    return jsonify(summary)
+
+
 @api_cdm.route('/get-cdm-data',methods=['GET'])
-def get_data(graph = 'all'):
+def get_data():
     param_id = request.args.get("id",default = 'TEST')
     graph = request.args.get("graph",default = 'all')
+    city = request.args.get("city",default = "Torino")
+    year = json.loads(request.args.get("year",default = "[2017]"))
+    month = json.loads(request.args.get("month",default = "[8]"))
+    print(city," ",year,"-",month)
+    _,collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
+    #query = [{"$match": {"city":str(city),"year":{"$in":year},"month":{"$in":month}}},{"$project": {"city":1,"year":1,"month":1,"day":1, "n_bookings": 1,"avg_duration":1,"_id": 0}},{"$sort":{"year":1,"month":1,"day":1}}]
+    query = [
+        {
+            "$match": {"city":str(city),"year":{"$in":year},"month":{"$in":month}}
+        },
+        {
+            "$project": {
+                "city":1,
+                "year":1,
+                "month":1,
+                "day":1,
+                "n_booking": 1,
+                'avg_duration':1, 
+                "_id": 0}
+        },
+        { 
+            '$unwind' : {'path': "$n_booking",'includeArrayIndex': "hour_bookings"}
+        },
+        { 
+            '$unwind' : {'path': "$avg_duration",'includeArrayIndex': "hour_duration"}
+        },
+        {
+            '$project': {
+                "year":1,
+                "month":1,
+                "day":1,
+                'n_booking':1, 
+                'avg_duration':1, 
+                'hour': "$hour_bookings",
+                'compare': {'$cmp': ['$hour_bookings', '$hour_duration']}}
+        },
+        {
+            '$match': {'compare': 0}
+        },
+        {
+            '$project':{
+                'date': { '$dateFromParts': {'year' : '$year', 'month' : '$month', 'day' : '$day', 'hour' : '$hour'}},
+                'n_booking':1, 
+                'avg_duration':1, 
+            }
+        }
+        ]
     
-    collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
-    
+    results = list(collection.aggregate(query))
+    '''
     if graph == 'all':
         query = {"_id":param_id}
         results = list(collection.find(query))
     else:
         query = [{"$match": {"_id":param_id}}, {"$project": {"_id" : "$_id", graph: 1}}]
         results = list(collection.aggregate(query))
+    '''
     print(results)
-    return json.dumps(list(results))
-    
+    #return json.dumps(list(results))
+    return json.dumps(results, default=json_util.default)
+
+
+@api_cdm.route('/streamlit', methods=["POST"])
+def streamlit_redirect():
+    payload =   {
+                "link": "http://127.0.0.1:8501"
+                }
+    code = 302
+    response = make_response(jsonify(payload), code)
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+    response.status_code = 302
+
+    return response
+
+
 @api_cdm.route('/available_data_test',methods=['GET'])
 def bretest():
 
@@ -214,15 +272,38 @@ def bretest():
             }
         }
 
-        # risultato2 = {
-        #     {
-        #         "city":"Torino",
-        #         "datasource":"bigdatadb",
-        #         "values":
-        #     },
-        #     {
-
-        #     }
-        # }
-
     return jsonify(risultato)
+
+
+
+
+@api_cdm.route('/map-data',methods=['GET'])
+def mapdata():
+    result =  [
+        {
+            "id":1,
+            "description":"Nice City",
+            "name":"Torino",
+            "lat":45.0703,
+            "long":7.6869,
+            "total_trips":39082
+        },
+        {
+            "id":2,
+            "description":"Nice City",
+            "name":"Milano",
+            "lat":45.4642,
+            "long":9.1900,
+            "total_trips":647168
+        },
+        {
+            "id":3,
+            "description":"Nice City",
+            "name":"New York City",
+            "lat":40.7128,
+            "long":-74.0060,
+            "total_trips":647168
+        }
+    ]
+   
+    return jsonify(result)

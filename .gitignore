@@ -3,7 +3,11 @@
 
 venv*/
 .vscode
-inter_env/*
+#Databases
+*.db
+
+odysseus/webapp/apis/api_cityDataManager/norm-data.json
+odysseus/webapp/apis/api_cityDataManager/raw-data.json
 
 odysseus/city_data_manager/data/*
 odysseus/city_data_manager/city_data_source/data/*
@@ -111,6 +115,7 @@ venv3/
 ENV/
 env.bak/
 venv.bak/
+inter_env/*
 
 # Spyder project settings
 .spyderproject
