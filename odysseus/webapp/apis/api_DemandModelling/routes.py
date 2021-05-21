@@ -42,10 +42,10 @@ def existing_models():
     avalaible_cities = {}
     for f in os.scandir(demand_model_path):
         if f.is_dir():
-            avalaible_cities[f]=[]
+            avalaible_cities[f.path.split("/")[-1]]=[]
             for models in os.scandir(os.path.join(demand_model_path,f)):
                 if models.is_dir() and os.path.exists(os.path.join(models.path,"city_obj.pickle")):
-                    avalaible_cities[f].append(os.path.basename(os.path.normpath(models.path)))
+                    avalaible_cities[f.path.split("/")[-1]].append(os.path.basename(os.path.normpath(models.path)))
     payload =   avalaible_cities
     code = 200
     response = make_response(jsonify(payload), code)
@@ -99,7 +99,8 @@ def run_dm():
             "zones_factors":[str(form_inputs["k_zones_factor"])],
             "kde_bandwidths":[str(form_inputs["kde_bandwidth"])],
             "train_range":[str(form_inputs["year"]), str(form_inputs["month"]), str(form_inputs["year"]), str(form_inputs["endMonth"])],
-            "test_range":[str(form_inputs["yearTest"]), str(form_inputs["monthTest"]), str(form_inputs["yearTest"]), str(form_inputs["endMonthTest"])]
+            "test_range":[str(form_inputs["yearTest"]), str(form_inputs["monthTest"]), str(form_inputs["yearTest"]), str(form_inputs["endMonthTest"])],
+            "save_folder":[form_inputs["save_folder"]]
         }
 
         print("STARTING THE DEMAND MODELLING MODULE WITH CONFIG",dict_for_dm_modelling )
