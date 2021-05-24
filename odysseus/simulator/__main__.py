@@ -83,7 +83,10 @@ conf_path = versioned_conf_path
 
 #guided parameter configuration
 if args.set_general_parameters:
-    print("Welcome to the automatic parameter setting. Press enter to select the default values between squares or enter your choice")
+    print("""
+        Welcome to the automatic parameter setting. 
+        Press enter to select the default values between squares or enter your choice
+    """)
     input("Press enter to continue")
     print("\n---------------SIM GENERAL CONFIG---------------")
     city = [input("City? [Torino] \t\t\t") or "Torino"]

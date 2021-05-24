@@ -5,7 +5,7 @@ import pandas as pd
 import pymongo as pm
 import json
 import numpy as np
-from shapely.geometry import Point, LineString, Polygon
+from shapely.geometry import Polygon
 import geopandas as gpd
 
 
