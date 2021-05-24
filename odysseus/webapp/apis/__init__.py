@@ -34,6 +34,9 @@ def create_app():
     from odysseus.webapp.apis.api_DemandModelling.routes import api_dm
     app.register_blueprint(api_dm, url_prefix='/api_dm')
 
+    from odysseus.webapp.apis.api_SupplyModelling.routes import api_sm
+    app.register_blueprint(api_auth, url_prefix='/api_sm')
+
     from odysseus.webapp.apis.api_simulator.routes import api_sim
     app.register_blueprint(api_sim, url_prefix='/api_sim')
 

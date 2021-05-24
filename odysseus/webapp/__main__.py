@@ -1,6 +1,5 @@
 from odysseus.webapp.apis import create_app
 from odysseus.webapp.apis.api_cityDataManager.utils import *
-import json
 
 app = create_app()
 
