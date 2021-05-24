@@ -86,7 +86,7 @@ def run_dm():
         
 
         # The values needed to run the Demand Modelling are:
-        # city, datasource, year, month, endMonth, sim_technique, bin_side_lenght, k_zones_factor, kde_bandwidth
+        # city, datasource, year, month, endMonth, sim_technique, bin_side_lenght, k_zones_factor, kde_bandwidth,save folder
 
 
         form_inputs = data["values"]

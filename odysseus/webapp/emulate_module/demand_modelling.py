@@ -26,7 +26,7 @@ class DemandModelling:
         self.kde_bandwidths=form_inputs["kde_bandwidths"]
         self.train_range = form_inputs["train_range"]
         self.test_range = form_inputs["test_range"]
-        self.save_folder = form_inputs[" "]
+        self.save_folder = form_inputs["save_folder"]
         self.in_flow = True
         self.out_flow = True
         

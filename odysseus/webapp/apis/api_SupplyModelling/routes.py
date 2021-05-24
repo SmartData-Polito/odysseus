@@ -81,14 +81,14 @@ def run_sm():
         dict_for_sm_modelling = {
             "cities":[form_inputs["city"]],
             "data_source_ids":[form_inputs["datasource"]],
-            "num_vehicles":[form_inputs["num_vehicles"]],
-            "tot_n_charging_poles":[str(form_inputs["tot_n_charging_poles"])],
-            "year":[str(form_inputs["year"])],
-            "n_charging_zones":[form_inputs["n_charging_zones"]],
+            "num_vehicles":form_inputs["num_vehicles"],
+            "tot_n_charging_poles":form_inputs["tot_n_charging_poles"],
+            "year":form_inputs["year"],
+            "n_charging_zones":form_inputs["n_charging_zones"],
             "distributed_cps":form_inputs["distributed_cps"],
             "cps_placement_policy":form_inputs["cps_placement_policy"],
             "n_relocation_workers":form_inputs["n_relocation_workers"],
-            "folder_name":form_inputs["save_folder"],
+            "folder_name":[form_inputs["save_folder"]],
             "recover_supply_model":form_inputs["recover_supply_model"]
         }
 
@@ -129,6 +129,7 @@ def run_sm():
         # response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
         # response.status_code = 302
     except Exception as e:
+        print("Something went wrong")
         print(e)
         payload =   {
                 "error": "something went wrong"

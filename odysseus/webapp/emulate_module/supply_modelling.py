@@ -23,25 +23,25 @@ DEFAULT_FORM = {
     "recover_supply_model":""
 }
 class SupplyModelling:
+    
     def __init__(self,form_inputs=DEFAULT_FORM):
         self.form =form_inputs
-        self.cities=form_inputs["cities"],
-        self.data_source_ids=form_inputs["data_source_ids"],
-        self.num_vehicles=form_inputs["num_vehicles"],
-        self.tot_n_charging_poles=form_inputs["tot_n_charging_poles"],
-        self.n_charging_zones=form_inputs["n_charging_zones"],
-        self.year=form_inputs["year"],
-        self.distributed_cps=form_inputs["distributed_cps"],
-        self.cps_placement_policy=form_inputs["cps_placement_policy"],
-        self.n_relocation_workers=form_inputs["n_relocation_workers"],
-        self.folder_name=form_inputs["folder_name"],
+        self.cities=form_inputs["cities"]
+        self.data_source_ids=form_inputs["data_source_ids"]
+        self.num_vehicles=form_inputs["num_vehicles"]
+        self.tot_n_charging_poles=form_inputs["tot_n_charging_poles"]
+        self.n_charging_zones=form_inputs["n_charging_zones"]
+        self.year=form_inputs["year"]
+        self.distributed_cps=form_inputs["distributed_cps"]
+        self.cps_placement_policy=form_inputs["cps_placement_policy"]
+        self.n_relocation_workers=form_inputs["n_relocation_workers"]
+        self.folder_name=form_inputs["folder_name"]
         self.recover_supply_model=form_inputs["recover_supply_model"]
 
         #self.available_policy = ["num_parkings", "old_manual", "real_positions", "realpos_numpark"]
 
     def run(self):
         t_or_f = True if self.distributed_cps[0].lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh'] else False
-
         if self.recover_supply_model != "":
             #controllo che il file esista
             folder = self.recover_supply_model
@@ -73,19 +73,18 @@ class SupplyModelling:
                 "data_source_id": self.data_source_ids[0],
                 "n_vehicles": int(self.num_vehicles[0]),
                 "tot_n_charging_poles": int(self.tot_n_charging_poles[0]),
-                "n_charging_zones": int(self.n_charging_zones[0]),
                 "distributed_cps":t_or_f,
+                "n_charging_zones": int(self.n_charging_zones[0]),
                 "cps_placement_policy":self.cps_placement_policy,
                 "n_relocation_workers":int(self.n_relocation_workers)
             })
-
+            print(supply_model_conf)
             supply_model = SupplyModel(supply_model_conf, int(*self.year))
-
-
+            print("FASFAFA")
             vehicles_soc_dict, vehicles_zones, available_vehicles_dict = supply_model.init_vehicles()
             supply_model.init_charging_poles()
             supply_model.init_relocation()
-
+            print("EHI")
             ##Salvare su file le strutture dati
             #se c'è il saveflag salvo nel path che mi dice
 
@@ -97,7 +96,7 @@ class SupplyModelling:
                     folder = "default_supply_model"
                 else:
                     folder = namegenerator.gen()
-
+            print(folder)
             #cartella di default
             savepath = os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", self.cities[0], folder)
 
