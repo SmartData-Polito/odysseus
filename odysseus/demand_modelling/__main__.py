@@ -65,15 +65,15 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    cities=["Torino"],
+    cities=["Torino", "Milano", "Vancouver"],
     data_source_ids=["big_data_db"],
     sim_techniques=["eventG"],
     bin_side_lengths=["500"],
     zones_factors=["1"],
     kde_bandwidths=["1"],
-    train_range=["2017", "10", "2017", "10"],
-    test_range=["2017", "11", "2017", "11"],
-    folder_name=["default_demand_model"]
+    train_range=["2017", "10", "2017", "12"],
+    test_range=["2017", "10", "2017", "12"],
+    folder_name=["isc2_extension_2021"]
 )
 
 args = parser.parse_args()
