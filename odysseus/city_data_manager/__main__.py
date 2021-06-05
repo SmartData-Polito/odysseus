@@ -37,7 +37,7 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    cities=["Torino"],
+    cities=["Torino", "Milano", "Vancouver"],
     data_source_ids=["big_data_db"],
     years=["2017"],
     months=[str(i) for i in range(10, 13)],
