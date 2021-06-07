@@ -27,7 +27,7 @@ parser.add_argument(
 
 parser.add_argument(
     "-cc", "--conf_name",
-    help="specify conf name(s)"
+    help="specify conf name"
 )
 
 parser.add_argument(
@@ -44,7 +44,7 @@ parser.add_argument(
 
 parser.set_defaults(
     campaign_name="test",
-    conf_names="big_data_db_test",
+    conf_name="big_data_db_test",
     existing_supply_model_folder=None,
     existing_demand_model_folder="isc2_extension_2021"
 )
@@ -52,7 +52,7 @@ parser.set_defaults(
 args = parser.parse_args()
 
 campaign_name = args.campaign_name
-conf_name = args.conf_names
+conf_name = args.conf_name
 
 versioned_conf_path = os.path.join(
     simulation_input_paths["sim_configs_versioned"],
