@@ -48,13 +48,15 @@ class EnergyMix:
 	def evaluate_emissions(self):
 		if self.city_name == "Roma" or self.city_name == "Torino" or self.city_name == "Milano":
 			energy_mix_conf = self.energymix_db["Italy"][self.year]
-		if self.city_name == "Amsterdam":
+		elif self.city_name == "Amsterdam":
 			energy_mix_conf = self.energymix_db["Netherlands"][self.year]
-		if self.city_name in ["Hamburg", "Berlin"]:
+		elif self.city_name in ["Hamburg", "Berlin"]:
 			energy_mix_conf = self.energymix_db["Germany"][self.year]
-		if self.city_name in ["Wien"]:
+		elif self.city_name in ["Wien"]:
 			energy_mix_conf = self.energymix_db["Austria"][self.year]
-		if self.city_name in ["Louisville", "Minneapolis", "Austin", "Norfolk", "Kansas City", "Chicago", "Calgary"]:
+		elif self.city_name in ["Vancouver"]:
+			energy_mix_conf = self.energymix_db["Canada"][self.year]
+		elif self.city_name in ["Louisville", "Minneapolis", "Austin", "Norfolk", "Kansas City", "Chicago", "Calgary"]:
 			energy_mix_conf = self.energymix_db["US"][self.year]
 		tot_emission = 0
 		for i in list(self.lca_co2_elect_sources.keys()):
