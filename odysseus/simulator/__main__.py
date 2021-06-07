@@ -32,13 +32,11 @@ parser.add_argument(
 
 parser.add_argument(
     "-s", "--existing_supply_model_folder",
-    nargs="+",
     help="Specify the folder in which is stored a supply model"
 )
 
 parser.add_argument(
     "-d", "--existing_demand_model_folder",
-    nargs="+",
     help="Specify the folder in which is stored a supply model"
 )
 
