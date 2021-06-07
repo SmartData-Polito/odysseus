@@ -72,6 +72,8 @@ class EnergyMix:
 			energy_mix_conf = self.energymix_db["Germany"][self.year]
 		if self.city_name in ["Wien"]:
 			energy_mix_conf = self.energymix_db["Austria"][self.year]
+		elif self.city_name in ["Vancouver"]:
+			energy_mix_conf = self.energymix_db["Canada"][self.year]
 		if self.city_name in ["Louisville", "Minneapolis", "Austin", "Norfolk", "Kansas City", "Chicago", "Calgary"]:
 			energy_mix_conf = self.energymix_db["US"][self.year]
 		tot_energy = 0
