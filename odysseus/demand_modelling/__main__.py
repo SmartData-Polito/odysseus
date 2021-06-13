@@ -110,7 +110,7 @@ for demand_model_config in demand_model_configs_list:
                                    int(args.train_range[2]), int(args.train_range[3]),
                                    int(args.test_range[0]), int(args.test_range[1]),
                                    int(args.test_range[2]), int(args.test_range[3]),
-                                   save_folder = args.folder_name[0])
+                                   save_folder=args.folder_name[0])
         demand_model.save_results()
         if args.in_flow:
             demand_model.save_in_flow_count()

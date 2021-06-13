@@ -1,3 +1,4 @@
+import requests
 import numpy as np
 import pandas as pd
 from shapely.geometry import Point, LineString, Polygon
@@ -127,3 +128,35 @@ def get_od_distance(grid, origin_id, destination_id):
 
 def miles_to_meters(miles):
     return miles * 1609.34
+
+
+def get_amenities(city="Roma", amenity_type="university"):
+    overpass_url = "http://overpass-api.de/api/interpreter"
+    if amenity_type == "station":
+        overpass_query = '''
+            [out:json];
+            area["name"="''' + city + '''"];
+            (node["public_transport"="''' + amenity_type + '''"](area););
+            out center;
+        '''
+    else:
+        overpass_query = '''
+            [out:json];
+            area["name"="''' + city + '''"];
+            (node["amenity"="''' + amenity_type + '''"](area););
+            out center;
+        '''
+    print(overpass_query)
+    response = requests.get(overpass_url, params={'data': overpass_query})
+    data = response.json()
+    records_list = list()
+    for node in data["elements"]:
+        record = dict()
+        if "name" in node["tags"]:
+            record["name"] = node["tags"]["name"]
+        record["id"] = node["id"]
+        record["latitude"] = node["lat"]
+        record["longitude"] = node["lon"]
+        record["geometry"] = Point(record["longitude"], record["latitude"])
+        records_list.append(record)
+    return gpd.GeoDataFrame(records_list)

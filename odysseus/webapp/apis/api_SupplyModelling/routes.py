@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, make_response
-from odysseus.webapp.emulate_module.demand_modelling import DemandModelling
+from odysseus.webapp.emulate_module.supply_modelling import SupplyModelling
 from odysseus.webapp.apis.api_cityDataManager.utils import *
 import pymongo as pm
 import json
@@ -9,14 +9,13 @@ import random
 import pandas as pd
 random.seed(42)
 from flask_cors import CORS
-api_dm = Blueprint('api_dm', __name__)
-CORS(api_dm)
+api_sm = Blueprint('api_sm', __name__)
+CORS(api_sm)
 
-
-@api_dm.route('/available_data',methods=['GET'])
+@api_sm.route('/available_data',methods=['GET'])
 def available_data():
     """
-    The demand modelling module can be run only on data that has been normalized 
+    The supply modelling module can be run only on data that has been normalized 
     """
     level = 'norm'#request.args.get("level", default = 'norm')
     filename = os.path.join(
@@ -27,24 +26,24 @@ def available_data():
             summary = json.load(f)
     return jsonify(summary)
 
-@api_dm.route('/existing_models',methods=['GET'])
+@api_sm.route('/existing_models',methods=['GET'])
 def existing_models():
     """
     the module cannot be run if it's already present a model for that city, independent from time period
     """
     ROOT_DIR = os.path.abspath(os.curdir)
-    demand_model_path = os.path.join(
+    supply_model_path = os.path.join(
         ROOT_DIR,
         "odysseus",
-        "demand_modelling",
-        "demand_models",
+        "supply_modelling",
+        "supply_models",
     )
     avalaible_cities = {}
-    for f in os.scandir(demand_model_path):
+    for f in os.scandir(supply_model_path):
         if f.is_dir():
             avalaible_cities[f.path.split("/")[-1]]=[]
-            for models in os.scandir(os.path.join(demand_model_path,f)):
-                if models.is_dir() and os.path.exists(os.path.join(models.path,"city_obj.pickle")):
+            for models in os.scandir(os.path.join(supply_model_path,f)):
+                if models.is_dir() and os.path.exists(os.path.join(models.path,"supply_model.pickle")):
                     avalaible_cities[f.path.split("/")[-1]].append(os.path.basename(os.path.normpath(models.path)))
     payload =   avalaible_cities
     code = 200
@@ -55,56 +54,46 @@ def existing_models():
     response.status_code = code
     return response
 
-@api_dm.route('/run_dm',methods=['POST'])
-def run_dm():
+@api_sm.route('/run_sm',methods=['POST'])
+def run_sm():
     try:
         data = request.get_json(force=True)
         print("data received from the form", data)
 
 
         # {'values': 
-        #     {'city': 'Torino', 
-        #     'datasource': 'big_data_db', 
-        #     'datasources': [{'value': 'big_data_db', 'label': 'big_data_db'}], 
-        #     'year': 2017, 
-        #     'allYears': [{'value': '2016', 'label': '2016'}, {'value': '2017', 'label': '2017'}, {'value': '2018', 'label': '2018'}], 
-        #     'yearTest': 2017, 
-        #     'allYearsTest': [{'value': '2017', 'label': '2017'}, {'value': '2018', 'label': '2018'}], 
-        #     'month': 4, 
-        #     'allMonths': [{'value': '4', 'label': '4'}, {'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
-        #     'endMonth': 5, 
-        #     'allEndMonths': [{'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
-        #     'monthTest': 5, 
-        #     'allMonthsTest': [{'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
-        #     'endMonthTest': 7, 
-        #     'allEndMonthsTest': [{'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
-        #     'demandModelType': 'Kde Poisson', 
-        #     'bin_side_lenght': '500', 
-        #     'k_zones_factor': '1', 
-        #     'kde_bandwidth': '0.5'}
+        #     {
+        #         "cities":["Amsterdam"],
+                # "data_source_ids":["big_data_db"],
+                # "num_vehicles":["500"],
+                # "tot_n_charging_poles":["100"],
+                # "n_charging_zones":["10"],
+                # "year":["2017"],
+                # "distributed_cps":"True",
+                # "cps_placement_policy":"num_parkings",
+                # "n_relocation_workers":1,
+                # "folder_name":"",
+                # "recover_supply_model":""}
         # }
         
-
-        # The values needed to run the Demand Modelling are:
-        # city, datasource, year, month, endMonth, sim_technique, bin_side_lenght, k_zones_factor, kde_bandwidth,save folder
-
-
         form_inputs = data["values"]
         
-        dict_for_dm_modelling = {
+        dict_for_sm_modelling = {
             "cities":[form_inputs["city"]],
             "data_source_ids":[form_inputs["datasource"]],
-            "sim_techniques":[form_inputs["demandModelType"]],
-            "bin_side_lengths":[str(form_inputs["bin_side_lenght"])],
-            "zones_factors":[str(form_inputs["k_zones_factor"])],
-            "kde_bandwidths":[str(form_inputs["kde_bandwidth"])],
-            "train_range":[str(form_inputs["year"]), str(form_inputs["month"]), str(form_inputs["year"]), str(form_inputs["endMonth"])],
-            "test_range":[str(form_inputs["yearTest"]), str(form_inputs["monthTest"]), str(form_inputs["yearTest"]), str(form_inputs["endMonthTest"])],
-            "save_folder":[form_inputs["save_folder"]]
+            "num_vehicles":form_inputs["num_vehicles"],
+            "tot_n_charging_poles":form_inputs["tot_n_charging_poles"],
+            "year":form_inputs["year"],
+            "n_charging_zones":form_inputs["n_charging_zones"],
+            "distributed_cps":form_inputs["distributed_cps"],
+            "cps_placement_policy":form_inputs["cps_placement_policy"],
+            "n_relocation_workers":form_inputs["n_relocation_workers"],
+            "folder_name":[form_inputs["save_folder"]],
+            "recover_supply_model":form_inputs["recover_supply_model"]
         }
 
-        print("STARTING THE DEMAND MODELLING MODULE WITH CONFIG",dict_for_dm_modelling )
-        dm = DemandModelling(dict_for_dm_modelling)
+        print("STARTING THE DEMAND MODELLING MODULE WITH CONFIG",dict_for_sm_modelling )
+        dm = SupplyModelling(dict_for_sm_modelling)
         print("Start Run")
         status = dm.run()
 
@@ -140,6 +129,7 @@ def run_dm():
         # response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
         # response.status_code = 302
     except Exception as e:
+        print("Something went wrong")
         print(e)
         payload =   {
                 "error": "something went wrong"
@@ -152,5 +142,4 @@ def run_dm():
         response.status_code = 500
     
     return response
-
 
