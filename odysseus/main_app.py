@@ -29,7 +29,7 @@ def generate_button_choice():
         load_dashboard()
 
     if react_button:
-        webbrowser.open_new_tab('127.0.0.1:3000')
+        webbrowser.open_new_tab('http://localhost:3000')
 
 
 if not is_authenticated(session_state.username, session_state.password):
