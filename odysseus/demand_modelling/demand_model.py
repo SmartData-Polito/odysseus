@@ -49,6 +49,8 @@ class DemandModel:
         self.trips_origins_train = pd.DataFrame()
         self.trips_destinations_train = pd.DataFrame()
         for year, month in month_year_iter(start_month_train, start_year_train, end_month_train, end_year_train):
+            if(self.data_source_id=='big_data_db' and month==3):
+                continue
             print("train", year, month)
             self.loader = Loader(self.city_name, self.data_source_id, year, month)
             bookings, origins, destinations = self.loader.read_data()
