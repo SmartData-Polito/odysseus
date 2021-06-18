@@ -1,6 +1,6 @@
 supply_model_configs_grid = {
 
-    "city": ["Torino", "Milano", "Vancouver"],
+    "city": ["Amsterdam"],
 
     "data_source_id": ["big_data_db"],
 

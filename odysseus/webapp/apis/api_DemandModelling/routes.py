@@ -62,7 +62,7 @@ def run_dm():
         print("data received from the form", data)
 
 
-        # {'values': 
+        #     {'values': 
         #     {'city': 'Torino', 
         #     'datasource': 'big_data_db', 
         #     'datasources': [{'value': 'big_data_db', 'label': 'big_data_db'}], 
