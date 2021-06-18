@@ -1,7 +1,7 @@
-from flask import Blueprint, jsonify, request,make_response
+from flask import Blueprint, app,current_app, jsonify, request,make_response
 from odysseus.webapp.emulate_module.city_data_manager import CityDataManager
 from odysseus.webapp.apis.api_cityDataManager.utils import *
-import pymongo as pm
+from odysseus.webapp.database_handler import DatabaseHandler
 import json
 import os
 from datetime import datetime
@@ -12,31 +12,57 @@ from flask_cors import CORS
 api_cdm = Blueprint('api_cdm', __name__)
 CORS(api_cdm)
 
-HOST = 'mongodb://localhost:27017/'
-DATABASE = 'inter_test'
-COLLECTION = 'booking_duration'
 
 @api_cdm.route('/run_cdm',methods=['POST'])
 def run_cdm():
     """
     Receive the configuration from the front end and run simulation
     
-    {'values': 
-        {
-            'city': 'Torino', 
-            'datasource': 'big_data_db', 
-            'datasources': [{'value': 'big_data_db', 'label': 'big_data_db'}], 
-            'year': '2018', 
-            'allYears': [{'value': '2016', 'label': '2016'}, {'value': '2017', 'label': '2017'}, {'value': '2018', 'label': '2018'}], 
-            'month': 1, 
-            'allMonths': [{'value': '1', 'label': '1'}], 
-            'endMonth': 1, 
-            'allEndMonths': [{'value': '1', 'label': '1'}]
-        }
+    {
+    "values":{
+        "city":"Torino",
+        "datasource":"big_data_db",
+        "datasources":[
+            {
+                "value":"big_data_db",
+                "label":"big_data_db"
+            }
+        ],
+        "year":"2018",
+        "allYears":[
+            {
+                "value":"2016",
+                "label":"2016"
+            },
+            {
+                "value":"2017",
+                "label":"2017"
+            },
+            {
+                "value":"2018",
+                "label":"2018"
+            }
+        ],
+        "month":1,
+        "allMonths":[
+            {
+                "value":"1",
+                "label":"1"
+            }
+        ],
+        "endMonth":1,
+        "allEndMonths":[
+            {
+                "value":"1",
+                "label":"1"
+            }
+        ]
+    }
     }
 
     """
     try:
+        dbhandler=DatabaseHandler(host=current_app.config["HOST"],database=current_app.config["DATABASE"])
         data = request.get_json(force=True)
         print("data received from the form", data)
         form_inputs = data["values"]
@@ -71,7 +97,7 @@ def run_cdm():
 
         print("EXTRACTED DATA",city,year,months,datasource)
 
-        cdm = CityDataManager(city,year,months,datasource)
+        cdm = CityDataManager(city,year,months,datasource,dbhandler=dbhandler)
         cdm.run()
         payload =   {
                 "link": "http://127.0.0.1:8501"
@@ -275,7 +301,14 @@ def bretest():
     return jsonify(risultato)
 
 
-
+@api_cdm.route('/test_connectivity',methods=['GET'])
+def conn_test():
+    dbhandler=DatabaseHandler(host=current_app.config["HOST"],database=current_app.config["DATABASE"])
+    status=dbhandler.upload({"city":1,"year":1,"month":1,"day":1},"test")
+    if status is not None:
+        return jsonify({"STATUS":"uploaded"})
+    else:
+        return jsonify({"STATUS":"Not uploaded"})
 
 @api_cdm.route('/map-data',methods=['GET'])
 def mapdata():

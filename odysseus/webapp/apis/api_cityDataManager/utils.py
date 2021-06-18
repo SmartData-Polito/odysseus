@@ -7,7 +7,7 @@ import json
 import numpy as np
 from shapely.geometry import Polygon
 import geopandas as gpd
-
+from odysseus.webapp.database_handler import DatabaseHandler
 
 # import skmob
 # from skmob.tessellation import tilers
@@ -33,6 +33,7 @@ def initialize_mongoDB(host=HOST,database=DATABASE,collection=COLLECTION):
     db = client[database]
     col = db[collection]
     return db,col
+
 
 def upload_to_mongoDB(document,host=HOST,database=DATABASE,collection=COLLECTION):
     db,col = initialize_mongoDB(host=host,database=database,collection=collection)
@@ -155,8 +156,6 @@ def build_raw_answer_hour(df,city,host=HOST,database=DATABASE,collection=COLLECT
     document.update({"year":year,"month":month,"day":prev_day,"n_booking":final_dict[index[0]][index[1]][prev_day][0],
                              "avg_duration":final_dict[index[0]][index[1]][prev_day][1]})
     id=upload_to_mongoDB(document)
-    # db,col = initialize_mongoDB()
-    # id_object = col.insert_one(json.loads(json_util.dumps(document)))
     return final_dict
 
 

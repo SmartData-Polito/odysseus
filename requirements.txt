@@ -26,3 +26,4 @@ tqdm~=4.54.1
 streamlit
 plotly
 keras~=2.4.3
+dnspython==2.1.0

@@ -1,5 +1,6 @@
 import argparse
 import datetime
+from odysseus.webapp.data_aggregator import DataAggregator
 
 from odysseus.city_data_manager.city_geo_trips.nyc_citi_bike_geo_trips import NewYorkCityBikeGeoTrips
 from odysseus.city_data_manager.city_geo_trips.big_data_db_geo_trips import BigDataDBGeoTrips
@@ -14,13 +15,13 @@ from odysseus.webapp.apis.api_cityDataManager.data_transormer_cdm.transformer_cd
 from odysseus.webapp.apis.api_cityDataManager.utils import *
 
 class CityDataManager():
-    def __init__(self,cities=["Torino"], years=[2017], months=["10","11"], data_source_ids=["big_data_db"]):
+    def __init__(self,cities=["Torino"], years=[2017], months=["10","11"], data_source_ids=["big_data_db"],dbhandler=None):
         self.cities = cities
         self.years = years
         self.months = months
         self.data_source_ids = data_source_ids
-        self.dt = DataTransformer()
-
+        self.data_agg = DataAggregator()
+        self.dbhandler = dbhandler
     def run(self):
         for city in self.cities:
             for data_source_id in self.data_source_ids:
@@ -67,5 +68,8 @@ class CityDataManager():
                             cdm_path,
                             city, "od_trips","trips",data_source_id, f"{year}_{month}","trips.csv"
                         )
-                        groupby_day_hour(filepath,city)
+                        doc_list=self.data_agg.groupby_day_hour(filepath,city)
+                        for d in doc_list:
+                            self.dbhandler.upload(d,"city_data_manager")
+
         print(datetime.datetime.now(), "Done")
