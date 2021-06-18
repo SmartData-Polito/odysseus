@@ -26,9 +26,12 @@ class DatabaseHandler:
             id_object=None
         return id_object
 
-    def query(self,query,collection_name):
+    def aggregate_query(self,query,collection_name):
         return list(self.db[collection_name].aggregate(query))
-    
+        
+    def query(self,query,collection_name):
+        return self.db[collection_name].find(query)
+
     def check_unicity(self,document,collection_name):
         #Control that there is not already the item in the db
         c =self.db[collection_name].count_documents({"city":document["city"],"year":document["year"],"month":document["month"],"day":document["day"]}, limit= 1)

@@ -145,3 +145,7 @@ def run_sm():
     
     return response
 
+@api_sm.route('/retrieve_config',methods=['GET'])
+def retrieve_sm_config():
+    folder_name=request.args.get("graph",default = 'default_supply_model')
+    dbhandler=DatabaseHandler(host=current_app.config["HOST"],database=current_app.config["DATABASE"])

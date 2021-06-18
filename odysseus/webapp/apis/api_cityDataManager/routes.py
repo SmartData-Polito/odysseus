@@ -213,7 +213,7 @@ def get_data():
         ]
     
     #results = list(collection.aggregate(query))
-    results = dbhandler.query(query)
+    results = dbhandler.aggregate_query(query)
     '''
     if graph == 'all':
         query = {"_id":param_id}
