@@ -18,20 +18,20 @@ class DatabaseHandler:
         self.db = self.client[database]
         return
 
-    def upload(self,document,collection):
-        if self.check_unicity(document,collection):
-            id_object = self.db[collection].insert_one(json.loads(json_util.dumps(document)))
+    def upload(self,document,collection_name):
+        if self.check_unicity(document,collection_name):
+            id_object = self.db[collection_name].insert_one(json.loads(json_util.dumps(document)))
         else:
             print("Already existing document for those date")
             id_object=None
         return id_object
 
-    def query(self,query):
-        return list(self.col.aggregate(query))
+    def query(self,query,collection_name):
+        return list(self.db[collection_name].aggregate(query))
     
-    def check_unicity(self,document,collection):
+    def check_unicity(self,document,collection_name):
         #Control that there is not already the item in the db
-        c =self.db[collection].count_documents({"city":document["city"],"year":document["year"],"month":document["month"],"day":document["day"]}, limit= 1)
+        c =self.db[collection_name].count_documents({"city":document["city"],"year":document["year"],"month":document["month"],"day":document["day"]}, limit= 1)
         if c==0:
             return True
         return False

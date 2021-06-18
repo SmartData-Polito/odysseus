@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, make_response
+from flask import Blueprint, jsonify, request, make_response,current_app
 from odysseus.webapp.emulate_module.supply_modelling import SupplyModelling
 from odysseus.webapp.apis.api_cityDataManager.utils import *
 import pymongo as pm
@@ -56,7 +56,9 @@ def existing_models():
 
 @api_sm.route('/run_sm',methods=['POST'])
 def run_sm():
+    collection_name = "demand_models_config"  
     try:
+        dbhandler=DatabaseHandler(host=current_app.config["HOST"],database=current_app.config["DATABASE"])
         data = request.get_json(force=True)
         print("data received from the form", data)
 
@@ -97,7 +99,7 @@ def run_sm():
         print("Start Run")
         status = dm.run()
 
-        
+        dbhandler.upload(dict_for_sm_modelling,collection_name=collection_name)
         payload =  {
                 "link": "http://127.0.0.1:8501",
                 }
