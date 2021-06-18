@@ -111,7 +111,7 @@ def run_dm():
         print("Start Run")
         status = dm.run()
 
-        dbhandler.upload(dict_for_dm_modelling,collection_name=collection_name)
+        dbhandler.upload_config(dict_for_dm_modelling,collection_name=collection_name)
 
         payload =  {
                 "link": "http://127.0.0.1:8501",

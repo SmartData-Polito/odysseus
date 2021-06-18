@@ -26,15 +26,30 @@ class DatabaseHandler:
             id_object=None
         return id_object
 
+    def upload_config(self,document,collection_name):
+        if self.check_unicity_config(document,collection_name):
+            id_object = self.db[collection_name].insert_one(json.loads(json_util.dumps(document)))
+        else:
+            print("Already existing document for those date")
+            id_object=None
+        return id_object
+
     def aggregate_query(self,query,collection_name):
         return list(self.db[collection_name].aggregate(query))
-        
+
     def query(self,query,collection_name):
         return self.db[collection_name].find(query)
 
     def check_unicity(self,document,collection_name):
         #Control that there is not already the item in the db
         c =self.db[collection_name].count_documents({"city":document["city"],"year":document["year"],"month":document["month"],"day":document["day"]}, limit= 1)
+        if c==0:
+            return True
+        return False
+        
+    def check_unicity_config(self,document,collection_name):
+        #Control that there is not already the item in the db
+        c =self.db[collection_name].count_documents({"save_folder":document["save_folder"]}, limit= 1)
         if c==0:
             return True
         return False
