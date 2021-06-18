@@ -167,7 +167,8 @@ def get_data():
     year = json.loads(request.args.get("year",default = "[2017]"))
     month = json.loads(request.args.get("month",default = "[8]"))
     print(city," ",year,"-",month)
-    _,collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
+    #_,collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
+    dbhandler=DatabaseHandler(host=current_app.config["HOST"],database=current_app.config["DATABASE"])
     #query = [{"$match": {"city":str(city),"year":{"$in":year},"month":{"$in":month}}},{"$project": {"city":1,"year":1,"month":1,"day":1, "n_bookings": 1,"avg_duration":1,"_id": 0}},{"$sort":{"year":1,"month":1,"day":1}}]
     query = [
         {
@@ -211,7 +212,8 @@ def get_data():
         }
         ]
     
-    results = list(collection.aggregate(query))
+    #results = list(collection.aggregate(query))
+    results = dbhandler.query(query)
     '''
     if graph == 'all':
         query = {"_id":param_id}
