@@ -65,6 +65,29 @@ def run_dm():
         print("data received from the form", data)
 
 
+        #     {'values': 
+        #     {'city': 'Torino', 
+        #     'datasource': 'big_data_db', 
+        #     'datasources': [{'value': 'big_data_db', 'label': 'big_data_db'}], 
+        #     'year': 2017, 
+        #     'allYears': [{'value': '2016', 'label': '2016'}, {'value': '2017', 'label': '2017'}, {'value': '2018', 'label': '2018'}], 
+        #     'yearTest': 2017, 
+        #     'allYearsTest': [{'value': '2017', 'label': '2017'}, {'value': '2018', 'label': '2018'}], 
+        #     'month': 4, 
+        #     'allMonths': [{'value': '4', 'label': '4'}, {'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
+        #     'endMonth': 5, 
+        #     'allEndMonths': [{'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
+        #     'monthTest': 5, 
+        #     'allMonthsTest': [{'value': '5', 'label': '5'}, {'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
+        #     'endMonthTest': 7, 
+        #     'allEndMonthsTest': [{'value': '7', 'label': '7'}, {'value': '8', 'label': '8'}, {'value': '9', 'label': '9'}, {'value': '10', 'label': '10'}, {'value': '11', 'label': '11'}, {'value': '12', 'label': '12'}], 
+        #     'demandModelType': 'Kde Poisson', 
+        #     'bin_side_lenght': '500', 
+        #     'k_zones_factor': '1', 
+        #     'kde_bandwidth': '0.5'}
+        # }
+        
+
         # The values needed to run the Demand Modelling are:
         # city, datasource, year, month, endMonth, sim_technique, bin_side_lenght, k_zones_factor, kde_bandwidth,save folder
 
