@@ -65,7 +65,7 @@ def run_sm():
 
         # {'values': 
         #     {
-        #       "cities":["Amsterdam"],
+        #         "cities":["Amsterdam"],
                 # "data_source_ids":["big_data_db"],
                 # "num_vehicles":["500"],
                 # "tot_n_charging_poles":["100"],
@@ -84,9 +84,9 @@ def run_sm():
             "cities":[form_inputs["city"]],
             "data_source_ids":[form_inputs["datasource"]],
             "num_vehicles":form_inputs["num_vehicles"],
-            #"tot_n_charging_poles":form_inputs["tot_n_charging_poles"],
-            #"year":form_inputs["year"],
-            #"n_charging_zones":form_inputs["n_charging_zones"],
+            # "tot_n_charging_poles":form_inputs["tot_n_charging_poles"],
+            # "year":form_inputs["year"],
+            # "n_charging_zones":form_inputs["n_charging_zones"],
             "distributed_cps":form_inputs["distributed_cps"],
             "cps_placement_policy":form_inputs["cps_placement_policy"],
             #"n_relocation_workers":form_inputs["n_relocation_workers"],
@@ -94,7 +94,7 @@ def run_sm():
             "recover_supply_model":form_inputs["recover_supply_model"]
         }
 
-        print("STARTING THE SUPPLY MODELLING MODULE WITH CONFIG",dict_for_sm_modelling )
+        print("STARTING THE DEMAND MODELLING MODULE WITH CONFIG",dict_for_sm_modelling )
         dm = SupplyModelling(dict_for_sm_modelling)
         print("Start Run")
         status = dm.run()
@@ -149,3 +149,5 @@ def run_sm():
 def retrieve_sm_config():
     folder_name=request.args.get("graph",default = 'default_supply_model')
     dbhandler=DatabaseHandler(host=current_app.config["HOST"],database=current_app.config["DATABASE"])
+    res = dbhandler.query({"folder_name":folder_name})
+    return jsonify(res)
