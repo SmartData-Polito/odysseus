@@ -11,7 +11,7 @@ class SimOutput():
 		self.valid_zones = sim.simInput.valid_zones
 
 		self.sim_general_conf = sim.simInput.demand_model_config
-		self.sim_scenario_conf = sim.simInput.supply_model_conf
+		self.supply_model_conf = sim.simInput.supply_model_conf
 		self.grid = sim.simInput.grid
 
 		# Sim Stats creation
@@ -19,10 +19,6 @@ class SimOutput():
 		sim_stats_obj = SimStats()
 		self.sim_stats = sim_stats_obj.get_stats_from_sim(sim)
 		self.sim_stats = sim_stats_obj.sim_stats
-
-		
-
-
 
 		if self.sim_general_conf["save_history"]:
 
@@ -34,7 +30,7 @@ class SimOutput():
 			self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 			self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
 			self.sim_users_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
-			if self.sim_scenario_conf["vehicle_relocation"]:
+			if self.supply_model_conf["vehicle_relocation"]:
 				self.sim_vehicle_relocations = pd.DataFrame(sim.vehicleRelocationStrategy.sim_vehicle_relocations)
 
 			if "end_time" not in self.sim_system_charges_bookings:
@@ -260,11 +256,11 @@ class SimOutput():
 
 			if self.sim_stats["n_unsatisfied"]:
 				self.grid[
-					"unsatisfied_demand_origins_fraction"
-				] = self.sim_unsatisfied_requests.origin_id.value_counts() / len(self.sim_unsatisfied_requests)
+					"unsatisfied_demand_origins"
+				] = self.sim_unsatisfied_requests.origin_id.value_counts()
 			else:
 				self.grid[
-					"unsatisfied_demand_origins_fraction"
+					"unsatisfied_demand_origins"
 				] = 0
 
 			if len(self.sim_not_enough_energy_requests):
@@ -277,11 +273,11 @@ class SimOutput():
 				] = self.sim_charge_deaths.origin_id.value_counts()
 
 			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
-			insert_scenario_costs(self.sim_stats, self.sim_scenario_conf, vehicle_cost, charging_station_costs)
-			insert_sim_costs(self.sim_stats, self.sim_scenario_conf, fuel_costs, administrative_cost_conf,
-			                 vehicle_cost)
-			self.sim_stats.loc["profit"] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - \
-			                               self.sim_stats["sim_cost"]
+			insert_scenario_costs(self.sim_stats, self.supply_model_conf, vehicle_cost, charging_station_costs)
+			insert_sim_costs(self.sim_stats, self.supply_model_conf, fuel_costs, administrative_cost_conf, vehicle_cost)
+			self.sim_stats.loc[
+				"profit"
+			] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - self.sim_stats["sim_cost"]
 
 			self.vehicles_history = pd.DataFrame()
 			for vehicle in sim.vehicles_list:
@@ -301,10 +297,10 @@ class SimOutput():
 				zone_df["zone_id"] = key
 				self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)
 
-			if self.sim_scenario_conf["scooter_relocation"]:
+			if self.supply_model_conf["scooter_relocation"]:
 				self.relocation_history = pd.DataFrame(sim.scooterRelocationStrategy.sim_scooter_relocations)
 
-		if "vehicle_relocation" in self.sim_scenario_conf and self.sim_scenario_conf["vehicle_relocation"]:
+		if "vehicle_relocation" in self.supply_model_conf and self.supply_model_conf["vehicle_relocation"]:
 			self.sim_stats.loc["n_vehicle_relocations"] = sim.vehicleRelocationStrategy.n_vehicle_relocations
 			self.sim_stats.loc["tot_vehicle_relocations_distance"] = \
 				sim.vehicleRelocationStrategy.tot_vehicle_relocations_distance

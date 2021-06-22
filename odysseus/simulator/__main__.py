@@ -59,16 +59,16 @@ versioned_conf_path = os.path.join(
 )
 
 sim_general_conf_grid = get_sim_configs_from_path(versioned_conf_path, "sim_general_conf", "sim_general_conf_grid")
-sim_scenario_conf = get_sim_configs_from_path(versioned_conf_path, "single_run_conf", "sim_scenario_conf")
-sim_scenario_conf_grid = get_sim_configs_from_path(versioned_conf_path, "multiple_runs_conf", "sim_scenario_conf_grid")
+single_run_conf_grid = get_sim_configs_from_path(versioned_conf_path, "single_run_conf", "sim_scenario_conf")
+multiple_runs_conf_grid = get_sim_configs_from_path(versioned_conf_path, "multiple_runs_conf", "sim_scenario_conf_grid")
 
 print(sim_general_conf_grid)
-print(sim_scenario_conf)
-print(sim_scenario_conf_grid)
+print(single_run_conf_grid)
+print(multiple_runs_conf_grid)
 
 confs_dict = dict()
-confs_dict["multiple_runs"] = sim_scenario_conf_grid
-confs_dict["single_run"] = sim_scenario_conf
+confs_dict["multiple_runs"] = multiple_runs_conf_grid
+confs_dict["single_run"] = single_run_conf_grid
 
 sim_general_conf_list = EFFCS_SimConfGrid(sim_general_conf_grid).conf_list
 for sim_general_conf in sim_general_conf_list:
@@ -80,7 +80,7 @@ for sim_general_conf in sim_general_conf_list:
         city_supply_models_path = os.path.join(supply_models_path, sim_general_conf["city"])
         folder_path = os.path.join(city_supply_models_path, existing_supply_model_folder)
         if not os.path.exists(city_supply_models_path):
-            print("No data stored about " + sim_general_conf["city"] + "!")
+            print("No supply model found for " + sim_general_conf["city"] + "!")
             exit(3)
 
         if not os.path.exists(folder_path):
@@ -103,7 +103,7 @@ for sim_general_conf in sim_general_conf_list:
     folder_path = os.path.join(city_demand_models_path, existing_demand_model_folder)
 
     if not os.path.exists(city_demand_models_path):
-        print("No data stored about " + sim_general_conf["city"] + "!")
+        print("No demand model found for " + sim_general_conf["city"] + "!")
         exit(2)
 
     if not os.path.exists(folder_path):
@@ -120,9 +120,15 @@ for sim_general_conf in sim_general_conf_list:
     }
 
     if sim_run_mode == "single_run":
-        single_run(
-            parameters_dict
-        )
+        sim_conf_grid = EFFCS_SimConfGrid(single_run_conf_grid)
+        pool_stats_dict = {}
+        conf_tuples = []
+        for conf_id, sim_scenario_conf in enumerate(sim_conf_grid.conf_list):
+            parameters_dict["sim_scenario_conf"] = sim_scenario_conf
+            parameters_dict["sim_scenario_conf"]["conf_id"] = conf_id
+            single_run(
+                parameters_dict
+            )
 
     elif sim_run_mode == "multiple_runs":
         if args.n_cpus is not None:

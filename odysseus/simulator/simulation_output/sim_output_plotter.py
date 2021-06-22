@@ -24,22 +24,14 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 class EFFCS_SimOutputPlotter ():
 
-	def __init__ (self, sim_output, city, sim_scenario_name):
+	def __init__ (self, sim_output, city, sim_scenario_name, figures_path):
 
 		self.sim_output = sim_output
 		self.city = city
 		self.grid = sim_output.grid
 		self.sim_scenario_name = sim_scenario_name
 
-		self.figures_path = os.path.join(
-			os.path.dirname(os.path.dirname(__file__)),
-			"figures",
-			city,
-			"single_run",
-			sim_scenario_name,
-		)
-		
-		os.makedirs(self.figures_path, exist_ok=True)
+		self.figures_path = figures_path
 
 		self.sim_booking_requests = sim_output.sim_booking_requests
 
@@ -65,7 +57,7 @@ class EFFCS_SimOutputPlotter ():
 
 		self.sim_output = sim_output
 
-	def plot_city_zones(self):
+	def plot_city_zones(self, annotate=False):
 
 		fig, ax = plt.subplots(1, 1, figsize=(15, 15))
 		plt.title("")
@@ -75,10 +67,11 @@ class EFFCS_SimOutputPlotter ():
 		plt.yticks([])
 		self.grid.plot(color="white", edgecolor="black", ax=ax)
 		self.grid['coords'] = self.grid['geometry'].apply(lambda x: x.centroid.coords[0])
-		for idx, row in self.grid.iterrows():
-			plt.annotate(
-				text=row['zone_id'], xy=row['coords'], horizontalalignment='center'
-			)
+		if annotate:
+			for idx, row in self.grid.iterrows():
+				plt.annotate(
+					text=row['zone_id'], xy=row['coords'], horizontalalignment='center'
+				)
 		plt.savefig(os.path.join(self.figures_path, "city_zones.png"), transparent=True)
 		plt.close()
 

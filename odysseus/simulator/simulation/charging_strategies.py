@@ -11,8 +11,8 @@ class ChargingStrategy(ChargingPrimitives):
 			charging_zone_id = booking_request["destination_id"]
 			charging_outward_distance = 0
 
-			if self.simInput.sim_scenario_conf["scooter_relocation"] \
-				and self.simInput.sim_scenario_conf["scooter_relocation_strategy"] == "post_battery_swap":
+			if self.simInput.supply_model_conf["scooter_relocation"] \
+				and self.simInput.supply_model_conf["scooter_relocation_strategy"] == "post_battery_swap":
 
 				if operator == "system":
 					relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
@@ -23,7 +23,7 @@ class ChargingStrategy(ChargingPrimitives):
 					if relocated:
 						charging_zone_id = scooter_relocation["end_zone_id"]
 
-						if self.simInput.sim_scenario_conf["time_estimation"]:
+						if self.simInput.supply_model_conf["time_estimation"]:
 							timeout_return = scooter_relocation["duration"]
 
 					else:

@@ -50,7 +50,7 @@ class ScooterRelocationPrimitives:
 
         self.relocation_workers_resource = simpy.Resource(
             self.env,
-            capacity=self.simInput.sim_scenario_conf["n_relocation_workers"]
+            capacity=self.simInput.supply_model_conf["n_relocation_workers"]
         )
 
         self.current_hour_origin_count = {}

@@ -37,8 +37,8 @@ class ModelDrivenSim(SharedMobilitySim):
             self.current_daytype = "weekday"
 
         if self.update_relocation_schedule \
-                and self.simInput.sim_scenario_conf["scooter_relocation"] \
-                and self.simInput.sim_scenario_conf["scooter_relocation_strategy"] in ["proactive",
+                and self.simInput.supply_model_conf["scooter_relocation"] \
+                and self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["proactive",
                                                                                        "reactive_post_charge",
                                                                                        "reactive_post_trip",
                                                                                        "predictive"]:
@@ -47,9 +47,9 @@ class ModelDrivenSim(SharedMobilitySim):
             self.update_relocation_schedule = False
 
         if self.update_relocation_schedule \
-                and self.simInput.sim_scenario_conf["vehicle_relocation"] \
-                and "vehicle_relocation_scheduling" in self.simInput.sim_scenario_conf.keys() \
-                and self.simInput.sim_scenario_conf["vehicle_relocation_scheduling"]:
+                and self.simInput.supply_model_conf["vehicle_relocation"] \
+                and "vehicle_relocation_scheduling" in self.simInput.supply_model_conf.keys() \
+                and self.simInput.supply_model_conf["vehicle_relocation_scheduling"]:
             self.vehicleRelocationStrategy.generate_relocation_schedule(self.current_datetime, self.current_daytype,
                                                                         self.current_hour)
             self.update_relocation_schedule = False
@@ -117,7 +117,7 @@ class ModelDrivenSim(SharedMobilitySim):
 
             timeout_sec = (
                 np.random.exponential(
-                    1 / self.simInput.sim_scenario_conf["requests_rate_factor"] / self.current_arrival_rate
+                    1 / self.simInput.supply_model_conf["requests_rate_factor"] / self.current_arrival_rate
                 )
             )
 

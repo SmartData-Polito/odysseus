@@ -29,16 +29,27 @@ def single_run(conf_dict):
         city,
         "single_run",
         sim_scenario_name,
+        str(sim_scenario_conf["conf_id"])
     )
     os.makedirs(results_path, exist_ok=True)
+
+    figures_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),
+        "figures",
+        city,
+        "single_run",
+        sim_scenario_name,
+        str(sim_scenario_conf["conf_id"])
+    )
+    os.makedirs(figures_path, exist_ok=True)
 
     print(city, datetime.datetime.now(), "City initialised!")
 
     input_parameters = {
-        "sim_general_conf":sim_general_conf,
-        "sim_scenario_conf":sim_scenario_conf,
-        "supply_model_object":supply_model_object,
-        "demand_model_folder":demand_model_folder
+        "sim_general_conf": sim_general_conf,
+        "sim_scenario_conf": sim_scenario_conf,
+        "supply_model_object": supply_model_object,
+        "demand_model_folder": demand_model_folder
     }
 
     if sim_type == "eventG":
@@ -106,7 +117,7 @@ def single_run(conf_dict):
         simOutput.sim_not_enough_energy_requests.to_pickle(
             os.path.join(
                 results_path,
-                "sim_unsatisfied_no-energy.pickle" # maybe change to underscore?
+                "sim_unsatisfied_no_energy.pickle" # maybe change to underscore?
             )
         )
         simOutput.sim_no_close_vehicle_requests.to_pickle(
@@ -178,7 +189,7 @@ def single_run(conf_dict):
 
         print(datetime.datetime.now(), city, sim_scenario_name, "results saved!")
 
-        plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name)
+        plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name, figures_path)
         plotter.plot_events_profile_barh()
         plotter.plot_events_t()
         plotter.plot_fleet_status_t()
@@ -188,17 +199,17 @@ def single_run(conf_dict):
         plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
 
         plotter.plot_city_zones()
-        #plotter.plot_charging_infrastructure()
-        # for col in [
-        #     "origin_count",
-        #     "destination_count",
-        #     "charge_needed_system_zones_count",
-        #     "charge_needed_users_zones_count",
-        #     "unsatisfied_demand_origins_fraction",
-        #     "not_enough_energy_origins_count",
-        #     "charge_deaths_origins_count",
-        # ]:
-        #     if col in simOutput.grid:
-        #         plotter.plot_choropleth(col)
+        plotter.plot_charging_infrastructure()
+        for col in [
+            "origin_count",
+            "destination_count",
+            "charge_needed_system_zones_count",
+            #"charge_needed_users_zones_count",
+            "unsatisfied_demand_origins",
+            "not_enough_energy_origins_count",
+            "charge_deaths_origins_count",
+        ]:
+            if col in simOutput.grid:
+                plotter.plot_choropleth(col)
 
     return sim_stats
