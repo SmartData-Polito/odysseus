@@ -55,7 +55,7 @@ def single_run(conf_dict):
     if sim_type == "eventG":
         simInput_eventG = get_eventG_input(input_parameters)
         sim_eventG = run_eventG_sim(simInput=simInput_eventG)
-        simOutput_eventG = SimOutput(sim_eventG)
+        simOutput_eventG = SimOutput(sim_eventG, results_path, sim_general_conf, sim_scenario_conf)
         sim_stats = simOutput_eventG.sim_stats
         simOutput = simOutput_eventG
 
@@ -63,13 +63,11 @@ def single_run(conf_dict):
 
         simInput_traceB = get_traceB_input(input_parameters)
         sim_traceB = run_traceB_sim (simInput=simInput_traceB)
-        simOutput_traceB = SimOutput(sim_traceB)
+        simOutput_traceB = SimOutput(sim_traceB, results_path, sim_general_conf, sim_scenario_conf)
         sim_stats = simOutput_traceB.sim_stats
         simOutput = simOutput_traceB
 
-    print(datetime.datetime.now(), city, sim_scenario_name, "finished!")
-
-    os.makedirs(results_path, exist_ok=True)
+    print(datetime.datetime.now(), city, sim_scenario_name, sim_scenario_conf["conf_id"], "finished!")
 
     sim_stats.to_pickle(os.path.join(results_path, "sim_stats.pickle"))
     sim_stats.to_csv(os.path.join(results_path, "sim_stats.csv"))
@@ -95,100 +93,6 @@ def single_run(conf_dict):
     )
 
     if sim_general_conf["save_history"]:
-
-        simOutput.sim_booking_requests.to_csv(
-            os.path.join(
-                results_path,
-                "sim_booking_requests.csv"
-            )
-        )
-        simOutput.sim_bookings.to_pickle(
-            os.path.join(
-                results_path,
-                "sim_bookings.pickle"
-            )
-        )
-        simOutput.sim_charges.to_pickle(
-            os.path.join(
-                results_path,
-                "sim_charges.pickle"
-            )
-        )
-        simOutput.sim_not_enough_energy_requests.to_pickle(
-            os.path.join(
-                results_path,
-                "sim_unsatisfied_no_energy.pickle" # maybe change to underscore?
-            )
-        )
-        simOutput.sim_no_close_vehicle_requests.to_pickle(
-            os.path.join(
-                results_path,
-                "sim_unsatisfied_no_close_vehicle.pickle"
-            )
-        )
-        simOutput.sim_unsatisfied_requests.to_pickle(
-            os.path.join(
-                results_path,
-                "sim_unsatisfied_requests.pickle"
-            )
-        )
-        simOutput.sim_system_charges_bookings.to_pickle(
-            os.path.join(
-                results_path,
-                "sim_system_charges_bookings.pickle"
-            )
-        )
-        
-        simOutput.sim_users_charges_bookings.to_pickle(
-            os.path.join(
-                results_path,
-                "sim_users_charges_bookings.pickle"
-            )
-        )
-        simOutput.sim_unfeasible_charge_bookings.to_pickle(
-            os.path.join(
-                results_path,
-                "sim_unfeasible_charge_bookings.pickle"
-            )
-        )
-        simOutput.sim_charge_deaths.to_pickle(
-            os.path.join(
-                results_path,
-                "sim_unfeasible_charges.pickle"
-            )
-        )
-
-        simOutput.vehicles_history.to_csv(
-            os.path.join(
-                results_path,
-                "vehicles_history.csv"
-            )
-        )
-
-        simOutput.stations_history.to_csv(
-            os.path.join(
-                results_path,
-                "stations_history.csv"
-            )
-        )
-
-        simOutput.zones_history.to_csv(
-            os.path.join(
-                results_path,
-                "zones_history.csv"
-            )
-        )
-
-        if sim_scenario_conf["scooter_relocation"]:
-            simOutput.relocation_history.to_csv(
-                os.path.join(
-                    results_path,
-                    "relocation_history.csv"
-                )
-            )
-
-        print(datetime.datetime.now(), city, sim_scenario_name, "results saved!")
-
         plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name, figures_path)
         plotter.plot_events_profile_barh()
         plotter.plot_events_t()

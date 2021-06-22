@@ -1,3 +1,5 @@
+import os
+import datetime
 import pandas as pd
 from odysseus.simulator.simulation_output.sim_stats import SimStats
 from odysseus.utils.cost_utils import insert_sim_costs, insert_scenario_costs
@@ -6,7 +8,7 @@ from odysseus.simulator.simulation_input.costs_conf import *
 
 class SimOutput():
 
-	def __init__(self, sim):
+	def __init__(self, sim, results_path, sim_general_conf, sim_scenario_conf):
 
 		self.valid_zones = sim.simInput.valid_zones
 
@@ -310,3 +312,96 @@ class SimOutput():
 		for key in self.sim_stats.index:
 			if key.startswith("fraction"):
 				self.sim_stats["percentage" + key[8:]] = self.sim_stats[key] * 100
+
+		if sim_general_conf["save_history"]:
+
+			self.sim_booking_requests.to_csv(
+				os.path.join(
+					results_path,
+					"sim_booking_requests.csv"
+				)
+			)
+			self.sim_bookings.to_pickle(
+				os.path.join(
+					results_path,
+					"sim_bookings.pickle"
+				)
+			)
+			self.sim_charges.to_pickle(
+				os.path.join(
+					results_path,
+					"sim_charges.pickle"
+				)
+			)
+			self.sim_not_enough_energy_requests.to_pickle(
+				os.path.join(
+					results_path,
+					"sim_unsatisfied_no_energy.pickle"  #  maybe change to underscore?
+				)
+			)
+			self.sim_no_close_vehicle_requests.to_pickle(
+				os.path.join(
+					results_path,
+					"sim_unsatisfied_no_close_vehicle.pickle"
+				)
+			)
+			self.sim_unsatisfied_requests.to_pickle(
+				os.path.join(
+					results_path,
+					"sim_unsatisfied_requests.pickle"
+				)
+			)
+			self.sim_system_charges_bookings.to_pickle(
+				os.path.join(
+					results_path,
+					"sim_system_charges_bookings.pickle"
+				)
+			)
+
+			self.sim_users_charges_bookings.to_pickle(
+				os.path.join(
+					results_path,
+					"sim_users_charges_bookings.pickle"
+				)
+			)
+			self.sim_unfeasible_charge_bookings.to_pickle(
+				os.path.join(
+					results_path,
+					"sim_unfeasible_charge_bookings.pickle"
+				)
+			)
+			self.sim_charge_deaths.to_pickle(
+				os.path.join(
+					results_path,
+					"sim_unfeasible_charges.pickle"
+				)
+			)
+
+			self.vehicles_history.to_csv(
+				os.path.join(
+					results_path,
+					"vehicles_history.csv"
+				)
+			)
+
+			self.stations_history.to_csv(
+				os.path.join(
+					results_path,
+					"stations_history.csv"
+				)
+			)
+
+			self.zones_history.to_csv(
+				os.path.join(
+					results_path,
+					"zones_history.csv"
+				)
+			)
+
+			if sim_scenario_conf["scooter_relocation"]:
+				self.relocation_history.to_csv(
+					os.path.join(
+						results_path,
+						"relocation_history.csv"
+					)
+				)

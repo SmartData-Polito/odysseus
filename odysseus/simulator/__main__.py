@@ -63,8 +63,6 @@ single_run_conf_grid = get_sim_configs_from_path(versioned_conf_path, "single_ru
 multiple_runs_conf_grid = get_sim_configs_from_path(versioned_conf_path, "multiple_runs_conf", "sim_scenario_conf_grid")
 
 print(sim_general_conf_grid)
-print(single_run_conf_grid)
-print(multiple_runs_conf_grid)
 
 confs_dict = dict()
 confs_dict["multiple_runs"] = multiple_runs_conf_grid
@@ -120,6 +118,7 @@ for sim_general_conf in sim_general_conf_list:
     }
 
     if sim_run_mode == "single_run":
+        print(single_run_conf_grid)
         sim_conf_grid = EFFCS_SimConfGrid(single_run_conf_grid)
         pool_stats_dict = {}
         conf_tuples = []
@@ -131,6 +130,8 @@ for sim_general_conf in sim_general_conf_list:
             )
 
     elif sim_run_mode == "multiple_runs":
+        print(multiple_runs_conf_grid)
+        parameters_dict["sim_general_conf"]["save_history"] = False
         if args.n_cpus is not None:
             parameters_dict["n_cpus"] = int(args.n_cpus)
             multiple_runs(
