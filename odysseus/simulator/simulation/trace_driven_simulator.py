@@ -3,6 +3,7 @@ import datetime
 from odysseus.simulator.simulation.simulator import SharedMobilitySim
 from odysseus.utils.time_utils import update_req_time_info
 from odysseus.simulator.simulation_data_structures.booking_request import BookingRequest
+from odysseus.utils.bookings_utils import *
 
 
 class TraceDrivenSim (SharedMobilitySim):

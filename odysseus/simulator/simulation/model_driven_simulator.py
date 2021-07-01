@@ -3,10 +3,10 @@ import itertools
 
 import numpy as np
 
-from odysseus.utils.geospatial_utils import get_od_distance
 from odysseus.simulator.simulation.simulator import SharedMobilitySim
 
 from odysseus.simulator.simulation_data_structures.booking_request import BookingRequest
+from odysseus.utils.bookings_utils import *
 
 np.random.seed(44)
 
@@ -55,16 +55,10 @@ class ModelDrivenSim(SharedMobilitySim):
         booking_request_dict["origin_id"] = self.closest_valid_zone.loc[booking_request_dict["origin_id"]]
         booking_request_dict["destination_id"] = self.closest_valid_zone.loc[booking_request_dict["destination_id"]]
 
-        booking_request_dict["euclidean_distance"] = get_od_distance(
-            self.simInput.grid,
-            booking_request_dict["origin_id"],
-            booking_request_dict["destination_id"]
+        booking_request_dict = get_distances(
+            booking_request_dict, self.simInput.grid, self.simInput.demand_model_config["bin_side_length"]
         )
 
-        if booking_request_dict["euclidean_distance"] == 0:
-            booking_request_dict["euclidean_distance"] = self.simInput.demand_model_config["bin_side_length"]
-
-        booking_request_dict["driving_distance"] = booking_request_dict["euclidean_distance"] * 1.4
         booking_request_dict["duration"] = booking_request_dict["driving_distance"] / (
                 self.simInput.avg_speed_kmh_mean / 3.6
         )

@@ -69,7 +69,10 @@ confs_dict["multiple_runs"] = multiple_runs_conf_grid
 confs_dict["single_run"] = single_run_conf_grid
 
 sim_general_conf_list = EFFCS_SimConfGrid(sim_general_conf_grid).conf_list
-for sim_general_conf in sim_general_conf_list:
+
+for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
+
+    sim_general_conf["general_conf_id"] = general_conf_id
 
     sim_run_mode = sim_general_conf["sim_run_mode"]
 
@@ -124,7 +127,7 @@ for sim_general_conf in sim_general_conf_list:
         conf_tuples = []
         for conf_id, sim_scenario_conf in enumerate(sim_conf_grid.conf_list):
             parameters_dict["sim_scenario_conf"] = sim_scenario_conf
-            parameters_dict["sim_scenario_conf"]["conf_id"] = conf_id
+            parameters_dict["sim_scenario_conf"]["conf_id"] = "_".join([str(general_conf_id), str(conf_id)])
             single_run(
                 parameters_dict
             )
