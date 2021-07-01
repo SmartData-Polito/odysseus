@@ -10,7 +10,7 @@ def run_eventG_sim (simInput):
                 simInput=simInput
     
             )
-    sim_eventG.init_data_structures()    
+    sim_eventG.init_demand_data_structures()
     sim_eventG.run()
     return sim_eventG
 

@@ -4,14 +4,7 @@ from odysseus.simulator.simulation_input.sim_input import SimInput
 
 
 def run_traceB_sim (simInput):
-
-    sim_traceB = TraceDrivenSim(
-    
-                simInput=simInput,
-    
-            )
-
-    sim_traceB.init_data_structures()
+    sim_traceB = TraceDrivenSim(simInput=simInput)
     sim_traceB.run()
     return sim_traceB
 
@@ -33,7 +26,6 @@ def get_traceB_sim_stats(conf_tuple):
         "sim_scenario_conf": sim_scenario_conf,
         "supply_model_object": supply_model_object,
         "demand_model_folder": demand_model_folder
-
     }
 
     simInput = SimInput(parameters_input)

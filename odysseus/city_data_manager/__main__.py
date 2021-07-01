@@ -12,7 +12,6 @@ from odysseus.city_data_manager.city_geo_trips.chicago_geo_trips import ChicagoG
 from odysseus.city_data_manager.city_geo_trips.calgary_geo_trips import CalgaryGeoTrips
 
 
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument(

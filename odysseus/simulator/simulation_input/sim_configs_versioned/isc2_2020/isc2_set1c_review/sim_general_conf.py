@@ -5,7 +5,7 @@ sim_general_conf_grid = {
     "sim_run_mode": ["single_run"],
 
     "data_source_id": ["big_data_db"],
-    "sim_technique": ["eventG"],
+    "sim_technique": ["traceB", "eventG"],
     "sim_scenario_name": ["single_run_lambda_comparison"],
 
     # Fleet general parameters

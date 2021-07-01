@@ -123,7 +123,6 @@ class ScooterRelocationPrimitives:
                     prediction_model_configs["time_horizon_three"], self.city_shape,
                     8, mask=mask, path=prediction_model_path)
 
-
     def relocate_scooter_single_zone(self, scooter_relocation, move_vehicles=False, worker=None):
 
         with self.relocation_workers_resource.request() as relocation_worker_request:

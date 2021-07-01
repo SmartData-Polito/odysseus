@@ -4,7 +4,7 @@ import numpy as np
 
 sim_scenario_conf = {
 
-    "requests_rate_factor": [6, 6.5, 7],
+    "requests_rate_factor": [1],
     "n_vehicles_factor": [1],
 
     "engine_type": ["electric"],
