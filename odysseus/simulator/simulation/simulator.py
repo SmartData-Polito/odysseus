@@ -1,8 +1,6 @@
 import copy
 import datetime
 import pytz
-import json
-from random import sample
 
 import simpy
 
@@ -285,109 +283,49 @@ class SharedMobilitySim:
                 self.sim_booking_requests += [booking_request_dict]
         self.n_booking_requests += 1
 
-        available_vehicle_flag = False
-        found_vehicle_flag = False
-        available_vehicle_flag_same_zone = False
-        available_vehicle_flag_not_same_zone = False
+        flags_return_dict, max_soc_vehicle_id, max_soc_zone_id = booking_request.search_vehicle(
+            available_vehicles_dict=self.available_vehicles_dict,
+            vehicles_list=self.vehicles_list,
+            neighbors_dict=self.neighbors_dict,
+            booking_request_dict=booking_request_dict
+        )
 
-        def find_vehicle(zone_id):
-            available_vehicles_soc_dict = {
-                k: self.vehicles_list[k].soc.level for k in self.available_vehicles_dict[zone_id]
-            }
-            max_soc = max(available_vehicles_soc_dict.values())
-            max_soc_vehicle = max(available_vehicles_soc_dict, key=available_vehicles_soc_dict.get)
-            if self.vehicles_list[max_soc_vehicle].soc.level > abs(
-                    self.vehicles_list[max_soc_vehicle].consumption_to_percentage(
-                        self.vehicles_list[max_soc_vehicle].distance_to_consumption(
-                            booking_request_dict["driving_distance"] / 1000)
-                    )
-            ):
-                return True, max_soc_vehicle, max_soc
-            else:
-                return False, max_soc_vehicle, max_soc
-
-        if len(self.available_vehicles_dict[booking_request_dict["origin_id"]]):
-            available_vehicle_flag = True
-            available_vehicle_flag_same_zone = True
-            found_vehicle_flag, max_soc_vehicle_origin, max_soc_origin = \
-                booking_request.search_max_soc_vehicle(
-                    self.available_vehicles_dict, self.vehicles_list, booking_request_dict,
-                    booking_request_dict["origin_id"]
-                )
+        available_vehicle_flag = flags_return_dict["available_vehicle_flag"]
+        found_vehicle_flag = flags_return_dict["found_vehicle_flag"]
+        available_vehicle_flag_same_zone = flags_return_dict["available_vehicle_flag_same_zone"]
+        available_vehicle_flag_not_same_zone = flags_return_dict["available_vehicle_flag_not_same_zone"]
 
         if found_vehicle_flag:
-            booking_request_dict["soc_delta"] = self.vehicles_list[max_soc_vehicle_origin].consumption_to_percentage(
-                self.vehicles_list[max_soc_vehicle_origin].distance_to_consumption(
+            booking_request_dict["soc_delta"] = self.vehicles_list[max_soc_vehicle_id].consumption_to_percentage(
+                self.vehicles_list[max_soc_vehicle_id].distance_to_consumption(
                     booking_request_dict["driving_distance"] / 1000
                 )
             )
-            booking_request_dict["welltotank_kwh"] = self.vehicles_list[max_soc_vehicle_origin].welltotank_energy_from_perc(
+            booking_request_dict["welltotank_kwh"] = self.vehicles_list[max_soc_vehicle_id].welltotank_energy_from_perc(
                 booking_request_dict["soc_delta"]
             )
             booking_request_dict["tanktowheel_kwh"] = self.vehicles_list[
-                max_soc_vehicle_origin].tanktowheel_energy_from_perc(
+                max_soc_vehicle_id
+            ].tanktowheel_energy_from_perc(
                 booking_request_dict["soc_delta"]
             )
             booking_request_dict["soc_delta_kwh"] = booking_request_dict["welltotank_kwh"] + booking_request_dict["tanktowheel_kwh"]
             booking_request_dict["welltotank_emissions"] = self.vehicles_list[
-                max_soc_vehicle_origin].distance_to_welltotank_emission(booking_request_dict["driving_distance"] / 1000)
+                max_soc_vehicle_id
+            ].distance_to_welltotank_emission(booking_request_dict["driving_distance"] / 1000)
             booking_request_dict["tanktowheel_emissions"] = self.vehicles_list[
-                max_soc_vehicle_origin].distance_to_tanktowheel_emission(booking_request_dict["driving_distance"] / 1000)
+                max_soc_vehicle_id
+            ].distance_to_tanktowheel_emission(booking_request_dict["driving_distance"] / 1000)
             booking_request_dict["co2_emissions"] = booking_request_dict["welltotank_emissions"] + \
                                                     booking_request_dict["tanktowheel_emissions"]
             self.env.process(
-                self.execute_booking(booking_request_dict, max_soc_vehicle_origin, booking_request_dict["origin_id"])
+                self.execute_booking(booking_request_dict, max_soc_vehicle_id, max_soc_zone_id)
             )
+
+        if available_vehicle_flag_same_zone:
             self.n_same_zone_trips += 1
-        else:
-            available_vehicle_flag = False
-            found_vehicle_flag = False
-            available_vehicle_flag_same_zone = False
-            available_vehicle_flag_not_same_zone = False
-            max_soc_vehicle_neighbors = None
-            max_soc_neighbors = -1
-            max_neighbor = None
-            for neighbor in self.neighbors_dict[booking_request_dict["origin_id"]].dropna().values:
-                if neighbor in self.available_vehicles_dict:
-                    if len(self.available_vehicles_dict[neighbor]) and not found_vehicle_flag:
-                        available_vehicle_flag = True
-                        available_vehicle_flag_not_same_zone = True
-                        found_vehicle_flag, max_soc_vehicle_neighbor, max_soc_neighbor = \
-                            booking_request.search_max_soc_vehicle(
-                                self.available_vehicles_dict, self.vehicles_list, booking_request_dict,
-                                neighbor
-                            )
-                        if max_soc_neighbors < max_soc_neighbor:
-                            max_neighbor = neighbor
-                            max_soc_vehicle_neighbors = max_soc_vehicle_neighbor
-            if found_vehicle_flag:
-                booking_request_dict["soc_delta"] = self.vehicles_list[max_soc_vehicle_neighbors].consumption_to_percentage(
-                    self.vehicles_list[max_soc_vehicle_neighbors].distance_to_consumption(
-                        booking_request_dict["driving_distance"] / 1000
-                    )
-                )
-                # booking_request["avg_speed_kmh"] = (booking_request["driving_distance"] / 1000)/\
-                #                                    (booking_request['duration'] / 3600)
-                booking_request_dict["welltotank_kwh"] = self.vehicles_list[
-                    max_soc_vehicle_neighbors].welltotank_energy_from_perc(
-                    booking_request_dict["soc_delta"]
-                )
-                booking_request_dict["tanktowheel_kwh"] = self.vehicles_list[
-                    max_soc_vehicle_neighbors].tanktowheel_energy_from_perc(
-                    booking_request_dict["soc_delta"]
-                )
-                booking_request_dict["soc_delta_kwh"] = booking_request_dict["welltotank_kwh"] + booking_request_dict[
-                    "tanktowheel_kwh"]
-                booking_request_dict["welltotank_emissions"] = self.vehicles_list[
-                    max_soc_vehicle_neighbors].distance_to_welltotank_emission(booking_request_dict["driving_distance"] / 1000)
-                booking_request_dict["tanktowheel_emissions"] = self.vehicles_list[
-                    max_soc_vehicle_neighbors].distance_to_tanktowheel_emission(booking_request_dict["driving_distance"] / 1000)
-                booking_request_dict["co2_emissions"] = booking_request_dict["welltotank_emissions"] + \
-                                                        booking_request_dict["tanktowheel_emissions"]
-                self.env.process(
-                    self.execute_booking(booking_request_dict, max_soc_vehicle_neighbors, max_neighbor)
-                )
-                self.n_not_same_zone_trips += 1
+        elif available_vehicle_flag_not_same_zone:
+            self.n_not_same_zone_trips += 1
 
         if not found_vehicle_flag \
                 and "scooter_relocation" in self.simInput.supply_model_conf \
@@ -407,7 +345,6 @@ class SharedMobilitySim:
                 self.vehicles_zones[vehicle] = relocation_zone_id
 
                 available_vehicle_flag = True
-                available_vehicle_flag_same_zone = True
                 found_vehicle_flag = True
 
                 self.env.process(
@@ -423,7 +360,6 @@ class SharedMobilitySim:
 
             if relocated:
                 available_vehicle_flag = True
-                available_vehicle_flag_same_zone = True
                 found_vehicle_flag = True
 
                 self.env.process(
@@ -445,19 +381,8 @@ class SharedMobilitySim:
             self.n_deaths += 1
             death = copy.deepcopy(booking_request_dict)
             death["hour"] = death["start_time"].hour
-            if available_vehicle_flag_same_zone and available_vehicle_flag_not_same_zone:
-                if max_soc_origin > max_soc_neighbor:
-                    death["plate"] = max_soc_vehicle_origin
-                    death["zone_id"] = booking_request_dict["origin_id"]
-                else:
-                    death["plate"] = max_soc_vehicle_neighbor
-                    death["zone_id"] = max_neighbor
-            elif available_vehicle_flag_same_zone:
-                death["plate"] = max_soc_vehicle_origin
-                death["zone_id"] = booking_request_dict["origin_id"]
-            elif available_vehicle_flag_not_same_zone:
-                death["plate"] = max_soc_vehicle_neighbor
-                death["zone_id"] = max_neighbor
+            death["plate"] = max_soc_vehicle_id
+            death["zone_id"] = max_soc_zone_id
             if "save_history" in self.simInput.demand_model_config:
                 if self.simInput.demand_model_config["save_history"]:
                     self.sim_booking_requests_deaths += [death]
