@@ -25,9 +25,10 @@ DEFAULT_FORM = {
 class SupplyModelling:
     
     def __init__(self,form_inputs=DEFAULT_FORM):
-        self.form =form_inputs
-        self.cities=form_inputs["cities"]
-        self.data_source_ids=form_inputs["data_source_ids"]
+
+        self.form = form_inputs
+        self.city=form_inputs["city"]
+        self.datasource=form_inputs["datasource"]
         self.num_vehicles=form_inputs["num_vehicles"]
         self.tot_n_charging_poles=form_inputs["tot_n_charging_poles"]
         self.n_charging_zones=form_inputs["n_charging_zones"]
@@ -35,8 +36,8 @@ class SupplyModelling:
         self.distributed_cps=form_inputs["distributed_cps"]
         self.cps_placement_policy=form_inputs["cps_placement_policy"]
         self.n_relocation_workers=form_inputs["n_relocation_workers"]
-        self.folder_name=form_inputs["folder_name"]
-        self.recover_supply_model=form_inputs["recover_supply_model"]
+        self.save_folder=form_inputs["save_folder"]
+        self.recover_supply_model=""
 
         #self.available_policy = ["num_parkings", "old_manual", "real_positions", "realpos_numpark"]
 

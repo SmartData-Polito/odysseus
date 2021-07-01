@@ -14,39 +14,40 @@ from odysseus.dashboards.session_state import get
 from odysseus.login.login import *
 from odysseus.dashboards.dashboard import *
 
-session_state = get(password='', username='')
+# session_state = get(password='', username='')
 
 
-def generate_button_choice():
-    dashboard_button_block = st.empty()
-    react_button_block = st.empty()
-    dashboard_button = dashboard_button_block.button('DASHBOARD')
-    react_button = react_button_block.button('REACT')
+# def generate_button_choice():
+#     dashboard_button_block = st.empty()
+#     react_button_block = st.empty()
+#     dashboard_button = dashboard_button_block.button('DASHBOARD')
+#     react_button = react_button_block.button('REACT')
 
-    if dashboard_button:
-        dashboard_button_block.empty()
-        react_button_block.empty()
-        load_dashboard()
+#     if dashboard_button:
+#         dashboard_button_block.empty()
+#         react_button_block.empty()
+#         load_dashboard()
 
-    if react_button:
-        webbrowser.open_new_tab('http://localhost:3000')
+#     if react_button:
+#         webbrowser.open_new_tab('http://localhost:3000')
 
 
-if not is_authenticated(session_state.username, session_state.password):
-    login_blocks = generate_login_block()
-    username, password = login(login_blocks)
-    session_state.username = username
-    session_state.password = password
-    if is_authenticated(username, password):
-        clean_blocks(login_blocks)
-        generate_button_choice()
-    elif session_state.password != '':
-        st.error(
-            """
-            Username or password not recognised.
-            Please try again.
-            """
-        )
-else:
-    load_dashboard()
+# if not is_authenticated(session_state.username, session_state.password):
+#     login_blocks = generate_login_block()
+#     username, password = login(login_blocks)
+#     session_state.username = username
+#     session_state.password = password
+#     if is_authenticated(username, password):
+#         clean_blocks(login_blocks)
+#         generate_button_choice()
+#     elif session_state.password != '':
+#         st.error(
+#             """
+#             Username or password not recognised.
+#             Please try again.
+#             """
+#         )
+# else:
+#     load_dashboard()
 
+load_dashboard()
