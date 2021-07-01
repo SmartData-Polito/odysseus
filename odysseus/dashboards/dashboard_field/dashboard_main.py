@@ -55,7 +55,7 @@ class DashboardMain(DashboardField):
         ret = [name, city, month, year, db]
         col1, col2, col3 = st.sidebar.beta_columns([1,1,1])
         if col2.button('Go to React'):
-            webbrowser.open_new_tab('http://localhost:3000')
+            webbrowser.open_new_tab('127.0.0.1:3000')
 
         return tuple(ret)
 
@@ -84,7 +84,7 @@ class DashboardMain(DashboardField):
         elif name == "Demand Modelling":
             main_screen= ScreenDemand(title="Titolo: " + name, name=name,month = month, year = year, city = city)
         elif name == "Supply Modelling":
-            main_screen= ScreenDemand(title="Titolo: " + name, name=name,month = month, year = year, city = city)
+            main_screen= ScreenSupply(title="Titolo: " + name, name=name,month = month, year = year, city = city)
         elif name == "Simulator":
             main_screen= ScreenDemand(title="Titolo: " + name, name=name,month = month, year = year, city = city)
  #       

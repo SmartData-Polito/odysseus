@@ -127,6 +127,8 @@ def st_functional_columns(lista, sizes=None):
                       f = partial(cols[i].multiselect, *el[1:])
                   elif el[0] == "date_input":
                       f = partial(cols[i].date_input, *el[1:])
+                  elif el[0] == "number_input":
+                      f = partial(cols[i].number_input, *el[1:])
 
                   ret.append(f())
               i += 1
