@@ -122,27 +122,6 @@ def run_dm():
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
         response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
         response.status_code = code
-        # if status["status"] == "complete":
-            # payload =  status.update({
-            #     "link": "http://127.0.0.1:8501",
-            #     })
-            # code = 302
-            # response = make_response(jsonify(payload), code)
-            # response.headers['Access-Control-Allow-Origin'] = '*'
-            # response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
-            # response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
-            # response.status_code = code
-        
-        # testing form submission
-        # payload =   {
-        #         "link": "http://127.0.0.1:8501"
-        #         }
-        # code = 302
-        # response = make_response(jsonify(payload), code)
-        # response.headers['Access-Control-Allow-Origin'] = '*'
-        # response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
-        # response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
-        # response.status_code = 302
     except Exception as e:
         print(e)
         payload =   {

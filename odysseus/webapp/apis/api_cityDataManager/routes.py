@@ -97,7 +97,7 @@ def run_cdm():
 
         print("EXTRACTED DATA",city,year,months,datasource)
 
-        cdm = CityDataManager(city,year,months,datasource,dbhandler=dbhandler)
+        cdm = CityDataManager(city,year,months,datasource,collection="city_data_manager_test",dbhandler=dbhandler)
         cdm.run()
         payload =   {
                 "link": "http://127.0.0.1:8501"
@@ -130,7 +130,6 @@ def run_cdm():
     # results = list(collection.find(query))
     #return jsonify({'Result':"Success"})
 
-
 @api_cdm.route('/available_data',methods=['GET'])
 def available_data():
     print("Return available data per cities")
@@ -158,7 +157,7 @@ def zone_test():
     summary = summary_available_data_per_zone(DEBUG=False)
     return jsonify(summary)
 
-
+'''
 @api_cdm.route('/get-cdm-data',methods=['GET'])
 def get_data():
     param_id = request.args.get("id",default = 'TEST')
@@ -214,18 +213,74 @@ def get_data():
     
     #results = list(collection.aggregate(query))
     results = dbhandler.aggregate_query(query)
-    '''
+    
     if graph == 'all':
         query = {"_id":param_id}
         results = list(collection.find(query))
     else:
         query = [{"$match": {"_id":param_id}}, {"$project": {"_id" : "$_id", graph: 1}}]
         results = list(collection.aggregate(query))
-    '''
+    
     print(results)
     #return json.dumps(list(results))
     return json.dumps(results, default=json_util.default)
+'''
 
+@api_cdm.route('/get-demand-data',methods=['GET'])
+def get_space_data():
+    COLLECTION = 'city_data_manager_test'
+    dbhandler=DatabaseHandler(host=current_app.config["HOST"],database=current_app.config["DATABASE"])
+    param_id = request.args.get("id",default = 'TEST')
+    graph = request.args.get("graph",default = 'all')
+    city = request.args.get("city",default = "Torino")
+    year = json.loads(request.args.get("year",default = "[2017]"))
+    month = json.loads(request.args.get("month",default = "[8]"))
+    print(city," ",year,"-",month)
+    #_,collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
+    query = [
+    {
+    "$match": {"city":str(city),"year":{"$in":year},"month":{"$in":month}}
+    },
+    {
+    "$project": {
+    "n_booking":0,
+    "avg_duration":0,
+    "sum_duration":0,
+    "euclidean_distance":0,
+    "sum_euclidean_distance":0,
+    "_id": 0}
+    }
+    ]
+
+    results = dbhandler.aggregate_query(query,COLLECTION)
+    return json.dumps(results, default=json_util.default)
+
+@api_cdm.route('/get-cdm-data',methods=['GET'])
+def get_time_data():
+    COLLECTION = 'city_data_manager_test'
+    param_id = request.args.get("id",default = 'TEST')
+    graph = request.args.get("graph",default = 'all')
+    city = request.args.get("city",default = "Torino")
+    year = json.loads(request.args.get("year",default = "[2017]"))
+    month = json.loads(request.args.get("month",default = "[1]"))
+    print(city," ",year,"-",month)
+    # _,collection = initialize_mongoDB(HOST,DATABASE,COLLECTION)
+    dbhandler=DatabaseHandler(host=current_app.config["HOST"],database=current_app.config["DATABASE"])
+    query = [
+    {
+    "$match": {"city":str(city),"year":{"$in":year},"month":{"$in":month}}
+    },
+    {
+    "$project": {
+    "out_flow_count":0,
+    "in_flow_count":0,
+    "origin_count":0,
+    "_id": 0}
+    }
+    ]
+
+    results = dbhandler.aggregate_query(query,COLLECTION)
+    return json.dumps(results, default=json_util.default)
 
 @api_cdm.route('/streamlit', methods=["POST"])
 def streamlit_redirect():
