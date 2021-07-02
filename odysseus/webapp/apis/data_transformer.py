@@ -1,4 +1,5 @@
 import numpy
+import datetime
 import pandas as pd
 import pickle
 
@@ -8,7 +9,7 @@ class DataTransformer:
         
     # Bookings
     def bookings_request(self,obj):
-        obj['starting_date'] = obj['start_time'].apply(lambda x:  datetime.datetime.strptime(x,'%Y-%m-%d %H:%M:%S%z')
+        obj['starting_date'] = obj['start_time'].apply(lambda x:  datetime.datetime.strptime(x,'%Y-%m-%d %H:%M:%S%z'))
         self.sim_booking_requests = obj.fillna(0).set_index("starting_date").iloc[:, 0].resample("60Min").count()
         if self.DEBUG:
             print(self.sim_booking_requests.to_json())

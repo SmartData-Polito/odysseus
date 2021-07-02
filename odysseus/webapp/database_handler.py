@@ -14,7 +14,7 @@ COLLECTION = 'booking_duration'
 class DatabaseHandler:
     
     def __init__(self,host=HOST,database=DATABASE) -> None:
-        self.client = pm.MongoClient(host)
+        self.client = pm.MongoClient(host)#"mongodb://localhost:27017/")
         self.db = self.client[database]
         return
 
