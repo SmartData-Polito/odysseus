@@ -81,25 +81,25 @@ def run_sm():
         form_inputs = data["values"]
         
         dict_for_sm_modelling = {
-            "city":[form_inputs["city"]],
-            "datasource":[form_inputs["datasource"]],
-            "num_vehicles":form_inputs["num_vehicles"],
-            "tot_n_charging_poles":form_inputs["tot_n_charging_poles"],
-            "year":form_inputs["year"],
-            "n_charging_zones":form_inputs["n_charging_zones"],
-            "distributed_cps":form_inputs["distributed_cps"],
+            "cities":[form_inputs["city"]],
+            "data_source_ids":[form_inputs["datasource"]],
+            "num_vehicles":[form_inputs["num_vehicles"]],
+            "tot_n_charging_poles":[form_inputs["tot_n_charging_poles"]],
+            "year":[form_inputs["year"]],
+            "n_charging_zones":[form_inputs["n_charging_zones"]],
+            "distributed_cps":[form_inputs["distributed_cps"]],
             "cps_placement_policy":form_inputs["cps_placement_policy"],
             "n_relocation_workers":form_inputs["n_relocation_workers"],
-            "save_folder":[form_inputs["save_folder"]],
+            "folder_name":form_inputs["folder_name"],
             "recover_supply_model":""
         }
 
-        print("STARTING THE DEMAND MODELLING MODULE WITH CONFIG", dict_for_sm_modelling )
+        print("STARTING THE DEMAND MODELLING MODULE WITH CONFIG\n", dict_for_sm_modelling )
         sm = SupplyModelling(dict_for_sm_modelling)
-        print("Start Run")
+        print("Start Run\n")
         status = sm.run()
-
-        dbhandler.upload(dict_for_sm_modelling,collection_name=collection_name)
+        print("STATUS FROM RUN :", status)
+        # dbhandler.upload(dict_for_sm_modelling,collection_name=collection_name) @ matteo non odiarmi, brendan
         payload =  {
                 "link": "http://127.0.0.1:8501",
                 }
