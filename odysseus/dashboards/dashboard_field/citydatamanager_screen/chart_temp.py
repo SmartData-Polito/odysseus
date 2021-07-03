@@ -7,8 +7,6 @@ import pandas as pd
 import datetime
 
 import plotly.express as px
-import pymongo
-
 
 class ChartTemp(DashboardChart):
 

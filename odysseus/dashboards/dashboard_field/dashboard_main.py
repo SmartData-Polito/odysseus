@@ -88,7 +88,7 @@ class DashboardMain(DashboardField):
         elif name == "Supply Modelling":
             main_screen= ScreenSupply(title="Titolo: " + name, name=name,month = month, year = year, city = city)
         elif name == "Simulator":
-            main_screen= ScreenDemand(title="Titolo: " + name, name=name,month = month, year = year, city = city)
+            main_screen= ScreenSimulator(title="Titolo: " + name, name=name,month = month, year = year, city = city)
  #       
         return main_screen
 

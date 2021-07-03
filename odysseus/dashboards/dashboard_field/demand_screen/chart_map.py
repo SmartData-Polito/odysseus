@@ -62,7 +62,6 @@ class ChartMap(DashboardChart, Thread):
         column,= self.show_widgets()[0]
         scelta = SessionState.get(zone = None)
 
-        print('-------------------- PRE ERRORE')
         if scelta.zone is None or st.button("Seleziona la zona"):
             st.title("Premi su una cella per vedere i dati relativi a quella zona")
 

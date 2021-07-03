@@ -6,35 +6,19 @@ from threading import Thread
 
 import streamlit as st
 from functools import partial
-import pandas as pd
-import builtins
 import plotly.express as px
 
-import folium
-from folium import plugins
-from folium.plugins import HeatMap
-from folium.plugins import HeatMapWithTime
-import branca.colormap
-from collections import defaultdict
 
-import datetime 
-from streamlit_folium import folium_static
+class ChartMap(DashboardChart):
 
-class ChartMap(DashboardChart, Thread):
-
-    def __init__(self, og_data, title, subtitle, grid, start, end, tipo="heatmap", parametro='Torino'):
+    def __init__(self, data, title, subtitle, parametro='Torino'):
         
-        Thread.__init__(self)
         DashboardChart.__init__(self, title, name=title, subtitle=subtitle)
-        self.og_data = og_data
-        #self.dest_data = dest_data
+        self.data = data
         self.parametro=parametro
-        self.tipo = tipo
-        self.grid = grid
-        
-        self.startDay = start
-        self.endDay = end
-        arg = [["selectbox", "Scegli grafico", ['out_flow_count', 'in_flow_count','origin_count']]]
+        param_list = list(self.data.columns.difference(['zone_id', 'zone_id_or', 'charge_n_1', 'geometry']))
+
+        arg = [["selectbox", "Scegli grafico", param_list]]
 
         self.widget_list= [partial(st_functional_columns, arg)]
 
@@ -42,10 +26,10 @@ class ChartMap(DashboardChart, Thread):
     def get_choropleth_mapbox(self, column):
 
         data_to_show = column
-        plot_df = self.og_data.loc[(self.og_data['date'] > str(self.startDay)) & (self.og_data['date'] < str(self.endDay))]
+        plot_df = self.data
         fig = px.choropleth_mapbox(plot_df,
-                                geojson=self.grid,
-                                locations=plot_df.tile_ID,
+                                geojson=plot_df.geometry,
+                                locations=plot_df.zone_id_or,
                                 color=data_to_show,
                                 color_continuous_scale="YlOrRd",
                                 opacity=0.7,
@@ -61,5 +45,3 @@ class ChartMap(DashboardChart, Thread):
         stat_column,= self.show_widgets()[0]
         fig = self.get_choropleth_mapbox(stat_column)
         st.plotly_chart(fig, use_container_width=True)
-
-
