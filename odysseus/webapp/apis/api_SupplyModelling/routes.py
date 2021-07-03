@@ -99,7 +99,7 @@ def run_sm():
         print("Start Run")
         status = sm.run()
 
-        dbhandler.upload(dict_for_sm_modelling,collection_name=collection_name)
+        dbhandler.upload_config(dict_for_sm_modelling,collection_name=collection_name)
         payload =  {
                 "link": "http://127.0.0.1:8501",
                 }
