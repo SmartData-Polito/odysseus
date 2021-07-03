@@ -80,6 +80,8 @@ class SupplyModelling:
                 "n_relocation_workers":int(self.n_relocation_workers)
             })
             print("supply_model_conf line 82\n",supply_model_conf)
+            # little trickery to solve the supply modelling looking for the wrong folder
+            # use the same name for your supply model as you did for your demand model :) 
             supply_model = SupplyModel(supply_model_conf, int(*self.year), self.folder_name)
             vehicles_soc_dict, vehicles_zones, available_vehicles_dict = supply_model.init_vehicles()
             supply_model.init_charging_poles()
