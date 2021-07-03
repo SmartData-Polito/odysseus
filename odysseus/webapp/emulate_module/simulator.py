@@ -4,15 +4,15 @@ import json
 
 from shutil import copy
 
-from e3f2s.simulator.simulation_input.sim_input_paths import simulation_input_paths
+from odysseus.simulator.simulation_input.sim_input_paths import simulation_input_paths
 
-from e3f2s.simulator.single_run.single_run import single_run
-from e3f2s.simulator.multiple_runs.multiple_runs import multiple_runs
-from e3f2s.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
+from odysseus.simulator.single_run.single_run import single_run
+from odysseus.simulator.multiple_runs.multiple_runs import multiple_runs
+from odysseus.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 
-from e3f2s.simulator.simulation_input.sim_current_config.sim_general_conf import sim_general_conf_grid
-from e3f2s.simulator.simulation_input.sim_current_config.multiple_runs_conf import sim_scenario_conf_grid
-from e3f2s.simulator.simulation_input.sim_current_config.single_run_conf import sim_scenario_conf
+from odysseus.simulator.simulation_input.sim_current_config.sim_general_conf import sim_general_conf_grid
+from odysseus.simulator.simulation_input.sim_current_config.multiple_runs_conf import sim_scenario_conf_grid
+from odysseus.simulator.simulation_input.sim_current_config.single_run_conf import sim_scenario_conf
 
 
 class Simulator:
