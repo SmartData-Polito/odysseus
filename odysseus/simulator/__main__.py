@@ -57,14 +57,14 @@ parser.add_argument(
 parser.add_argument(
     "-d", "--existing_demand_model_folder",
     nargs="+",
-    help="Specify the folder in which is stored a supply model"
+    help="Specify the folder in which is stored a supply model" # demand magari?
 )
 parser.set_defaults(
     campaign_name=["test"],
     conf_names=["big_data_db_test"],
     set_general_parameters = False,
-    existing_supply_model_folder = None,
-    existing_demand_model_folder = "default_demand_model"
+    existing_supply_model_folder = "brendan_1",
+    existing_demand_model_folder = "brendan_1" #"default_demand_model"
 )
 
 args = parser.parse_args()
@@ -120,7 +120,7 @@ else:
 #retrieving an existing SupplyModel template
 if args.existing_supply_model_folder is not None:
     folder = args.existing_supply_model_folder
-    folder_path = os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", sim_general_conf_grid["city"][0], folder[0])
+    folder_path = os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", sim_general_conf_grid["city"][0], folder)#folder[0]) folder is a str not list :/
 
     if not os.path.exists(os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models",
                                sim_general_conf_grid["city"][0])):
@@ -128,6 +128,7 @@ if args.existing_supply_model_folder is not None:
         exit(3)
 
     if not os.path.exists(folder_path):
+        print(f"supply model path that i am trying to reach {folder_path}")
         print("Non-existent folder.")
         print("Available folders", str(os.listdir(os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", sim_general_conf_grid["city"][0]))))
         exit(1)
@@ -147,7 +148,8 @@ else:
 
 #retrieving an existing DemandModel template
 
-demand_folder = args.existing_demand_model_folder[0]
+demand_folder = args.existing_demand_model_folder #[0] # this is not a list, it is a string :/
+print(f"demand model folder args line 151 main simulator {demand_folder}, full list {args.existing_demand_model_folder}")
 folder_path = os.path.join(os.curdir, "odysseus", "demand_modelling", "demand_models", sim_general_conf_grid["city"][0], demand_folder)
 
 if not os.path.exists(os.path.join(os.curdir, "odysseus", "demand_modelling", "demand_models",
@@ -156,6 +158,7 @@ if not os.path.exists(os.path.join(os.curdir, "odysseus", "demand_modelling", "d
     exit(2)
 
 if not os.path.exists(folder_path):
+    print("folder_path in simulator main",folder_path)
     print("Non-existent demand model folder.")
     print("Available folders", str(os.listdir(os.path.join(os.curdir, "odysseus", "demand_modelling", "demand_models", sim_general_conf_grid["city"][0]))))
     exit(1)
