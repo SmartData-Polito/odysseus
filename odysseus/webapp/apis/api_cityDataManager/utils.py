@@ -9,8 +9,6 @@ from shapely.geometry import Polygon
 import geopandas as gpd
 from odysseus.webapp.database_handler import DatabaseHandler
 
-# import skmob
-# from skmob.tessellation import tilers
 from bson import json_util
 
 
