@@ -77,6 +77,8 @@ class DashboardMain(DashboardField):
                 break
 
     def get_main_screen(self, name, month, year, city, db):
+        year = 2018
+        month = 1
         if name == "Home Page":
             main_screen = ScreenHome(title="Titolo: " + name, name=name,month = month, year = year, city = city, db = db)
         elif name == "City Data Manager":

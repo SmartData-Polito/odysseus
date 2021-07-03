@@ -18,6 +18,7 @@ from streamlit_plotly_events import plotly_events
 import datetime 
 from streamlit_folium import folium_static
 
+import ast
 class ChartMap(DashboardChart, Thread):
 
     def __init__(self, og_data, title, subtitle, grid, start, end, tipo="heatmap", parametro='Torino'):
@@ -61,8 +62,10 @@ class ChartMap(DashboardChart, Thread):
         bottom = st.empty()
         here2 = st.empty()
         if a is not None and len(a) > 0 :
-            here.title("Hai selezionato la zona "+str(a[0]["pointNumber"]))
-            zona = self.grid[ self.grid["tile_ID"] == a[0]["pointNumber"]]
+
+            zone_choice = ast.literal_eval(a)
+            here.title("Hai selezionato la zona "+str(zone_choice[0]["pointNumber"]))
+            zona = self.grid[ self.grid["tile_ID"] == zone_choice[0]["pointNumber"]]
             #here1.dataframe(grid_csv[ self.grid["FID"] == a[0]["pointNumber"]])
 
 

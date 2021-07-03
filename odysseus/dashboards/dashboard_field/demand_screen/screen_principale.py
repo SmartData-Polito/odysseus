@@ -111,10 +111,7 @@ class ScreenDemand(DashboardScreen):
         df_plot[['in_flow_count','tile_ID']] = pd.DataFrame(df_plot.in_flow_count.tolist(), index= df_plot.index)
         df_plot[['origin_count','tile_ID']] = pd.DataFrame(df_plot.origin_count.tolist(), index= df_plot.index)
         
-        
-        #tessellation = tilers.tiler.get("squared", base_shape = base_shapes[self.city_name], meters=500)
-        #tessellation.tile_ID = tessellation.tile_ID.astype(int)
-        
+    
         gdf = self.grid.merge(df_plot, on="tile_ID")
         return gdf
     
@@ -127,9 +124,4 @@ class ScreenDemand(DashboardScreen):
         if start>=end:
             st.error('End limit date cannot be before the start date of analysis. Retry')
         else:
-            #og_points = self.filter_map_data(self.data, start, end)
-
-            #map_df = filtered_df.rename(columns={'start_latitude':'lat', 'start_longitude':'lng', 'start_time':'datetime'})
-            #ChartMap(self.space_data, 'Heat Map', "This is a heatmap of the bookings during the month in exam. You can change the time interval also! The data analyst who thought about it is pretty smart, don't you think?", self.grid, start, end, tipo='heatmap', parametro=self.city_name).show_choropleth_mapbox()
-
-            ChartMap(self.space_data, 'Heat Map', "This is a heatmap of the bookings during the month in exam. You can change the time interval also! The data analyst who thought about it is pretty smart, don't you think?", self.grid, start, end, tipo='heatmap', parametro=self.city_name).show_prova5()
+            ChartMap(self.space_data, 'Montly demand', "Here you can choose the desired zone of your analysis. The choices are between the incoming cars, the outgoing cars and the number of cars that passed through that zone overall. Just click on one of the squares and you'll see the graphs yourself!", self.grid, start, end, tipo='heatmap', parametro=self.city_name).show_map_with_barplot()

@@ -31,7 +31,6 @@ class ChartMap(DashboardChart, Thread):
         self.parametro=parametro
         self.tipo = tipo
         self.grid = grid
-        st.write(grid)
         
         self.startDay = start
         self.endDay = end
@@ -42,9 +41,8 @@ class ChartMap(DashboardChart, Thread):
 
     def get_choropleth_mapbox(self, column):
 
-        # aaa = self.og_data.loc[self.startDay:self.endDay]
         data_to_show = column
-        plot_df = self.og_data.loc[self.og_data['date'] == '2017-10-09']
+        plot_df = self.og_data.loc[(self.og_data['date'] > str(self.startDay)) & (self.og_data['date'] < str(self.endDay))]
         fig = px.choropleth_mapbox(plot_df,
                                 geojson=self.grid,
                                 locations=plot_df.tile_ID,

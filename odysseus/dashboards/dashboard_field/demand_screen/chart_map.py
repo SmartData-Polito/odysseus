@@ -8,18 +8,20 @@ from threading import Thread
 import streamlit as st
 from functools import partial
 import pandas as pd
-import builtins
+#import builtins
 import plotly.express as px
 
-import folium
-from folium import plugins
-from folium.plugins import HeatMap
-from folium.plugins import HeatMapWithTime
-import branca.colormap
-from collections import defaultdict
+#import folium
+#from folium import plugins
+#from folium.plugins import HeatMap
+#from folium.plugins import HeatMapWithTime
+#import branca.colormap
+#from collections import defaultdict
 from streamlit_plotly_events import plotly_events
 import datetime 
-from streamlit_folium import folium_static
+#from streamlit_folium import folium_static
+
+import ast
 
 class ChartMap(DashboardChart, Thread):
 
@@ -39,30 +41,6 @@ class ChartMap(DashboardChart, Thread):
         self.widget_list= [partial(st_functional_columns, arg)]
 
 
-    def get_choropleth_mapbox(self, column):
-
-        # aaa = self.og_data.loc[self.startDay:self.endDay]
-        data_to_show = column
-        plot_df = self.og_data#.loc[self.og_data['date'] == '2017-10-09']
-        fig = px.choropleth_mapbox(plot_df,
-                                geojson=self.grid,
-                                locations=plot_df.tile_ID,
-                                color=data_to_show,
-                                color_continuous_scale="YlOrRd",
-                                opacity=0.7,
-                                center={"lat": 45.06, "lon":7.67},
-                                mapbox_style="open-street-map",
-                                zoom=11)
-        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
-        return fig
-
-
-    def show_choropleth_mapbox(self):
-        self.show_heading()
-        stat_column,= self.show_widgets()[0]
-        fig = self.get_choropleth_mapbox(stat_column)
-        st.plotly_chart(fig, use_container_width=True)
-
     def get_map(self):
         fig = px.choropleth_mapbox(self.og_data,
                                 geojson=self.grid,
@@ -79,10 +57,12 @@ class ChartMap(DashboardChart, Thread):
 
 
 
-    def show_prova5(self):
+    def show_map_with_barplot(self):
         self.show_heading()
         column,= self.show_widgets()[0]
-        scelta = SessionState.get( zone = None)
+        scelta = SessionState.get(zone = None)
+
+        print('-------------------- PRE ERRORE')
         if scelta.zone is None or st.button("Seleziona la zona"):
             st.title("Premi su una cella per vedere i dati relativi a quella zona")
 
@@ -95,7 +75,10 @@ class ChartMap(DashboardChart, Thread):
             else:
                 scelta.zone = a
                 st.experimental_rerun()
-        sq_choice = self.og_data.loc[scelta.zone[0]["pointNumber"]].tile_ID
+
+        zone_choice = ast.literal_eval(scelta.zone)
+
+        sq_choice = self.og_data.loc[zone_choice[0]["pointNumber"]].tile_ID
         line_plot = self.og_data.loc[self.og_data['tile_ID'] == sq_choice]
         line_plot = line_plot.set_index('date').resample(
                     '1D'
