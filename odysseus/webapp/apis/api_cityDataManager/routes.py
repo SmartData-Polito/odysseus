@@ -144,6 +144,13 @@ def available_data():
     print(summary)
     return jsonify(summary)
 
+@api_cdm.route('/available-data-on-db',methods=['GET'])
+def available_data_on_db():
+    print("Return available data per cities")
+    dbhandler=DatabaseHandler(host=current_app.config["HOST"],database=current_app.config["DATABASE"])
+    
+    return jsonify(summary)
+
 @api_cdm.route('/test',methods=['GET'])
 def test():
     print("Return available data per cities")
@@ -245,7 +252,7 @@ def get_space_data():
     "$project": {
     "n_booking":0,
     "avg_duration":0,
-    "sum_duration":0,
+    "sum_avg_duration":0,
     "euclidean_distance":0,
     "sum_euclidean_distance":0,
     "_id": 0}

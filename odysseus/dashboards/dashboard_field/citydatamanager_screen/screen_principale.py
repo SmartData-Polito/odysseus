@@ -65,9 +65,9 @@ class ScreenDataManager(DashboardScreen):
         if (json_df.empty):
             st.error('dataframe vuoto')
             st.stop()
-
+        
         #unlist the values
-        df = json_df.set_index(['year', 'month', 'day', 'city']).apply(pd.Series.explode).reset_index()
+        df = json_df.set_index(['year', 'month', 'day', 'city','data_source_id']).apply(pd.Series.explode).reset_index()
 
         #add the hour column from unlisted values
         df['hour'] = pd.timedelta_range(0, periods=len(df.index), freq='H')
@@ -99,7 +99,7 @@ class ScreenDataManager(DashboardScreen):
         if (json_df.empty):
             st.error('dataframe vuoto')
             st.stop()
-        
+            
         #unlist the values
         df = json_df.set_index(['year', 'month', 'day', 'city', 'data_source_id']).apply(pd.Series.explode).reset_index()
         

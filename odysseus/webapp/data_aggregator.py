@@ -137,7 +137,7 @@ class DataAggregator:
                     document.update({"year":year,"month":month,"day":prev_day+gg,
                                 "n_booking":final_dict[index[0]][index[1]][prev_day+gg][0],
                                 "avg_duration":final_dict[index[0]][index[1]][prev_day+gg][1],
-                                "sum_duration":final_dict[index[0]][index[1]][prev_day+gg][2],
+                                "sum_avg_duration":final_dict[index[0]][index[1]][prev_day+gg][2],
                                 "euclidean_distance":final_dict[index[0]][index[1]][prev_day+gg][3],
                                 "sum_euclidean_distance":final_dict[index[0]][index[1]][prev_day+gg][4]})
                     document_list.append(document)
