@@ -56,7 +56,7 @@ def existing_models():
 
 @api_sm.route('/run_sm',methods=['POST'])
 def run_sm():
-    collection_name = "demand_models_config"  
+    collection_name = "supply_models_config"  
     try:
         dbhandler=DatabaseHandler(host=current_app.config["HOST"],database=current_app.config["DATABASE"])
         data = request.get_json(force=True)
