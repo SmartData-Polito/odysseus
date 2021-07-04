@@ -29,7 +29,7 @@ class ChartMap(DashboardChart):
         plot_df = self.data
         fig = px.choropleth_mapbox(plot_df,
                                 geojson=plot_df.geometry,
-                                locations=plot_df.zone_id_or,
+                                locations=plot_df.zone_id,
                                 color=data_to_show,
                                 color_continuous_scale="YlOrRd",
                                 opacity=0.7,

@@ -55,8 +55,24 @@ class ScreenSimulator(DashboardScreen):
         results_path = self.get_simulaton_path()
 
         self.stat_data = pd.read_csv(os.path.join(results_path, 'sim_stats.csv'))
-        ChartTemp(self.stat_data, 'Bookings Count', 'Here is a time series showing how many cars within our fleet are booked at any given time. You can see how it behaves based on different frequencies and zoom in during specific periods in the month!').show_pie_chart()
+
+        ChartTemp(self.stat_data, 'Event Plot', 'Percentage charts of the events simulated. \
+            The first chart refers to how the trips have been satisfied: if the car was in the requested zone or in the near vicinity.\
+            Second chart instead focuses on the unsatisfied trips and in what fashion this happened: if there where no cars available or \
+            the energy in the chosen car was not sufficient to complete the trips. At last, the percentage of events that have been successful\
+            versus the unsuccesful ones.  ').show_pie_chart()
         
+
         self.grid = gpd.read_file(os.path.join(results_path, "grid.shp"))
 
-        ChartMap(self.grid, 'Zonal Analysis', "In this map is shown different statistics by zone of the simulation you just run!", parametro=self.city_name).show_choropleth_mapbox()
+        ChartMap(self.grid, 'Zonal Analysis', 
+        "In this map is shown different statistics by zone of the simulation you just run!", 
+        parametro=self.city_name).show_choropleth_mapbox()
+
+        sim_booking_requests = pd.read_csv(os.path.join(results_path, 'sim_booking_requests.csv'))
+        ChartTemp(sim_booking_requests, 'Event Plot', 'Percentage charts of the events simulated. \
+            The first chart refers to how the trips have been satisfied: if the car was in the requested zone or in the near vicinity.\
+            Second chart instead focuses on the unsatisfied trips and in what fashion this happened: if there where no cars available or \
+            the energy in the chosen car was not sufficient to complete the trips. At last, the percentage of events that have been successful\
+            versus the unsuccesful ones.  ').show_cost()
+        
