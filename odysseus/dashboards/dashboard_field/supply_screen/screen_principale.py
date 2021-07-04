@@ -29,8 +29,8 @@ class ScreenSupply(DashboardScreen):
         self.city_name = city
         self.data_source_id = db
 
-        base_shapes = {"Torino": "Turin, Italy",
-                        "Amsterdam":"Amsterdam, Netherlands"}
+        #base_shapes = {"Torino": "Turin, Italy",
+        #                "Amsterdam":"Amsterdam, Netherlands"}
         tessellation = tilers.tiler.get("squared", base_shape = base_shapes[self.city_name], meters=500)
         tessellation.tile_ID = tessellation.tile_ID.astype(int)
         self.grid = tessellation
