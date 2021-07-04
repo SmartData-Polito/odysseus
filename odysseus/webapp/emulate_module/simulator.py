@@ -9,7 +9,6 @@ from odysseus.simulator.simulation_input.sim_input_paths import simulation_input
 from odysseus.simulator.single_run.single_run import single_run
 from odysseus.simulator.multiple_runs.multiple_runs import multiple_runs
 from odysseus.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
-
 from odysseus.simulator.simulation_input.sim_current_config.sim_general_conf import sim_general_conf_grid
 from odysseus.simulator.simulation_input.sim_current_config.multiple_runs_conf import sim_scenario_conf_grid
 from odysseus.simulator.simulation_input.sim_current_config.single_run_conf import sim_scenario_conf

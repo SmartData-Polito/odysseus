@@ -60,8 +60,8 @@ parser.add_argument(
     help="Specify the folder in which is stored a supply model" # demand magari?
 )
 parser.set_defaults(
-    campaign_name=["test"],
-    conf_names=["big_data_db_test"],
+    campaign_name=["test_03_2021"],
+    conf_names=["big_data_db_test_03_2021"],
     set_general_parameters = False,
     existing_supply_model_folder = "brendan_1",
     existing_demand_model_folder = "brendan_1" #"default_demand_model"

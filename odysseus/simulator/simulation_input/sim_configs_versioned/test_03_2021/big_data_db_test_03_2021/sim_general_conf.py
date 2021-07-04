@@ -6,7 +6,7 @@ sim_general_conf_grid = {
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["big_data_db_test_03_2021"],
+    "sim_scenario_name": ["big_data_db_test_scv_test_03_2021"],
 
     # Fleet general parameters
     "const_load_factor": [False],
