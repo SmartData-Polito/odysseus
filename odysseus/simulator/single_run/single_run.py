@@ -67,10 +67,9 @@ def single_run(conf_dict):
 
     print(datetime.datetime.now(), city, sim_scenario_name, sim_scenario_conf["conf_id"], "finished!")
 
-    sim_stats.to_pickle(os.path.join(results_path, "sim_stats.pickle"))
     sim_stats.to_csv(os.path.join(results_path, "sim_stats.csv"))
-    pd.Series(sim_general_conf).to_pickle(os.path.join(results_path, "sim_general_conf.pickle"))
-    pd.Series(sim_scenario_conf).to_pickle(os.path.join(results_path, "sim_scenario_conf.pickle"))
+    pd.Series(sim_general_conf).to_csv(os.path.join(results_path, "sim_general_conf.csv"))
+    pd.Series(sim_scenario_conf).to_csv(os.path.join(results_path, "sim_scenario_conf.csv"))
 
     pickle.dump(
         simOutput,

@@ -12,6 +12,8 @@ class Booking(SimEvent):
         self.booking_request = booking_request
         self.booking_request_dict = self.booking_request.booking_request_dict.copy()
         self.booking_dict = self.booking_request_dict.copy()
+        self.booking_dict["req_origin_id"] = self.booking_dict["origin_id"]
+        self.booking_dict["req_destination_id"] = self.booking_dict["destination_id"]
         self.chosen_origin = chosen_origin
         self.chosen_destination = chosen_destination
         self.booking_dict["origin_id"] = self.chosen_origin.zone_id

@@ -289,7 +289,7 @@ class SharedMobilitySim:
             )
             booking = Booking(
                 self.env,
-                booking_request_dict,
+                booking_request,
                 self.zone_dict[chosen_origin_id],
                 self.zone_dict[booking_request_dict["destination_id"]],
                 self.vehicles_list[chosen_vehicle_id],
