@@ -11,6 +11,9 @@ from odysseus.dashboards.dashboard_field.simulator_screen.screen_principale impo
 from odysseus.city_data_manager.config.config import cities # get all possible city names from config files
 from functools import partial
 
+import requests
+import json
+
 import webbrowser
 
 class DashboardMain(DashboardField):
@@ -20,6 +23,9 @@ class DashboardMain(DashboardField):
         self.available_screens_list = available_fields
         super().__init__(widget_location=st.sidebar, title=title, name="Schermata principale", subtitle=subtitle, widget_list=None)
         self.logo = logo
+        r = requests.get('http://127.0.0.1:5000/api_cdm/available-data-on-db')
+
+        self.available_data = r.json()
 
     def show_heading(self):
         self.widget_location.image(self.logo)
@@ -28,29 +34,21 @@ class DashboardMain(DashboardField):
     def show_widgets(self):
         
         name = st.sidebar.selectbox("Scegli quale schermata visualizzare", ["Home Page", "City Data Manager", "Demand Modelling", "Supply Modelling", "Simulator"])
-
-
-        city_path = os.path.join(os.curdir, "odysseus", "city_data_manager", "data")
-        city_dir = [f.name for f in os.scandir(city_path) if (f.is_dir() and not f.name.endswith(".DS_Store"))]
-        city =  st.sidebar.selectbox("Scegli quale città", city_dir)
-
-
-        db_path = os.path.join(os.curdir, "odysseus", "city_data_manager", "data", city, "od_trips", "points")
-        db_dir = [f.name for f in os.scandir(db_path) if (f.is_dir() and not f.name.endswith(".DS_Store"))]
-        db = st.sidebar.selectbox("Scegli la data source", db_dir)
-
-
-        ym_path = os.path.join(os.curdir, "odysseus", "city_data_manager", "data", city, "od_trips", "points", db)
-        ym_dir = [f.name for f in os.scandir(ym_path) if (f.is_dir() and not f.name.endswith(".DS_Store"))]
-
-        splitList=set([item.split(".")[0] for item in ym_dir])
-
-        years = set([item.split("_")[0] for item in splitList])
-        year = st.sidebar.selectbox("Scegli l'anno", list(years))
         
-        months = set([item.split("_")[1] for item in splitList if item.split("_")[0] == year])
-        months = sorted(months)
-        month = st.sidebar.selectbox("Scegli il mese", list(months))
+        
+
+        available_cities = list(self.available_data.keys())
+        city =  st.sidebar.selectbox("Scegli quale città", available_cities)
+
+        available_dbs = list(self.available_data[city].keys())
+        db = st.sidebar.selectbox("Scegli la data source", available_dbs)
+
+        available_years = list(self.available_data[city][db].keys())
+
+        year = st.sidebar.selectbox("Scegli l'anno", list(available_years))
+        
+        available_months = self.available_data[city][db][year]
+        month = st.sidebar.selectbox("Scegli il mese", sorted(available_months))
         
         ret = [name, city, month, year, db]
         col1, col2, col3 = st.sidebar.beta_columns([1,1,1])
