@@ -73,17 +73,18 @@ parser.add_argument(
 )
 
 default = {
-    "cities":["Amsterdam"],
-    "data_source_ids":["big_data_db"],
-    "num_vehicles":["500"],
-    "tot_n_charging_poles":["100"],
-    "n_charging_zones":["10"],
-    "year":["2017"],
-    "distributed_cps":"True",
-    "cps_placement_policy":"num_parkings",
-    "n_relocation_workers":1,
-    "folder_name":"",
-    "recover_supply_model":""
+    "cities": ["Milano"],
+    "data_source_ids": ["big_data_db"],
+    "num_vehicles": ["500"],
+    "tot_n_charging_poles": ["100"],
+    "n_charging_zones": ["10"],
+    "year": ["2017"],
+    "distributed_cps": "True",
+    "cps_placement_policy": "num_parkings",
+    "n_relocation_workers": 1,
+    "demand_model_folder": "test",
+    "folder_name": "",
+    "recover_supply_model": ""
 }
 
 
@@ -97,6 +98,7 @@ parser.set_defaults(
     distributed_cps=default["distributed_cps"],
     cps_placement_policy=default["cps_placement_policy"],
     n_relocation_workers=default["n_relocation_workers"],
+    demand_model_folder=default["demand_model_folder"],
     folder_name=default["folder_name"],
     recover_supply_model=default["recover_supply_model"]
 )
@@ -108,10 +110,8 @@ t_or_f = True if args.distributed_cps[0].lower() in ['true', '1', 't', 'y', 'yes
 if args.recover_supply_model != "":
     #controllo che il file esista
     folder = args.recover_supply_model
-    folder_path = os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models",
-                               args.cities[0], folder[0])
-    if not os.path.exists(os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models",
-                               args.cities[0])):
+    folder_path = os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", args.cities[0], folder[0])
+    if not os.path.exists(os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", args.cities[0])):
         print("No "+args.cities[0]+" data stored.")
         exit(3)
     if not os.path.exists(folder_path):
@@ -142,8 +142,9 @@ else:
         "n_relocation_workers":int(args.n_relocation_workers)
     })
 
-    supply_model = SupplyModel(supply_model_conf, int(*args.year)) # nel webapp bre-cambiato
-
+    supply_model = SupplyModel(
+        supply_model_conf, int(*args.year), args.demand_model_folder
+    )
 
     vehicles_soc_dict, vehicles_zones, available_vehicles_dict = supply_model.init_vehicles()
     supply_model.init_charging_poles()
@@ -163,17 +164,15 @@ else:
             if folder == "NO":
                 exit(0)
 
-
     #cartella di default
-    savepath = os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", args.cities[0], folder)
+    savepath = os.path.join(
+        os.path.dirname(__file__), "supply_models", args.cities[0], folder
+    )
+    print(savepath)
 
-    if not os.path.exists(savepath):
-        os.makedirs(savepath)
+    os.makedirs(savepath, exist_ok=True)
 
     with open(os.path.join(savepath, "supply_model.pickle"), "wb") as f:
         pickle.dump(supply_model, f)
 
     print("Model saved in folder:", savepath)
-
-
-
