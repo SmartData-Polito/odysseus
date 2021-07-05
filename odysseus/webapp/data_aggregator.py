@@ -8,9 +8,9 @@ import json
 import numpy as np
 from bson import json_util
 from functools import reduce
-# import skmob
-# from skmob.tessellation import tilers
-# from skmob.preprocessing import detection
+import skmob
+from skmob.tessellation import tilers
+from skmob.preprocessing import detection
 
 def get_out_flow_count(trips_origins):
     
@@ -32,20 +32,20 @@ def get_in_flow_count(trips_destinations):
 
     return in_flow_count
 
-# def build_tesselation(park_df):
-#     df = park_df.copy()
+def build_tesselation(park_df):
+    df = park_df.copy()
 
-#     tdf = skmob.TrajDataFrame(park_df, latitude='start_latitude', longitude='start_longitude', user_id='plate', datetime='start_time')
-#     stdf = detection.stops(tdf, stop_radius_factor=0.5, minutes_for_a_stop=15.0, spatial_radius_km=0.2, leaving_time=True)
+    tdf = skmob.TrajDataFrame(park_df, latitude='start_latitude', longitude='start_longitude', user_id='plate', datetime='start_time')
+    stdf = detection.stops(tdf, stop_radius_factor=0.5, minutes_for_a_stop=15.0, spatial_radius_km=0.2, leaving_time=True)
 
-#     stdf_parkings = stdf[['uid', 'end_time', 'end_longitude', 'end_latitude', 'leaving_datetime']].rename(columns={
-#         'end_time':'start_parking', 'end_longitude':'park_longitude', 'end_latitude':'park_latitude', 'leaving_datetime':'end_parking'
-#     })
+    stdf_parkings = stdf[['uid', 'end_time', 'end_longitude', 'end_latitude', 'leaving_datetime']].rename(columns={
+        'end_time':'start_parking', 'end_longitude':'park_longitude', 'end_latitude':'park_latitude', 'leaving_datetime':'end_parking'
+    })
 
-#     # grid using skmob tilers
-#     tessellation = tilers.tiler.get("squared", base_shape="Turin, Italy", meters=500)
-#     tessellation["tile_ID"] = tessellation.index.values
-#     return tessellation,stdf_parkings
+    # grid using skmob tilers
+    tessellation = tilers.tiler.get("squared", base_shape="Turin, Italy", meters=500)
+    tessellation["tile_ID"] = tessellation.index.values
+    return tessellation,stdf_parkings
 
 def merge_spatial_df(data_frames,on_cols=['tile_ID', 'year', 'month', 'day']):
     ## Merge all together 

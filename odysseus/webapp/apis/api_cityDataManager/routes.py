@@ -1,3 +1,4 @@
+import re
 from flask import Blueprint, app,current_app, jsonify, request,make_response
 from odysseus.webapp.emulate_module.city_data_manager import CityDataManager
 from odysseus.webapp.apis.api_cityDataManager.utils import *
@@ -148,8 +149,20 @@ def available_data():
 def available_data_on_db():
     print("Return available data per cities")
     dbhandler=DatabaseHandler(host=current_app.config["HOST"],database=current_app.config["DATABASE"])
-    
-    return jsonify(summary)
+    query= [
+    {"$match":{}},
+    {
+    "$project": {
+    "city":1,
+    "year":1,
+    "month":1,
+    "data_source_id":1,
+    "_id": 0}
+    }]
+    res = dbhandler.aggregate_query(query,collection_name="city_data_manager_test")
+    print(res)
+    answer = build_streamlit_answer(res)
+    return jsonify(answer)
 
 @api_cdm.route('/test',methods=['GET'])
 def test():

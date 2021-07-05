@@ -454,3 +454,17 @@ def build_raw_answer_monthly_zone(df, DEBUG=False):
     db,col = initialize_mongoDB()
     id_object = col.insert_one(json.loads(json_util.dumps(final_dict)))
     return final_dict
+
+
+def build_streamlit_answer(doc_list):
+    raw_answer = {}
+    for d in doc_list:
+        if d["city"] not in raw_answer.keys():
+            raw_answer[d["city"]] = {d["data_source_id"]:{d["year"]:[d["month"]]}}
+        elif d["data_source_id"]  not in raw_answer[d["city"]].keys():
+            raw_answer[d["city"]].update({d["data_source_id"]:{d["year"]:[d["month"]]}})
+        elif d["year"] not in raw_answer[d["city"]][d["data_source_id"]].keys():
+            raw_answer[d["city"]][d["data_source_id"]].update({d["year"]:[d["month"]]})
+        elif d["month"] not in raw_answer[d["city"]][d["data_source_id"]][d["year"]]:
+            raw_answer[d["city"]][d["data_source_id"]][d["year"]].append(d["month"])
+    return raw_answer
