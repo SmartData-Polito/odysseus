@@ -34,7 +34,7 @@ class VehicleRelocationPrimitives:
 
 		self.env = env
 
-		self.simInput = sim.simInput
+		self.simInput = sim.sim_input
 
 		self.vehicles_soc_dict = sim.vehicles_soc_dict
 

@@ -18,7 +18,7 @@ class TraceDrivenSim (SharedMobilitySim):
 
         sim_timestamps = []
 
-        for booking_request_dict in self.simInput.booking_requests_list:
+        for booking_request_dict in self.sim_input.booking_requests_list:
 
             if booking_request_dict["origin_id"] in self.valid_zones\
                     and booking_request_dict["destination_id"] in self.valid_zones:
@@ -26,10 +26,12 @@ class TraceDrivenSim (SharedMobilitySim):
                 booking_request_dict = self.create_booking_request_dict(booking_request_dict)
                 sim_timestamps += [self.current_datetime]
 
-                if self.simInput.supply_model_conf["scooter_relocation"] \
-                        and self.simInput.supply_model_conf["scooter_relocation_strategy"] in ["predictive"]:
+                if self.sim_input.supply_model_conf["scooter_relocation"] \
+                        and self.sim_input.supply_model_conf["scooter_relocation_strategy"] in ["predictive"]:
                     self.scooterRelocationStrategy.update_current_hour_stats(booking_request_dict)
 
                 yield self.env.timeout(booking_request_dict["ia_timeout"])
-                booking_request = BookingRequest(booking_request_dict)
+                booking_request = BookingRequest(
+                    self.env, self.sim_input, self.vehicles_list, booking_request_dict
+                )
                 self.process_booking_request(booking_request)

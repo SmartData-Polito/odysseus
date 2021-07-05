@@ -38,11 +38,8 @@ class DemandModel:
         self.demand_model_config = demand_model_config
         self.save_folder = save_folder
 
-
         self.data_source_id = demand_model_config["data_source_id"]
-
         self.kde_bw = self.demand_model_config["kde_bandwidth"]
-
         self.bin_side_length = self.demand_model_config["bin_side_length"]
 
         self.bookings_train = pd.DataFrame()
@@ -145,7 +142,7 @@ class DemandModel:
             (self.bookings_train.origin_id.isin(self.valid_zones)) & (
                 self.bookings_train.destination_id.isin(self.valid_zones)
             )
-            ]
+        ]
         self.grid["origin_count"] = self.bookings_train.origin_id.value_counts()
         self.grid["destination_count"] = self.bookings_train.destination_id.value_counts()
         reqs_per_zone = self.bookings_train.origin_id.value_counts(
@@ -164,13 +161,19 @@ class DemandModel:
         self.request_rates = self.get_requests_rates()
         self.get_grid_indexes()
         self.trip_kdes = self.get_trip_kdes()
+        self.hourly_ods = dict()
+        self.avg_request_rate = -1
+        self.kde_columns = [
+            "origin_i",
+            "origin_j",
+            "destination_i",
+            "destination_j",
+        ]
 
         self.max_out_flow = float('-inf')
         self.max_in_flow = float('-inf')
         self.avg_out_flows_train = self.get_avg_out_flows()
         self.avg_in_flows_train = self.get_avg_in_flows()
-
-
 
     def map_zones_on_trips(self, zones):
 
@@ -265,23 +268,19 @@ class DemandModel:
             "Minneapolis", "Louisville", "Austin", "Norfolk", "Kansas City", "Chicago", "Calgary"
         ] or self.data_source_id in ["citi_bike"]:
             bookings = bookings[bookings.avg_speed_kmh < 30]
-            bookings = bookings[(
-                                                              bookings.duration > 60
-                ) & (
-                                                              bookings.duration < 60 * 60
-                ) & (
-                                                              bookings.euclidean_distance > 200
-                )
-                                                      ]
+            bookings = bookings[
+                (bookings.duration > 60) & (
+                    bookings.duration < 60 * 60
+                ) & (bookings.euclidean_distance > 200)
+            ]
+
         elif self.data_source_id in ["big_data_db"]:
             bookings = bookings[bookings.avg_speed_kmh < 120]
             bookings = bookings[
                 (bookings.duration > 3 * 60) & (
-                        bookings.duration < 60 * 60
-                ) & (
-                        bookings.euclidean_distance > 500
-                )
-                ]
+                    bookings.duration < 60 * 60
+                ) & (bookings.euclidean_distance > 500)
+            ]
 
         print(bookings[["driving_distance", "duration", "avg_speed_kmh"]].describe())
 
@@ -304,7 +303,7 @@ class DemandModel:
         valid_dest_zones_test = dest_zones_count_test[(dest_zones_count_test > count_threshold)]
 
         valid_zones_train = valid_origin_zones_train.index.intersection(
-                valid_dest_zones_train.index
+            valid_dest_zones_train.index
         ).astype(int)
 
         valid_zones_test = valid_origin_zones_test.index.intersection(
@@ -315,28 +314,29 @@ class DemandModel:
 
         return self.valid_zones
 
-    def get_neighbors_dicts(self):
+    def get_neighbors_dicts(self, max_n_hops=1):
 
         self.neighbors_dict = {}
-        for i in self.grid_matrix.index:
-            for j in self.grid_matrix.columns:
-                zone = self.grid_matrix.iloc[i, j]
-                i_low = i-1 if i-1 >= 0 else 0
-                i_up = i+1 if i+1 < len(self.grid_matrix.index) else len(self.grid_matrix.index) - 1
-                j_low = j-1 if j-1 >= 0 else 0
-                j_up = j+1 if j+1 < len(self.grid_matrix.columns) else len(self.grid_matrix.columns) - 1
-                iii = 0
-                self.neighbors_dict[int(zone)] = {}
-                for ii in range(i_low, i_up+1):
-                    for jj in range(j_low, j_up+1):
-                        if ii != i or jj != j and self.grid_matrix.iloc[ii, jj] in self.grid.index:
-                            self.neighbors_dict[int(zone)].update({iii: self.grid_matrix.iloc[ii, jj]})
-                            iii += 1
+        n_rows = len(self.grid_matrix.index)
+        n_cols = len(self.grid_matrix.columns)
+        for current_max_n_hops in range(1, max_n_hops+1):
+            for i in self.grid_matrix.index:
+                for j in self.grid_matrix.columns:
+                    zone = self.grid_matrix.iloc[i, j]
+                    i_up = i-max_n_hops if i-max_n_hops >= 0 else 0
+                    i_low = i+max_n_hops if i+max_n_hops < len(self.grid_matrix.index) else n_rows - 1
+                    j_left = j-max_n_hops if j-max_n_hops >= 0 else 0
+                    j_right = j+max_n_hops if j+max_n_hops < len(self.grid_matrix.columns) else n_cols - 1
+                    self.neighbors_dict[int(zone)] = dict()
+                    for ii in range(i_up, i_low+1):
+                        for jj in range(j_left, j_right+1):
+                            if ii != i or jj != j and self.grid_matrix.iloc[ii, jj] in self.grid.index:
+                                self.neighbors_dict[int(zone)].update(
+                                    {len(self.neighbors_dict[int(zone)].keys()): self.grid_matrix.iloc[ii, jj]}
+                                )
         return self.neighbors_dict
 
     def get_hourly_ods(self):
-
-        self.hourly_ods = {}
 
         for hour, hour_df in self.bookings_train.groupby("hour"):
             self.hourly_ods[hour] = pd.DataFrame(
@@ -386,20 +386,12 @@ class DemandModel:
             self.bookings_train.loc[self.bookings_train.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
             self.bookings_train.loc[self.bookings_train.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
             self.bookings_train.loc[self.bookings_train.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
-        for zone in self.valid_zones:
             self.bookings_test.loc[self.bookings_test.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
             self.bookings_test.loc[self.bookings_test.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
             self.bookings_test.loc[self.bookings_test.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
             self.bookings_test.loc[self.bookings_test.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
 
     def get_trip_kdes(self):
-        self.trip_kdes = {}
-        self.kde_columns = [
-            "origin_i",
-            "origin_j",
-            "destination_i",
-            "destination_j",
-        ]
 
         for daytype, daytype_bookings_gdf in self.bookings_train.groupby("daytype"):
             self.trip_kdes[daytype] = {}
@@ -487,27 +479,13 @@ class DemandModel:
         with open(os.path.join(demand_model_path, "city_obj.pickle"), "wb") as f:
             pickle.dump(self, f)
 
-        self.grid_matrix.to_pickle(
-            os.path.join(demand_model_path, "grid_matrix.pickle")
-        )
-        self.grid_matrix.to_csv(
-            os.path.join(demand_model_path, "grid_matrix.csv")
-        )
-        self.grid.geometry.to_file(
-            os.path.join(demand_model_path, "grid.dbf")
-        )
-        self.grid.to_pickle(
-            os.path.join(demand_model_path, "grid.pickle")
-        )
-        self.grid.to_csv(
-            os.path.join(demand_model_path, "grid.csv")
-        )
-        pd.DataFrame(self.neighbors_dict).to_pickle(
-            os.path.join(demand_model_path, "neighbors_dict.pickle")
-        )
-        pd.DataFrame(self.neighbors_dict).to_csv(
-            os.path.join(demand_model_path, "neighbors_dict.csv")
-        )
+        self.grid_matrix.to_pickle(os.path.join(demand_model_path, "grid_matrix.pickle"))
+        self.grid_matrix.to_csv(os.path.join(demand_model_path, "grid_matrix.csv"))
+        self.grid.geometry.to_file(os.path.join(demand_model_path, "grid.dbf"))
+        self.grid.to_pickle(os.path.join(demand_model_path, "grid.pickle"))
+        self.grid.to_csv(os.path.join(demand_model_path, "grid.csv"))
+        pd.DataFrame(self.neighbors_dict).to_pickle(os.path.join(demand_model_path, "neighbors_dict.pickle"))
+        pd.DataFrame(self.neighbors_dict).to_csv(os.path.join(demand_model_path, "neighbors_dict.csv"))
         self.bookings_train.to_csv(os.path.join(demand_model_path, "bookings_train.csv"))
         self.bookings_train.to_pickle(os.path.join(demand_model_path, "bookings_train.pickle"))
         self.bookings_test.to_csv(os.path.join(demand_model_path, "bookings_test.csv"))
@@ -540,8 +518,6 @@ class DemandModel:
         print(integers_dict)
         with open(os.path.join(demand_model_path, "integers_dict.pickle"), "wb") as f:
             pickle.dump(integers_dict, f)
-
-
 
     def save_in_flow_count(self):
 

@@ -54,7 +54,7 @@ def single_run(conf_dict):
 
     if sim_type == "eventG":
         simInput_eventG = get_eventG_input(input_parameters)
-        sim_eventG = run_eventG_sim(simInput=simInput_eventG)
+        sim_eventG = run_eventG_sim(sim_input=simInput_eventG)
         simOutput_eventG = SimOutput(sim_eventG, results_path, sim_general_conf, sim_scenario_conf)
         sim_stats = simOutput_eventG.sim_stats
         simOutput = simOutput_eventG
@@ -62,7 +62,7 @@ def single_run(conf_dict):
     elif sim_type == "traceB":
 
         simInput_traceB = get_traceB_input(input_parameters)
-        sim_traceB = run_traceB_sim (simInput=simInput_traceB)
+        sim_traceB = run_traceB_sim (sim_input=simInput_traceB)
         simOutput_traceB = SimOutput(sim_traceB, results_path, sim_general_conf, sim_scenario_conf)
         sim_stats = simOutput_traceB.sim_stats
         simOutput = simOutput_traceB

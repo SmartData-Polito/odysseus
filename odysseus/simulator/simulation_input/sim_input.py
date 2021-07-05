@@ -10,15 +10,10 @@ class SimInput:
 
 	def __init__(self, conf_dict):
 
-
 		self.demand_model_config = conf_dict["sim_general_conf"]
 		self.sim_scenario_conf = conf_dict["sim_scenario_conf"]
 		supply_model = conf_dict["supply_model_object"]
 		self.demand_model_folder = conf_dict["demand_model_folder"]
-
-
-		self.city = self.demand_model_config["city"]
-
 		demand_model_path = os.path.join(
 			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
 			"demand_modelling",
@@ -27,7 +22,8 @@ class SimInput:
 			self.demand_model_folder
 		)
 
-		#demand modelling
+		self.city = self.demand_model_config["city"]
+
 		self.grid = pickle.Unpickler(open(os.path.join(demand_model_path, "grid.pickle"), "rb")).load()
 		self.grid_matrix = pickle.Unpickler(open(os.path.join(demand_model_path, "grid_matrix.pickle"), "rb")).load()
 		self.avg_out_flows_train = pickle.Unpickler(open(os.path.join(demand_model_path, "avg_out_flows_train.pickle"), "rb")).load()
@@ -37,7 +33,16 @@ class SimInput:
 		self.integers_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "integers_dict.pickle"), "rb")).load()
 		self.closest_valid_zone = pickle.Unpickler(open(os.path.join(demand_model_path, "closest_valid_zone.pickle"), "rb")).load()
 
+		self.distance_matrix = self.grid.loc[self.valid_zones].centroid.apply(
+			lambda x: self.grid.loc[self.valid_zones].centroid.distance(x).sort_values()
+		)
+		self.closest_zones = dict()
+		for zone_id in self.valid_zones:
+			self.closest_zones[zone_id] = list(
+				self.distance_matrix[self.distance_matrix > 0].loc[zone_id].sort_values().dropna().index.values
+			)
 
+		# demand
 		self.avg_request_rate = self.integers_dict["avg_request_rate"]
 		self.n_vehicles_original = self.integers_dict["n_vehicles_original"]
 		self.avg_speed_mean = self.integers_dict["avg_speed_mean"]
@@ -56,13 +61,14 @@ class SimInput:
 			self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
 			self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
 
-		#supply model
 		if "n_requests" in self.sim_scenario_conf.keys():
+			# TODO -> compute w.r.t. sim duration
 			# 30 => 1 month
 			self.desired_avg_rate = self.sim_scenario_conf["n_requests"] / 30 / 24 / 3600
 			self.rate_ratio = self.desired_avg_rate / self.avg_request_rate
 			self.sim_scenario_conf["requests_rate_factor"] = self.rate_ratio
 
+		#supply
 		if "n_vehicles" in self.sim_scenario_conf.keys():
 			self.n_vehicles_sim = self.sim_scenario_conf["n_vehicles"]
 		elif "n_vehicles_factor" in self.sim_scenario_conf.keys():

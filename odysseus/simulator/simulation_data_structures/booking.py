@@ -1,16 +1,30 @@
+import datetime
+
 from odysseus.simulator.simulation_data_structures.sim_event import SimEvent
 from odysseus.utils.bookings_utils import *
 
 
 class Booking(SimEvent):
 
-    def __init__(self, booking_request_dict, chosen_zone_id, grid):
+    def __init__(self, env, booking_request_dict, chosen_origin, chosen_destination, vehicle, grid):
 
-        super().__init__("booking")
-
-        self.booking_request_dict = booking_request_dict
+        super().__init__(env, "booking")
+        self.booking_request_dict = booking_request_dict.copy()
         self.booking_dict = booking_request_dict.copy()
-        self.booking_dict["origin_id"] = chosen_zone_id
-        self.booking_dict = get_distances(
-            self.booking_dict, grid,
+        self.chosen_origin = chosen_origin
+        self.chosen_destination = chosen_destination
+        self.booking_dict["origin_id"] = self.chosen_origin.zone_id
+        self.booking_dict["destination_id"] = self.chosen_destination.zone_id
+        self.booking_dict = get_distances(self.booking_dict, grid)
+        self.booking_dict = get_walking_distances(self.booking_dict, self.booking_request_dict, grid)
+        self.booking_dict["start_soc"] = vehicle.soc.level
+        self.booking_dict["plate"] = vehicle.plate
+        self.vehicle = vehicle
+
+    def execute(self):
+        self.chosen_origin.remove_vehicle(self.booking_dict["start_time"])
+        yield self.env.process(self.vehicle.booking(self.booking_dict))
+        self.chosen_destination.add_vehicle(
+            self.booking_dict["start_time"] + datetime.timedelta(seconds=self.booking_dict['duration'])
         )
+        self.booking_dict["end_soc"] = self.vehicle.soc.level

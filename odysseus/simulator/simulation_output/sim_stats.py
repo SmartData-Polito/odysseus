@@ -10,12 +10,12 @@ class SimStats():
 
 	def get_stats_from_sim (self, sim):
 
-		self.valid_zones = sim.simInput.valid_zones
+		self.valid_zones = sim.sim_input.valid_zones
 
-		self.sim_general_conf = sim.simInput.demand_model_config
-		self.sim_scenario_conf = sim.simInput.supply_model_conf
+		self.sim_general_conf = sim.sim_input.demand_model_config
+		self.sim_scenario_conf = sim.sim_input.supply_model_conf
 
-		self.grid = sim.simInput.grid
+		self.grid = sim.sim_input.grid
 
 		# Sim Stats creation
 
@@ -23,17 +23,17 @@ class SimStats():
 
 		self.sim_stats = pd.concat([
 			self.sim_stats,
-			pd.Series(sim.simInput.demand_model_config)
+			pd.Series(sim.sim_input.demand_model_config)
 		])
 
 		self.sim_stats = pd.concat([
 			self.sim_stats,
-			pd.Series(sim.simInput.supply_model_conf)
+			pd.Series(sim.sim_input.supply_model_conf)
 		])
 
-		self.sim_stats.loc["n_vehicles_sim"] = sim.simInput.n_vehicles_sim
-		self.sim_stats.loc["tot_n_charging_poles"] = sim.simInput.tot_n_charging_poles
-		self.sim_stats.loc["n_charging_zones"] = sim.simInput.n_charging_zones
+		self.sim_stats.loc["n_vehicles_sim"] = sim.sim_input.n_vehicles_sim
+		self.sim_stats.loc["tot_n_charging_poles"] = sim.sim_input.tot_n_charging_poles
+		self.sim_stats.loc["n_charging_zones"] = sim.sim_input.n_charging_zones
 
 		self.sim_stats["sim_duration"] = (sim.end - sim.start).total_seconds()
 		self.sim_stats.loc["tot_potential_charging_energy"] = self.sim_stats.loc["sim_duration"] / 3600 * (

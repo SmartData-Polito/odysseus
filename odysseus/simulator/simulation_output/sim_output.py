@@ -10,11 +10,11 @@ class SimOutput():
 
 	def __init__(self, sim, results_path, sim_general_conf, sim_scenario_conf):
 
-		self.valid_zones = sim.simInput.valid_zones
+		self.valid_zones = sim.sim_input.valid_zones
 
-		self.sim_general_conf = sim.simInput.demand_model_config
-		self.supply_model_conf = sim.simInput.supply_model_conf
-		self.grid = sim.simInput.grid
+		self.sim_general_conf = sim.sim_input.demand_model_config
+		self.supply_model_conf = sim.sim_input.supply_model_conf
+		self.grid = sim.sim_input.grid
 
 		# Sim Stats creation
 
