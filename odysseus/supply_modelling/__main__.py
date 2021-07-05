@@ -9,9 +9,6 @@ import pickle
 from odysseus.supply_modelling.supply_model import SupplyModel
 
 
-def same_parameters(default, parser):
-    return parser.cities==default["cities"] and parser.data_source_ids==default["data_source_ids"] and parser.num_vehicles==default["num_vehicles"] and parser.tot_n_charging_poles==default["tot_n_charging_poles"] and parser.n_charging_zones==default["n_charging_zones"] and parser.year==default["year"] and parser.distributed_cps==default["distributed_cps"] and parser.cps_placement_policy==default["cps_placement_policy"] and parser.n_relocation_workers==default["n_relocation_workers"] and parser.folder_name==default["folder_name"]
-
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "-c", "--cities", nargs="+",
@@ -156,13 +153,9 @@ else:
     if args.folder_name != "":
         folder = args.folder_name[0]
     else:
-        if same_parameters(default, args):
-            #salvo nella cartella di default
-            folder = "default_supply_model"
-        else:
-            folder = input("In which folder do you want to save the model? [type NO to not save]\t")
-            if folder == "NO":
-                exit(0)
+        folder = input("In which folder do you want to save the model? [type NO to not save]\t")
+        if folder == "NO":
+            exit(0)
 
     #cartella di default
     savepath = os.path.join(
