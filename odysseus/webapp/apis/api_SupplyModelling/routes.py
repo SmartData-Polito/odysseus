@@ -90,7 +90,8 @@ def run_sm():
             "distributed_cps":[form_inputs["distributed_cps"]],
             "cps_placement_policy":form_inputs["cps_placement_policy"],
             "n_relocation_workers":form_inputs["n_relocation_workers"],
-            "folder_name":form_inputs["folder_name"],
+            "demand_model_folder":form_inputs["demand_model_folder"],
+            "folder_name":[form_inputs["folder_name"]],
             "recover_supply_model":""
         }
 
@@ -98,8 +99,11 @@ def run_sm():
         sm = SupplyModelling(dict_for_sm_modelling)
         print("Start Run\n")
         status = sm.run()
+        dict_for_sm_modelling_fo_db = dict_for_sm_modelling
+        dict_for_sm_modelling_fo_db.pop("folder_name")
+        dict_for_sm_modelling_fo_db["save_folder"] = form_inputs["folder_name"]
 
-        dbhandler.upload_config(dict_for_sm_modelling,collection_name=collection_name)
+        dbhandler.upload_config(dict_for_sm_modelling_fo_db,collection_name=collection_name)
         payload =  {
                 "link": "http://127.0.0.1:8501",
                 }

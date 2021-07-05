@@ -30,7 +30,7 @@ def geodataframe_charging_points(city,engine_type,station_location):
 class SupplyModel:
 
     def __init__(self, supply_model_conf, year, demand_model_folder = "default_demand_model"):
-
+        # supply_model_conf is a dictionary created in the __main__ file 
         self.supply_model_conf = supply_model_conf
         print("in SupplyModel og, \n", supply_model_conf)
 

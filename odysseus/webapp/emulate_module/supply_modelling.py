@@ -20,13 +20,15 @@ DEFAULT_FORM = {
     "distributed_cps":"True",
     "cps_placement_policy":"num_parkings",
     "n_relocation_workers":1,
-    "save_folder":"",
+    "demand_model_folder":"",
+    "folder_name":"",
     "recover_supply_model":""
 }
 class SupplyModelling:
     
     def __init__(self, dict_for_sm_modelling):
         print("INSIDE INIT", dict_for_sm_modelling)
+        # this dict needs to contain all elements as lists
         self.form = dict_for_sm_modelling
         self.cities=dict_for_sm_modelling["cities"]
         self.data_source_ids=dict_for_sm_modelling["data_source_ids"]
@@ -37,6 +39,7 @@ class SupplyModelling:
         self.distributed_cps=dict_for_sm_modelling["distributed_cps"]
         self.cps_placement_policy=dict_for_sm_modelling["cps_placement_policy"]
         self.n_relocation_workers=dict_for_sm_modelling["n_relocation_workers"]
+        self.demand_model_folder = dict_for_sm_modelling["demand_model_folder"]
         self.folder_name=dict_for_sm_modelling["folder_name"]
         self.recover_supply_model=""
 
@@ -83,7 +86,11 @@ class SupplyModelling:
             print("supply_model_conf line 82\n",supply_model_conf)
             # little trickery to solve the supply modelling looking for the wrong folder
             # use the same name for your supply model as you did for your demand model :) 
-            supply_model = SupplyModel(supply_model_conf, int(*self.year), self.folder_name)
+            # supply_model = SupplyModel(supply_model_conf, int(*self.year), self.folder_name)
+            supply_model = SupplyModel(
+                supply_model_conf, int(*self.year), self.demand_model_folder
+            )
+
             vehicles_soc_dict, vehicles_zones, available_vehicles_dict = supply_model.init_vehicles()
             supply_model.init_charging_poles()
             supply_model.init_relocation()
@@ -92,7 +99,7 @@ class SupplyModelling:
 
             if self.folder_name != "":
                 # folder = self.folder_name[0] brendan 2/7/2021 commented
-                folder = self.folder_name
+                folder = self.folder_name[0]
 
             else:
                 if same_parameters(self.form,DEFAULT_FORM):
@@ -100,6 +107,7 @@ class SupplyModelling:
                     folder = "default_supply_model"
                 else:
                     folder = namegenerator.gen()
+
             print("folder, line 101",folder)
             #cartella di default
             savepath = os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", self.cities[0], folder)  #"bre-cambiato"
