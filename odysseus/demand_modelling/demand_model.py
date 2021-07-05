@@ -393,6 +393,7 @@ class DemandModel:
 
     def get_trip_kdes(self):
 
+        self.trip_kdes = dict()
         for daytype, daytype_bookings_gdf in self.bookings_train.groupby("daytype"):
             self.trip_kdes[daytype] = {}
             for hour in range(24):

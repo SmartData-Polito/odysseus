@@ -73,7 +73,7 @@ parser.set_defaults(
     kde_bandwidths=["1"],
     train_range=["2017", "10", "2017", "12"],
     test_range=["2017", "10", "2017", "12"],
-    folder_name=["isc2_extension_2021"]
+    folder_name=["test"]
 )
 
 args = parser.parse_args()

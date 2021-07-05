@@ -1,8 +1,14 @@
 class SimMetrics:
 
-    def __init__(self, metrics_dict):
+    def __init__(self):
 
-        self.metrics_dict = metrics_dict
+        self.metrics_dict = {
+            "cum_relo_ret_t": "sum",
+            "min_vehicles_relocated": "min",  # Minimum number of vehicles relocated at the same time
+            "max_vehicles_relocated": "max",  # Maximum number of vehicles relocated at the same time
+            "avg_relocation_step_distance": "avg",
+            "tot_vehicles_moved": "sum",
+        }
         self.metrics_values = dict()
 
         for metrics in self.metrics_dict:

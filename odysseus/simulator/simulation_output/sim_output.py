@@ -321,59 +321,59 @@ class SimOutput():
 					"sim_booking_requests.csv"
 				)
 			)
-			self.sim_bookings.to_pickle(
+			self.sim_bookings.to_csv(
 				os.path.join(
 					results_path,
-					"sim_bookings.pickle"
+					"sim_bookings.csv"
 				)
 			)
-			self.sim_charges.to_pickle(
+			self.sim_charges.to_csv(
 				os.path.join(
 					results_path,
-					"sim_charges.pickle"
+					"sim_charges.csv"
 				)
 			)
-			self.sim_not_enough_energy_requests.to_pickle(
+			self.sim_not_enough_energy_requests.to_csv(
 				os.path.join(
 					results_path,
-					"sim_unsatisfied_no_energy.pickle"  #  maybe change to underscore?
+					"sim_unsatisfied_no_energy.csv"
 				)
 			)
-			self.sim_no_close_vehicle_requests.to_pickle(
+			self.sim_no_close_vehicle_requests.to_csv(
 				os.path.join(
 					results_path,
-					"sim_unsatisfied_no_close_vehicle.pickle"
+					"sim_unsatisfied_no_close_vehicle.csv"
 				)
 			)
-			self.sim_unsatisfied_requests.to_pickle(
+			self.sim_unsatisfied_requests.to_csv(
 				os.path.join(
 					results_path,
-					"sim_unsatisfied_requests.pickle"
+					"sim_unsatisfied_requests.csv"
 				)
 			)
-			self.sim_system_charges_bookings.to_pickle(
+			self.sim_system_charges_bookings.to_csv(
 				os.path.join(
 					results_path,
-					"sim_system_charges_bookings.pickle"
+					"sim_system_charges_bookings.csv"
 				)
 			)
 
-			self.sim_users_charges_bookings.to_pickle(
+			self.sim_users_charges_bookings.to_csv(
 				os.path.join(
 					results_path,
-					"sim_users_charges_bookings.pickle"
+					"sim_users_charges_bookings.csv"
 				)
 			)
-			self.sim_unfeasible_charge_bookings.to_pickle(
+			self.sim_unfeasible_charge_bookings.to_csv(
 				os.path.join(
 					results_path,
-					"sim_unfeasible_charge_bookings.pickle"
+					"sim_unfeasible_charge_bookings.csv"
 				)
 			)
-			self.sim_charge_deaths.to_pickle(
+			self.sim_charge_deaths.to_csv(
 				os.path.join(
 					results_path,
-					"sim_unfeasible_charges.pickle"
+					"sim_unfeasible_charges.csv"
 				)
 			)
 

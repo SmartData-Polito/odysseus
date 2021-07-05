@@ -6,11 +6,12 @@ from odysseus.utils.bookings_utils import *
 
 class Booking(SimEvent):
 
-    def __init__(self, env, booking_request_dict, chosen_origin, chosen_destination, vehicle, grid):
+    def __init__(self, env, booking_request, chosen_origin, chosen_destination, vehicle, grid):
 
         super().__init__(env, "booking")
-        self.booking_request_dict = booking_request_dict.copy()
-        self.booking_dict = booking_request_dict.copy()
+        self.booking_request = booking_request
+        self.booking_request_dict = self.booking_request.booking_request_dict.copy()
+        self.booking_dict = self.booking_request_dict.copy()
         self.chosen_origin = chosen_origin
         self.chosen_destination = chosen_destination
         self.booking_dict["origin_id"] = self.chosen_origin.zone_id

@@ -135,14 +135,7 @@ class SharedMobilitySim:
                 print("Policy for alpha not recognised!")
                 exit(0)
 
-        metrics_dict = {
-            "cum_relo_ret_t": "sum",
-            "min_vehicles_relocated": "min",  # Minimum number of vehicles relocated at the same time
-            "max_vehicles_relocated": "max",  # Maximum number of vehicles relocated at the same time
-            "avg_relocation_step_distance": "avg",
-            "tot_vehicles_moved": "sum",
-        }
-        self.sim_metrics = SimMetrics(metrics_dict)
+        self.sim_metrics = SimMetrics()
 
         if self.sim_input.supply_model_conf["battery_swap"] \
                 and self.sim_input.supply_model_conf["scooter_relocation"]:
