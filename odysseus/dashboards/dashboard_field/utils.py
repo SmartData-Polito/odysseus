@@ -165,3 +165,34 @@ base_shapes = {
     "San Diego": "San Diego, USA",
     "Seattle": "Seattle, USA",
     "Amsterdam":"Amsterdam, Netherlands"}
+
+
+
+city_centroid = {
+    "Torino": {"lat": 45.116177 ,"lon": 7.742615},
+    "Milano": {"lat": 45.464664 ,"lon": 9.188540},	
+    "Firenze": {"lat": 43.769562 ,"lon":11.255814},
+    "Roma": {"lat": 41.9027835 ,"lon": 12.4963655},
+    
+    "Madrid": {"lat": 40.416775 ,"lon": -3.703790},
+               
+    "Berlin": {"lat": 52.520008,"lon": 13.404954},
+    "Frankfurt":{"lat":  50.110924 ,"lon": 8.682127},
+    "Hamburg": {"lat": 53.551086 ,"lon": 9.993682},
+    "Munchen": {"lat": 48.137154 ,"lon": 11.576124},
+    #"Rheinland": {"lat": 45.464664 ,"lon": 9.188540},
+    "Stuttgart": {"lat": 48.783333 ,"lon": 9.183333},
+               
+    "Toronto": {"lat":  43.651070,"lon":  -79.347015},
+    "Vancouver": {"lat": 49.246292 ,"lon": -123.116226},
+    "Calgary": {"lat":  51.049999,"lon": -114.066666},
+    "Montreal": {"lat":  45.508888,"lon": -73.561668},
+    
+    "Austin": {"lat":  30.266666 ,"lon": -97.733330},
+    "Washington": {"lat":  38.8951,"lon": -77.0364},
+    "Columbus": {"lat": 39.983334 ,"lon": -82.983330},
+    "Denver": {"lat": 39.742043 ,"lon": -104.991531},
+    "New York City": {"lat": 40.730610 ,"lon":-73.935242 },
+    "San Diego": {"lat": 32.715736 ,"lon":-117.161087 },
+    "Seattle": {"lat": 47.608013 ,"lon":-122.335167 },
+    "Amsterdam":{"lat": 52.377956 ,"lon": 4.897070}}

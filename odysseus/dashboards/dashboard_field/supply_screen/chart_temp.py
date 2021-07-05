@@ -3,7 +3,6 @@ from odysseus.dashboards.dashboard_field.utils import st_functional_columns
 from odysseus.simulator.simulation_input.vehicle_conf import vehicle_conf
 
 from odysseus.dashboards import session_state as SessionState
-from threading import Thread
 import streamlit as st
 from functools import partial
 import pandas as pd
@@ -16,13 +15,21 @@ class ChartTemp(DashboardChart):
 
     def __init__(self, data, year, month, start, end, stat_col, title, subtitle, tipo="Altair", parametro='plate'):
         super().__init__(title, name=title, subtitle=subtitle)
+
         self.data = data
+
         self.parametro=parametro
+
         self.tipo = tipo
+
         self.year= year
+
         self.month = month
+
         self.startDay = start
+
         self.endDay = end
+        
         self.car_type = stat_col
         arg = [["selectbox", "Scegli aggregazione", ["1H", "3H", "6H", "12H","1D", "2D", "3D"]],
                 ["selectbox", "Segli modello macchina", list(vehicle_conf[self.car_type].keys())],
@@ -34,16 +41,9 @@ class ChartTemp(DashboardChart):
 
         engine_type = vehicle_conf[self.car_type][car_model]["engine_type"] #gasoline, diesel, lpg, gnc, electric
         consumption = vehicle_conf[self.car_type][car_model]["consumption"] #km/l, km/kWh
-        capacity = vehicle_conf[self.car_type][car_model]["fuel_capacity"] #kWh (electric), Liter (gasoline,diesel,lpg), kilograms (gnc)
 		
-        st.write("Engine type is:")
-        st.write(engine_type)
+        st.write("Engine type is:", engine_type)
 
-        st.write("Consumpion is:")
-        st.write(consumption)
-
-        st.write("from_kml_to_lkm: ")
-        st.write(self.from_kml_to_lkm(consumption))
         column = 'sum_euclidean_distance'
 
         test_df = self.data.copy()

@@ -131,7 +131,7 @@ class ChartTemp(DashboardChart):
 
     def distance_to_cost(self, distance, consumption, fuel_cost):
         perkm_consumption = self.from_kml_to_lkm(consumption)
-        tot_consumption = perkm_consumption * distance * fuel_cost / 1000
+        tot_consumption = perkm_consumption * distance * fuel_cost
         return tot_consumption
 
 

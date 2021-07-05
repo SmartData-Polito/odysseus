@@ -132,4 +132,5 @@ class ScreenSupply(DashboardScreen):
             
             ChartTemp(self.temp_data, self.year, self.month, start, end, car_type, 'Fuel Supply of the Fleet', 'Here is a time series showing, given a fleet composed of a specified model of car, how much would cost to run it').show_bookings_count()
 
-            #ChartMap(self.space_data, 'Heat Map', "This is a heatmap of the bookings during the month in exam. You can change the time interval also! The data analyst who thought about it is pretty smart, don't you think?", self.grid, start, end, tipo='heatmap', parametro=self.city_name).show_amenities_map()
+            ChartMap(self.space_data, self.grid, 'Amenities', 'In this map is possibile to see the infrastructure avilable in the city \
+                of your choice and its neightbor areas.', parametro=self.city_name).show_amenities_map()
