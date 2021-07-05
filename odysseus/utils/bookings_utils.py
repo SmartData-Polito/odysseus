@@ -28,15 +28,15 @@ def get_distances(booking_or_request_dict, grid, min_distance=500, orography_fac
 	return booking_or_request_dict
 
 
-def get_walking_distances(booking_dict, booking_request_dict, grid):
+def get_walking_distances(booking_dict, grid):
 	booking_dict["origin_walking_distance"] = get_od_distance(
 		grid,
-		booking_request_dict["origin_id"],
+		booking_dict["req_origin_id"],
 		booking_dict["origin_id"]
 	)
 	booking_dict["destination_walking_distance"] = get_od_distance(
 		grid,
-		booking_request_dict["destination_id"],
+		booking_dict["req_destination_id"],
 		booking_dict["destination_id"]
 	)
 	return booking_dict

@@ -19,7 +19,7 @@ class Booking(SimEvent):
         self.booking_dict["origin_id"] = self.chosen_origin.zone_id
         self.booking_dict["destination_id"] = self.chosen_destination.zone_id
         self.booking_dict = get_distances(self.booking_dict, grid)
-        self.booking_dict = get_walking_distances(self.booking_dict, self.booking_request_dict, grid)
+        self.booking_dict = get_walking_distances(self.booking_dict, grid)
         self.booking_dict["start_soc"] = vehicle.soc.level
         self.booking_dict["plate"] = vehicle.plate
         self.vehicle = vehicle

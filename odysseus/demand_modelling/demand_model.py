@@ -158,11 +158,10 @@ class DemandModel:
             self.n_vehicles_original = 100
 
         self.neighbors_dict = self.get_neighbors_dicts()
-        self.request_rates = self.get_requests_rates()
+        self.avg_request_rate, self.request_rates = self.get_requests_rates()
         self.get_grid_indexes()
         self.trip_kdes = self.get_trip_kdes()
         self.hourly_ods = dict()
-        self.avg_request_rate = -1
 
         self.max_out_flow = float('-inf')
         self.max_in_flow = float('-inf')
@@ -367,7 +366,7 @@ class DemandModel:
 
         self.avg_request_rate = pd.DataFrame(self.request_rates.values()).mean().mean()
 
-        return self.request_rates
+        return self.avg_request_rate, self.request_rates
 
     def get_grid_indexes(self):
         zone_coords_dict = {}
