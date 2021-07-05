@@ -142,7 +142,7 @@ else:
         "n_relocation_workers":int(args.n_relocation_workers)
     })
 
-    supply_model = SupplyModel(supply_model_conf, int(*args.year))
+    supply_model = SupplyModel(supply_model_conf, int(*args.year)) # nel webapp bre-cambiato
 
 
     vehicles_soc_dict, vehicles_zones, available_vehicles_dict = supply_model.init_vehicles()

@@ -1,3 +1,4 @@
+#"bre-cambiato"
 
 #per sopprimere i warning sui centroidi
 from odysseus.webapp.emulate_module.demand_modelling import DEFAULT_FORM
@@ -101,7 +102,8 @@ class SupplyModelling:
                     folder = namegenerator.gen()
             print("folder, line 101",folder)
             #cartella di default
-            savepath = os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", self.cities[0], folder)
+            savepath = os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", self.cities[0], folder)  #"bre-cambiato"
+            # passo lo stesso nome del supply model per il demand model
 
             if not os.path.exists(savepath):
                 os.makedirs(savepath)

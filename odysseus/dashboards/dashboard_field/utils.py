@@ -134,3 +134,34 @@ def st_functional_columns(lista, sizes=None):
               i += 1
 
        return ret
+
+
+
+base_shapes = {
+    "Torino": "Turin, Italy",
+    "Milano": "Milan, Italy",
+    "Firenze": "Florence, Italy",
+    "Roma": "Rome, Italy",
+    
+    "Madrid": "Madrid, Spain",
+               
+    "Berlin": "Berlin, Germany",
+    "Frankfurt": "Frankfurt, Germany",
+    "Hamburg": "Hamburg, Germany",
+    "Munchen": "Munchen, Germany",
+    "Rheinland": "Rheinland, Germany",
+    "Stuttgart": "Stuttgart, Germany",
+               
+    "Toronto": "Toronto, Canada",
+    "Vancouver": "Vancouver, Canada",
+    "Calgary": "Calgary, Canada",
+    "Montreal": "Montreal, Canada",
+    
+    "Austin": "Austin, USA",
+    "Washington": "Washington, USA",
+    "Columbus": "Columbus, USA",
+    "Denver": "Denver, USA",
+    "New York City": "New York City, USA",
+    "San Diego": "San Diego, USA",
+    "Seattle": "Seattle, USA",
+    "Amsterdam":"Amsterdam, Netherlands"}
