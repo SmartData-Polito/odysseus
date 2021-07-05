@@ -26,7 +26,7 @@ def load_user(email):
 #db.create_all()
 
 def create_app():
-    with open(os.path.join(os.path.abspath(os.curdir),"odysseus/webapp/settings.json"),"r") as f:
+    with open(os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), "settings.json"), "r") as f:
         dbdata=json.load(f)["mongodb"]
         dbdata["password"]=os.environ["MONGODB_PASSWORD"]
 
