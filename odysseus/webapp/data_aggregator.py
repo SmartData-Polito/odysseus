@@ -32,7 +32,36 @@ def get_in_flow_count(trips_destinations):
 
     return in_flow_count
 
-def build_tesselation(park_df):
+def build_tesselation(park_df,city):
+    base_shapes = {
+    "Torino": "Turin, Italy",
+    "Milano": "Milan, Italy",
+    "Firenze": "Florence, Italy",
+    "Roma": "Rome, Italy",
+    
+    "Madrid": "Madrid, Spain",
+               
+    "Berlin": "Berlin, Germany",
+    "Frankfurt": "Frankfurt, Germany",
+    "Hamburg": "Hamburg, Germany",
+    "Munchen": "Munchen, Germany",
+    "Rheinland": "Rheinland, Germany",
+    "Stuttgart": "Stuttgart, Germany",
+               
+    "Toronto": "Toronto, Canada",
+    "Vancouver": "Vancouver, Canada",
+    "Calgary": "Calgary, Canada",
+    "Montreal": "Montreal, Canada",
+    
+    "Austin": "Austin, USA",
+    "Washington": "Washington, USA",
+    "Columbus": "Columbus, USA",
+    "Denver": "Denver, USA",
+    "New York City": "New York City, USA",
+    "San Diego": "San Diego, USA",
+    "Seattle": "Seattle, USA",
+    "Amsterdam":"Amsterdam, Netherlands"}
+
     df = park_df.copy()
 
     tdf = skmob.TrajDataFrame(park_df, latitude='start_latitude', longitude='start_longitude', user_id='plate', datetime='start_time')
@@ -43,7 +72,7 @@ def build_tesselation(park_df):
     })
 
     # grid using skmob tilers
-    tessellation = tilers.tiler.get("squared", base_shape="Turin, Italy", meters=500)
+    tessellation = tilers.tiler.get("squared", base_shape=base_shapes[city], meters=500)
     tessellation["tile_ID"] = tessellation.index.values
     return tessellation,stdf_parkings
 
@@ -166,20 +195,21 @@ class DataAggregator:
         document_list.append(document)
         return document_list
 
-    def spatial_grouping(self,datapath):
+    def spatial_grouping(self,datapath,city):
         # select columns needed for analysis and read csv
         cols = ["start_time", "end_time", 'start_longitude', 'start_latitude', 'end_longitude', 'end_latitude', 'plate']
         park_df = pd.read_csv(datapath, usecols=cols)
         park_df['start_time'] = pd.to_datetime(park_df['start_time'],utc=True).dt.to_pydatetime()
         park_df['end_time'] = pd.to_datetime(park_df['end_time'],utc=True).dt.to_pydatetime()   
 
-        tessellation,stdf_parkings = build_tesselation(park_df)
+        tessellation,stdf_parkings = build_tesselation(park_df,city)
 
         or_count=self.origin_count(stdf_parkings,tessellation)
         of_count=self.out_flow_count(park_df,tessellation)
         if_count=self.in_flow_count(park_df,tessellation)
+   
         agg_df = merge_spatial_df([of_count,if_count,or_count])
-        print("FINE")
+
         return agg_df
 
     def build_spatial_doc(self,agg_df,city,datasource):

@@ -69,9 +69,9 @@ class CityDataManager():
                             city, "od_trips","trips",data_source_id, f"{year}_{month}","trips.csv"
                         )
                         doc_list=self.data_agg.groupby_day_hour(filepath,city)
-                        agg_df = self.data_agg.spatial_grouping(filepath)
+                        agg_df = self.data_agg.spatial_grouping(filepath,city)
+                        print("agg: ",agg_df)
                         spatial_doc = self.data_agg.build_spatial_doc(agg_df,city,data_source_id)
-                        print("SPATIAL DOC")
                         final_doc = []
                         for d in doc_list:
                             for s in spatial_doc:
