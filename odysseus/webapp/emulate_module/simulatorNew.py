@@ -5,6 +5,7 @@ import os
 import json
 
 from shutil import copy
+import shutil
 
 from odysseus.simulator.simulation_input.sim_input_paths import simulation_input_paths
 
@@ -17,12 +18,16 @@ from odysseus.simulator.simulation_input.sim_current_config.single_run_conf impo
 
 
 class Simulator:
-    def __init__(self):
+    def __init__(self, config_dict):
+        self.city = config_dict["city"]
+        self.demandModelName = config_dict["demandModelName"]
+        self.supplyModelName = config_dict["supplyModelName"]
         pass
 
-    def run_simulation(self):
+    def run(self):
 
         print(datetime.datetime.now())
+        shutil.rmtree(simulation_input_paths["sim_current_config"])
 
         with open(simulation_input_paths['sim_configs_target'], 'r') as my_file:
             data = my_file.read()
@@ -34,6 +39,7 @@ class Simulator:
             campaign_name,
             conf_name
         )
+
         conf_path = simulation_input_paths['sim_current_config']
         os.makedirs(conf_path, exist_ok=True)
 
