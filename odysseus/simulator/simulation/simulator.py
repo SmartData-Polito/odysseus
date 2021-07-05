@@ -252,16 +252,20 @@ class SharedMobilitySim:
     def process_booking_request(self, booking_request):
 
         booking_request_dict = booking_request.booking_request_dict
+        booking_request_dict["req_id"] = self.n_booking_requests
+        self.n_booking_requests += 1
 
-        self.list_n_vehicles_booked += [self.n_booked_vehicles]
-        self.list_n_vehicles_charging_system += [self.chargingStrategy.n_vehicles_charging_system]
-        self.list_n_vehicles_charging_users += [self.chargingStrategy.n_vehicles_charging_users]
-        self.list_n_vehicles_dead += [self.chargingStrategy.n_dead_vehicles]
-
-        n_vehicles_charging = self.chargingStrategy.n_vehicles_charging_system + self.chargingStrategy.n_vehicles_charging_users
-        self.list_n_vehicles_available += [
-            self.sim_input.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
-        ]
+        if "save_history" in self.sim_input.demand_model_config:
+            if self.sim_input.demand_model_config["save_history"]:
+                self.sim_booking_requests += [booking_request_dict]
+                self.list_n_vehicles_booked += [self.n_booked_vehicles]
+                self.list_n_vehicles_charging_system += [self.chargingStrategy.n_vehicles_charging_system]
+                self.list_n_vehicles_charging_users += [self.chargingStrategy.n_vehicles_charging_users]
+                self.list_n_vehicles_dead += [self.chargingStrategy.n_dead_vehicles]
+                n_vehicles_charging = self.chargingStrategy.n_vehicles_charging_system + self.chargingStrategy.n_vehicles_charging_users
+                self.list_n_vehicles_available += [
+                    self.sim_input.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
+                ]
 
         if self.sim_input.supply_model_conf["battery_swap"] \
                 and self.sim_input.supply_model_conf["scooter_relocation"]:
@@ -271,11 +275,6 @@ class SharedMobilitySim:
 
         self.charging_outward_distance = [self.chargingStrategy.charging_outward_distance]
         self.charging_return_distance = [self.chargingStrategy.charging_return_distance]
-
-        if "save_history" in self.sim_input.demand_model_config:
-            if self.sim_input.demand_model_config["save_history"]:
-                self.sim_booking_requests += [booking_request_dict]
-        self.n_booking_requests += 1
 
         flags_return_dict, chosen_vehicle_id, chosen_origin_id = booking_request.search_vehicle()
 

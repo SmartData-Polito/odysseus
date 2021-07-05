@@ -163,12 +163,6 @@ class DemandModel:
         self.trip_kdes = self.get_trip_kdes()
         self.hourly_ods = dict()
         self.avg_request_rate = -1
-        self.kde_columns = [
-            "origin_i",
-            "origin_j",
-            "destination_i",
-            "destination_j",
-        ]
 
         self.max_out_flow = float('-inf')
         self.max_in_flow = float('-inf')
@@ -393,6 +387,12 @@ class DemandModel:
 
     def get_trip_kdes(self):
 
+        kde_columns = [
+            "origin_i",
+            "origin_j",
+            "destination_i",
+            "destination_j",
+        ]
         self.trip_kdes = dict()
         for daytype, daytype_bookings_gdf in self.bookings_train.groupby("daytype"):
             self.trip_kdes[daytype] = {}
@@ -401,7 +401,7 @@ class DemandModel:
                 if len(slot_df):
                     self.trip_kdes[daytype][hour] = KernelDensity(
                         bandwidth=self.kde_bw
-                    ).fit(slot_df[self.kde_columns].dropna())
+                    ).fit(slot_df[kde_columns].dropna())
             hours_list = list(range(7, 24)) + list(range(7))
             for hour in hours_list:
                 slot_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
