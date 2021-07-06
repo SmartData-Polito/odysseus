@@ -58,7 +58,6 @@ class ScreenDataManager(DashboardScreen):
         month_list.append(self.month)
 
         settings = {'id': 'TEST', 'city': self.city_name, 'year': str(year_list), 'month': str(month_list)}
-        print(settings)
         r = requests.get('http://127.0.0.1:5000/api_cdm/get-cdm-data', params=settings)
         json_df = pd.DataFrame(json.loads(r.text, object_hook=json_util.object_hook))
         
@@ -123,9 +122,10 @@ class ScreenDataManager(DashboardScreen):
         if start>=end:
             st.error('End limit date cannot be before the start date of analysis. Retry')
         else:
-            ChartTemp(self.temp_data, self.year, self.month, start, end, stat_col, 'Bookings Count', 'Here is a time series showing how many cars within our fleet are booked at any given time. You can see how it behaves based on different frequencies and zoom in during specific periods in the month!').show_bookings_count()
-            ChartTemp(self.temp_data, self.year, self.month, start, end, stat_col,'Hourly Bookings', "here is a bar plot showing the distribution of the usage of cars in our fleet based on the hour in which were booked during the specified month.").show_bookings_by_hour()
-            ChartTemp(self.temp_data, self.year, self.month, start, end, stat_col,'Bubble Plot', 'This is a bubble plot. here each bubble is bigger the more bookings we had during a specific hour and a specific day of the week.').show_bubble_plot()
+            print(stat_col.replace('_', '. ').title())
+            ChartTemp(self.temp_data, self.year, self.month, start, end, stat_col, stat_col.replace('_', ' ').title(), 'Here is a time series showing how the statistic you wanted to look at changes at any given time. You can see how it behaves based on different frequencies and zoom in during specific periods in the month!').show_bookings_count()
+            ChartTemp(self.temp_data, self.year, self.month, start, end, stat_col,'Hourly '+ stat_col.replace('_', ' ').title(), "here is a bar plot showing the distribution of your desired statistic based on the hour of the day during the specified month.").show_bookings_by_hour()
+            ChartTemp(self.temp_data, self.year, self.month, start, end, stat_col,'Bubble Plot', 'This is a bubble plot. here each bubble is bigger the higher the value of the chosen statistic during a specific hour and a specific day of the week.').show_bubble_plot()
             
-            ChartMap(self.space_data, 'Heat Map', "This is a heatmap of the incoming, outgoing and available cars at our disposal in the fleet during the specified time period", self.grid, start, end, tipo='heatmap', parametro=self.city_name).show_choropleth_mapbox()
+            ChartMap(self.space_data, 'Heat Map', "This is a heatmap of the incoming, outgoing and available cars at our disposal in the fleet during the specified time period", self.grid, start, end,self.city_name, tipo='heatmap').show_choropleth_mapbox()
 

@@ -34,7 +34,7 @@ class ChartTemp(DashboardChart):
         fig = px.line(plot_df)
         fig.update_layout(
             xaxis_title="Time series",
-            yaxis_title="Number of Trips",
+            yaxis_title=column.replace('_', ' ').title(),
             font=dict(
                 family="Courier New, monospace",
                 size=18,
@@ -50,7 +50,7 @@ class ChartTemp(DashboardChart):
         fig = px.bar(bar_plot)
         fig.update_layout(
             xaxis_title="Hour of the day",
-            yaxis_title="Number of trips",
+            yaxis_title=column.replace('_', ' ').title(),
             legend_title="Legend Title",
             font=dict(
                 family="Courier New, monospace",
@@ -73,7 +73,7 @@ class ChartTemp(DashboardChart):
         
         bubble_plot = bubble_plot.groupby(['dayOfWeek', 'hour']).agg({column:'sum'}).reset_index().round(2)
 
-        print(bubble_plot[column])
+        #print(bubble_plot[column])
         fig = px.scatter(bubble_plot, x="hour", y="dayOfWeek", size=column)
         fig.update_layout(
             xaxis_title="Hour of the day",

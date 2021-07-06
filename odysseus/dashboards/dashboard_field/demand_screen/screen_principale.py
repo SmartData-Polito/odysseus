@@ -124,4 +124,5 @@ class ScreenDemand(DashboardScreen):
         if start>=end:
             st.error('End limit date cannot be before the start date of analysis. Retry')
         else:
-            ChartMap(self.space_data, 'Montly demand', "Here you can choose the desired zone of your analysis. The choices are between the incoming cars, the outgoing cars and the number of cars that passed through that zone overall. Just click on one of the squares and you'll see the graphs yourself!", self.grid, start, end, tipo='heatmap', parametro=self.city_name).show_map_with_barplot()
+            ChartMap(self.space_data, 'Montly demand', "Here you can choose the desired zone of your analysis. The choices are between the incoming cars, the outgoing cars and the number of cars that passed through that zone overall. Just click on one of the squares and you'll see the graphs yourself! \
+                One you have finished, you can click on the button 'Seleziona la zona' and you wll be redirected again to the grid map", self.grid, start, end, tipo='heatmap', parametro=self.city_name).show_map_with_barplot()

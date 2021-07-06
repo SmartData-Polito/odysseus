@@ -66,7 +66,10 @@ class ScreenSimulator(DashboardScreen):
         self.grid = gpd.read_file(os.path.join(results_path, "grid.shp"))
 
         ChartMap(self.grid, 'Zonal Analysis', 
-        "In this map is shown different statistics by zone of the simulation you just run!", 
+        "In this map is shown different statistics by zone of the simulation you just run! The possible choices are: \
+        \n- *charge_dea* : Number of charge events per zone done by the system  \n- *Charge_nee* : Number of charge evenets asked by the users  \
+        \n- *destinatio*_: Number of trips that ended in each zone  \n- *origin_coun*: Number of trips that originated in each zone  \
+        \n- *unsatisfied* : Percentage of unsatisfied trips per zone ", 
         parametro=self.city_name).show_choropleth_mapbox()
 
         sim_booking_requests = pd.read_csv(os.path.join(results_path, 'sim_booking_requests.csv'))

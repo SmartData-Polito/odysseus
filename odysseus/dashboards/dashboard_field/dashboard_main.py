@@ -51,7 +51,6 @@ class DashboardMain(DashboardField):
         month = st.sidebar.selectbox("Scegli il mese", sorted(available_months))
         
         ret = [name, city, month, year, db]
-        print(ret)
         col1, col2, col3 = st.sidebar.beta_columns([1,1,1])
         if col2.button('Go to React'):
             webbrowser.open_new_tab('127.0.0.1:3000')

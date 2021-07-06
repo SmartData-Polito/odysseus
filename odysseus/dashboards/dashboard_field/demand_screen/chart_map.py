@@ -88,7 +88,7 @@ class ChartMap(DashboardChart, Thread):
         fig = px.bar(plot_df)
         fig.update_layout(
             xaxis_title="Time series",
-            yaxis_title="---",
+            yaxis_title=column.replace('_', ' ').title(),
             font=dict(
                 family="Courier New, monospace",
                 size=18,
