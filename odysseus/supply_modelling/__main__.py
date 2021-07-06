@@ -82,7 +82,7 @@ default = {
     "distributed_cps": "True",
     "cps_placement_policy": "num_parkings",
     "n_relocation_workers": 1,
-    "demand_model_folder": "test",
+    "demand_model_folder": "default_demand_model",
     "folder_name": "",
     "recover_supply_model": ""
 }

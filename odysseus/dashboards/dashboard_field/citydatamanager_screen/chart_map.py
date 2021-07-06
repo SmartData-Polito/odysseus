@@ -1,5 +1,6 @@
 from odysseus.dashboards.dashboard_field.dashboard_chart import DashboardChart
 from odysseus.dashboards.dashboard_field.utils import st_functional_columns
+from odysseus.dashboards.dashboard_field.utils import *
 
 from threading import Thread
 
@@ -22,7 +23,7 @@ from streamlit_folium import folium_static
 
 class ChartMap(DashboardChart, Thread):
 
-    def __init__(self, og_data, title, subtitle, grid, start, end, tipo="heatmap", parametro='Torino'):
+    def __init__(self, og_data, title, subtitle, grid, start, end, parametro, tipo="heatmap"):
         
         Thread.__init__(self)
         DashboardChart.__init__(self, title, name=title, subtitle=subtitle)
@@ -49,7 +50,7 @@ class ChartMap(DashboardChart, Thread):
                                 color=data_to_show,
                                 color_continuous_scale="YlOrRd",
                                 opacity=0.7,
-                                center={"lat": 45.06, "lon":7.67},
+                                center=city_centroid[self.parametro],
                                 mapbox_style="open-street-map",
                                 zoom=11)
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})

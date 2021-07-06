@@ -1,5 +1,6 @@
 from odysseus.dashboards.dashboard_field.dashboard_chart import DashboardChart
 from odysseus.dashboards.dashboard_field.utils import st_functional_columns
+from odysseus.dashboards.dashboard_field.utils import *
 
 from odysseus.dashboards import session_state as SessionState
 from threading import Thread
@@ -47,7 +48,7 @@ class ChartMap(DashboardChart, Thread):
                                 locations=self.og_data.tile_ID,
                                 #color="zone_id",
                                 opacity=0.5,
-                                center={"lat": 45.06, "lon":7.67},
+                                center=city_centroid[self.parametro],
                                 mapbox_style="open-street-map",
                                 zoom=11)
         fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})

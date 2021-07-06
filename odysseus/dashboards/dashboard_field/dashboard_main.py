@@ -51,6 +51,7 @@ class DashboardMain(DashboardField):
         month = st.sidebar.selectbox("Scegli il mese", sorted(available_months))
         
         ret = [name, city, month, year, db]
+        print(ret)
         col1, col2, col3 = st.sidebar.beta_columns([1,1,1])
         if col2.button('Go to React'):
             webbrowser.open_new_tab('127.0.0.1:3000')
@@ -75,8 +76,7 @@ class DashboardMain(DashboardField):
                 break
 
     def get_main_screen(self, name, month, year, city, db):
-        year = 2018
-        month = 1
+        
         if name == "Home Page":
             main_screen = ScreenHome(title="Titolo: " + name, name=name,month = month, year = year, city = city, db = db)
         elif name == "City Data Manager":

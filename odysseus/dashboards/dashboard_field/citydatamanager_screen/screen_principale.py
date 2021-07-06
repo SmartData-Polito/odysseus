@@ -47,7 +47,7 @@ class ScreenDataManager(DashboardScreen):
                                                             ['date_input', "Inserisci la data di fine analisi", _max, _min, _max],
                                                             [ "selectbox", "Scegli il parametro", param_list]])]
         
-    @st.cache(allow_output_mutation=True, show_spinner=False)
+    @st.cache(allow_output_mutation=True, show_spinner=False, suppress_st_warning=True)
     def get_temp_collection(self):
 
         year_list =[]
@@ -58,6 +58,7 @@ class ScreenDataManager(DashboardScreen):
         month_list.append(self.month)
 
         settings = {'id': 'TEST', 'city': self.city_name, 'year': str(year_list), 'month': str(month_list)}
+        print(settings)
         r = requests.get('http://127.0.0.1:5000/api_cdm/get-cdm-data', params=settings)
         json_df = pd.DataFrame(json.loads(r.text, object_hook=json_util.object_hook))
         
@@ -81,7 +82,7 @@ class ScreenDataManager(DashboardScreen):
         return df
 
 
-    @st.cache(allow_output_mutation=True, show_spinner=False)
+    @st.cache(allow_output_mutation=True, show_spinner=False, suppress_st_warning=True)
     def get_space_collection(self):
 
         year_list =[]
