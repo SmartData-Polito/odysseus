@@ -10,20 +10,21 @@ import geopandas as gpd
 from odysseus.webapp.database_handler import DatabaseHandler
 
 from bson import json_util
-
+from odysseus.city_data_manager.config.config import root_data_path
 
 HOST = 'mongodb://localhost:27017/'
 DATABASE = 'inter_test'
 COLLECTION = 'booking_duration'
 
+
 def set_path(api):
-    ROOT_DIR = os.path.abspath(os.curdir)
+    ROOT_DIR = os.path.dirname(os.curdir)
     cdm_data_path = os.path.join(
 	    ROOT_DIR,
         f"odysseus/{api}/",
 	    "data"
     )
-    return cdm_data_path
+    return root_data_path
 
 
 def initialize_mongoDB(host=HOST,database=DATABASE,collection=COLLECTION):
@@ -236,15 +237,17 @@ def summary_available_data_per_hour(level='od_trips',api="city_data_manager",DEB
         summary[city] = data
     return summary
 
-def create_predefined_file(formato=["norm","raw"],DEBUG=False):
+
+def create_predefined_file(formato=["norm", "raw"], DEBUG=False):
     for f in formato:
-        summary = summary_available_data(f,DEBUG=DEBUG)
+        summary = summary_available_data(f, DEBUG=DEBUG)
         filename = os.path.join(
-	    os.path.abspath(os.curdir),
-        "odysseus","webapp","apis","api_cityDataManager",f"{f}-data.json"
+            os.path.dirname(os.path.dirname(__file__)),
+            "api_cityDataManager", f"{f}-data.json"
         )
         with open(filename, 'w+') as f:
             json.dump(summary, f) 
+
 
 # *******************************************************
 ## SPACE STATS 
