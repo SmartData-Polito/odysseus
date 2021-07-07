@@ -196,3 +196,44 @@ city_centroid = {
     "San Diego": {"lat": 32.715736 ,"lon":-117.161087 },
     "Seattle": {"lat": 47.608013 ,"lon":-122.335167 },
     "Amsterdam":{"lat": 52.377956 ,"lon": 4.897070}}
+
+
+def get_simulaton_path():
+
+        sim_path = os.path.join(os.curdir, "odysseus", "simulator")
+        dir = [f.name for f in os.scandir(sim_path) if (f.is_dir() and not f.name.endswith(".DS_Store"))]
+        
+        if "results" not in dir:
+            st.sidebar.error("No simulation as been run")
+            return None
+        
+        result_dir = os.path.join(os.curdir, "odysseus", "simulator", "results")
+        city_dir = [f.name for f in os.scandir(result_dir) if (f.is_dir() and not f.name.endswith(".DS_Store"))]
+        sim_city =  st.sidebar.selectbox("Scegli quale città", city_dir)
+
+        sim_type_path = os.path.join(os.curdir,  "odysseus", "simulator", "results", sim_city)
+        sim_type_dir = [f.name for f in os.scandir(sim_type_path) if (f.is_dir() and not f.name.endswith(".DS_Store"))]
+        sim_type =  st.sidebar.selectbox("Scegli quale tipo di run", sim_type_dir)
+
+        sim_name_path = os.path.join(os.curdir,  "odysseus", "simulator", "results", sim_city, sim_type)
+        sim_name_dir = [f.name for f in os.scandir(sim_name_path) if (f.is_dir() and not f.name.endswith(".DS_Store"))]
+        sim_scenario_name =  st.sidebar.selectbox("Scegli run visualizzare", sim_name_dir)
+
+        
+        result_path = os.path.join(os.curdir,  "odysseus", "simulator", "results", sim_city, sim_type, sim_scenario_name)
+        return result_path
+
+
+def get_simulation_names(sim_name_path):
+
+    sim_name_dir = [f.name for f in os.scandir(sim_name_path) if (f.is_dir() and not f.name.endswith(".DS_Store"))]
+    simulation_names = []
+
+    suffixes = ['_trace', '_model']
+    for name in sim_name_dir:
+        for suffix in suffixes:
+            if name.lower().endswith(suffix.lower()):
+                name = name[0:-len(suffix)]
+                simulation_names.append(name)
+            
+    return list(set(simulation_names))

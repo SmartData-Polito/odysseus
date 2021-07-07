@@ -58,7 +58,7 @@ class ChartMap(DashboardChart):
         
         am = get_amenities(city=self.parametro, amenity_type=output).copy()
         fig2 = px.scatter_mapbox(am, lat="latitude", lon="longitude",
-                        color_discrete_sequence=["black"], hover_data=['capacity'],
+                        color_discrete_sequence=["black"],
                         hover_name="operator", zoom=10,center=city_centroid[self.parametro])
         fig2.update_layout(mapbox_style="open-street-map")
         fig2.update_layout(margin={"r":0,"t":0,"l":0,"b":0})

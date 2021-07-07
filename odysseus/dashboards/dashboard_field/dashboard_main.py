@@ -8,6 +8,9 @@ from odysseus.dashboards.dashboard_field.demand_screen.screen_principale import 
 from odysseus.dashboards.dashboard_field.supply_screen.screen_principale import ScreenSupply
 from odysseus.dashboards.dashboard_field.simulator_screen.screen_principale import ScreenSimulator
 
+from odysseus.dashboards.dashboard_field.utils import *
+
+
 from odysseus.city_data_manager.config.config import cities # get all possible city names from config files
 from functools import partial
 
@@ -50,7 +53,11 @@ class DashboardMain(DashboardField):
         available_months = self.available_data[city][db][year]
         month = st.sidebar.selectbox("Scegli il mese", sorted(available_months))
         
-        ret = [name, city, month, year, db]
+        st.sidebar.markdown("The next widgest are needed to gather the simulation output data. Of course, if no simulation has been run, you can brows the city data manager or go to the react pahe and run it!")
+
+        results_path = get_simulaton_path()
+
+        ret = [name, city, month, year, db, results_path]
         col1, col2, col3 = st.sidebar.beta_columns([1,1,1])
         if col2.button('Go to React'):
             webbrowser.open_new_tab('127.0.0.1:3000')
@@ -74,25 +81,25 @@ class DashboardMain(DashboardField):
                 screen.show_charts()
                 break
 
-    def get_main_screen(self, name, month, year, city, db):
+    def get_main_screen(self, name, month, year, city, db, res_path):
         
         if name == "Home Page":
             main_screen = ScreenHome(title="Titolo: " + name, name=name,month = month, year = year, city = city, db = db)
         elif name == "City Data Manager":
             main_screen = ScreenDataManager(title="Titolo: " + name, name=name,month = month, year = year, city = city, db = db)
         elif name == "Demand Modelling":
-            main_screen= ScreenDemand(title="Titolo: " + name, name=name,month = month, year = year, city = city)
+            main_screen= ScreenDemand(title="Titolo: " + name, name=name,month = month, year = year, city = city, result_path=res_path)
         elif name == "Supply Modelling":
             main_screen= ScreenSupply(title="Titolo: " + name, name=name,month = month, year = year, city = city)
         elif name == "Simulator":
-            main_screen= ScreenSimulator(title="Titolo: " + name, name=name,month = month, year = year, city = city)
+            main_screen= ScreenSimulator(title="Titolo: " + name, name=name,month = month, year = year, city = city, result_path=res_path)
  #       
         return main_screen
 
     def show(self):
         self.show_heading()
 
-        name, city, month, year, db = self.show_widgets()
-        main_screen= self.get_main_screen(name, month, year, city, db)
+        name, city, month, year, db, path = self.show_widgets()
+        main_screen= self.get_main_screen(name, month, year, city, db, path)
         main_screen.show_heading()
         main_screen.show_charts()

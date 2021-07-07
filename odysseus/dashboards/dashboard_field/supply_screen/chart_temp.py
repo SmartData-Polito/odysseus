@@ -57,7 +57,7 @@ class ChartTemp(DashboardChart):
         fig = px.line(plot_df)
         fig.update_layout(
             xaxis_title="Time series",
-            yaxis_title="Tot. consumption",
+            yaxis_title="Total fuel price [€]",
             font=dict(
                 family="Courier New, monospace",
                 size=18,
@@ -79,5 +79,5 @@ class ChartTemp(DashboardChart):
 
     def distance_to_cost(self, distance, consumption, price):
         perkm_consumption = self.from_kml_to_lkm(consumption)
-        tot_consumption = perkm_consumption * distance * price
+        tot_consumption = perkm_consumption * distance * price / 1000 # distance è in metri
         return tot_consumption

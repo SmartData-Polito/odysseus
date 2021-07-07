@@ -62,7 +62,7 @@ parser.add_argument(
 )
 parser.set_defaults(
     campaign_name=["test_03_2021"],
-    conf_names=["big_data_db_test_03_2021"],
+    conf_names=["streamlit_test_trace"],
     set_general_parameters = False,
     existing_supply_model_folder = "brendan_1",
     existing_demand_model_folder = "brendan_1" #"default_demand_model"
@@ -72,6 +72,8 @@ args = parser.parse_args()
 
 campaign_name = args.campaign_name[0]
 conf_name = args.conf_names[0]
+
+print(campaign_name, conf_name)
 
 versioned_conf_path = os.path.join(
     simulation_input_paths["sim_configs_versioned"],
