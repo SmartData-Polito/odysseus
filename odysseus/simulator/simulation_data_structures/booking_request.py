@@ -4,7 +4,7 @@ from odysseus.utils.bookings_utils import *
 
 class BookingRequest(SimEvent):
 
-    def __init__(self, env, sim_input, vehicles_list, booking_request_dict, vehicle_research_policy="closest_vehicle"):
+    def __init__(self, env, sim_input, vehicles_list, booking_request_dict, vehicle_research_policy="neighbors_1"):
         super().__init__(env, "booking_request")
         self.sim_input = sim_input
         self.available_vehicles_dict = self.sim_input.supply_model.available_vehicles_dict
@@ -89,17 +89,27 @@ class BookingRequest(SimEvent):
 
     def search_closest_vehicle(self):
 
+        flags_return_dict = dict(
+            available_vehicle_flag = False,
+            found_vehicle_flag = False,
+            available_vehicle_flag_same_zone = False,
+            available_vehicle_flag_not_same_zone = False
+        )
+        chosen_vehicle_id = -1
+        chosen_origin_id = -1
+
         for zone_id in self.closest_zones[self.booking_request_dict["origin_id"]]:
 
-            flags_return_dict, chosen_vehicle_id, chosen_origin_id = self.search_vehicle_in_zone(zone_id)
+            flags_return_dict, chosen_vehicle_id, chosen_origin_id = self.search_max_soc_vehicle(zone_id)
 
             if flags_return_dict["found_vehicle_flag"]:
                 if zone_id == self.booking_request_dict["origin_id"]:
                     flags_return_dict["available_vehicle_flag_same_zone"] = True
                 else:
                     flags_return_dict["available_vehicle_flag_not_same_zone"] = True
+                break
 
-                return flags_return_dict, chosen_vehicle_id, chosen_origin_id
+        return flags_return_dict, chosen_vehicle_id, chosen_origin_id
 
     def search_vehicle(self):
 
@@ -112,4 +122,10 @@ class BookingRequest(SimEvent):
             else:
                 return self.search_vehicle_in_neighbors()
         elif self.vehicle_research_policy == "closest_vehicle":
-            return self.search_closest_vehicle()
+            flags_return_dict, chosen_vehicle_id, chosen_origin_id = self.search_vehicle_in_zone(
+                self.booking_request_dict["origin_id"]
+            )
+            if flags_return_dict["found_vehicle_flag"]:
+                return flags_return_dict, chosen_vehicle_id, chosen_origin_id
+            else:
+                return self.search_closest_vehicle()

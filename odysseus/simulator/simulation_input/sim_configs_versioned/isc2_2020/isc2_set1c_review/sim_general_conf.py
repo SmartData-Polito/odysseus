@@ -1,12 +1,12 @@
 sim_general_conf_grid = {
 
     # Run configuration
-    "city": ["Milano"],
+    "city": ["Torino"],
     "sim_run_mode": ["single_run"],
 
     "data_source_id": ["big_data_db"],
-    "sim_technique": ["traceB", "eventG"],
-    "sim_scenario_name": ["single_run_lambda_comparison"],
+    "sim_technique": ["traceB"],
+    "sim_scenario_name": ["test_closest_vehicle"],
 
     # Fleet general parameters
     "const_load_factor": [False],

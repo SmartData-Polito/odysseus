@@ -4,8 +4,8 @@ import numpy as np
 
 sim_scenario_conf = {
 
-    "requests_rate_factor": [1],
-    "n_vehicles_factor": [1],
+    "requests_rate_factor": [0.1],
+    "n_vehicles_factor": [0.1],
 
     "engine_type": ["electric"],
     "profile_type": ["single_phase_1"],  # works only if engine_type = electric

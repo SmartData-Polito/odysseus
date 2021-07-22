@@ -50,7 +50,8 @@ class ChargingStation(Pole):
             yield req
             amount = vehicle.soc.capacity - vehicle.soc.level
             yield self.env.timeout(duration)
-            vehicle.soc.put(amount)
+            if amount:
+                vehicle.soc.put(amount)
         vehicle.available = True
         vehicle.current_status = {
             "time": start_time + datetime.timedelta(seconds=duration),
