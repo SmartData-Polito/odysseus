@@ -93,6 +93,9 @@ class SimInput:
 			if "cps_zones_percentage" in self.sim_scenario_conf and self.sim_scenario_conf["cps_placement_policy"] != "real_positions":
 				self.n_charging_zones = int(self.sim_scenario_conf["cps_zones_percentage"] * len(self.valid_zones))
 			elif "n_charging_zones" in self.sim_scenario_conf and self.sim_scenario_conf["cps_placement_policy"] != "real_positions":
+				self.sim_scenario_conf["n_charging_zones"] = max(
+					self.sim_scenario_conf["n_charging_zones"], len(self.valid_zones)
+				)
 				self.n_charging_zones = self.sim_scenario_conf["n_charging_zones"]
 				self.sim_scenario_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
 			elif "cps_zones" in self.sim_scenario_conf and self.sim_scenario_conf["cps_placement_policy"] != "real_positions":
