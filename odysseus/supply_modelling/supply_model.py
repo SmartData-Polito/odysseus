@@ -216,8 +216,8 @@ class SupplyModel:
 
             zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
 
-            self.zones_cp_distances = self.grid.centroid.apply(
-                lambda x: self.grid.loc[zones_with_cps].centroid.distance(x)
+            self.zones_cp_distances = self.grid.to_crs("epsg:3857").centroid.apply(
+                lambda x: self.grid.loc[zones_with_cps].to_crs("epsg:3857").centroid.distance(x)
             )
 
             self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)

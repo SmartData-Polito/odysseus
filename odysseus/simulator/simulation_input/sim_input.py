@@ -33,8 +33,8 @@ class SimInput:
 		self.integers_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "integers_dict.pickle"), "rb")).load()
 		self.closest_valid_zone = pickle.Unpickler(open(os.path.join(demand_model_path, "closest_valid_zone.pickle"), "rb")).load()
 
-		self.distance_matrix = self.grid.loc[self.valid_zones].centroid.apply(
-			lambda x: self.grid.loc[self.valid_zones].centroid.distance(x).sort_values()
+		self.distance_matrix = self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.apply(
+			lambda x: self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.distance(x).sort_values()
 		)
 		self.closest_zones = dict()
 		for zone_id in self.valid_zones:
@@ -147,7 +147,6 @@ class SimInput:
 			"hour",
 			"duration",
 		]].dropna().to_dict("records")
-
 
 	def init_vehicles(self):
 		return self.supply_model.init_vehicles()

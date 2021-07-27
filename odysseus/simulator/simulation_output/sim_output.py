@@ -8,7 +8,7 @@ from odysseus.simulator.simulation_input.costs_conf import *
 
 class SimOutput():
 
-	def __init__(self, sim, results_path, sim_general_conf, sim_scenario_conf):
+	def __init__(self, sim):
 
 		self.valid_zones = sim.sim_input.valid_zones
 
@@ -312,6 +312,8 @@ class SimOutput():
 		for key in self.sim_stats.index:
 			if key.startswith("fraction"):
 				self.sim_stats["percentage" + key[8:]] = self.sim_stats[key] * 100
+
+	def save_output(self, results_path, sim_general_conf, sim_scenario_conf):
 
 		if sim_general_conf["save_history"]:
 

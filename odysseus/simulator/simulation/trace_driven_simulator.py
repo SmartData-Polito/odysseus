@@ -18,7 +18,7 @@ class TraceDrivenSim (SharedMobilitySim):
 
         sim_timestamps = []
 
-        for booking_request_dict in self.sim_input.booking_requests_list:
+        for booking_request_dict in self.sim_input.booking_requests_list[:100]:
 
             if booking_request_dict["origin_id"] in self.valid_zones\
                     and booking_request_dict["destination_id"] in self.valid_zones:

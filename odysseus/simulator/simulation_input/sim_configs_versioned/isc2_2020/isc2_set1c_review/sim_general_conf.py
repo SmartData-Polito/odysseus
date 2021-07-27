@@ -2,11 +2,11 @@ sim_general_conf_grid = {
 
     # Run configuration
     "city": ["Torino"],
-    "sim_run_mode": ["single_run"],
+    "sim_run_mode": ["multiple_runs"],
 
     "data_source_id": ["big_data_db"],
-    "sim_technique": ["traceB"],
-    "sim_scenario_name": ["test_closest_vehicle"],
+    "sim_technique": ["eventG"],
+    "sim_scenario_name": ["test_zp"],
 
     # Fleet general parameters
     "const_load_factor": [False],

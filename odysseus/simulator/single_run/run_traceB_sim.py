@@ -1,6 +1,7 @@
 from odysseus.simulator.simulation.trace_driven_simulator import TraceDrivenSim
 from odysseus.simulator.simulation_output.sim_output import SimOutput
 from odysseus.simulator.simulation_input.sim_input import SimInput
+from odysseus.utils.path_utils import get_output_path
 
 
 def run_traceB_sim (sim_input):

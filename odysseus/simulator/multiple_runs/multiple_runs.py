@@ -2,6 +2,7 @@ import os
 import datetime
 import multiprocessing as mp
 import sys
+import traceback
 
 import pandas as pd
 from tqdm import tqdm
@@ -9,6 +10,7 @@ from tqdm import tqdm
 from odysseus.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
 from odysseus.simulator.single_run.run_eventG_sim import get_eventG_sim_stats
 from odysseus.simulator.single_run.run_traceB_sim import get_traceB_sim_stats
+from odysseus.utils.path_utils import get_output_path
 
 
 def multiple_runs(conf_dict):
@@ -25,15 +27,7 @@ def multiple_runs(conf_dict):
 
 	sim_technique = sim_general_conf["sim_technique"]
 	city = sim_general_conf["city"]
-
-	results_path = os.path.join(
-		os.path.dirname(os.path.dirname(__file__)),
-		"results",
-		city,
-		"multiple_runs",
-		sim_scenario_name,
-	)
-	os.makedirs(results_path, exist_ok=True)
+	results_path = get_output_path("results", sim_general_conf["city"], sim_scenario_name, "multiple_runs")
 
 	with mp.Pool(n_cpus, maxtasksperchild=1) as pool:
 
@@ -70,7 +64,9 @@ def multiple_runs(conf_dict):
 					supply_model_object
 				)]
 
-		with tqdm(total=len(conf_tuples), unit="sim", postfix=str(n_cpus)+" cpu(s)", smoothing=0, dynamic_ncols=True) as pbar:
+		with tqdm(
+				total=len(conf_tuples), unit="sim", postfix=str(n_cpus)+" cpu(s)", smoothing=0, dynamic_ncols=True
+		) as pbar:
 
 			def collect_result(res):
 				res_id = res["conf_id"]
@@ -78,7 +74,11 @@ def multiple_runs(conf_dict):
 				pbar.update()
 
 			def print_error(err):
-				tqdm.write(str(datetime.datetime.now()) + " ERROR: Simulation failed! Cause: " + str(err), file=sys.stderr)
+				tqdm.write(
+					str(datetime.datetime.now()) + " ERROR: Simulation failed! Cause: " + str(err) + " " + \
+					traceback.format_exc(),
+					file=sys.stderr
+				)
 				pbar.update()
 
 			async_results = []
