@@ -47,7 +47,6 @@ parser.add_argument(
     help="specify start year, start month, end year and end month for testing"
 )
 
-
 parser.add_argument(
     "--in_flow", action="store_true",
     help="compute in flows"

@@ -16,6 +16,7 @@ Get started with Odysseus
    city_data_manager/index
    demand_modelling/index
    supply_modelling/index
+   simulator/index
    modules
 
 Introduction

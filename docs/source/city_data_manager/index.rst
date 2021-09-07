@@ -14,5 +14,8 @@ City Data Manager
    city_data_source/index
    city_geo_trips/index
 
+Introduction
+-----------------------------
+
 The City Data Manager module takes care of data preprocessing. The simulator supports heterogeneous data sources thanks to this module which, starting from a generic input data format, transforms them following the same format adopted by the other simulator modules.
 The module is divided into two submodules, City Geo Trips and City Data Source.

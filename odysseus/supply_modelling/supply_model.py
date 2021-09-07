@@ -232,7 +232,9 @@ class SupplyModel:
                 np.random.uniform(0, 30, n_relocation_workers).astype(int).round()
             )
 
-            self.initial_relocation_workers_positions = [self.grid.loc[int(top_o_zones.index[i])].zone_id for i in workers_random_zones]
+            self.initial_relocation_workers_positions = [
+                self.grid.loc[int(top_o_zones.index[i])].zone_id for i in workers_random_zones
+            ]
 
     def init_workers(self):
         pass
