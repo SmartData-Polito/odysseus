@@ -17,9 +17,9 @@ ODySSEUS is composed by four main functional modules, each one coming with its o
 
 * Demand Modelling
    * Create different demand models using:
-      * Standard mathematical models [5] (random walk models, exploration and preferential return model, etc.)
-      * Migration models [5] (gravity model, radiation model, etc.).
-      * Data-driven (e.g. Poisson/KDE estimation [3], Deep Learning [6]) 
+      * [to be integrated using [5]] Standard mathematical models [5] (random walk models, exploration and preferential return model, etc.)
+      * [to be integrated using [5]] Migration models [5] (gravity model, radiation model, etc.).
+      * Data-driven (e.g. Poisson/KDE estimation for generating mobility samples[3], Deep Learning for forecasting[6]) 
    * Evaluate the goodness of a demand model under different viewpoints and compare different demand models.
    * Create demand-side simulation scenarios.
 
@@ -29,7 +29,7 @@ ODySSEUS is composed by four main functional modules, each one coming with its o
 
 * Simulator
    * Create and run simulation scenarios based on supply and demand configurations.
-   * Support for trip-level simulations (single_run) and timeframe-level simulations (multiple_runs).
+   * Support for trip-level "micro" simulations (single_run) and timeframe-level "macro" simulations (multiple_runs).
    * Collect several performance metrics (satisfied demand, fleet handling cost, equivalent CO2 emissions, gross profit, ...)
    * Detailed interface to analyse simulation results
 
