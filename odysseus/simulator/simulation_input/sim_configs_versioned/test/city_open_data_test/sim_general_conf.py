@@ -1,12 +1,12 @@
 sim_general_conf_grid = {
 
     # Run configuration
-    "city": ["Torino"],#, "Milano", "Vancouver"],
+    "city": ["Louisville"],
     "sim_run_mode": ["single_run"],
 
     "data_source_id": ["big_data_db"],
     "sim_technique": ["eventG"],
-    "sim_scenario_name": ["city_single_run_test_"],
+    "sim_scenario_name": ["louisville_test"],
 
     # Fleet general parameters
     "const_load_factor": [False],
@@ -16,9 +16,9 @@ sim_general_conf_grid = {
     "k_zones_factor": [1],
 
     # Time general parameters
-    "year": [2017],
-    "month_start": [10],
-    "month_end": [13],
+    "year": [2019],
+    "month_start": [2],
+    "month_end": [3],
 
     "save_history": [True]
 }

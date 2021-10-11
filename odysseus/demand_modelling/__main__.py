@@ -64,14 +64,14 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    cities=["Milano"],
-    data_source_ids=["big_data_db"],
+    cities=["Louisville"],
+    data_source_ids=["city_open_data"],
     sim_techniques=["eventG"],
     bin_side_lengths=["500"],
     zones_factors=["1"],
     kde_bandwidths=["1"],
-    train_range=["2017", "10", "2017", "12"],
-    test_range=["2017", "10", "2017", "12"],
+    train_range=["2019", "1", "2019", "1"],
+    test_range=["2019", "2", "2019", "2"],
     folder_name=["test"]
 )
 

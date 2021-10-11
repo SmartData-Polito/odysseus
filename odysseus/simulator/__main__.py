@@ -41,10 +41,10 @@ parser.add_argument(
 )
 
 parser.set_defaults(
-    campaign_name="isc2_2020",
-    conf_name="isc2_set1c_review",
+    campaign_name="test",
+    conf_name="city_open_data_test",
     existing_supply_model_folder=None,
-    existing_demand_model_folder="isc2_extension_2021"
+    existing_demand_model_folder="test"
 )
 
 args = parser.parse_args()

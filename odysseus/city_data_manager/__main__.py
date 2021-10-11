@@ -36,10 +36,10 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    cities=["Torino", "Milano", "Vancouver"],
-    data_source_ids=["big_data_db"],
-    years=["2015"],
-    months=[str(i) for i in range(10, 13)],
+    cities=["Louisville"],
+    data_source_ids=["city_open_data"],
+    years=["2019"],
+    months=[str(i) for i in range(2, 3)],
 )
 
 args = parser.parse_args()

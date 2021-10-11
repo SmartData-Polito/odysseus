@@ -105,7 +105,6 @@ class SupplyModel:
             zone = self.vehicles_zones[vehicle]
             self.available_vehicles_dict[zone] += [vehicle]
 
-
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
 
     def init_charging_poles(self):

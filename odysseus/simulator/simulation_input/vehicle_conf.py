@@ -123,6 +123,7 @@ vehicle_conf = {
 			"consumption": 1 / 0.011,
 			"n_seats": 1,
 			"max_charg_power": {
+				"wall_plug": 2300,
 				"inf": 1000000
 			}
 		}

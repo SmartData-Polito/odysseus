@@ -22,6 +22,7 @@ def get_output_path(output_folder_name, city, sim_scenario_name, run_mode, conf_
 	if run_mode == "single_run":
 		results_path = os.path.join(
 			os.path.dirname(os.path.dirname(__file__)),
+			"simulator",
 			output_folder_name,
 			city,
 			run_mode,
@@ -31,6 +32,7 @@ def get_output_path(output_folder_name, city, sim_scenario_name, run_mode, conf_
 	elif run_mode == "multiple_runs":
 		results_path = os.path.join(
 			os.path.dirname(os.path.dirname(__file__)),
+			"simulator",
 			output_folder_name,
 			city,
 			run_mode,

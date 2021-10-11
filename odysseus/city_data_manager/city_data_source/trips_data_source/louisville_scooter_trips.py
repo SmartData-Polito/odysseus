@@ -9,7 +9,7 @@ from odysseus.city_data_manager.city_data_source.trips_data_source.trips_data_so
 class LouisvilleScooterTrips(TripsDataSource):
 
     def __init__(self):
-        super().__init__("Louisville", "city_of_louisville", "e-scooter")
+        super().__init__("Louisville", "city_open_data", "e-scooter")
 
     def load_raw(self):
 
@@ -20,7 +20,7 @@ class LouisvilleScooterTrips(TripsDataSource):
             ),
             os.path.join(
                 self.raw_data_path,
-                "Louisville-Dockless-Trips .csv"
+                "Louisville-Dockless-Trips%20.csv"
             )]
 
         trips_dfs = [pd.read_csv(raw_trips_data_path) for raw_trips_data_path in raw_trips_data_paths]
@@ -65,12 +65,6 @@ class LouisvilleScooterTrips(TripsDataSource):
         self.trips_df_norm.end_time = pd.to_datetime(
             self.trips_df_norm.end_date + " " + self.trips_df_norm.end_time
         )
-        self.trips_df_norm.start_time = pd.to_datetime(
-            self.trips_df_norm.start_time
-        ).apply(lambda x: pd.Timestamp(x, tz="America/Kentucky/Louisville"))
-        self.trips_df_norm.end_time = pd.to_datetime(
-            self.trips_df_norm.end_time
-        ).apply(lambda x: pd.Timestamp(x, tz="America/Kentucky/Louisville"))
 
         self.trips_df_norm.driving_distance *= 1609
         self.trips_df_norm.duration *= 60

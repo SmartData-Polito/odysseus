@@ -49,6 +49,7 @@ class DemandModel:
             print("train", year, month)
             self.loader = Loader(self.city_name, self.data_source_id, year, month)
             bookings, origins, destinations = self.loader.read_data()
+            print(bookings.shape, origins.shape, destinations.shape)
             self.bookings_train = pd.concat([self.bookings_train, bookings], ignore_index=True)
             self.trips_origins_train = pd.concat([
                 self.trips_origins_train, origins
