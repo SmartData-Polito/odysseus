@@ -29,7 +29,7 @@ def geodataframe_charging_points(city,engine_type,station_location):
 
 class SupplyModel:
 
-    def __init__(self, supply_model_conf,year, demand_model_folder = "default_demand_model"):
+    def __init__(self, supply_model_conf, year, city_scenario_folder):
 
         self.supply_model_conf = supply_model_conf
 
@@ -37,16 +37,14 @@ class SupplyModel:
 
         demand_model_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
-            "demand_modelling",
-            "demand_models",
-            self.supply_model_conf["city"],
-            demand_model_folder
+            "city_scenario",
+            "city_scenarios",
+            self.city,
+            city_scenario_folder
         )
 
         self.grid = pickle.Unpickler(open(os.path.join(demand_model_path, "grid.pickle"), "rb")).load()
         self.grid_matrix = pickle.Unpickler(open(os.path.join(demand_model_path, "grid_matrix.pickle"), "rb")).load()
-        self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
-        self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
         self.valid_zones = pickle.Unpickler(open(os.path.join(demand_model_path, "valid_zones.pickle"), "rb")).load()
         self.neighbors_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "neighbors_dict.pickle"), "rb")).load()
         self.integers_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "integers_dict.pickle"), "rb")).load()
@@ -75,32 +73,15 @@ class SupplyModel:
 
     def init_vehicles(self):
 
-        vehicles_random_soc = list(
-            np.random.uniform(25, 100, self.n_vehicles_sim).astype(int)
-        )
-
-        self.vehicles_soc_dict = {
-            i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
-        }
-
+        vehicles_random_soc = list(np.random.uniform(25, 100, self.n_vehicles_sim).astype(int))
+        self.vehicles_soc_dict = {i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)}
         top_o_zones = self.grid.zone_id_origin_count.sort_values(ascending=False).iloc[:31]
-
-        vehicles_random_zones = list(
-            np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()
-        )
-
+        vehicles_random_zones = list(np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round())
         self.vehicles_zones = []
         for i in vehicles_random_zones:
             self.vehicles_zones.append(self.grid.loc[int(top_o_zones.index[i])].zone_id)
-
-        self.vehicles_zones = {
-            i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)
-        }
-
-        self.available_vehicles_dict = {
-            int(zone): [] for zone in self.grid.zone_id
-        }
-
+        self.vehicles_zones = {i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)}
+        self.available_vehicles_dict = {int(zone): [] for zone in self.grid.zone_id}
         for vehicle in range(len(self.vehicles_zones)):
             zone = self.vehicles_zones[vehicle]
             self.available_vehicles_dict[zone] += [vehicle]

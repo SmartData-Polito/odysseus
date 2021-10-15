@@ -1,13 +1,7 @@
-
-#per sopprimere i warning sui centroidi
-import warnings
-warnings.simplefilter("ignore", UserWarning)
-######
 import argparse
-import os
-import pickle
 from odysseus.supply_modelling.supply_model import SupplyModel
 
+from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -70,102 +64,58 @@ parser.add_argument(
 )
 
 default = {
-    "cities": ["Milano"],
-    "data_source_ids": ["big_data_db"],
-    "num_vehicles": ["500"],
+    "cities": ["Louisville"],
+    "data_source_ids": ["city_open_data"],
+    "n_vehicles": ["500"],
     "tot_n_charging_poles": ["100"],
     "n_charging_zones": ["10"],
     "year": ["2017"],
-    "distributed_cps": "True",
-    "cps_placement_policy": "num_parkings",
-    "n_relocation_workers": 1,
-    "demand_model_folder": "test",
-    "folder_name": "",
-    "recover_supply_model": ""
+    "distributed_cps": ["True"],
+    "cps_placement_policy": ["num_parkings"],
+    "n_relocation_workers": [1],
+    "city_scenario_folder": "default",
+    "supply_model_folder": "default",
+    "recover_supply_model": False
 }
 
 
 parser.set_defaults(
     cities=default["cities"],
     data_source_ids=default["data_source_ids"],
-    num_vehicles=default["num_vehicles"],
+    n_vehicles=default["n_vehicles"],
     tot_n_charging_poles=default["tot_n_charging_poles"],
     n_charging_zones=default["n_charging_zones"],
     year=default["year"],
     distributed_cps=default["distributed_cps"],
     cps_placement_policy=default["cps_placement_policy"],
     n_relocation_workers=default["n_relocation_workers"],
-    demand_model_folder=default["demand_model_folder"],
-    folder_name=default["folder_name"],
+    city_scenario_folder=default["city_scenario_folder"],
+    supply_model_folder=default["supply_model_folder"],
     recover_supply_model=default["recover_supply_model"]
 )
 
 
 args = parser.parse_args()
-t_or_f = True if args.distributed_cps[0].lower() in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh'] else False
 
-if args.recover_supply_model != "":
-    #controllo che il file esista
-    folder = args.recover_supply_model
-    folder_path = os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", args.cities[0], folder[0])
-    if not os.path.exists(os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models", args.cities[0])):
-        print("No "+args.cities[0]+" data stored.")
-        exit(3)
-    if not os.path.exists(folder_path):
-        print("Non-existent folder.")
-        print("Available folders", str(os.listdir(
-            os.path.join(os.curdir, "odysseus", "supply_modelling", "supply_models",
-                         args.cities[0]))))
-        exit(1)
-    else:
-        if "supply_model.pickle" not in os.listdir(folder_path):
-            print("The folder must contain the supply_model.pickle file")
-            exit(2)
-        else:
-            with open(os.path.join(folder_path, "supply_model.pickle"), "rb") as f:
-                supply_model = pickle.load(f)
-    print("Existing object. I am recovering it...")
-else:
-    supply_model_conf = dict()
-    #supply_model_conf.update(self.sim_scenario_conf)
-    supply_model_conf.update({
-        "city": args.cities[0],
-        "data_source_id": args.data_source_ids[0],
-        "n_vehicles": int(args.num_vehicles[0]),
-        "tot_n_charging_poles": int(args.tot_n_charging_poles[0]),
-        "n_charging_zones": int(args.n_charging_zones[0]),
-        "distributed_cps":t_or_f,
-        "cps_placement_policy":args.cps_placement_policy,
-        "n_relocation_workers":int(args.n_relocation_workers)
-    })
+supply_model_configs_grid = {
+    "city": args.cities,
+    "data_source_id": args.data_source_ids,
+    "distributed_cps": args.distributed_cps,
+    "cps_placement_policy": args.cps_placement_policy,
+    "n_vehicles": list(map(int, args.n_vehicles)),
+    "tot_n_charging_poles": list(map(int, args.tot_n_charging_poles)),
+    "n_charging_zones": list(map(int, args.n_charging_zones)),
+    "year": list(map(int, args.year)),
+    "n_relocation_workers": list(map(int, args.n_relocation_workers)),
+}
 
-    supply_model = SupplyModel(
-        supply_model_conf, int(*args.year), args.demand_model_folder
-    )
+supply_model_configs_list = SimConfGrid(supply_model_configs_grid).conf_list
 
-    vehicles_soc_dict, vehicles_zones, available_vehicles_dict = supply_model.init_vehicles()
-    supply_model.init_charging_poles()
-    supply_model.init_relocation()
+for supply_model_config in supply_model_configs_list:
 
-    ##Salvare su file le strutture dati
-    #se c'è il saveflag salvo nel path che mi dice
+    print(supply_model_config)
 
-    if args.folder_name != "":
-        folder = args.folder_name[0]
-    else:
-        folder = input("In which folder do you want to save the model? [type NO to not save]\t")
-        if folder == "NO":
-            exit(0)
-
-    #cartella di default
-    savepath = os.path.join(
-        os.path.dirname(__file__), "supply_models", args.cities[0], folder
-    )
-    print(savepath)
-
-    os.makedirs(savepath, exist_ok=True)
-
-    with open(os.path.join(savepath, "supply_model.pickle"), "wb") as f:
-        pickle.dump(supply_model, f)
-
-    print("Model saved in folder:", savepath)
+    supply_model = SupplyModel(supply_model_config, supply_model_config["year"], city_scenario_folder=args.city_scenario_folder)
+    # vehicles_soc_dict, vehicles_zones, available_vehicles_dict = supply_model.init_vehicles()
+    # supply_model.init_charging_poles()
+    # supply_model.init_relocation()

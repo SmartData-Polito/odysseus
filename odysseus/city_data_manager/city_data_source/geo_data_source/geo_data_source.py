@@ -2,7 +2,7 @@ import os
 
 import geopandas as gpd
 
-from odysseus.city_data_manager.config.config import data_paths_dict
+from odysseus.path_config.path_config import data_paths_dict
 from odysseus.utils.path_utils import check_create_path
 
 

@@ -1,4 +1,6 @@
 from math import sqrt
+
+
 class Pole(object):
 	def __init__(self, station_config):
 		self.fuel_type = station_config["fuel_type"] #electric, gasoline, diesel, lpg, gnc

@@ -1,6 +1,5 @@
 import os
-from odysseus.city_data_manager.config.config import data_paths_dict
-from odysseus.city_data_manager.city_data_source.trips_data_gatherer.citi_bike_data_gatherer import CitiBikeDataGatherer
+from odysseus.config.config import data_paths_dict
 
 # raw_data_path = os.path.join(data_paths_dict["New_York_City"]["raw"]["trips"], "citi_bike")
 # os.makedirs(raw_data_path, exist_ok=True)
@@ -9,12 +8,18 @@ from odysseus.city_data_manager.city_data_source.trips_data_gatherer.citi_bike_d
 #     gatherer = CitiBikeDataGatherer(raw_data_path)
 #     gatherer.download_data(2017, month)
 
-from odysseus.city_data_manager.city_data_source.trips_data_gatherer.louisville_scooter_trips_gatherer import LouisvilleScooterDataGatherer
+# from odysseus.city_data_manager.city_data_source.trips_data_gatherer.louisville_scooter_trips_gatherer import LouisvilleScooterDataGatherer
+#
+# raw_data_path = os.path.join(data_paths_dict["Louisville"]["raw"]["trips"], "city_open_data")
+# os.makedirs(raw_data_path, exist_ok=True)
+#
+# gatherer = LouisvilleScooterDataGatherer(raw_data_path,)
+# gatherer.download_data()
 
-raw_data_path = os.path.join(data_paths_dict["Louisville"]["raw"]["trips"], "city_open_data")
+from odysseus.city_data_manager.city_data_source.trips_data_gatherer.austin_scooter_trips_gatherer import AustinScooterDataGatherer
+
+raw_data_path = os.path.join(data_paths_dict["Austin"]["raw"]["trips"], "city_open_data")
 os.makedirs(raw_data_path, exist_ok=True)
 
-gatherer = LouisvilleScooterDataGatherer(
-    raw_data_path,
-)
+gatherer = AustinScooterDataGatherer(raw_data_path,)
 gatherer.download_data()

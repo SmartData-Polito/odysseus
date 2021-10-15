@@ -97,7 +97,7 @@ class ScooterRelocationPrimitives:
                 "simulator",
                 "simulation_input",
                 "prediction_model",
-                self.simInput.demand_model_config["city"]
+                self.simInput.supply_model_config["city"]
             )
 
             with open(os.path.join(prediction_model_dir, "params.json"), "r") as f:
@@ -301,8 +301,8 @@ class ScooterRelocationPrimitives:
 
     def update_relocation_stats(self, scooter_relocation):
 
-        if "save_history" in self.simInput.demand_model_config:
-            if self.simInput.demand_model_config["save_history"]:
+        if "save_history" in self.simInput.supply_model_config:
+            if self.simInput.supply_model_config["save_history"]:
                 self.sim_scooter_relocations += [scooter_relocation]
 
         self.n_scooter_relocations += 1

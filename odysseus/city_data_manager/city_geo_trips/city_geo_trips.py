@@ -1,12 +1,9 @@
-import os
-
-import geopandas as gpd
 import shapely
 
-from odysseus.city_data_manager.config.config import *
 from odysseus.utils.time_utils import *
 from odysseus.utils.path_utils import *
 from odysseus.utils.geospatial_utils import *
+from odysseus.path_config.path_config import data_paths_dict
 
 
 class CityGeoTrips:

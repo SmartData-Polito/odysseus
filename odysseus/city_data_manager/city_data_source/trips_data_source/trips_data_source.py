@@ -2,9 +2,9 @@ import os
 import pytz
 import pandas as pd
 
-from odysseus.city_data_manager.config.config import *
 from odysseus.utils.path_utils import check_create_path
 from odysseus.utils.time_utils import get_time_group_columns
+from odysseus.path_config.path_config import data_paths_dict
 
 
 class TripsDataSource:

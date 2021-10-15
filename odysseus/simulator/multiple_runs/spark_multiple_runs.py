@@ -6,7 +6,7 @@ from odysseus.simulator.simulation_input.sim_current_config.sim_general_conf imp
 from odysseus.simulator.simulation_input.sim_current_config.multiple_runs_conf import sim_scenario_conf_grid
 
 from odysseus.scenario_generator.city import City
-from odysseus.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
+from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 from odysseus.simulator.simulation_input.sim_input import SimInput
 from odysseus.simulator.simulation.model_driven_simulator import ModelDrivenSim
 from odysseus.simulator.simulation_output.sim_output import SimOutput
@@ -71,7 +71,7 @@ def spark_multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_n
 
     print("Here 2!")
 
-    sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
+    sim_conf_grid = SimConfGrid(sim_scenario_conf_grid)
 
     conf_tuples = []
 
@@ -96,7 +96,7 @@ def spark_multiple_runs(sim_general_conf, sim_scenario_conf_grid, sim_scenario_n
 confs_dict = {}
 confs_dict["spark"] = sim_scenario_conf_grid
 
-sim_general_conf_list = EFFCS_SimConfGrid(sim_general_conf_grid).conf_list
+sim_general_conf_list = SimConfGrid(sim_general_conf_grid).conf_list
 
 for sim_general_conf in sim_general_conf_list:
     print(sim_general_conf)

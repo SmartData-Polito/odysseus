@@ -1,9 +1,8 @@
 import os
-import datetime
 import pandas as pd
 from odysseus.simulator.simulation_output.sim_stats import SimStats
 from odysseus.utils.cost_utils import insert_sim_costs, insert_scenario_costs
-from odysseus.simulator.simulation_input.costs_conf import *
+from odysseus.supply_modelling.costs_conf import *
 
 
 class SimOutput():
@@ -12,7 +11,7 @@ class SimOutput():
 
 		self.valid_zones = sim.sim_input.valid_zones
 
-		self.sim_general_conf = sim.sim_input.demand_model_config
+		self.sim_general_conf = sim.sim_input.supply_model_config
 		self.supply_model_conf = sim.sim_input.supply_model_conf
 		self.grid = sim.sim_input.grid
 

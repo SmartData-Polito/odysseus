@@ -7,7 +7,7 @@ import traceback
 import pandas as pd
 from tqdm import tqdm
 
-from odysseus.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
+from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 from odysseus.simulator.single_run.run_eventG_sim import get_eventG_sim_stats
 from odysseus.simulator.single_run.run_traceB_sim import get_traceB_sim_stats
 from odysseus.utils.path_utils import get_output_path
@@ -31,7 +31,7 @@ def multiple_runs(conf_dict):
 
 	with mp.Pool(n_cpus, maxtasksperchild=1) as pool:
 
-		sim_conf_grid = EFFCS_SimConfGrid(sim_scenario_conf_grid)
+		sim_conf_grid = SimConfGrid(sim_scenario_conf_grid)
 
 		pool_stats_dict = {}
 		conf_tuples = []

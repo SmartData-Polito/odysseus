@@ -130,7 +130,7 @@ class SimInput:
 			self.n_vehicles_sim = supply_model.n_vehicles_sim
 		else:
 			self.supply_model = SupplyModel(
-				self.supply_model_conf, self.demand_model_config["year"], demand_model_folder=self.demand_model_folder
+				self.supply_model_conf, self.demand_model_config["year"], city_scenario_folder=self.demand_model_folder
 			)
 
 	def get_booking_requests_list(self):

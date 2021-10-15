@@ -56,7 +56,7 @@ class ModelDrivenSim(SharedMobilitySim):
         booking_request_dict["destination_id"] = self.closest_valid_zone.loc[booking_request_dict["destination_id"]]
 
         booking_request_dict = get_distances(
-            booking_request_dict, self.sim_input.grid, self.sim_input.demand_model_config["bin_side_length"]
+            booking_request_dict, self.sim_input.grid, self.sim_input.supply_model_config["bin_side_length"]
         )
 
         booking_request_dict["duration"] = booking_request_dict["driving_distance"] / (

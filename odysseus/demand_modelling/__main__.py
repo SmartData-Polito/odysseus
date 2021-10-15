@@ -3,7 +3,7 @@ import argparse
 
 from odysseus.demand_modelling.demand_model import DemandModel
 
-from odysseus.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
+from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 
 parser = argparse.ArgumentParser()
 
@@ -58,8 +58,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-f", "--folder_name", nargs="+",
-    help="Specify saving folder name "
+    "-f", "--city_scenario_name", nargs="+",
+    help="Specify city scenario folder name "
+)
+
+parser.add_argument(
+    "-f", "--demand_model_name", nargs="+",
+    help="Specify demand model folder name "
 )
 
 
@@ -67,28 +72,21 @@ parser.set_defaults(
     cities=["Louisville"],
     data_source_ids=["city_open_data"],
     sim_techniques=["eventG"],
-    bin_side_lengths=["500"],
-    zones_factors=["1"],
     kde_bandwidths=["1"],
-    train_range=["2019", "1", "2019", "1"],
-    test_range=["2019", "2", "2019", "2"],
-    folder_name=["test"]
+    city_scenario_name=["default"],
+    demand_model_name=["default"]
 )
 
 args = parser.parse_args()
 
 demand_model_configs_grid = {
     "city": args.cities,
-
     "data_source_id": args.data_source_ids,
     "sim_technique": args.sim_techniques,
-
-    "bin_side_length": list(map(int, args.bin_side_lengths)),
-    "k_zones_factor": list(map(int, args.zones_factors)),
     "kde_bandwidth": list(map(int, args.kde_bandwidths)),
 }
 
-demand_model_configs_list = EFFCS_SimConfGrid(demand_model_configs_grid).conf_list
+demand_model_configs_list = SimConfGrid(demand_model_configs_grid).conf_list
 
 for demand_model_config in demand_model_configs_list:
 

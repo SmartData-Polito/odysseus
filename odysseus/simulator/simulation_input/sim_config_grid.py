@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-class EFFCS_SimConfGrid ():
+class SimConfGrid ():
     
     def __init__ (self, conf_grid):
 

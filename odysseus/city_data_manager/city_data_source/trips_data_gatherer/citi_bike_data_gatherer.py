@@ -14,8 +14,7 @@ class CitiBikeDataGatherer:
 
     :param output_path: path in which to store the file
     :type output_path: str
-    :param structured_dataset_name:
-            """
+    """
     def __init__(self, output_path):
         self.root_url = 'https://s3.amazonaws.com/tripdata/'
 
@@ -37,8 +36,6 @@ class CitiBikeDataGatherer:
                 continue
             else:
                 self.dataset_names[key[0:6]] = key
-
-        return
 
     def download_data(self, year, month):
         """

@@ -107,7 +107,7 @@ def add_grouped_count_to_grid(grid, trips_locations, group_col, od_key, aggfunc=
     return grid
 
 
-def my_haversine(lon1, lat1, lon2, lat2):
+def get_haversine_distance(lon1, lat1, lon2, lat2):
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
     dlon = lon2 - lon1
     dlat = lat2 - lat1
@@ -122,8 +122,26 @@ def get_od_distance(grid, origin_id, destination_id):
     lat1 = grid.loc[origin_id, "geometry"].centroid.y
     lon2 = grid.loc[destination_id, "geometry"].centroid.x
     lat2 = grid.loc[destination_id, "geometry"].centroid.y
-    return my_haversine(lon1, lat1, lon2, lat2)
+    return get_haversine_distance(lon1, lat1, lon2, lat2)
 
 
 def miles_to_meters(miles):
     return miles * 1609.34
+
+
+def get_in_flow_count(trips_destinations):
+
+    in_flow_count = trips_destinations[["zone_id", "year", "month", "day", "end_hour", "end_time"]].groupby(
+        ["zone_id", "year", "month", "day", "end_hour"], as_index=False
+    ).count().rename(columns={"end_time": "in_flow_count"})
+
+    return in_flow_count
+
+
+def get_out_flow_count(trips_origins):
+
+    out_flow_count = trips_origins[["zone_id", "year", "month", "day", "start_hour", "start_time"]].groupby(
+        ["zone_id", "year", "month", "day", "start_hour"], as_index=False
+    ).count().rename(columns={"start_time": "out_flow_count"})
+
+    return out_flow_count

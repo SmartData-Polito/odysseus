@@ -4,11 +4,10 @@ import pickle
 import warnings
 warnings.simplefilter("ignore", UserWarning)
 
-from odysseus.city_data_manager.config.config import *
 from odysseus.simulator.simulation_input.sim_input_paths import simulation_input_paths
 from odysseus.simulator.single_run.single_run import single_run
 from odysseus.simulator.multiple_runs.multiple_runs import multiple_runs
-from odysseus.simulator.simulation_input.sim_config_grid import EFFCS_SimConfGrid
+from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 from odysseus.utils.path_utils import *
 
 parser = argparse.ArgumentParser()
@@ -68,7 +67,7 @@ confs_dict = dict()
 confs_dict["multiple_runs"] = multiple_runs_conf_grid
 confs_dict["single_run"] = single_run_conf_grid
 
-sim_general_conf_list = EFFCS_SimConfGrid(sim_general_conf_grid).conf_list
+sim_general_conf_list = SimConfGrid(sim_general_conf_grid).conf_list
 
 for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
 
@@ -122,7 +121,7 @@ for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
 
     if sim_run_mode == "single_run":
         print(single_run_conf_grid)
-        sim_conf_grid = EFFCS_SimConfGrid(single_run_conf_grid)
+        sim_conf_grid = SimConfGrid(single_run_conf_grid)
         pool_stats_dict = {}
         conf_tuples = []
         for conf_id, sim_scenario_conf in enumerate(sim_conf_grid.conf_list):

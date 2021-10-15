@@ -46,11 +46,15 @@ for city in cities:
 				root_data_path, city, data_step_id, data_type_id
 			)
 
+city_scenarios_path = os.path.join(
+	os.path.dirname(os.path.dirname(__file__)),
+	"city_scenario", "city_scenarios"
+)
 demand_models_path = os.path.join(
-	os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+	os.path.dirname(os.path.dirname(__file__)),
 	"demand_modelling", "demand_models"
 )
 supply_models_path = os.path.join(
-	os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+	os.path.dirname(os.path.dirname(__file__)),
 	"supply_modelling", "supply_models"
 )
