@@ -12,7 +12,7 @@ odysseus/webapp/apis/api_cityDataManager/raw-data.json
 odysseus/data/*
 odysseus/city_data_manager/city_data_source/data/*
 odysseus/city_scenario/city_scenarios/*
-odysseus/city_scenario/city_scenarios/*
+odysseus/demand_modelling/demand_models/*
 
 odysseus/simulator/data/*
 odysseus/simulator/figures/*
