@@ -11,11 +11,11 @@ from odysseus.utils.time_utils import *
 
 class DemandModel:
 
-    def __init__(self, city_name, demand_model_config, save_folder = "default_demand_model"):
+    def __init__(self, city_name, demand_model_config, demand_model_folder):
 
         self.city_name = city_name
         self.demand_model_config = demand_model_config
-        self.save_folder = save_folder
+        self.demand_model_folder = demand_model_folder
 
         self.data_source_id = demand_model_config["data_source_id"]
         self.kde_bw = self.demand_model_config["kde_bandwidth"]
@@ -98,7 +98,6 @@ class DemandModel:
 
         return self.trip_kdes
 
-
     def save_results(self):
 
         demand_model_path = os.path.join(
@@ -106,7 +105,7 @@ class DemandModel:
             "demand_modelling",
             "demand_models",
             self.demand_model_config["city"],
-            self.save_folder
+            self.demand_model_folder
         )
 
         with open(os.path.join(demand_model_path, "city_obj.pickle"), "wb") as f:

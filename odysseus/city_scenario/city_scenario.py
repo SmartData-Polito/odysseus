@@ -140,6 +140,7 @@ class CityScenario:
         self.max_in_flow = float('-inf')
         self.avg_out_flows_train = self.get_avg_out_flows()
         self.avg_in_flows_train = self.get_avg_in_flows()
+        self.get_out_flows()
 
     def map_zones_on_trips(self, zones):
 

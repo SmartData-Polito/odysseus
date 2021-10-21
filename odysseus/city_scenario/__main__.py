@@ -46,7 +46,7 @@ parser.set_defaults(
     kde_bandwidths=["1"],
     train_range=["2019", "1", "2019", "1"],
     test_range=["2019", "2", "2019", "2"],
-    folder_name=["default"]
+    folder_name="default"
 )
 
 args = parser.parse_args()
@@ -63,7 +63,7 @@ for city_scenario_config in city_scenario_configs_list:
 
     print(city_scenario_config)
 
-    city_scenario = CityScenario(city_scenario_config["city"], city_scenario_config, save_folder=args.folder_name[0])
+    city_scenario = CityScenario(city_scenario_config["city"], city_scenario_config, save_folder=args.folder_name)
     city_scenario.create_city_scenario(
         int(args.train_range[0]), int(args.train_range[1]),
         int(args.train_range[2]), int(args.train_range[3]),

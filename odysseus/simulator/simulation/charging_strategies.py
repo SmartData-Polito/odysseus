@@ -84,7 +84,6 @@ class ChargingStrategy(ChargingPrimitives):
 						else:
 							charging_zone_id = charging_zone_id
 							break
-
 			elif charging_relocation_strategy == "random":
 				zones_by_distance = self.simInput.supply_model.zones_cp_distances.loc[int(booking_request["destination_id"])]
 				free_pole_flag = 0

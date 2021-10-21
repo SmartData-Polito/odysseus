@@ -73,8 +73,8 @@ parser.set_defaults(
     data_source_ids=["city_open_data"],
     sim_techniques=["eventG"],
     kde_bandwidths=["1"],
-    city_scenario_name=["default"],
-    demand_model_name=["default"]
+    city_scenario_folder="default",
+    demand_model_folder="default"
 )
 
 args = parser.parse_args()
@@ -97,19 +97,10 @@ for demand_model_config in demand_model_configs_list:
         "demand_modelling",
         "demand_models",
         demand_model_config["city"],
-        args.folder_name[0]
+        args.demand_model_folder
     )
     os.makedirs(demand_model_path, exist_ok=True)
 
     if not os.path.exists(os.path.join(demand_model_path, "city_obj.pickle")):
-        demand_model = DemandModel(demand_model_config["city"], demand_model_config,
-                                   int(args.train_range[0]), int(args.train_range[1]),
-                                   int(args.train_range[2]), int(args.train_range[3]),
-                                   int(args.test_range[0]), int(args.test_range[1]),
-                                   int(args.test_range[2]), int(args.test_range[3]),
-                                   save_folder = args.folder_name[0])
+        demand_model = DemandModel(demand_model_config["city"], demand_model_config, args.demand_model_folder)
         demand_model.save_results()
-        if args.in_flow:
-            demand_model.save_in_flow_count()
-        if args.out_flow:
-            demand_model.save_out_flow_count()

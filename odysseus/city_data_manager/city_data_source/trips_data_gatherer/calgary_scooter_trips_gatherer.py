@@ -8,7 +8,7 @@ from pathlib import Path
 import xmltodict
 
 
-class AustinScooterDataGatherer:
+class CalgaryScooterDataGatherer:
     """
     Class for automatically downloading data relating to the New York Citi bike sharing operator from a remote database.
 
@@ -21,7 +21,7 @@ class AustinScooterDataGatherer:
         if not os.path.exists(output_path):
             os.makedirs(output_path)
         self.download_urls = [
-            'https://data.austintexas.gov/api/views/7d8e-dm7r/rows.csv?accessType=DOWNLOAD&bom=true&format=true'
+            "https://data.calgary.ca/api/views/jicz-mxiz/rows.csv?accessType=DOWNLOAD",
         ]
 
     def download_data(self):
@@ -31,6 +31,6 @@ class AustinScooterDataGatherer:
             r = requests.get(url)
             end = time.time()
             print('download completed in %.2f' % (end-start))
-            with open(self.output_path.joinpath("Shared_Micromobility_Vehicle_Trips.csv"), mode='wb') as localfile:
+            with open(self.output_path.joinpath("Shared_Mobility_Pilot_Trips.csv"), mode='wb') as localfile:
                 localfile.write(r.content)
 
