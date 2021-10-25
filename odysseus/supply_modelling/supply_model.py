@@ -9,9 +9,10 @@ import datetime
 import pytz
 from odysseus.supply_modelling.energymix_loader import EnergyMix
 
+from odysseus.city_scenario.city_scenario import CityScenario
 
 
-def geodataframe_charging_points(city,engine_type,station_location):
+def geodataframe_charging_points(city, engine_type, station_location):
     charging_points = station_location[city][engine_type]
     points_list = []
 
@@ -29,36 +30,30 @@ def geodataframe_charging_points(city,engine_type,station_location):
 
 class SupplyModel:
 
-    def __init__(self, supply_model_conf, year, city_scenario_folder):
+    def __init__(self, supply_model_conf):
 
         self.supply_model_conf = supply_model_conf
 
         self.city = self.supply_model_conf["city"]
-
-        demand_model_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "city_scenario",
-            "city_scenarios",
-            self.city,
-            city_scenario_folder
+        self.city_scenario_folder = self.supply_model_conf["city_scenario_folder"]
+        self.city_scenario = CityScenario(
+            city=self.city,
+            from_file=True,
+            in_folder_name=self.city_scenario_folder
         )
+        self.city_scenario.read_city_scenario_for_supply_model()
 
-        self.grid = pickle.Unpickler(open(os.path.join(demand_model_path, "grid.pickle"), "rb")).load()
-        self.grid_matrix = pickle.Unpickler(open(os.path.join(demand_model_path, "grid_matrix.pickle"), "rb")).load()
-        self.valid_zones = pickle.Unpickler(open(os.path.join(demand_model_path, "valid_zones.pickle"), "rb")).load()
-        self.neighbors_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "neighbors_dict.pickle"), "rb")).load()
-        self.integers_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "integers_dict.pickle"), "rb")).load()
+        self.grid = self.city_scenario.grid
+        self.valid_zones = self.city_scenario.valid_zones
+        self.neighbors_dict = self.city_scenario.neighbors_dict
+        self.integers_dict = self.city_scenario.integers_dict
 
-        self.n_vehicles_original = self.integers_dict["n_vehicles_original"]
         self.avg_speed_mean = self.integers_dict["avg_speed_mean"]
         self.avg_speed_std = self.integers_dict["avg_speed_std"]
-        self.avg_speed_kmh_mean = self.integers_dict["avg_speed_kmh_mean"]
-        self.avg_speed_kmh_std = self.integers_dict["avg_speed_kmh_std"]
-        self.max_driving_distance = self.integers_dict["max_driving_distance"]
 
-        self.n_vehicles_sim = self.supply_model_conf["n_vehicles"]
-        self.tot_n_charging_poles = self.supply_model_conf["tot_n_charging_poles"]
-        self.n_charging_zones = self.supply_model_conf["n_charging_zones"]
+        self.n_vehicles_sim = int(self.supply_model_conf["n_vehicles"])
+        self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
+        self.n_charging_zones = int(self.supply_model_conf["n_charging_zones"])
 
         self.n_charging_poles_by_zone = {}
         self.vehicles_soc_dict = {}
@@ -67,7 +62,7 @@ class SupplyModel:
 
         self.zones_cp_distances = pd.Series()
         self.closest_cp_zone = pd.Series()
-        self.energy_mix = EnergyMix(self.city, year)
+        self.energy_mix = EnergyMix(self.city, self.supply_model_conf["year"])
 
         self.initial_relocation_workers_positions = []
 

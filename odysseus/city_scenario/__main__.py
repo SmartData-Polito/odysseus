@@ -58,7 +58,11 @@ for city_scenario_config in city_scenario_configs_list:
 
     print(city_scenario_config)
 
-    city_scenario = CityScenario(city_scenario_config)
+    city_scenario = CityScenario(
+        city=city_scenario_config["city"],
+        from_file=False,
+        city_scenario_config=city_scenario_config
+    )
     city_scenario.create_city_scenario(
         int(city_scenario_config["train_range"][0]), int(city_scenario_config["train_range"][1]),
         int(city_scenario_config["train_range"][2]), int(city_scenario_config["train_range"][3]),

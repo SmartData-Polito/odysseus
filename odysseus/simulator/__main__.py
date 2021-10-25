@@ -9,6 +9,8 @@ from odysseus.simulator.single_run.single_run import single_run
 from odysseus.simulator.multiple_runs.multiple_runs import multiple_runs
 from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 from odysseus.utils.path_utils import *
+from odysseus.path_config.path_config import *
+
 
 parser = argparse.ArgumentParser()
 

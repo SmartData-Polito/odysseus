@@ -8,6 +8,8 @@ class SimConfGrid ():
     
     def __init__ (self, conf_grid):
 
+        print(conf_grid)
+
         self.conf_keys = conf_grid.values()
         self.conf_list = []
         for el in itertools.product(*conf_grid.values()):
@@ -17,5 +19,4 @@ class SimConfGrid ():
                 conf[k] = el[i]
                 i += 1
             self.conf_list += [conf]
-        assert len(conf_grid["folder_name"]) == len(self.conf_list)
         self.conf_list = pd.DataFrame(self.conf_list).drop_duplicates().to_dict("records")

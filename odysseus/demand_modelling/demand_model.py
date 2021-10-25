@@ -8,17 +8,38 @@ from odysseus.utils.geospatial_utils import *
 
 from odysseus.utils.time_utils import *
 
+from odysseus.city_scenario.city_scenario import CityScenario
+
 
 class DemandModel:
 
-    def __init__(self, city_name, demand_model_config, demand_model_folder):
+    def __init__(self, demand_model_config):
 
-        self.city_name = city_name
         self.demand_model_config = demand_model_config
-        self.demand_model_folder = demand_model_folder
+
+        self.city_name = self.demand_model_config["city"]
+        self.city_scenario_folder = self.demand_model_config["city_scenario_folder"]
+        self.city_scenario = CityScenario(
+            city=self.city_name,
+            from_file=True,
+            in_folder_name=self.city_scenario_folder
+        )
+        self.city_scenario.read_city_scenario_for_demand_model()
+        self.bookings_train = self.city_scenario.bookings_train
+        self.grid = self.city_scenario.grid
+
+        self.demand_model_folder = self.demand_model_config["folder_name"]
+
+        self.demand_model_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "demand_modelling",
+            "demand_models",
+            self.demand_model_config["city"],
+            self.demand_model_folder
+        )
 
         self.data_source_id = demand_model_config["data_source_id"]
-        self.kde_bw = self.demand_model_config["kde_bandwidth"]
+        self.kde_bw = float(self.demand_model_config["kde_bandwidth"])
 
         self.avg_request_rate, self.request_rates = self.get_requests_rates()
         self.trip_kdes = self.get_trip_kdes()
@@ -98,15 +119,9 @@ class DemandModel:
 
     def save_results(self):
 
-        demand_model_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "demand_modelling",
-            "demand_models",
-            self.demand_model_config["city"],
-            self.demand_model_folder
-        )
+        os.makedirs(self.demand_model_path)
 
-        with open(os.path.join(demand_model_path, "request_rates.pickle"), "wb") as f:
+        with open(os.path.join(self.demand_model_path, "request_rates.pickle"), "wb") as f:
             pickle.dump(self.request_rates, f)
-        with open(os.path.join(demand_model_path, "trip_kdes.pickle"), "wb") as f:
+        with open(os.path.join(self.demand_model_path, "trip_kdes.pickle"), "wb") as f:
             pickle.dump(self.trip_kdes, f)

@@ -13,19 +13,28 @@ from odysseus.path_config.path_config import *
 
 class CityScenario:
 
-    def __init__(self, city_scenario_config):
+    def __init__(self, city, from_file=False, city_scenario_config=None, in_folder_name=None):
 
-        self.city_scenario_config = city_scenario_config
-        self.city_name = self.city_scenario_config["city"]
-        self.data_source_id = city_scenario_config["data_source_id"]
-        self.bin_side_length = int(self.city_scenario_config["bin_side_length"])
-        self.folder_name = self.city_scenario_config["folder_name"]
+        self.city_name = city
+
+        if from_file and in_folder_name:
+            self.folder_name = in_folder_name
+        elif city_scenario_config:
+            self.city_scenario_config = city_scenario_config
+            self.folder_name = self.city_scenario_config["folder_name"]
+        else:
+            raise IOError("Wrong arguments for CityScenario!")
 
         self.city_scenario_path = os.path.join(
             city_scenarios_path,
-            self.city_scenario_config["city"],
+            city,
             self.folder_name
         )
+        if from_file and in_folder_name:
+            self.read_config_from_folder_name()
+
+        self.data_source_id = self.city_scenario_config["data_source_id"]
+        self.bin_side_length = int(self.city_scenario_config["bin_side_length"])
 
         self.loader = CityDataLoader(self.city_name, self.data_source_id)
 
@@ -427,29 +436,22 @@ class CityScenario:
             columns={"start_hour": "hour"}
         ).to_csv(os.path.join(self.city_scenario_path, "out_flow_count.csv"))
 
-    def read_city_scenario_light(self):
+    def read_config_from_folder_name(self):
+        with open(os.path.join(self.city_scenario_path, "city_scenario_config.json"), "r") as f:
+            self.city_scenario_config = json.load(f)
+
+    def read_city_scenario_for_supply_model(self):
 
         assert os.path.exists(self.city_scenario_path)
 
         self.grid = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "grid.pickle"), "rb")).load()
-        self.grid_matrix = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "grid_matrix.pickle"), "rb")).load()
         self.valid_zones = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "valid_zones.pickle"), "rb")).load()
         self.neighbors_dict = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "neighbors_dict.pickle"), "rb")).load()
         self.integers_dict = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "integers_dict.pickle"), "rb")).load()
 
-        self.n_vehicles_original = self.integers_dict["n_vehicles_original"]
-        self.avg_speed_mean = self.integers_dict["avg_speed_mean"]
-        self.avg_speed_std = self.integers_dict["avg_speed_std"]
-        self.avg_speed_kmh_mean = self.integers_dict["avg_speed_kmh_mean"]
-        self.avg_speed_kmh_std = self.integers_dict["avg_speed_kmh_std"]
-        self.max_driving_distance = self.integers_dict["max_driving_distance"]
+    def read_city_scenario_for_demand_model(self):
 
-    def read_city_scenario(self):
+        assert os.path.exists(self.city_scenario_path)
 
-        self.read_city_scenario_light()
-        self.avg_out_flows_train = pickle.Unpickler(
-            open(os.path.join(self.city_scenario_path, "avg_out_flows_train.pickle"), "rb")).load()
-        self.avg_in_flows_train = pickle.Unpickler(
-            open(os.path.join(self.city_scenario_path, "avg_in_flows_train.pickle"), "rb")).load()
-        self.closest_valid_zone = pickle.Unpickler(
-            open(os.path.join(self.city_scenario_path, "closest_valid_zone.pickle"), "rb")).load()
+        self.grid = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "grid.pickle"), "rb")).load()
+        self.bookings_train = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "bookings_train.pickle"), "rb")).load()
