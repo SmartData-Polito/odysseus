@@ -8,12 +8,12 @@ from odysseus.city_data_manager.city_data_source.geo_data_source.geo_data_source
 class ChicagoCommunityAreas(GeoDataSource):
 
     def __init__(self):
-        super().__init__("Chicago", "city_of_chicago")
+        super().__init__("Chicago", "city_open_data")
 
     def load_raw(self):
         raw_geo_data_path = os.path.join(
             self.raw_data_path,
-            "geo_export_9340dbbc-816a-4ee7-9a2f-8d9edbc6acb6.dbf"
+            [filename for filename in os.listdir(self.raw_data_path) if filename.endswith("dbf")][0]
         )
         self.gdf = gpd.read_file(raw_geo_data_path)
         return self.gdf

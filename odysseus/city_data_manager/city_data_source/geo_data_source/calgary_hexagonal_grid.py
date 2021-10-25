@@ -8,12 +8,12 @@ from odysseus.city_data_manager.city_data_source.geo_data_source.geo_data_source
 class CalgaryHexagonalGrid(GeoDataSource):
 
     def __init__(self):
-        super().__init__("Calgary", "city_of_calgary")
+        super().__init__("Calgary", "city_open_data")
 
     def load_raw(self):
         raw_geo_data_path = os.path.join(
             self.raw_data_path,
-            "geo_export_edc5528d-f07e-4fd8-9622-be91c874918c.dbf"
+            [filename for filename in os.listdir(self.raw_data_path) if filename.endswith("dbf")][0]
         )
         self.gdf = gpd.read_file(raw_geo_data_path)
         return self.gdf

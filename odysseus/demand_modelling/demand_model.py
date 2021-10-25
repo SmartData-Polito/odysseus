@@ -26,8 +26,6 @@ class DemandModel:
 
         self.max_out_flow = float('-inf')
         self.max_in_flow = float('-inf')
-        self.avg_out_flows_train = self.get_avg_out_flows()
-        self.avg_in_flows_train = self.get_avg_in_flows()
 
     def get_hourly_ods(self):
 
@@ -108,45 +106,7 @@ class DemandModel:
             self.demand_model_folder
         )
 
-        with open(os.path.join(demand_model_path, "city_obj.pickle"), "wb") as f:
-            pickle.dump(self, f)
-
-        self.grid_matrix.to_pickle(os.path.join(demand_model_path, "grid_matrix.pickle"))
-        self.grid_matrix.to_csv(os.path.join(demand_model_path, "grid_matrix.csv"))
-        self.grid.geometry.to_file(os.path.join(demand_model_path, "grid.dbf"))
-        self.grid.to_pickle(os.path.join(demand_model_path, "grid.pickle"))
-        self.grid.to_csv(os.path.join(demand_model_path, "grid.csv"))
-        pd.DataFrame(self.neighbors_dict).to_pickle(os.path.join(demand_model_path, "neighbors_dict.pickle"))
-        pd.DataFrame(self.neighbors_dict).to_csv(os.path.join(demand_model_path, "neighbors_dict.csv"))
-        self.bookings_train.to_csv(os.path.join(demand_model_path, "bookings_train.csv"))
-        self.bookings_train.to_pickle(os.path.join(demand_model_path, "bookings_train.pickle"))
-        self.bookings_test.to_csv(os.path.join(demand_model_path, "bookings_test.csv"))
-        self.bookings_test.to_pickle(os.path.join(demand_model_path, "bookings_test.pickle"))
-        self.closest_valid_zone.to_csv(os.path.join(demand_model_path, "closest_valid_zone.csv"))
-        self.closest_valid_zone.to_pickle(os.path.join(demand_model_path, "closest_valid_zone.pickle"))
-
         with open(os.path.join(demand_model_path, "request_rates.pickle"), "wb") as f:
             pickle.dump(self.request_rates, f)
         with open(os.path.join(demand_model_path, "trip_kdes.pickle"), "wb") as f:
             pickle.dump(self.trip_kdes, f)
-        with open(os.path.join(demand_model_path, "valid_zones.pickle"), "wb") as f:
-            pickle.dump(self.valid_zones, f)
-        with open(os.path.join(demand_model_path, "avg_out_flows_train.pickle"), "wb") as f:
-            pickle.dump(self.avg_out_flows_train, f)
-        with open(os.path.join(demand_model_path, "avg_in_flows_train.pickle"), "wb") as f:
-            pickle.dump(self.avg_in_flows_train, f)
-
-        integers_dict = {
-            "avg_request_rate": self.avg_request_rate,
-            "n_vehicles_original": self.n_vehicles_original,
-            "avg_speed_mean": self.avg_speed_mean,
-            "avg_speed_std": self.avg_speed_std,
-            "avg_speed_kmh_mean": self.avg_speed_kmh_mean,
-            "avg_speed_kmh_std": self.avg_speed_kmh_std,
-            "max_driving_distance": self.max_driving_distance,
-            "max_in_flow": self.max_in_flow,
-            "max_out_flow": self.max_out_flow,
-        }
-        print(integers_dict)
-        with open(os.path.join(demand_model_path, "integers_dict.pickle"), "wb") as f:
-            pickle.dump(integers_dict, f)

@@ -9,7 +9,7 @@ from odysseus.city_data_manager.city_data_source.trips_data_source.trips_data_so
 class ChicagoScooterTrips(TripsDataSource):
 
     def __init__(self):
-        super().__init__("Chicago", "city_of_chicago", "e-scooter")
+        super().__init__("Chicago", "city_open_data", "e-scooter")
 
     def load_raw(self):
 

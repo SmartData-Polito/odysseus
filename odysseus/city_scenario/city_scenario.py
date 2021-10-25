@@ -13,20 +13,20 @@ from odysseus.path_config.path_config import *
 
 class CityScenario:
 
-    def __init__(self, city_name, city_scenario_config, save_folder="default_city_scenario"):
+    def __init__(self, city_scenario_config):
 
-        self.city_name = city_name
         self.city_scenario_config = city_scenario_config
-        self.save_folder = save_folder
+        self.city_name = self.city_scenario_config["city"]
+        self.data_source_id = city_scenario_config["data_source_id"]
+        self.bin_side_length = int(self.city_scenario_config["bin_side_length"])
+        self.folder_name = self.city_scenario_config["folder_name"]
 
         self.city_scenario_path = os.path.join(
             city_scenarios_path,
             self.city_scenario_config["city"],
-            self.save_folder
+            self.folder_name
         )
 
-        self.data_source_id = city_scenario_config["data_source_id"]
-        self.bin_side_length = self.city_scenario_config["bin_side_length"]
         self.loader = CityDataLoader(self.city_name, self.data_source_id)
 
         self.bookings_train = pd.DataFrame()
@@ -64,11 +64,15 @@ class CityScenario:
     ):
 
         self.bookings_train, self.trips_origins_train, self.trips_destinations_train = \
-            self.loader.read_year_month_range_data(start_month_train, start_year_train, end_month_train, end_year_train)
+            self.loader.read_year_month_range_data(
+                start_month_train, start_year_train, end_month_train, end_year_train
+            )
         self.bookings_train = self.get_input_bookings_filtered(self.bookings_train).dropna()
 
         self.bookings_test, self.trips_origins_test, self.trips_destinations_test = \
-            self.loader.read_year_month_range_data(start_month_test, start_year_test, end_month_test, end_year_test)
+            self.loader.read_year_month_range_data(
+                start_month_test, start_year_test, end_month_test, end_year_test
+            )
         self.bookings_train = self.get_input_bookings_filtered(self.bookings_test).dropna()
 
         self.avg_speed_mean = self.bookings_train.avg_speed.mean()
@@ -140,7 +144,6 @@ class CityScenario:
         self.max_in_flow = float('-inf')
         self.avg_out_flows_train = self.get_avg_out_flows()
         self.avg_in_flows_train = self.get_avg_in_flows()
-        self.get_out_flows()
 
     def map_zones_on_trips(self, zones):
 
@@ -366,11 +369,6 @@ class CityScenario:
 
     def save_results(self):
 
-        self.city_scenario_path = os.path.join(
-            city_scenarios_path,
-            self.city_scenario_config["city"],
-            self.save_folder
-        )
         os.makedirs(self.city_scenario_path, exist_ok=True)
 
         with open(os.path.join(self.city_scenario_path, "city_scenario_config.json"), "w") as f:

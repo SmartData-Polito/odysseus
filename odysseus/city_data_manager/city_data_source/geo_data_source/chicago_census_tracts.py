@@ -13,15 +13,16 @@ class ChicagoCensusTracts(GeoDataSource):
     def load_raw(self):
         raw_geo_data_path = os.path.join(
             self.raw_data_path,
-            "tl_2019_17_tract.dbf"
+            [filename for filename in os.listdir(self.raw_data_path) if filename.endswith("dbf")][0]
         )
         self.gdf = gpd.read_file(raw_geo_data_path)
         return self.gdf
 
     def normalise(self):
         self.gdf_norm = self.gdf
+        print(list(self.gdf_norm.columns))
         self.gdf_norm = self.gdf_norm.rename({
-            "GEOID": "census_tract_id"
+            "geoid10": "census_tract_id"
         }, axis=1)
         self.gdf_norm = self.gdf_norm[[
             "census_tract_id", "geometry"

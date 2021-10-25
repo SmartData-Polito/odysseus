@@ -8,17 +8,17 @@ from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
-    "-c", "--cities", nargs="+",
+    "-c", "--city", nargs="+",
     help="specify cities"
 )
 
 parser.add_argument(
-    "-d", "--data_source_ids", nargs="+",
+    "-d", "--data_source_id", nargs="+",
     help="specify data source ids"
 )
 
 parser.add_argument(
-    "-b", "--bin_side_lengths", nargs="+",
+    "-b", "--bin_side_length", nargs="+",
     help="specify bin side lengths"
 )
 
@@ -39,35 +39,30 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    cities=["Louisville"],
-    data_source_ids=["city_open_data"],
-    sim_techniques=["eventG"],
-    bin_side_lengths=["500"],
-    kde_bandwidths=["1"],
-    train_range=["2019", "1", "2019", "1"],
-    test_range=["2019", "2", "2019", "2"],
-    folder_name="default"
+    city=["Louisville"],
+    data_source_id=["city_open_data"],
+    bin_side_length=["500"],
+    train_range=("2019", "1", "2019", "1"),
+    test_range=("2019", "2", "2019", "2"),
+    folder_name=["default"]
 )
 
 args = parser.parse_args()
-
-city_scenario_configs_grid = {
-    "city": args.cities,
-    "data_source_id": args.data_source_ids,
-    "bin_side_length": list(map(int, args.bin_side_lengths)),
-}
-
+city_scenario_configs_grid = vars(args)
+city_scenario_configs_grid["train_range"] = [tuple(city_scenario_configs_grid["train_range"])]
+city_scenario_configs_grid["test_range"] = [tuple(city_scenario_configs_grid["test_range"])]
+print(city_scenario_configs_grid)
 city_scenario_configs_list = SimConfGrid(city_scenario_configs_grid).conf_list
 
 for city_scenario_config in city_scenario_configs_list:
 
     print(city_scenario_config)
 
-    city_scenario = CityScenario(city_scenario_config["city"], city_scenario_config, save_folder=args.folder_name)
+    city_scenario = CityScenario(city_scenario_config)
     city_scenario.create_city_scenario(
-        int(args.train_range[0]), int(args.train_range[1]),
-        int(args.train_range[2]), int(args.train_range[3]),
-        int(args.test_range[0]), int(args.test_range[1]),
-        int(args.test_range[2]), int(args.test_range[3]),
+        int(city_scenario_config["train_range"][0]), int(city_scenario_config["train_range"][1]),
+        int(city_scenario_config["train_range"][2]), int(city_scenario_config["train_range"][3]),
+        int(city_scenario_config["test_range"][0]), int(city_scenario_config["test_range"][1]),
+        int(city_scenario_config["test_range"][2]), int(city_scenario_config["test_range"][3]),
     )
     city_scenario.save_results()

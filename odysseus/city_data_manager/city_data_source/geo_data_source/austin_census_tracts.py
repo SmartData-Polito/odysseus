@@ -13,7 +13,7 @@ class AustinCensusTracts(GeoDataSource):
     def load_raw(self):
         raw_geo_data_path = os.path.join(
             self.raw_data_path,
-            "tl_2019_48_tract.dbf"
+            [filename for filename in os.listdir(self.raw_data_path) if filename.endswith("dbf")][0]
         )
         self.gdf = gpd.read_file(raw_geo_data_path)
         return self.gdf
