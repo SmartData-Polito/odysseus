@@ -103,6 +103,8 @@ class SharedMobilitySim:
         self.charging_stations_dict = {}
         self.zone_dict = {}
 
+        # TODO -> Move to supply modelling appropriate data structures
+
         for zone_id in self.sim_input.valid_zones:
             self.zone_dict[zone_id] = Zone(self.env, zone_id, self.start, self.available_vehicles_dict[zone_id])
 

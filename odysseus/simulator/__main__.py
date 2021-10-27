@@ -119,6 +119,4 @@ for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
         parameters_dict["sim_general_conf"]["save_history"] = False
         if args.n_cpus is not None:
             parameters_dict["n_cpus"] = int(args.n_cpus)
-        multiple_runs(
-            parameters_dict
-        )
+        multiple_runs(parameters_dict)
