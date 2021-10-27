@@ -13,6 +13,7 @@ odysseus/data/*
 odysseus/city_data_manager/city_data_source/data/*
 odysseus/city_scenario/city_scenarios/*
 odysseus/demand_modelling/demand_models/*
+odysseus/supply_modelling/supply_models/*
 
 odysseus/simulator/data/*
 odysseus/simulator/figures/*
