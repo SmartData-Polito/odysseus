@@ -67,6 +67,8 @@ class CityScenario:
         self.avg_out_flows_train = dict()
         self.avg_in_flows_train = dict()
 
+        self.energy_mix = None
+
     def create_city_scenario(
             self, start_year_train, start_month_train, end_year_train, end_month_train,
                  start_year_test, start_month_test, end_year_test, end_month_test
@@ -153,6 +155,8 @@ class CityScenario:
         self.max_in_flow = float('-inf')
         self.avg_out_flows_train = self.get_avg_out_flows()
         self.avg_in_flows_train = self.get_avg_in_flows()
+
+        self.energy_mix = EnergyMix(self.city_name, start_year_test)
 
     def map_zones_on_trips(self, zones):
 

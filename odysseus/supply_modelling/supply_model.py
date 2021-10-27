@@ -34,10 +34,18 @@ class SupplyModel:
 
         self.supply_model_conf = supply_model_conf
 
-        self.city = self.supply_model_conf["city"]
+        self.city_name = self.supply_model_conf["city"]
         self.city_scenario_folder = self.supply_model_conf["city_scenario_folder"]
+        self.supply_model_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "supply_modelling",
+            "supply_models",
+            self.city_name,
+            self.city_scenario_folder
+        )
+
         self.city_scenario = CityScenario(
-            city=self.city,
+            city=self.city_name,
             from_file=True,
             in_folder_name=self.city_scenario_folder
         )
@@ -47,7 +55,6 @@ class SupplyModel:
         self.valid_zones = self.city_scenario.valid_zones
         self.neighbors_dict = self.city_scenario.neighbors_dict
         self.integers_dict = self.city_scenario.integers_dict
-
         self.avg_speed_mean = self.integers_dict["avg_speed_mean"]
         self.avg_speed_std = self.integers_dict["avg_speed_std"]
 
@@ -62,7 +69,7 @@ class SupplyModel:
 
         self.zones_cp_distances = pd.Series()
         self.closest_cp_zone = pd.Series()
-        self.energy_mix = EnergyMix(self.city, self.supply_model_conf["year"])
+        self.energy_mix = self.city_scenario.energy_mix
 
         self.initial_relocation_workers_positions = []
 
@@ -80,6 +87,10 @@ class SupplyModel:
         for vehicle in range(len(self.vehicles_zones)):
             zone = self.vehicles_zones[vehicle]
             self.available_vehicles_dict[zone] += [vehicle]
+
+        self.vehicles_soc_dict = {int(k): float(v) for k, v in self.vehicles_soc_dict.items()}
+        self.vehicles_zones = {int(k): int(v) for k, v in self.vehicles_zones.items()}
+        self.available_vehicles_dict = {int(k): v for k, v in self.available_vehicles_dict.items()}
 
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
 
@@ -129,7 +140,7 @@ class SupplyModel:
                 station_locations = json.load(f)
                 f.close()
                 cps_points = geodataframe_charging_points(
-                    self.city, self.supply_model_conf["engine_type"], station_locations
+                    self.city_name, self.supply_model_conf["engine_type"], station_locations
                 )
                 self.n_charging_poles_by_zone = {}
                 value = 0
@@ -159,7 +170,7 @@ class SupplyModel:
                 station_locations = json.load(f)
                 f.close()
                 cps_points = geodataframe_charging_points(
-                    self.city, self.supply_model_conf["engine_type"], station_locations
+                    self.city_name, self.supply_model_conf["engine_type"], station_locations
                 )
                 self.n_charging_poles_by_zone_inf = {}
 
@@ -189,16 +200,17 @@ class SupplyModel:
                 self.n_charging_poles_by_zone = dict(
                     pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
 
+            self.n_charging_poles_by_zone = {int(k): int(v) for k, v in self.n_charging_poles_by_zone.items()}
             zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
-
             self.zones_cp_distances = self.grid.to_crs("epsg:3857").centroid.apply(
                 lambda x: self.grid.loc[zones_with_cps].to_crs("epsg:3857").centroid.distance(x)
             )
-
             self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
 
     def init_relocation(self):
+
         if "n_relocation_workers" in self.supply_model_conf:
+
             n_relocation_workers = self.supply_model_conf["n_relocation_workers"]
 
             top_o_zones = self.grid.zone_id_origin_count.sort_values(ascending=False).iloc[:31]
@@ -208,11 +220,23 @@ class SupplyModel:
             )
 
             self.initial_relocation_workers_positions = [
-                self.grid.loc[int(top_o_zones.index[i])].zone_id for i in workers_random_zones
+                int(self.grid.loc[int(top_o_zones.index[i])].zone_id) for i in workers_random_zones
             ]
 
-    def init_workers(self):
-        pass
+    def save_results(self):
 
+        os.makedirs(self.supply_model_path, exist_ok=True)
 
+        with open(os.path.join(self.supply_model_path, "supply_model.pickle"), "wb") as f:
+            pickle.dump(self, f)
 
+        with open(os.path.join(self.supply_model_path, "n_charging_poles_by_zone.json"), "w") as f:
+            json.dump(self.n_charging_poles_by_zone, f, sort_keys=True, indent=4)
+        with open(os.path.join(self.supply_model_path, "vehicles_soc_dict.json"), "w") as f:
+            json.dump(self.vehicles_soc_dict, f)
+        with open(os.path.join(self.supply_model_path, "vehicles_zones.json"), "w") as f:
+            json.dump(self.vehicles_zones, f)
+        with open(os.path.join(self.supply_model_path, "available_vehicles_dict.json"), "w") as f:
+            json.dump(self.available_vehicles_dict, f)
+        with open(os.path.join(self.supply_model_path, "initial_relocation_workers_positions.json"), "w") as f:
+            json.dump(self.initial_relocation_workers_positions, f)

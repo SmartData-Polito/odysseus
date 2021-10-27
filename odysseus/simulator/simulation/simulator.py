@@ -25,21 +25,21 @@ class SharedMobilitySim:
     def __init__(self, sim_input):
 
         self.start = datetime.datetime(
-            sim_input.supply_model_config["year"],
-            sim_input.supply_model_config["month_start"],
+            sim_input.sim_general_config["year"],
+            sim_input.sim_general_config["month_start"],
             1, tzinfo=pytz.UTC
         )
 
-        if sim_input.supply_model_config["month_end"] == 13:
+        if sim_input.sim_general_config["month_end"] == 13:
             self.end = datetime.datetime(
-                sim_input.supply_model_config["year"] + 1,
+                sim_input.sim_general_config["year"] + 1,
                 1,
                 1, tzinfo=pytz.UTC
             )
         else:
             self.end = datetime.datetime(
-                sim_input.supply_model_config["year"],
-                sim_input.supply_model_config["month_end"],
+                sim_input.sim_general_config["year"],
+                sim_input.sim_general_config["month_end"],
                 1, tzinfo=pytz.UTC
             )
 
@@ -197,8 +197,8 @@ class SharedMobilitySim:
                 and self.sim_input.supply_model_conf["scooter_relocation_strategy"] in ["predictive"]:
             self.scooterRelocationStrategy.update_current_hour_stats(booking_dict)
 
-        if "save_history" in self.sim_input.supply_model_config:
-            if self.sim_input.supply_model_config["save_history"]:
+        if "save_history" in self.sim_input.supply_model_conf:
+            if self.sim_input.supply_model_conf["save_history"]:
                 self.sim_bookings += [booking_dict]
 
         if vehicle_id in self.available_vehicles_dict[zone_id]:
@@ -255,8 +255,8 @@ class SharedMobilitySim:
         booking_request_dict["req_id"] = self.n_booking_requests
         self.n_booking_requests += 1
 
-        if "save_history" in self.sim_input.supply_model_config:
-            if self.sim_input.supply_model_config["save_history"]:
+        if "save_history" in self.sim_input.supply_model_conf:
+            if self.sim_input.supply_model_conf["save_history"]:
                 self.sim_booking_requests += [booking_request_dict]
                 self.list_n_vehicles_booked += [self.n_booked_vehicles]
                 self.list_n_vehicles_charging_system += [self.chargingStrategy.n_vehicles_charging_system]
@@ -348,8 +348,8 @@ class SharedMobilitySim:
 
         if not available_vehicle_flag:
             self.n_no_close_vehicles += 1
-            if "save_history" in self.sim_input.supply_model_config:
-                if self.sim_input.supply_model_config["save_history"]:
+            if "save_history" in self.sim_input.supply_model_conf:
+                if self.sim_input.supply_model_conf["save_history"]:
                     self.sim_unsatisfied_requests += [booking_request_dict]
                     self.sim_no_close_vehicle_requests += [booking_request_dict]
 
@@ -359,8 +359,8 @@ class SharedMobilitySim:
             death["hour"] = death["start_time"].hour
             death["plate"] = chosen_vehicle_id
             death["zone_id"] = chosen_origin_id
-            if "save_history" in self.sim_input.supply_model_config:
-                if self.sim_input.supply_model_config["save_history"]:
+            if "save_history" in self.sim_input.supply_model_conf:
+                if self.sim_input.supply_model_conf["save_history"]:
                     self.sim_booking_requests_deaths += [death]
 
     def mobility_requests_generator(self):

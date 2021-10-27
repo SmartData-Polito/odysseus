@@ -19,6 +19,14 @@ class DemandModel:
 
         self.city_name = self.demand_model_config["city"]
         self.city_scenario_folder = self.demand_model_config["city_scenario_folder"]
+        self.demand_model_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "demand_modelling",
+            "demand_models",
+            self.city_name,
+            self.city_scenario_folder
+        )
+
         self.city_scenario = CityScenario(
             city=self.city_name,
             from_file=True,
@@ -27,16 +35,6 @@ class DemandModel:
         self.city_scenario.read_city_scenario_for_demand_model()
         self.bookings_train = self.city_scenario.bookings_train
         self.grid = self.city_scenario.grid
-
-        self.demand_model_folder = self.demand_model_config["folder_name"]
-
-        self.demand_model_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "demand_modelling",
-            "demand_models",
-            self.demand_model_config["city"],
-            self.demand_model_folder
-        )
 
         self.data_source_id = demand_model_config["data_source_id"]
         self.kde_bw = float(self.demand_model_config["kde_bandwidth"])
@@ -119,7 +117,7 @@ class DemandModel:
 
     def save_results(self):
 
-        os.makedirs(self.demand_model_path)
+        os.makedirs(self.demand_model_path, exist_ok=True)
 
         with open(os.path.join(self.demand_model_path, "request_rates.pickle"), "wb") as f:
             pickle.dump(self.request_rates, f)

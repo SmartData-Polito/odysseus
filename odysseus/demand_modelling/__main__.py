@@ -27,18 +27,11 @@ parser.add_argument(
     help="Specify city scenario folder name "
 )
 
-parser.add_argument(
-    "-f", "--folder_name", nargs="+",
-    help="Specify demand model folder name "
-)
-
-
 parser.set_defaults(
     city=["Louisville"],
     data_source_id=["city_open_data"],
     kde_bandwidth=["1"],
     city_scenario_folder=["default"],
-    folder_name=["default"]
 )
 
 args = parser.parse_args()

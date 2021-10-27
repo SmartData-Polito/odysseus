@@ -8,7 +8,6 @@ class SimConfGrid ():
     
     def __init__ (self, conf_grid):
 
-        print(conf_grid)
 
         self.conf_keys = conf_grid.values()
         self.conf_list = []

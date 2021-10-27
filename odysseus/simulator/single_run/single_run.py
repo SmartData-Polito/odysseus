@@ -19,7 +19,7 @@ def single_run(conf_dict):
     sim_scenario_conf = conf_dict["sim_scenario_conf"]
     sim_scenario_name = conf_dict["sim_scenario_name"]
     supply_model_object = conf_dict["supply_model_object"]
-    demand_model_folder = conf_dict["demand_model_folder"]
+    city_scenario_folder = conf_dict["city_scenario_folder"]
 
     city = sim_general_conf["city"]
     sim_type = sim_general_conf["sim_technique"]
@@ -37,7 +37,7 @@ def single_run(conf_dict):
         "sim_general_conf": sim_general_conf,
         "sim_scenario_conf": sim_scenario_conf,
         "supply_model_object": supply_model_object,
-        "demand_model_folder": demand_model_folder
+        "city_scenario_folder": city_scenario_folder
     }
 
     if sim_type == "eventG":

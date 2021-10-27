@@ -10,28 +10,30 @@ class SimInput:
 
 	def __init__(self, conf_dict):
 
-		self.demand_model_config = conf_dict["sim_general_conf"]
+		self.sim_general_config = conf_dict["sim_general_conf"]
 		self.sim_scenario_conf = conf_dict["sim_scenario_conf"]
+		self.city_scenario_folder = conf_dict["city_scenario_folder"]
 		supply_model = conf_dict["supply_model_object"]
-		self.demand_model_folder = conf_dict["demand_model_folder"]
-		demand_model_path = os.path.join(
+
+		self.city = self.sim_general_config["city"]
+		self.data_source_id = self.sim_general_config["data_source_id"]
+
+		city_scenario_path = os.path.join(
 			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-			"demand_modelling",
-			"demand_models",
-			self.demand_model_config["city"],
-			self.demand_model_folder
+			"city_scenario",
+			"city_scenarios",
+			self.sim_general_config["city"],
+			self.city_scenario_folder
 		)
 
-		self.city = self.demand_model_config["city"]
-
-		self.grid = pickle.Unpickler(open(os.path.join(demand_model_path, "grid.pickle"), "rb")).load()
-		self.grid_matrix = pickle.Unpickler(open(os.path.join(demand_model_path, "grid_matrix.pickle"), "rb")).load()
-		self.avg_out_flows_train = pickle.Unpickler(open(os.path.join(demand_model_path, "avg_out_flows_train.pickle"), "rb")).load()
-		self.avg_in_flows_train = pickle.Unpickler(open(os.path.join(demand_model_path, "avg_in_flows_train.pickle"), "rb")).load()
-		self.valid_zones = pickle.Unpickler(open(os.path.join(demand_model_path, "valid_zones.pickle"), "rb")).load()
-		self.neighbors_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "neighbors_dict.pickle"), "rb")).load()
-		self.integers_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "integers_dict.pickle"), "rb")).load()
-		self.closest_valid_zone = pickle.Unpickler(open(os.path.join(demand_model_path, "closest_valid_zone.pickle"), "rb")).load()
+		self.grid = pickle.Unpickler(open(os.path.join(city_scenario_path, "grid.pickle"), "rb")).load()
+		self.grid_matrix = pickle.Unpickler(open(os.path.join(city_scenario_path, "grid_matrix.pickle"), "rb")).load()
+		self.avg_out_flows_train = pickle.Unpickler(open(os.path.join(city_scenario_path, "avg_out_flows_train.pickle"), "rb")).load()
+		self.avg_in_flows_train = pickle.Unpickler(open(os.path.join(city_scenario_path, "avg_in_flows_train.pickle"), "rb")).load()
+		self.valid_zones = pickle.Unpickler(open(os.path.join(city_scenario_path, "valid_zones.pickle"), "rb")).load()
+		self.neighbors_dict = pickle.Unpickler(open(os.path.join(city_scenario_path, "neighbors_dict.pickle"), "rb")).load()
+		self.integers_dict = pickle.Unpickler(open(os.path.join(city_scenario_path, "integers_dict.pickle"), "rb")).load()
+		self.closest_valid_zone = pickle.Unpickler(open(os.path.join(city_scenario_path, "closest_valid_zone.pickle"), "rb")).load()
 
 		self.distance_matrix = self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.apply(
 			lambda x: self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.distance(x).sort_values()
@@ -43,7 +45,6 @@ class SimInput:
 			)
 
 		# demand
-		self.avg_request_rate = self.integers_dict["avg_request_rate"]
 		self.n_vehicles_original = self.integers_dict["n_vehicles_original"]
 		self.avg_speed_mean = self.integers_dict["avg_speed_mean"]
 		self.avg_speed_std = self.integers_dict["avg_speed_std"]
@@ -54,12 +55,23 @@ class SimInput:
 		self.max_in_flow = self.integers_dict["max_in_flow"]
 		self.max_out_flow = self.integers_dict["max_out_flow"]
 
-		if self.demand_model_config["sim_technique"] == "traceB":
+		demand_model_path = os.path.join(
+			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+			"demand_modelling",
+			"demand_models",
+			self.sim_general_config["city"],
+			self.city_scenario_folder
+		)
+
+		if self.sim_general_config["sim_technique"] == "traceB":
 			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings_test.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
-		elif self.demand_model_config["sim_technique"] == "eventG":
+			# TODO -> compute sim duration
+		elif self.sim_general_config["sim_technique"] == "eventG":
 			self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
+			self.avg_request_rate = pd.DataFrame(self.request_rates.values()).mean().mean()
 			self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
+			# TODO -> compute sim duration
 
 		if "n_requests" in self.sim_scenario_conf.keys():
 			# TODO -> compute w.r.t. sim duration
@@ -114,24 +126,27 @@ class SimInput:
 		self.zones_cp_distances = pd.Series()
 		self.closest_cp_zone = pd.Series()
 
-		self.supply_model_conf = dict()
-		self.supply_model_conf.update(self.sim_scenario_conf)
-		self.supply_model_conf.update({
-			"city": self.city,
-			"data_source_id": self.demand_model_config['data_source_id'],
-			"n_vehicles": self.n_vehicles_sim,
-			"tot_n_charging_poles": self.tot_n_charging_poles,
-			"n_charging_zones": self.n_charging_zones,
-		})
-
 		if supply_model is not None:
-			#nel caso venga fornito un supply model questo sovrascrive tutto. Eventualmente sollevare eccezioni/warning se i parametri non son compatibili
+
+			# TODO -> sollevare eccezioni/warning se i parametri non son compatibili
 			self.supply_model = supply_model
 			self.n_vehicles_sim = supply_model.n_vehicles_sim
+
 		else:
-			self.supply_model = SupplyModel(
-				self.supply_model_conf, self.demand_model_config["year"], city_scenario_folder=self.demand_model_folder
+
+			self.supply_model_conf = dict(
+				city=self.city,
+				data_source_id=self.data_source_id,
+				n_vehicles=self.n_vehicles_sim,
+				tot_n_charging_poles=self.tot_n_charging_poles,
+				n_charging_zones=self.n_charging_zones,
+				distributed_cps=self.sim_scenario_conf["distributed_cps"],
+				cps_placement_policy=self.sim_scenario_conf["cps_placement_policy"],
+				n_relocation_workers=self.sim_scenario_conf["n_relocation_workers"],
+				city_scenario_folder=self.city_scenario_folder,
 			)
+
+			self.supply_model = SupplyModel(self.supply_model_conf)
 
 	def get_booking_requests_list(self):
 

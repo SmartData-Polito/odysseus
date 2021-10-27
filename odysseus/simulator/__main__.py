@@ -36,16 +36,12 @@ parser.add_argument(
     help="Specify the folder in which is stored a supply model"
 )
 
-parser.add_argument(
-    "-d", "--existing_demand_model_folder",
-    help="Specify the folder in which is stored a supply model"
-)
 
 parser.set_defaults(
     campaign_name="test",
     conf_name="city_open_data_test",
+    city_scenario_folder="default",
     existing_supply_model_folder=None,
-    existing_demand_model_folder="test"
 )
 
 args = parser.parse_args()
@@ -100,25 +96,12 @@ for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
     else:
         supply_model = None
 
-    existing_demand_model_folder = args.existing_demand_model_folder
-    city_demand_models_path = os.path.join(demand_models_path, sim_general_conf["city"])
-    folder_path = os.path.join(city_demand_models_path, existing_demand_model_folder)
-
-    if not os.path.exists(city_demand_models_path):
-        print("No demand model found for " + sim_general_conf["city"] + "!")
-        exit(2)
-
-    if not os.path.exists(folder_path):
-        print("Non-existent demand model folder.")
-        print("Available folders", str(os.listdir(city_demand_models_path)))
-        exit(1)
-
     parameters_dict = {
         "sim_general_conf": sim_general_conf,
         "sim_scenario_conf": confs_dict[sim_general_conf["sim_run_mode"]],
         "sim_scenario_name": sim_general_conf["sim_scenario_name"],
+        "city_scenario_folder": args.city_scenario_folder,
         "supply_model_object": supply_model,
-        "demand_model_folder": existing_demand_model_folder
     }
 
     if sim_run_mode == "single_run":
@@ -129,19 +112,13 @@ for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
         for conf_id, sim_scenario_conf in enumerate(sim_conf_grid.conf_list):
             parameters_dict["sim_scenario_conf"] = sim_scenario_conf
             parameters_dict["sim_scenario_conf"]["conf_id"] = "_".join([str(general_conf_id), str(conf_id)])
-            single_run(
-                parameters_dict
-            )
+            single_run(parameters_dict)
 
     elif sim_run_mode == "multiple_runs":
         print(multiple_runs_conf_grid)
         parameters_dict["sim_general_conf"]["save_history"] = False
         if args.n_cpus is not None:
             parameters_dict["n_cpus"] = int(args.n_cpus)
-            multiple_runs(
-                parameters_dict
-            )
-        else:
-            multiple_runs(
-                parameters_dict
-            )
+        multiple_runs(
+            parameters_dict
+        )

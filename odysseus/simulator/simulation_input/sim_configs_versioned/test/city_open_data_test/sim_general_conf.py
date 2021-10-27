@@ -1,10 +1,11 @@
 sim_general_conf_grid = {
 
-    # Run configuration
+    # General configuration
     "city": ["Louisville"],
-    "sim_run_mode": ["single_run"],
-
     "data_source_id": ["big_data_db"],
+
+    # Run configuration
+    "sim_run_mode": ["single_run"],
     "sim_technique": ["eventG"],
     "sim_scenario_name": ["louisville_test"],
 

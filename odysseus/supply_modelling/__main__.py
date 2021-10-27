@@ -50,41 +50,27 @@ parser.add_argument(
     "-w", "--n_relocation_workers", nargs="+",
     help="Specify number of relocation workers"
 )
+
 parser.add_argument(
-    "-f", "--folder_name", nargs="+",
+    "-f", "--city_scenario_folder", nargs="+",
     help="Specify saving folder name "
 )
-
-default = {
-    "city": ["Louisville"],
-    "data_source_id": ["city_open_data"],
-    "n_vehicles": ["500"],
-    "tot_n_charging_poles": ["100"],
-    "n_charging_zones": ["10"],
-    "year": ["2017"],
-    "distributed_cps": ["True"],
-    "cps_placement_policy": ["num_parkings"],
-    "n_relocation_workers": [1],
-    "city_scenario_folder": ["default"],
-    "folder_name": ["default"],
-}
 
 
 parser.set_defaults(
 
-    city=default["city"],
-    data_source_id=default["data_source_id"],
+    city=["Louisville"],
+    data_source_id=["city_open_data"],
 
-    n_vehicles=default["n_vehicles"],
-    tot_n_charging_poles=default["tot_n_charging_poles"],
-    n_charging_zones=default["n_charging_zones"],
-    year=default["year"],
-    distributed_cps=default["distributed_cps"],
-    cps_placement_policy=default["cps_placement_policy"],
-    n_relocation_workers=default["n_relocation_workers"],
+    n_vehicles=["500"],
+    tot_n_charging_poles=["100"],
+    n_charging_zones=["10"],
+    year=["2017"],
+    distributed_cps=[True],
+    cps_placement_policy=["num_parkings"],
+    n_relocation_workers=[1],
 
-    city_scenario_folder=default["city_scenario_folder"],
-    folder_name=default["folder_name"],
+    city_scenario_folder=["default"],
 
 )
 
@@ -103,3 +89,4 @@ for supply_model_config in supply_model_configs_list:
     vehicles_soc_dict, vehicles_zones, available_vehicles_dict = supply_model.init_vehicles()
     supply_model.init_charging_poles()
     supply_model.init_relocation()
+    supply_model.save_results()
