@@ -7,9 +7,13 @@ import geopandas as gpd
 from shapely.geometry import Point
 import datetime
 import pytz
-from odysseus.supply_modelling.energymix_loader import EnergyMix
+from odysseus.simulator.simulation_data_structures.zone import Zone
+from odysseus.simulator.simulation_data_structures.vehicle import Vehicle
+from odysseus.simulator.simulation_data_structures.charging_station import ChargingStation
 
 from odysseus.city_scenario.city_scenario import CityScenario
+
+from odysseus.supply_modelling.energymix_loader import EnergyMix
 
 
 def geodataframe_charging_points(city, engine_type, station_location):
@@ -57,6 +61,7 @@ class SupplyModel:
         self.integers_dict = self.city_scenario.integers_dict
         self.avg_speed_mean = self.integers_dict["avg_speed_mean"]
         self.avg_speed_std = self.integers_dict["avg_speed_std"]
+        self.max_driving_distance = self.integers_dict["max_driving_distance"]
 
         self.n_vehicles_sim = int(self.supply_model_conf["n_vehicles"])
         self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
@@ -70,8 +75,54 @@ class SupplyModel:
         self.zones_cp_distances = pd.Series()
         self.closest_cp_zone = pd.Series()
         self.energy_mix = self.city_scenario.energy_mix
+        self.energy_mix = EnergyMix(self.city_name, 2019)
 
         self.initial_relocation_workers_positions = []
+
+        self.zone_dict = dict()
+        self.charging_stations_dict = dict()
+        self.real_n_charging_zones = 0
+        self.vehicles_list = list()
+
+        self.simpy_env = None
+
+    def init_for_simulation(
+            self, simpy_env, start,
+            station_conf, vehicle_conf,
+            engine_type, profile_type, vehicle_model_name
+    ):
+
+        self.simpy_env = simpy_env
+
+        for zone_id in self.valid_zones:
+            self.zone_dict[zone_id] = Zone(self.simpy_env, zone_id, start, self.available_vehicles_dict[zone_id])
+
+        if self.supply_model_conf["distributed_cps"]:
+            for zone_id in self.n_charging_poles_by_zone:
+                zone_n_cps = self.n_charging_poles_by_zone[zone_id]
+                if zone_n_cps > 0:
+                    self.charging_stations_dict[zone_id] = ChargingStation(
+                        self.simpy_env, zone_n_cps, zone_id, station_conf, engine_type, profile_type, start
+                    )
+                    self.real_n_charging_zones += zone_n_cps
+
+        for i in range(self.n_vehicles_sim):
+            vehicle_object = Vehicle(
+                self.simpy_env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
+                vehicle_conf, self.energy_mix, engine_type, vehicle_model_name, start
+            )
+            self.vehicles_list.append(vehicle_object)
+
+        if "alpha_policy" in self.supply_model_conf:
+            if self.supply_model_conf["alpha_policy"] == "auto":
+                self.supply_model_conf["alpha"] = self.vehicles_list[0].consumption_to_percentage(
+                    self.vehicles_list[0].distance_to_consumption(
+                        self.max_driving_distance / 1000
+                    )
+                )
+            else:
+                print("Policy for alpha not recognised!")
+                exit(0)
 
     def init_vehicles(self):
 

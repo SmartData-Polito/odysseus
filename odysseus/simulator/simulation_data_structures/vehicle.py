@@ -6,15 +6,13 @@ from odysseus.supply_modelling.vehicle import Vehicle as Vehicle_definition
 class Vehicle(Vehicle_definition):
 
     def __init__(self, env, plate, start_zone, start_soc,
-                 vehicle_config, energymix_conf, sim_scenario_conf, sim_start_time):
+                 vehicle_config, energymix_conf, engine_type, vehicle_model_name, sim_start_time):
 
-        engine_type = sim_scenario_conf["engine_type"]
-        model = sim_scenario_conf["vehicle_model_name"]
         if engine_type == "electric":
             energymix = energymix_conf
         else:
             energymix = {}
-        super().__init__(vehicle_config[engine_type][model], energymix)
+        super().__init__(vehicle_config[engine_type][vehicle_model_name], energymix)
 
         self.env = env
         self.plate = plate

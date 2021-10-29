@@ -10,6 +10,8 @@ from odysseus.utils.time_utils import *
 from odysseus.utils.geospatial_utils import *
 from odysseus.path_config.path_config import *
 
+from odysseus.supply_modelling.energymix_loader import EnergyMix
+
 
 class CityScenario:
 

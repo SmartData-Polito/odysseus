@@ -56,7 +56,7 @@ class ModelDrivenSim(SharedMobilitySim):
         booking_request_dict["destination_id"] = self.closest_valid_zone.loc[booking_request_dict["destination_id"]]
 
         booking_request_dict = get_distances(
-            booking_request_dict, self.sim_input.grid, self.sim_input.supply_model_config["bin_side_length"]
+            booking_request_dict, self.sim_input.grid, self.sim_input.supply_model.city_scenario.bin_side_length
         )
 
         booking_request_dict["duration"] = booking_request_dict["driving_distance"] / (
@@ -74,7 +74,7 @@ class ModelDrivenSim(SharedMobilitySim):
 
             timeout_sec = (
                 np.random.exponential(
-                    1 / self.sim_input.supply_model_conf["requests_rate_factor"] / self.current_arrival_rate
+                    1 / self.sim_input.sim_scenario_conf["requests_rate_factor"] / self.current_arrival_rate
                 )
             )
 

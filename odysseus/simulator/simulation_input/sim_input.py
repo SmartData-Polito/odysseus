@@ -10,19 +10,19 @@ class SimInput:
 
 	def __init__(self, conf_dict):
 
-		self.sim_general_config = conf_dict["sim_general_conf"]
+		self.sim_general_conf = conf_dict["sim_general_conf"]
 		self.sim_scenario_conf = conf_dict["sim_scenario_conf"]
 		self.city_scenario_folder = conf_dict["city_scenario_folder"]
 		supply_model = conf_dict["supply_model_object"]
 
-		self.city = self.sim_general_config["city"]
-		self.data_source_id = self.sim_general_config["data_source_id"]
+		self.city = self.sim_general_conf["city"]
+		self.data_source_id = self.sim_general_conf["data_source_id"]
 
 		city_scenario_path = os.path.join(
 			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
 			"city_scenario",
 			"city_scenarios",
-			self.sim_general_config["city"],
+			self.sim_general_conf["city"],
 			self.city_scenario_folder
 		)
 
@@ -59,15 +59,15 @@ class SimInput:
 			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
 			"demand_modelling",
 			"demand_models",
-			self.sim_general_config["city"],
+			self.sim_general_conf["city"],
 			self.city_scenario_folder
 		)
 
-		if self.sim_general_config["sim_technique"] == "traceB":
+		if self.sim_general_conf["sim_technique"] == "traceB":
 			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings_test.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
 			# TODO -> compute sim duration
-		elif self.sim_general_config["sim_technique"] == "eventG":
+		elif self.sim_general_conf["sim_technique"] == "eventG":
 			self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
 			self.avg_request_rate = pd.DataFrame(self.request_rates.values()).mean().mean()
 			self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
@@ -144,9 +144,12 @@ class SimInput:
 				cps_placement_policy=self.sim_scenario_conf["cps_placement_policy"],
 				n_relocation_workers=self.sim_scenario_conf["n_relocation_workers"],
 				city_scenario_folder=self.city_scenario_folder,
+				alpha_policy=self.sim_scenario_conf["alpha_policy"]
 			)
 
 			self.supply_model = SupplyModel(self.supply_model_conf)
+
+		self.sim_scenario_conf.update(self.supply_model_conf)
 
 	def get_booking_requests_list(self):
 

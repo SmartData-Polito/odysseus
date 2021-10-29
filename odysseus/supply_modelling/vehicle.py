@@ -1,5 +1,5 @@
 class Vehicle(object):
-	def __init__(self, vehicle_config, energy_mix_conf):
+	def __init__(self, vehicle_config, energy_mix_object):
 		self.engine_type = vehicle_config["engine_type"] #gasoline, diesel, lpg, gnc, electric
 		self.consumption = vehicle_config["consumption"] #km/l, km/kWh
 		self.capacity = vehicle_config["fuel_capacity"] #kWh (electric), Liter (gasoline,diesel,lpg), kilograms (gnc)
@@ -55,8 +55,8 @@ class Vehicle(object):
 			self.gwp_ch4 = 25
 			self.gwp_n2o = 298
 		elif self.engine_type == "electric":
-			self.welltotank_emission = energy_mix_conf.evaluate_emissions()#gCO2eq/kWh
-			self.welltotank_energy = energy_mix_conf.evaluate_energy()#MJ/MJelectricity
+			self.welltotank_emission = energy_mix_object.evaluate_emissions()#gCO2eq/kWh
+			self.welltotank_energy = energy_mix_object.evaluate_energy()#MJ/MJelectricity
 			self.tx_efficiency = 92.5 # %
 			self.charging_efficiency = 80 # %
 			self.supported_charge = vehicle_config["max_charg_power"]

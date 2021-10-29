@@ -113,17 +113,20 @@ class BookingRequest(SimEvent):
 
     def search_vehicle(self):
 
+        #print(type(self.booking_request_dict["origin_id"]), type(list(self.available_vehicles_dict.keys())[0]))
+
         if self.vehicle_research_policy == "neighbors_1":
             flags_return_dict, chosen_vehicle_id, chosen_origin_id = self.search_vehicle_in_zone(
-                self.booking_request_dict["origin_id"]
+                int(self.booking_request_dict["origin_id"])
             )
+            #print(flags_return_dict)
             if flags_return_dict["found_vehicle_flag"]:
                 return flags_return_dict, chosen_vehicle_id, chosen_origin_id
             else:
                 return self.search_vehicle_in_neighbors()
         elif self.vehicle_research_policy == "closest_vehicle":
             flags_return_dict, chosen_vehicle_id, chosen_origin_id = self.search_vehicle_in_zone(
-                self.booking_request_dict["origin_id"]
+                int(self.booking_request_dict["origin_id"])
             )
             if flags_return_dict["found_vehicle_flag"]:
                 return flags_return_dict, chosen_vehicle_id, chosen_origin_id

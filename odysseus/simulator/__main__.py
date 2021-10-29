@@ -91,6 +91,11 @@ for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
                 exit(2)
             else:
                 print("Existing object. I am recovering it...")
+
+                # TODO -> read supply model data structure by data structure
+                # at least the ones which make sense to modify manually
+                # TODO -> reparametrise OR raise exception if parameters are not coherent/cohese
+
                 with open(os.path.join(folder_path, "supply_model.pickle"), "rb") as f:
                     supply_model = pickle.load(f)
     else:
