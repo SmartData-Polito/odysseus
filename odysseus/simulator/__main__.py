@@ -56,14 +56,13 @@ versioned_conf_path = os.path.join(
 )
 
 sim_general_conf_grid = get_sim_configs_from_path(versioned_conf_path, "sim_general_conf", "sim_general_conf_grid")
-single_run_conf_grid = get_sim_configs_from_path(versioned_conf_path, "single_run_conf", "sim_scenario_conf")
+demand_model_conf_grid = get_sim_configs_from_path(versioned_conf_path, "demand_model_conf", "demand_model_conf_grid")
+supply_model_conf_grid = get_sim_configs_from_path(versioned_conf_path, "supply_model_conf", "supply_model_conf_grid")
 multiple_runs_conf_grid = get_sim_configs_from_path(versioned_conf_path, "multiple_runs_conf", "sim_scenario_conf_grid")
-
-print(sim_general_conf_grid)
 
 confs_dict = dict()
 confs_dict["multiple_runs"] = multiple_runs_conf_grid
-confs_dict["single_run"] = single_run_conf_grid
+confs_dict["single_run"] = demand_model_conf_grid
 
 sim_general_conf_list = SimConfGrid(sim_general_conf_grid).conf_list
 
@@ -101,23 +100,23 @@ for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
     else:
         supply_model = None
 
-    parameters_dict = {
-        "sim_general_conf": sim_general_conf,
-        "sim_scenario_conf": confs_dict[sim_general_conf["sim_run_mode"]],
-        "sim_scenario_name": sim_general_conf["sim_scenario_name"],
-        "city_scenario_folder": args.city_scenario_folder,
-        "supply_model_object": supply_model,
-    }
-
     if sim_run_mode == "single_run":
-        print(single_run_conf_grid)
-        sim_conf_grid = SimConfGrid(single_run_conf_grid)
-        pool_stats_dict = {}
-        conf_tuples = []
-        for conf_id, sim_scenario_conf in enumerate(sim_conf_grid.conf_list):
-            parameters_dict["sim_scenario_conf"] = sim_scenario_conf
-            parameters_dict["sim_scenario_conf"]["conf_id"] = "_".join([str(general_conf_id), str(conf_id)])
-            single_run(parameters_dict)
+        demand_conf_grid = SimConfGrid(demand_model_conf_grid)
+        for demand_conf_id, demand_model_conf in enumerate(demand_conf_grid.conf_list):
+            supply_conf_grid = SimConfGrid(supply_model_conf_grid)
+            for supply_model_conf_id, supply_model_conf in enumerate(supply_conf_grid.conf_list):
+                parameters_dict = {
+                    "city_scenario_folder": args.city_scenario_folder,
+                    "sim_general_conf": sim_general_conf,
+                    "sim_scenario_name": sim_general_conf["sim_scenario_name"],
+                    "demand_model_conf": demand_model_conf,
+                    "supply_model_conf": supply_model_conf,
+                    "supply_model_object": supply_model
+                }
+                parameters_dict["sim_general_conf"]["conf_id"] = "_".join(
+                    [str(general_conf_id), str(demand_conf_id), str(supply_model_conf_id)]
+                )
+                single_run(parameters_dict)
 
     elif sim_run_mode == "multiple_runs":
         print(multiple_runs_conf_grid)

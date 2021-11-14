@@ -24,26 +24,10 @@ class SharedMobilitySim:
 
     def __init__(self, sim_input):
 
-        self.start = datetime.datetime(
-            sim_input.sim_general_conf["year"],
-            sim_input.sim_general_conf["month_start"],
-            1, tzinfo=pytz.UTC
-        )
-
-        if sim_input.sim_general_conf["month_end"] == 13:
-            self.end = datetime.datetime(
-                sim_input.sim_general_conf["year"] + 1,
-                1,
-                1, tzinfo=pytz.UTC
-            )
-        else:
-            self.end = datetime.datetime(
-                sim_input.sim_general_conf["year"],
-                sim_input.sim_general_conf["month_end"],
-                1, tzinfo=pytz.UTC
-            )
-
-        self.total_seconds = (self.end - self.start).total_seconds()
+        self.start = sim_input.start
+        self.end = sim_input.end
+        self.total_seconds = sim_input.total_seconds
+        self.total_days = sim_input.total_days
         self.hours_spent = 0
         self.current_datetime = self.start
         self.current_hour = self.current_datetime.hour
@@ -63,7 +47,7 @@ class SharedMobilitySim:
         self.vehicles_soc_dict = self.sim_input.supply_model.vehicles_soc_dict
         self.vehicles_zones = self.sim_input.supply_model.vehicles_zones
 
-        if sim_input.sim_scenario_conf["distributed_cps"]:
+        if sim_input.supply_model_conf["distributed_cps"]:
             self.n_charging_poles_by_zone = self.sim_input.n_charging_poles_by_zone
 
         self.env = simpy.Environment()
@@ -99,12 +83,10 @@ class SharedMobilitySim:
         self.charging_return_distance = []
         self.charging_outward_distance = []
 
-        # TODO -> Move to supply modelling appropriate data structures
-
         self.sim_input.supply_model.init_for_simulation(
             self.env, self.start, station_conf, vehicle_conf,
-            self.sim_input.sim_scenario_conf["engine_type"], self.sim_input.sim_scenario_conf["profile_type"],
-            self.sim_input.sim_scenario_conf["vehicle_model_name"]
+            self.sim_input.supply_model_conf["engine_type"], self.sim_input.supply_model_conf["profile_type"],
+            self.sim_input.supply_model_conf["vehicle_model_name"]
         )
         self.zone_dict = self.sim_input.supply_model.zone_dict
         self.charging_stations_dict = self.sim_input.supply_model.charging_stations_dict
@@ -113,10 +95,10 @@ class SharedMobilitySim:
 
         self.sim_metrics = SimMetrics()
 
-        if self.sim_input.sim_scenario_conf["battery_swap"] \
-                and self.sim_input.sim_scenario_conf["scooter_relocation"]:
+        if self.sim_input.supply_model_conf["battery_swap"] \
+                and self.sim_input.supply_model_conf["scooter_relocation"]:
             self.scooterRelocationStrategy = ScooterRelocationStrategy(self.env, self)
-        elif self.sim_input.sim_scenario_conf["vehicle_relocation"]:
+        elif self.sim_input.supply_model_conf["vehicle_relocation"]:
             self.vehicleRelocationStrategy = VehicleRelocationStrategy(self.env, self)
 
         self.chargingStrategy = ChargingStrategy(self.env, self)
@@ -142,8 +124,8 @@ class SharedMobilitySim:
             self.current_daytype = "weekday"
 
         if self.update_relocation_schedule \
-                and self.sim_input.sim_scenario_conf["scooter_relocation"] \
-                and self.sim_input.sim_scenario_conf["scooter_relocation_strategy"] in ["proactive",
+                and self.sim_input.supply_model_conf["scooter_relocation"] \
+                and self.sim_input.supply_model_conf["scooter_relocation_strategy"] in ["proactive",
                                                                                        "reactive_post_charge",
                                                                                        "reactive_post_trip",
                                                                                        "predictive"]:
@@ -152,9 +134,9 @@ class SharedMobilitySim:
             self.update_relocation_schedule = False
 
         if self.update_relocation_schedule \
-                and self.sim_input.sim_scenario_conf["vehicle_relocation"] \
-                and "vehicle_relocation_scheduling" in self.sim_input.sim_scenario_conf.keys() \
-                and self.sim_input.sim_scenario_conf["vehicle_relocation_scheduling"]:
+                and self.sim_input.supply_model_conf["vehicle_relocation"] \
+                and "vehicle_relocation_scheduling" in self.sim_input.supply_model_conf.keys() \
+                and self.sim_input.supply_model_conf["vehicle_relocation_scheduling"]:
             self.vehicleRelocationStrategy.generate_relocation_schedule(
                 self.current_datetime,
                 self.current_daytype,
@@ -169,8 +151,8 @@ class SharedMobilitySim:
         self.tot_mobility_distance += booking_dict["driving_distance"]
         self.tot_mobility_duration += booking_dict["duration"]
 
-        if self.sim_input.sim_scenario_conf["scooter_relocation"] \
-                and self.sim_input.sim_scenario_conf["scooter_relocation_strategy"] in ["predictive"]:
+        if self.sim_input.supply_model_conf["scooter_relocation"] \
+                and self.sim_input.supply_model_conf["scooter_relocation_strategy"] in ["predictive"]:
             self.scooterRelocationStrategy.update_current_hour_stats(booking_dict)
 
         if "save_history" in self.sim_input.sim_general_conf:
@@ -192,10 +174,10 @@ class SharedMobilitySim:
         )
         relocation_zone_id = charging_relocation_zone_id
 
-        if self.sim_input.sim_scenario_conf["battery_swap"] \
-                and self.sim_input.sim_scenario_conf["scooter_relocation"]:
+        if self.sim_input.supply_model_conf["battery_swap"] \
+                and self.sim_input.supply_model_conf["scooter_relocation"]:
 
-            if self.sim_input.sim_scenario_conf["scooter_relocation_strategy"] == "reactive_post_trip":
+            if self.sim_input.supply_model_conf["scooter_relocation_strategy"] == "reactive_post_trip":
 
                 relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
                     booking_dict,
@@ -207,11 +189,11 @@ class SharedMobilitySim:
                     yield self.env.process(
                         self.scooterRelocationStrategy.relocate_scooter_single_zone(scooter_relocation))
 
-        if self.sim_input.sim_scenario_conf["vehicle_relocation"] \
-                and "vehicle_relocation_scheduling" in self.sim_input.sim_scenario_conf:
+        if self.sim_input.supply_model_conf["vehicle_relocation"] \
+                and "vehicle_relocation_scheduling" in self.sim_input.supply_model_conf:
 
-            if self.sim_input.sim_scenario_conf["vehicle_relocation_scheduling"] \
-                    and dict(self.sim_input.sim_scenario_conf["vehicle_scheduled_relocation_triggers"])["post_trip"]:
+            if self.sim_input.supply_model_conf["vehicle_relocation_scheduling"] \
+                    and dict(self.sim_input.supply_model_conf["vehicle_scheduled_relocation_triggers"])["post_trip"]:
 
                 relocated, vehicle_relocation = self.vehicleRelocationStrategy.check_vehicle_relocation(
                     booking_dict,
@@ -243,10 +225,10 @@ class SharedMobilitySim:
                     self.sim_input.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
                 ]
 
-        if self.sim_input.sim_scenario_conf["battery_swap"] \
-                and self.sim_input.sim_scenario_conf["scooter_relocation"]:
+        if self.sim_input.supply_model_conf["battery_swap"] \
+                and self.sim_input.supply_model_conf["scooter_relocation"]:
             self.list_n_scooters_relocating += [self.scooterRelocationStrategy.n_scooters_relocating]
-        elif self.sim_input.sim_scenario_conf["vehicle_relocation"]:
+        elif self.sim_input.supply_model_conf["vehicle_relocation"]:
             self.list_n_vehicles_relocating += [self.vehicleRelocationStrategy.n_vehicles_relocating]
 
         self.charging_outward_distance = [self.chargingStrategy.charging_outward_distance]
@@ -279,9 +261,9 @@ class SharedMobilitySim:
             self.n_not_same_zone_trips += 1
 
         if not found_vehicle_flag \
-                and "scooter_relocation" in self.sim_input.sim_scenario_conf \
-                and self.sim_input.sim_scenario_conf["scooter_relocation"] \
-                and self.sim_input.sim_scenario_conf["scooter_relocation_strategy"] == "magic_relocation":
+                and "scooter_relocation" in self.sim_input.supply_model_conf \
+                and self.sim_input.supply_model_conf["scooter_relocation"] \
+                and self.sim_input.supply_model_conf["scooter_relocation_strategy"] == "magic_relocation":
 
             relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(booking_request_dict)
 
@@ -303,8 +285,8 @@ class SharedMobilitySim:
                 )
                 self.n_same_zone_trips += 1
 
-        if not found_vehicle_flag and self.sim_input.sim_scenario_conf["vehicle_relocation"] \
-                and self.sim_input.sim_scenario_conf["vehicle_relocation_strategy"] == "magic_relocation":
+        if not found_vehicle_flag and self.sim_input.supply_model_conf["vehicle_relocation"] \
+                and self.sim_input.supply_model_conf["vehicle_relocation_strategy"] == "magic_relocation":
 
             relocated, vehicle_relocation = \
                 self.vehicleRelocationStrategy.check_vehicle_relocation(booking_request_dict)

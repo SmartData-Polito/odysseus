@@ -22,25 +22,8 @@ parser.add_argument(
     help="specify cities"
 )
 
-parser.add_argument(
-    "-y", "--years", nargs="+",
-    help="specify years"
-)
-
-parser.add_argument(
-    "-m", "--months", nargs="+",
-    help="specify months"
-)
-
-parser.add_argument(
-    "-d", "--data_source_ids", nargs="+",
-    help="specify data source ids"
-)
-
-
 parser.set_defaults(
     cities=["Louisville"],
-    data_source_ids=["city_open_data"],
 )
 
 args = parser.parse_args()

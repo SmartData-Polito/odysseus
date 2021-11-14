@@ -10,10 +10,10 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
         relocated_vehicles = vehicles
         vehicle_relocation = {}
 
-        if self.simInput.supply_model_conf["distributed_cps"]:
+        if self.simInput.supply_model_conf_grid["distributed_cps"]:
 
 
-            if self.simInput.supply_model_conf["vehicle_relocation_strategy"] == "magic_relocation":
+            if self.simInput.supply_model_conf_grid["vehicle_relocation_strategy"] == "magic_relocation":
 
                 available_vehicles_soc_dict = {}
 
@@ -50,8 +50,8 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
             else:
 
                 relocation_zone_id = None
-                if "vehicle_relocation_scheduling" in self.simInput.supply_model_conf.keys() \
-                        and self.simInput.supply_model_conf["vehicle_relocation_scheduling"]:
+                if "vehicle_relocation_scheduling" in self.simInput.supply_model_conf_grid.keys() \
+                        and self.simInput.supply_model_conf_grid["vehicle_relocation_scheduling"]:
 
                     if booking_request["destination_id"] in self.scheduled_vehicle_relocations \
                             and len(self.scheduled_vehicle_relocations[booking_request["destination_id"]]):
@@ -84,7 +84,7 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
                         relocation_zone_id
                     )
 
-                    duration = distance / 1000 / self.simInput.supply_model_conf["avg_relocation_speed"] * 3600
+                    duration = distance / 1000 / self.simInput.supply_model_conf_grid["avg_relocation_speed"] * 3600
 
                     vehicle_relocation = init_vehicle_relocation(
                         relocated_vehicles,
@@ -95,8 +95,8 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
                         duration=duration
                     )
 
-                    if "save_history" in self.simInput.supply_model_conf:
-                        if self.simInput.supply_model_conf["save_history"]:
+                    if "save_history" in self.simInput.supply_model_conf_grid:
+                        if self.simInput.supply_model_conf_grid["save_history"]:
                             self.sim_vehicle_relocations += [vehicle_relocation]
 
                     self.n_vehicle_relocations += 1
@@ -111,7 +111,7 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
 
         ending_zone_ids = []
         n_dropped_vehicles_list = []
-        technique = dict(self.simInput.supply_model_conf["vehicle_relocation_technique"])["end"]
+        technique = dict(self.simInput.supply_model_conf_grid["vehicle_relocation_technique"])["end"]
 
         if technique == "kde_sampling":
 
@@ -154,8 +154,8 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
 
             next_hour_origin_scores = self.simInput.avg_out_flows_train[daytype][(hour + 1) % 24]
 
-            if "end_demand_weight" in dict(self.simInput.supply_model_conf["vehicle_relocation_technique"]):
-                w1 = dict(self.simInput.supply_model_conf["vehicle_relocation_technique"])["end_demand_weight"]
+            if "end_demand_weight" in dict(self.simInput.supply_model_conf_grid["vehicle_relocation_technique"]):
+                w1 = dict(self.simInput.supply_model_conf_grid["vehicle_relocation_technique"])["end_demand_weight"]
             else:
                 w1 = 0.5
 
@@ -172,8 +172,8 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
                 sorted(delta_by_zone.items(), key=lambda item: item[1])
             }
 
-            if "end_vehicles_factor" in dict(self.simInput.supply_model_conf["vehicle_relocation_technique"]):
-                end_vehicles_factor = dict(self.simInput.supply_model_conf["vehicle_relocation_technique"])[
+            if "end_vehicles_factor" in dict(self.simInput.supply_model_conf_grid["vehicle_relocation_technique"]):
+                end_vehicles_factor = dict(self.simInput.supply_model_conf_grid["vehicle_relocation_technique"])[
                     "end_vehicles_factor"]
             else:
                 end_vehicles_factor = 1
@@ -191,7 +191,7 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
 
         starting_zone_ids = []
         n_picked_vehicles_list = []
-        technique = dict(self.simInput.supply_model_conf["vehicle_relocation_technique"])["start"]
+        technique = dict(self.simInput.supply_model_conf_grid["vehicle_relocation_technique"])["start"]
 
         if technique == "aggregation":
 
@@ -208,8 +208,8 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
 
             next_hour_origin_scores = self.simInput.avg_out_flows_train[daytype][(hour + 1) % 24]
 
-            if "start_demand_weight" in dict(self.simInput.supply_model_conf["vehicle_relocation_technique"]):
-                w1 = dict(self.simInput.supply_model_conf["vehicle_relocation_technique"])["start_demand_weight"]
+            if "start_demand_weight" in dict(self.simInput.supply_model_conf_grid["vehicle_relocation_technique"]):
+                w1 = dict(self.simInput.supply_model_conf_grid["vehicle_relocation_technique"])["start_demand_weight"]
             else:
                 w1 = 0.5
 
@@ -225,8 +225,8 @@ class VehicleRelocationStrategy(VehicleRelocationPrimitives):
                 sorted(delta_by_zone.items(), key=lambda item: -item[1])
             }
 
-            if "start_vehicles_factor" in dict(self.simInput.supply_model_conf["vehicle_relocation_technique"]):
-                start_vehicles_factor = dict(self.simInput.supply_model_conf["vehicle_relocation_technique"])[
+            if "start_vehicles_factor" in dict(self.simInput.supply_model_conf_grid["vehicle_relocation_technique"]):
+                start_vehicles_factor = dict(self.simInput.supply_model_conf_grid["vehicle_relocation_technique"])[
                     "start_vehicles_factor"]
             else:
                 start_vehicles_factor = 1

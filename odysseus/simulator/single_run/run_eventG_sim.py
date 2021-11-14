@@ -5,19 +5,13 @@ from odysseus.utils.path_utils import get_output_path
 
 
 def run_eventG_sim (sim_input):
-
-    sim_eventG = ModelDrivenSim(
-    
-                sim_input=sim_input
-    
-            )
+    sim_eventG = ModelDrivenSim(sim_input=sim_input)
     sim_eventG.init_demand_data_structures()
     sim_eventG.run()
     return sim_eventG
 
 
 def get_eventG_sim_output (sim_input):
-    
     sim_eventG = run_eventG_sim(sim_input)
     return SimOutput(sim_eventG)
 

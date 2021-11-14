@@ -24,28 +24,23 @@ class ChargingPrimitives:
 	def __init__(self, env, sim):
 
 		self.env = env
-
-		self.simInput = sim.sim_input
-
+		self.sim_input = sim.sim_input
 		self.vehicles_soc_dict = sim.vehicles_soc_dict
-
 		self.vehicles_list = sim.vehicles_list
-
 		self.charging_stations_dict = sim.charging_stations_dict
-
 		self.zone_dict = sim.zone_dict
 
-		if self.simInput.sim_scenario_conf["battery_swap"] \
-				and self.simInput.sim_scenario_conf["scooter_relocation"]:
+		if self.sim_input.supply_model_conf["battery_swap"] \
+				and self.sim_input.supply_model_conf["scooter_relocation"]:
 			self.scooterRelocationStrategy = sim.scooterRelocationStrategy
 
 		self.workers = simpy.Resource(
 			self.env,
-			capacity=self.simInput.sim_scenario_conf["n_workers"]
+			capacity=self.sim_input.supply_model_conf["n_workers"]
 		)
 
-		if self.simInput.sim_scenario_conf["distributed_cps"]:
-			self.n_charging_poles_by_zone = self.simInput.supply_model.n_charging_poles_by_zone
+		if self.sim_input.supply_model_conf["distributed_cps"]:
+			self.n_charging_poles_by_zone = self.sim_input.supply_model.n_charging_poles_by_zone
 			self.charging_poles_dict = {}
 			for zone, n in self.n_charging_poles_by_zone.items():
 				if n > 0:
@@ -90,7 +85,7 @@ class ChargingPrimitives:
 		self.charging_outward_distance += charge_dict["charging_outward_distance"]
 
 		def check_queuing():
-			if self.simInput.sim_scenario_conf["queuing"]:
+			if self.sim_input.supply_model_conf["queuing"]:
 				return True
 			else:
 				if resource.count < resource.capacity:
@@ -105,7 +100,7 @@ class ChargingPrimitives:
 		charge["cr_soc_delta"] = cr_soc_delta
 		charge["cr_soc_delta_kwh"] = vehicle.tanktowheel_energy_from_perc(cr_soc_delta)
 
-		if self.simInput.sim_scenario_conf["battery_swap"]:
+		if self.sim_input.supply_model_conf["battery_swap"]:
 			if operator == "system":
 				if check_queuing():
 					with self.workers.request() as worker_request:
@@ -170,35 +165,35 @@ class ChargingPrimitives:
 
 		charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
 
-		if "save_history" in self.simInput.sim_general_conf:
-			if self.simInput.sim_general_conf["save_history"]:
+		if "save_history" in self.sim_input.sim_general_conf:
+			if self.sim_input.sim_general_conf["save_history"]:
 				self.sim_charges += [charge]
 		self.n_charges += 1
 
 	def check_system_charge(self, booking_request, vehicle, charging_strategy):
 		if charging_strategy == "reactive":
-			if vehicle.soc.level < self.simInput.supply_model.supply_model_conf["alpha"]:
+			if vehicle.soc.level < self.sim_input.supply_model_conf["alpha"]:
 				charge = init_charge(
 					booking_request,
 					vehicle,
-					self.simInput.sim_scenario_conf["beta"]
+					self.sim_input.supply_model_conf["beta"]
 				)
 				return True, charge
 			else:
 				return False, None
 		else:
-			print("No such charging strategy supported")
+			print("No such charging strategy supported -> {}".format(charging_strategy))
 			exit()
 
 	def check_user_charge(self, booking_request, vehicle):
 
 		if booking_request["destination_id"] in self.charging_stations_dict:
-			if booking_request["end_soc"] < self.simInput.sim_scenario_conf["beta"]:
-				if np.random.binomial(1, self.simInput.sim_scenario_conf["willingness"]):
+			if booking_request["end_soc"] < self.sim_input.supply_model_conf["beta"]:
+				if np.random.binomial(1, self.sim_input.demand_model_conf["willingness"]):
 					charge = init_charge(
 						booking_request,
 						self.vehicles_list[vehicle],
-						self.simInput.sim_scenario_conf["beta"]
+						self.sim_input.supply_model_conf["beta"]
 					)
 					return True, charge
 				else:
@@ -210,30 +205,30 @@ class ChargingPrimitives:
 
 	def get_timeout(self, origin_id, destination_id):
 		distance = get_od_distance(
-			self.simInput.grid,
+			self.sim_input.grid,
 			origin_id,
 			destination_id
 		)
 		if distance == 0:
-			distance = self.simInput.supply_model.city_scenario.bin_side_length
-		return distance / 1000 / self.simInput.avg_speed_kmh_mean * 3600
+			distance = self.sim_input.supply_model.city_scenario.bin_side_length
+		return distance / 1000 / self.sim_input.avg_speed_kmh_mean * 3600
 
 	def get_cr_soc_delta(self, origin_id, destination_id, vehicle):
 		distance = get_od_distance(
-			self.simInput.grid,
+			self.sim_input.grid,
 			origin_id,
 			destination_id
 		)
 		if distance == 0:
-			distance = self.simInput.supply_model.city_scenario.bin_side_length
+			distance = self.sim_input.supply_model.city_scenario.bin_side_length
 		return vehicle.consumption_to_percentage(vehicle.distance_to_consumption(distance / 1000))
 
 	def get_distance(self, origin_id, destination_id):
 		distance = get_od_distance(
-			self.simInput.grid,
+			self.sim_input.grid,
 			origin_id,
 			destination_id
 		)
 		if distance == 0:
-			distance = self.simInput.supply_model.city_scenario.bin_side_length
+			distance = self.sim_input.supply_model.city_scenario.bin_side_length
 		return distance

@@ -50,7 +50,7 @@ class VehicleRelocationPrimitives:
 
 		self.relocation_workers = simpy.Resource(
 			self.env,
-			capacity=self.simInput.supply_model_conf["n_relocation_workers"]
+			capacity=self.simInput.supply_model_conf_grid["n_relocation_workers"]
 		)
 
 		self.n_vehicle_relocations = 0

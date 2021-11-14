@@ -1,20 +1,21 @@
 import pandas as pd
 
 
-
 class SimStats():
 
 	def __init__ (self):
-		pass
 
+		self.valid_zones = None
+		self.sim_general_conf = None
+		self.supply_model_conf = None
+		self.grid = None
+		self.sim_stats = None
 
 	def get_stats_from_sim (self, sim):
 
 		self.valid_zones = sim.sim_input.valid_zones
-
 		self.sim_general_conf = sim.sim_input.sim_general_conf
-		self.sim_scenario_conf = sim.sim_input.sim_scenario_conf
-
+		self.supply_model_conf = sim.sim_input.supply_model_conf
 		self.grid = sim.sim_input.grid
 
 		# Sim Stats creation
@@ -23,12 +24,7 @@ class SimStats():
 
 		self.sim_stats = pd.concat([
 			self.sim_stats,
-			pd.Series(sim.sim_input.supply_model_conf)
-		])
-
-		self.sim_stats = pd.concat([
-			self.sim_stats,
-			pd.Series(sim.sim_input.supply_model_conf)
+			pd.Series(self.supply_model_conf)
 		])
 
 		self.sim_stats.loc["n_vehicles_sim"] = sim.sim_input.n_vehicles_sim
@@ -37,7 +33,8 @@ class SimStats():
 
 		self.sim_stats["sim_duration"] = (sim.end - sim.start).total_seconds()
 		self.sim_stats.loc["tot_potential_charging_energy"] = self.sim_stats.loc["sim_duration"] / 3600 * (
-				self.sim_stats.loc["tot_n_charging_poles"] * 3.7
+			# TODO -> parametrise rated power
+			self.sim_stats.loc["tot_n_charging_poles"] * 3.7
 		)
 
 		self.sim_stats.loc["n_same_zone_trips"] = \
@@ -107,8 +104,8 @@ class SimStats():
 		self.sim_stats.loc["tot_mobility_distance"] = sim.tot_mobility_distance
 		self.sim_stats.loc["tot_mobility_duration"] = sim.tot_mobility_duration
 
-		if self.sim_scenario_conf["scooter_relocation"]:
-			if "scooter_relocation" in self.sim_scenario_conf and self.sim_scenario_conf["scooter_relocation"]:
+		if self.supply_model_conf["scooter_relocation"]:
+			if "scooter_relocation" in self.supply_model_conf and self.supply_model_conf["scooter_relocation"]:
 				self.sim_stats.loc["n_scooter_relocations"] = sim.scooterRelocationStrategy.n_scooter_relocations
 				self.sim_stats.loc["tot_scooter_relocations_distance"] = \
 					sim.scooterRelocationStrategy.tot_scooter_relocations_distance

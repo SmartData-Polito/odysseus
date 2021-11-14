@@ -1,16 +1,13 @@
-import os
 import json
 import pickle
 import datetime
-
-import pandas as pd
 
 from odysseus.city_scenario.city_data_loader import CityDataLoader
 from odysseus.utils.time_utils import *
 from odysseus.utils.geospatial_utils import *
 from odysseus.path_config.path_config import *
 
-from odysseus.supply_modelling.energymix_loader import EnergyMix
+from odysseus.city_scenario.energymix_loader import EnergyMix
 
 
 class CityScenario:
@@ -48,13 +45,14 @@ class CityScenario:
         self.trips_origins_test = pd.DataFrame()
         self.trips_destinations_test = pd.DataFrame()
 
-        self.integers_dict = dict()
+        self.numerical_params_dict = dict()
         self.avg_speed_mean = -1
         self.avg_speed_std = -1
         self.avg_speed_kmh_mean = -1
         self.avg_speed_kmh_std = -1
         self.max_driving_distance = -1
         self.n_vehicles_original = -1
+        self.year_energy_mix = -1
 
         self.grid = pd.DataFrame()
         self.grid_matrix = pd.DataFrame()
@@ -93,6 +91,7 @@ class CityScenario:
         self.avg_speed_kmh_mean = self.bookings_train.avg_speed_kmh.mean()
         self.avg_speed_kmh_std = self.bookings_train.avg_speed_kmh.std()
         self.max_driving_distance = self.bookings_train.driving_distance.max()
+        self.year_energy_mix = end_year_test
 
         self.grid = get_city_grid_as_gdf(
             (
@@ -158,7 +157,7 @@ class CityScenario:
         self.avg_out_flows_train = self.get_avg_out_flows()
         self.avg_in_flows_train = self.get_avg_in_flows()
 
-        self.energy_mix = EnergyMix(self.city_name, start_year_test)
+        self.energy_mix = EnergyMix(self.city_name, self.year_energy_mix)
 
     def map_zones_on_trips(self, zones):
 
@@ -413,7 +412,7 @@ class CityScenario:
         with open(os.path.join(self.city_scenario_path, "avg_in_flows_train.pickle"), "wb") as f:
             pickle.dump(self.avg_in_flows_train, f)
 
-        integers_dict = {
+        numerical_params_dict = {
             "n_vehicles_original": self.n_vehicles_original,
             "avg_speed_mean": self.avg_speed_mean,
             "avg_speed_std": self.avg_speed_std,
@@ -422,9 +421,10 @@ class CityScenario:
             "max_driving_distance": self.max_driving_distance,
             "max_in_flow": self.max_in_flow,
             "max_out_flow": self.max_out_flow,
+            "year_energy_mix": self.year_energy_mix
         }
-        with open(os.path.join(self.city_scenario_path, "integers_dict.pickle"), "wb") as f:
-            pickle.dump(integers_dict, f)
+        with open(os.path.join(self.city_scenario_path, "numerical_params_dict.pickle"), "wb") as f:
+            pickle.dump(numerical_params_dict, f)
 
         in_flow_count_train = get_in_flow_count(self.trips_destinations_train)
         in_flow_count_test = get_in_flow_count(self.trips_destinations_test)
@@ -453,7 +453,7 @@ class CityScenario:
         self.grid = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "grid.pickle"), "rb")).load()
         self.valid_zones = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "valid_zones.pickle"), "rb")).load()
         self.neighbors_dict = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "neighbors_dict.pickle"), "rb")).load()
-        self.integers_dict = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "integers_dict.pickle"), "rb")).load()
+        self.numerical_params_dict = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "numerical_params_dict.pickle"), "rb")).load()
 
     def read_city_scenario_for_demand_model(self):
 

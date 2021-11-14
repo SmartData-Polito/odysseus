@@ -4,8 +4,7 @@ import pickle
 
 import pandas as pd
 
-from odysseus.simulator.single_run.get_traceB_input import get_traceB_input
-from odysseus.simulator.single_run.get_eventG_input import get_eventG_input
+from odysseus.simulator.simulation_input.sim_input import SimInput
 from odysseus.simulator.single_run.run_traceB_sim import run_traceB_sim
 from odysseus.simulator.single_run.run_eventG_sim import run_eventG_sim
 from odysseus.simulator.simulation_output.sim_output import SimOutput
@@ -16,50 +15,47 @@ from odysseus.utils.path_utils import get_output_path
 def single_run(conf_dict):
 
     sim_general_conf = conf_dict["sim_general_conf"]
-    sim_scenario_conf = conf_dict["sim_scenario_conf"]
+    supply_model_conf = conf_dict["supply_model_conf"]
     sim_scenario_name = conf_dict["sim_scenario_name"]
-    supply_model_object = conf_dict["supply_model_object"]
-    city_scenario_folder = conf_dict["city_scenario_folder"]
 
     city = sim_general_conf["city"]
-    sim_type = sim_general_conf["sim_technique"]
+    sim_technique = sim_general_conf["sim_technique"]
 
     results_path = get_output_path(
-        "results", city, sim_general_conf["sim_scenario_name"], "single_run", sim_scenario_conf["conf_id"]
+        "results", city, conf_dict["sim_scenario_name"], "single_run", sim_general_conf["conf_id"]
     )
     figures_path = get_output_path(
-        "figures", city, sim_general_conf["sim_scenario_name"], "single_run", sim_scenario_conf["conf_id"]
+        "figures", city, conf_dict["sim_scenario_name"], "single_run", sim_general_conf["conf_id"]
     )
 
-    print(city, datetime.datetime.now(), "City initialised!")
+    print(datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"], "City scenario initialised!")
 
-    input_parameters = {
-        "sim_general_conf": sim_general_conf,
-        "sim_scenario_conf": sim_scenario_conf,
-        "supply_model_object": supply_model_object,
-        "city_scenario_folder": city_scenario_folder
-    }
+    sim_input = SimInput(conf_dict)
+    sim_input.init_vehicles()
+    sim_input.init_charging_poles()
+    sim_input.init_relocation()
 
-    if sim_type == "eventG":
-        simInput_eventG = get_eventG_input(input_parameters)
-        sim_eventG = run_eventG_sim(sim_input=simInput_eventG)
+    if sim_technique == "eventG":
+        sim_eventG = run_eventG_sim(sim_input=sim_input)
         simOutput_eventG = SimOutput(sim_eventG)
-        simOutput_eventG.save_output(results_path, sim_general_conf, sim_scenario_conf)
+        simOutput_eventG.save_output(results_path, sim_general_conf, supply_model_conf)
         sim_stats = simOutput_eventG.sim_stats
         simOutput = simOutput_eventG
-    elif sim_type == "traceB":
-        simInput_traceB = get_traceB_input(input_parameters)
-        sim_traceB = run_traceB_sim (sim_input=simInput_traceB)
+    elif sim_technique == "traceB":
+        sim_traceB = run_traceB_sim (sim_input=sim_input)
         simOutput_traceB = SimOutput(sim_traceB)
-        simOutput_traceB.save_output(results_path, sim_general_conf, sim_scenario_conf)
+        simOutput_traceB.save_output(results_path, sim_general_conf, supply_model_conf)
         sim_stats = simOutput_traceB.sim_stats
         simOutput = simOutput_traceB
 
-    print(datetime.datetime.now(), city, sim_scenario_name, sim_scenario_conf["conf_id"], "finished!")
+    print(
+        datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"], "Simulation finished!",
+        "Creating output.."
+    )
 
     sim_stats.to_csv(os.path.join(results_path, "sim_stats.csv"))
     pd.Series(sim_general_conf).to_csv(os.path.join(results_path, "sim_general_conf.csv"))
-    pd.Series(sim_scenario_conf).to_csv(os.path.join(results_path, "sim_scenario_conf.csv"))
+    pd.Series(supply_model_conf).to_csv(os.path.join(results_path, "sim_scenario_conf.csv"))
 
     pickle.dump(
         simOutput,
@@ -102,5 +98,10 @@ def single_run(conf_dict):
         ]:
             if col in simOutput.grid:
                 plotter.plot_choropleth(col)
+
+    print(
+        datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"],
+        "Output created!"
+    )
 
     return sim_stats

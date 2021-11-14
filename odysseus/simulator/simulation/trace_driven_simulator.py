@@ -26,8 +26,8 @@ class TraceDrivenSim (SharedMobilitySim):
                 booking_request_dict = self.create_booking_request_dict(booking_request_dict)
                 sim_timestamps += [self.current_datetime]
 
-                if self.sim_input.supply_model_conf["scooter_relocation"] \
-                        and self.sim_input.supply_model_conf["scooter_relocation_strategy"] in ["predictive"]:
+                if self.sim_input.supply_model_conf_grid["scooter_relocation"] \
+                        and self.sim_input.supply_model_conf_grid["scooter_relocation_strategy"] in ["predictive"]:
                     self.scooterRelocationStrategy.update_current_hour_stats(booking_request_dict)
 
                 yield self.env.timeout(booking_request_dict["ia_timeout"])

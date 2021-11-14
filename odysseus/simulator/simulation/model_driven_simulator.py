@@ -74,7 +74,7 @@ class ModelDrivenSim(SharedMobilitySim):
 
             timeout_sec = (
                 np.random.exponential(
-                    1 / self.sim_input.sim_scenario_conf["requests_rate_factor"] / self.current_arrival_rate
+                    1 / self.sim_input.demand_model_conf["requests_rate_factor"] / self.current_arrival_rate
                 )
             )
 

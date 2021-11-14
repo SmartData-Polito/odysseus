@@ -1,39 +1,31 @@
-sim_scenario_conf = {
+supply_model_conf_grid = {
 
-	"requests_rate_factor": [1],
 	"n_vehicles_factor": [1],
-
 	"engine_type": ["electric"],
-	"profile_type": ["wall_plug"], # works only if engine_type = electric
+	"profile_type": ["wall_plug"],
 	"vehicle_model_name": ["generic e-scooter"],
 
 	"year_energymix": ["2018"],
 
-	"time_estimation": [True],
-	"queuing": [True],
-
 	"alpha_policy": ['auto'],
-
 	"beta": [100],
 	"n_poles_n_vehicles_factor": [0.2],
 
-	"cps_placement_policy": ["num_parkings"],
-	"distributed_cps": [True],
-	"system_cps": [True],
-	"cps_zones_percentage": [0.2],
+	"cps_placement_policy": [""],
+	"distributed_cps": [False],
+	"system_cps": [False],
+	"cps_zones_percentage": [0],
 
-	"battery_swap": [False],
+	"battery_swap": [True],
 	"avg_reach_time": [20],
 	"avg_service_time": [0],
 
 	"n_workers": [12],
 	"relocation": [False],
 
-	"user_contribution": [False],
-	"willingness": [0],
-
 	"charging_strategy": ["reactive"],
-	"charging_relocation_strategy": ["closest_free"], #closest_free/random/closest_queueing
+	"charging_relocation_strategy": ["closest_free"],
+	"queuing": [True],
 
 	"scooter_relocation": [False],
 	"scooter_relocation_strategy": ["magic_relocation"],
