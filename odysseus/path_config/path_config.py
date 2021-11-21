@@ -46,6 +46,11 @@ for city in cities:
 				root_data_path, city, data_step_id, data_type_id
 			)
 
+root_dummy_data_path = os.path.join(
+	os.path.dirname(os.path.dirname(__file__)),
+	"dummy_data"
+)
+
 city_scenarios_path = os.path.join(
 	os.path.dirname(os.path.dirname(__file__)),
 	"city_scenario", "city_scenarios"

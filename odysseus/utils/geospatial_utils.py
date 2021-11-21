@@ -1,15 +1,34 @@
+import math
+
 import numpy as np
 import pandas as pd
 from shapely.geometry import Point, LineString, Polygon
 import geopandas as gpd
 from math import radians, cos, sin, asin, sqrt
 from haversine import haversine, Unit
+from scipy.spatial.distance import euclidean
 
 
-def get_city_grid_as_gdf(total_bounds, crs, bin_side_length):
-    x_min, y_min, x_max, y_max = total_bounds
+def get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length):
+    p1 = (y_min, x_min)
+    p2 = (y_max, x_min)
+    print(p1, p2)
+    height = math.dist(p1, p2)
+    rows = height / bin_side_length
 
-    # this has to be pretty much the same long all the longitudes, cause paralles are equidistant, so equal for every city
+    # width changes depending on the city, casuse longitude distances vary depending on the latitude.
+    p1 = (y_min, x_min)
+    p2 = (y_min, x_max)
+    print(p1, p2)
+    width = math.dist(p1, p2)
+    cols = width / bin_side_length
+
+    return width, height, int(rows), int(cols)
+
+
+def get_rows_cols_from_wgs84_bounds(x_min, y_min, x_max, y_max, bin_side_length):
+    # this has to be pretty much the same long all the longitudes
+    # cause paralles are equidistant, so equal for every city
     p1 = (y_min, x_min)
     p2 = (y_min + 0.01, x_min)
     height_001 = haversine(p1, p2, unit=Unit.METERS)
@@ -23,50 +42,48 @@ def get_city_grid_as_gdf(total_bounds, crs, bin_side_length):
 
     rows = int(np.ceil((y_max - y_min) / height))
     cols = int(np.ceil((x_max - x_min) / width))
+
+    return width, height, rows, cols
+
+
+def get_city_grid_as_gdf(total_bounds, bin_side_length, crs="epsg:4326"):
+    x_min, y_min, x_max, y_max = total_bounds
+    if crs == "epsg:4326":
+        width, height, rows, cols = get_rows_cols_from_wgs84_bounds(x_min, y_min, x_max, y_max, bin_side_length)
+    elif crs == "dummy_crs":
+        width, height, rows, cols = get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length)
     x_left = x_min
     x_right = x_min + width
     polygons = []
-    for i in range(cols):
-        y_top = y_max
-        y_bottom = y_max - height
-        for j in range(rows):
+    for i in range(rows):
+        y_top = y_min
+        y_bottom = y_min + height
+        for j in range(cols):
             polygons.append(Polygon([(x_left, y_top), (x_right, y_top), (x_right, y_bottom), (x_left, y_bottom)]))
-            y_top = y_top - height
-            y_bottom = y_bottom - height
+            y_top = y_top + height
+            y_bottom = y_bottom + height
         x_left = x_left + width
         x_right = x_right + width
     grid = gpd.GeoDataFrame({"geometry": polygons})
     grid["zone_id"] = range(len(grid))
-    grid.crs = crs
+    if crs == "epsg:4326":
+        grid.crs = crs
     return grid
 
 
-def get_city_grid_as_matrix(total_bounds, bin_side_length):
+def get_city_grid_as_matrix(total_bounds, bin_side_length, crs="epsg:4326"):
     x_min, y_min, x_max, y_max = total_bounds
-
-    # this has to be pretty much the same long all the longitudes, cause paralles are equidistant, so equal for every city
-    p1 = (y_min, x_min)
-    p2 = (y_min + 0.01, x_min)
-    height_001 = haversine(p1, p2, unit=Unit.METERS)
-    height = (0.01 * bin_side_length) / height_001
-
-    # width changes depending on the city, casuse longitude distances vary depending on the latitude.
-    p1 = (y_min, x_min)
-    p2 = (y_min, x_min + 0.01)
-    width_001 = haversine(p1, p2, unit=Unit.METERS)
-    width = (0.01 * bin_side_length) / width_001
-
-    rows = int(np.ceil((y_max - y_min) / height))
-    cols = int(np.ceil((x_max - x_min) / width))
+    if crs == "epsg:4326":
+        width, height, rows, cols = get_rows_cols_from_wgs84_bounds(x_min, y_min, x_max, y_max, bin_side_length)
+    elif crs == "dummy_crs":
+        width, height, rows, cols = get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length)
     grid_matrix = []
-    row = 0
+    zone_id = 0
     for i in range(rows):
         grid_matrix.append([])
-        col = 0
         for j in range(cols):
-            grid_matrix[i].append(col * rows + row)
-            col += 1
-        row += 1
+            grid_matrix[i].append(zone_id)
+            zone_id += 1
     return pd.DataFrame(grid_matrix)
 
 
@@ -118,11 +135,14 @@ def get_haversine_distance(lon1, lat1, lon2, lat2):
 
 
 def get_od_distance(grid, origin_id, destination_id):
-    lon1 = grid.loc[origin_id, "geometry"].centroid.x
-    lat1 = grid.loc[origin_id, "geometry"].centroid.y
-    lon2 = grid.loc[destination_id, "geometry"].centroid.x
-    lat2 = grid.loc[destination_id, "geometry"].centroid.y
-    return get_haversine_distance(lon1, lat1, lon2, lat2)
+    x1 = grid.loc[origin_id, "geometry"].centroid.x
+    y1 = grid.loc[origin_id, "geometry"].centroid.y
+    x2 = grid.loc[destination_id, "geometry"].centroid.x
+    y2 = grid.loc[destination_id, "geometry"].centroid.y
+    if grid.crs == "epsg:4326":
+        return get_haversine_distance(x1, y1, x2, y2)
+    elif grid.crs == "epsg:3857":
+        return math.dist((x1, y1), (x2, y2))
 
 
 def miles_to_meters(miles):

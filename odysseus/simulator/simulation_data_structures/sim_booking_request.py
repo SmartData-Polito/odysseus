@@ -2,7 +2,7 @@ from odysseus.simulator.simulation_data_structures.sim_event import SimEvent
 from odysseus.utils.bookings_utils import *
 
 
-class BookingRequest(SimEvent):
+class SimBookingRequest(SimEvent):
 
     def __init__(self, env, sim_input, vehicles_list, booking_request_dict, vehicle_research_policy="neighbors_1"):
         super().__init__(env, "booking_request")

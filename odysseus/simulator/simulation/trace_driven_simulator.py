@@ -2,7 +2,7 @@ import datetime
 
 from odysseus.simulator.simulation.simulator import SharedMobilitySim
 from odysseus.utils.time_utils import update_req_time_info
-from odysseus.simulator.simulation_data_structures.booking_request import BookingRequest
+from odysseus.simulator.simulation_data_structures.booking_request import SimBookingRequest
 from odysseus.utils.bookings_utils import *
 
 
@@ -31,7 +31,7 @@ class TraceDrivenSim (SharedMobilitySim):
                     self.scooterRelocationStrategy.update_current_hour_stats(booking_request_dict)
 
                 yield self.env.timeout(booking_request_dict["ia_timeout"])
-                booking_request = BookingRequest(
+                booking_request = SimBookingRequest(
                     self.env, self.sim_input, self.vehicles_list, booking_request_dict
                 )
                 self.process_booking_request(booking_request)

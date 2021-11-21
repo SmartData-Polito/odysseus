@@ -5,7 +5,7 @@ import numpy as np
 
 from odysseus.simulator.simulation.simulator import SharedMobilitySim
 
-from odysseus.simulator.simulation_data_structures.booking_request import BookingRequest
+from odysseus.simulator.simulation_data_structures.booking_request import SimBookingRequest
 from odysseus.utils.bookings_utils import *
 
 np.random.seed(44)
@@ -81,7 +81,7 @@ class ModelDrivenSim(SharedMobilitySim):
             if timeout_sec < 60 * 60:
                 yield self.env.timeout(timeout_sec)
                 booking_request_dict = self.create_booking_request_dict(timeout_sec)
-                booking_request = BookingRequest(
+                booking_request = SimBookingRequest(
                     self.env, self.sim_input, self.vehicles_list, booking_request_dict
                 )
                 self.process_booking_request(booking_request)

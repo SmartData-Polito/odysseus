@@ -7,7 +7,7 @@ import simpy
 from odysseus.simulator.simulation_data_structures.zone import Zone
 from odysseus.simulator.simulation_data_structures.vehicle import Vehicle
 from odysseus.simulator.simulation_data_structures.charging_station import ChargingStation
-from odysseus.simulator.simulation_data_structures.booking import Booking
+from odysseus.simulator.simulation_data_structures.booking import SimBooking
 
 from odysseus.simulator.simulation.charging_strategies import ChargingStrategy
 from odysseus.simulator.simulation.scooter_relocation_strategies import ScooterRelocationStrategy
@@ -245,7 +245,7 @@ class SharedMobilitySim:
             booking_request_dict = add_consumption_emission_info(
                 booking_request_dict, self.vehicles_list[chosen_vehicle_id]
             )
-            booking = Booking(
+            booking = SimBooking(
                 self.env,
                 booking_request,
                 self.zone_dict[chosen_origin_id],

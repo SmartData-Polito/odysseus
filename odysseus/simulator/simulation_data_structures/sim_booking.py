@@ -4,7 +4,7 @@ from odysseus.simulator.simulation_data_structures.sim_event import SimEvent
 from odysseus.utils.bookings_utils import *
 
 
-class Booking(SimEvent):
+class SimBooking(SimEvent):
 
     def __init__(self, env, booking_request, chosen_origin, chosen_destination, vehicle, grid):
 
