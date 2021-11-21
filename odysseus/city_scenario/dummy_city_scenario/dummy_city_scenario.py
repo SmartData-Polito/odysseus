@@ -9,7 +9,6 @@ from odysseus.utils.geospatial_utils import *
 from odysseus.path_config.path_config import *
 
 from odysseus.city_scenario.energymix_loader import EnergyMix
-from odysseus.mobility_event.booking_request import BookingRequest
 from odysseus.city_scenario.abstract_city_scenario import AbstractCityScenario
 
 
@@ -45,17 +44,3 @@ class DummyCityScenario(AbstractCityScenario):
         )
         self.grid = get_city_grid_as_gdf(total_bounds, bin_side_length, "dummy_crs")
         self.grid_matrix = get_city_grid_as_matrix(total_bounds, bin_side_length, "dummy_crs")
-
-    # def add_booking_request(self, train_or_test, origin_id, destination_id, start_time, end_time):
-    #     if train_or_test == "train":
-    #         self.bookings_train = pd.concat([
-    #             self.bookings_train,
-    #             BookingRequest(origin_id, destination_id, start_time, end_time)
-    #         ])
-    #     elif train_or_test == "test":
-    #         self.bookings_test = pd.concat([
-    #             self.bookings_test,
-    #             BookingRequest(origin_id, destination_id, start_time, end_time)
-    #         ])
-    #     else:
-    #         raise Exception("Possible choices are 'test' or 'train'")
