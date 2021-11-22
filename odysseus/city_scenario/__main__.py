@@ -19,7 +19,8 @@ parser.add_argument(
 
 parser.add_argument(
     "-b", "--bin_side_length", nargs="+",
-    help="specify bin side lengths"
+    help="specify bin side lengths",
+    type=int
 )
 
 parser.add_argument(
@@ -41,7 +42,7 @@ parser.add_argument(
 parser.set_defaults(
     city=["Louisville"],
     data_source_id=["city_open_data"],
-    bin_side_length=["500"],
+    bin_side_length=[500],
     train_range=("2019", "1", "2019", "1"),
     test_range=("2019", "2", "2019", "2"),
     folder_name=["default"]
@@ -63,10 +64,12 @@ for city_scenario_config in city_scenario_configs_list:
         read_config_from_file=False,
         city_scenario_config=city_scenario_config
     )
-    city_scenario.create_city_scenario_from_trips_data(
+    city_scenario.init_train_test(
         int(city_scenario_config["train_range"][0]), int(city_scenario_config["train_range"][1]),
         int(city_scenario_config["train_range"][2]), int(city_scenario_config["train_range"][3]),
         int(city_scenario_config["test_range"][0]), int(city_scenario_config["test_range"][1]),
         int(city_scenario_config["test_range"][2]), int(city_scenario_config["test_range"][3]),
     )
+    city_scenario.create_squared_city_grid()
+    city_scenario.create_city_scenario_from_trips_data()
     city_scenario.save_results()

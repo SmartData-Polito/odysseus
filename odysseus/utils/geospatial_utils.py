@@ -68,6 +68,8 @@ def get_city_grid_as_gdf(total_bounds, bin_side_length, crs="epsg:4326"):
     grid["zone_id"] = range(len(grid))
     if crs == "epsg:4326":
         grid.crs = crs
+    if crs == "dummy_crs":
+        grid.crs = "epsg:3857"
     return grid
 
 

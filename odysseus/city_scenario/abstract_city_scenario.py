@@ -1,6 +1,7 @@
 import json
 import pickle
 import datetime
+import pytz
 
 from odysseus.city_scenario.city_data_loader import CityDataLoader
 from odysseus.utils.time_utils import *
@@ -12,9 +13,10 @@ from odysseus.city_scenario.energymix_loader import EnergyMix
 
 class AbstractCityScenario:
 
-    def __init__(self, city_name):
+    def __init__(self, city_name, data_source_id):
 
         self.city_name = city_name
+        self.data_source_id = data_source_id
 
         self.bookings_train = pd.DataFrame()
         self.trips_origins_train = pd.DataFrame()
@@ -47,62 +49,23 @@ class AbstractCityScenario:
         self.avg_out_flows_train = dict()
         self.avg_in_flows_train = dict()
 
+        self.loader = None
         self.energy_mix = None
+        self.year_energy_mix = None
+        self.tz = None
+        self.city_scenario_path = None
+        self.city_scenario_config = dict()
 
-    def create_city_scenario_from_trips_data(
-            self, start_year_train, start_month_train, end_year_train, end_month_train,
-                 start_year_test, start_month_test, end_year_test, end_month_test
-    ):
-
-        self.bookings_train, self.trips_origins_train, self.trips_destinations_train = \
-            self.loader.read_year_month_range_data(
-                start_month_train, start_year_train, end_month_train, end_year_train
-            )
-        self.bookings_train = self.get_input_bookings_filtered(self.bookings_train).dropna()
-
-        self.bookings_test, self.trips_origins_test, self.trips_destinations_test = \
-            self.loader.read_year_month_range_data(
-                start_month_test, start_year_test, end_month_test, end_year_test
-            )
-        self.bookings_train = self.get_input_bookings_filtered(self.bookings_test).dropna()
+    def create_city_scenario_from_trips_data(self):
 
         self.avg_speed_mean = self.bookings_train.avg_speed.mean()
         self.avg_speed_std = self.bookings_train.avg_speed.std()
         self.avg_speed_kmh_mean = self.bookings_train.avg_speed_kmh.mean()
         self.avg_speed_kmh_std = self.bookings_train.avg_speed_kmh.std()
         self.max_driving_distance = self.bookings_train.driving_distance.max()
-        self.year_energy_mix = end_year_test
-
-        self.grid = get_city_grid_as_gdf(
-            (
-                min(self.trips_origins_train.start_longitude.min(), self.trips_destinations_train.end_longitude.min(),
-                    self.trips_origins_test.start_longitude.min(), self.trips_destinations_test.end_longitude.min()),
-                min(self.trips_origins_train.start_latitude.min(), self.trips_destinations_train.end_latitude.min(),
-                    self.trips_origins_test.start_latitude.min(), self.trips_destinations_test.end_latitude.min()),
-                max(self.trips_origins_train.start_longitude.max(), self.trips_destinations_train.end_longitude.max(),
-                    self.trips_origins_test.start_longitude.max(), self.trips_destinations_test.end_longitude.max()),
-                max(self.trips_origins_train.start_latitude.max(), self.trips_destinations_train.end_latitude.max(),
-                    self.trips_origins_test.start_latitude.max(), self.trips_destinations_test.end_latitude.max())
-            ),
-            self.bin_side_length
-        )
-        self.grid_matrix = get_city_grid_as_matrix(
-            (
-                min(self.trips_origins_train.start_longitude.min(), self.trips_destinations_train.end_longitude.min(),
-                    self.trips_origins_test.start_longitude.min(), self.trips_destinations_test.end_longitude.min()),
-                min(self.trips_origins_train.start_latitude.min(), self.trips_destinations_train.end_latitude.min(),
-                    self.trips_origins_test.start_latitude.min(), self.trips_destinations_test.end_latitude.min()),
-                max(self.trips_origins_train.start_longitude.max(), self.trips_destinations_train.end_longitude.max(),
-                    self.trips_origins_test.start_longitude.max(), self.trips_destinations_test.end_longitude.max()),
-                max(self.trips_origins_train.start_latitude.max(), self.trips_destinations_train.end_latitude.max(),
-                    self.trips_origins_test.start_latitude.max(), self.trips_destinations_test.end_latitude.max())
-            ),
-            self.bin_side_length
-        )
-        self.grid["zone_id"] = self.grid.index.values
-        self.map_zones_on_trips(self.grid)
 
         self.valid_zones = self.get_valid_zones()
+        print(self.valid_zones)
         self.zones_valid_zones_distances = self.grid.to_crs("epsg:3857").centroid.apply(
             lambda x: self.grid.to_crs("epsg:3857").loc[self.valid_zones].centroid.distance(x)
         )
@@ -195,30 +158,37 @@ class AbstractCityScenario:
         ) + bookings.random_seconds_end.apply(
             lambda sec: datetime.timedelta(seconds=sec)
         )
+        print(bookings[["start_time", "end_time"]].dtypes)
 
-        bookings["start_time"] = bookings["start_time"].dt.tz_convert(self.loader.tz)
-        bookings["end_time"] = bookings["end_time"].dt.tz_convert(self.loader.tz)
+        bookings["start_time"] = bookings["start_time"].dt.tz_convert(self.tz)
+        bookings["end_time"] = bookings["end_time"].dt.tz_convert(self.tz)
+        print(bookings.shape)
+        #bookings = get_time_group_columns(bookings)
 
-        bookings = get_time_group_columns(bookings)
         bookings["hour"] = bookings.start_hour
         bookings["daytype"] = bookings.start_daytype
         bookings["date"] = bookings.start_time.apply(lambda d: d.date())
 
         # TODO -> solve ambiguity when duration is present in fuzzed input data
-        bookings.loc[bookings.start_time > bookings.end_time, "end_time"] = bookings.loc[
+        bookings.loc[bookings.start_time > bookings.end_time, "end_time"] = pd.to_datetime(bookings.loc[
             bookings.start_time > bookings.end_time, "start_time"
         ] + bookings.loc[bookings.start_time > bookings.end_time, "random_seconds_pos"].apply(
             lambda sec: datetime.timedelta(seconds=sec)
-        )
+        ))
+        bookings["end_time"] = pd.to_datetime(bookings["end_time"], utc=True).dt.tz_convert(self.tz)
+        print(bookings[["start_time", "end_time"]].dtypes)
+
         bookings.loc[:, "duration"] = (
                 bookings.end_time - bookings.start_time
         ).apply(lambda x: x.total_seconds())
+        print(bookings.shape)
 
         bookings = bookings.sort_values("start_time")
         bookings.loc[:, "ia_timeout"] = (
                 bookings.start_time - bookings.start_time.shift()
         ).apply(lambda x: x.total_seconds()).abs()
         bookings = bookings.loc[bookings.ia_timeout >= 0]
+        print(bookings.shape)
 
         bookings = bookings[bookings.duration > 0]
         bookings = bookings[bookings.driving_distance >= 0]
@@ -246,7 +216,7 @@ class AbstractCityScenario:
 
         return bookings
 
-    def get_valid_zones(self, count_threshold=0):
+    def get_valid_zones(self, count_threshold=-1):
 
         # self.valid_zones = self.trips_origins_train.origin_id.value_counts().sort_values().tail(
         #     int(self.sim_general_conf["k_zones_factor"] * len(self.grid))
@@ -258,13 +228,19 @@ class AbstractCityScenario:
         dest_zones_count_test = self.bookings_test.destination_id.value_counts()
 
         valid_origin_zones_train = origin_zones_count_train[(origin_zones_count_train > count_threshold)]
+        print(valid_origin_zones_train)
         valid_dest_zones_train = dest_zones_count_train[(dest_zones_count_train > count_threshold)]
+        print(valid_dest_zones_train)
+
         valid_origin_zones_test = origin_zones_count_test[(origin_zones_count_test > count_threshold)]
+        print(valid_origin_zones_test)
         valid_dest_zones_test = dest_zones_count_test[(dest_zones_count_test > count_threshold)]
+        print(valid_origin_zones_test)
 
         valid_zones_train = valid_origin_zones_train.index.intersection(
             valid_dest_zones_train.index
         ).astype(int)
+        print(valid_zones_train)
 
         valid_zones_test = valid_origin_zones_test.index.intersection(
             valid_dest_zones_test.index

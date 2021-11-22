@@ -57,6 +57,8 @@ class EnergyMix:
 			self.energy_mix_conf = self.energymix_db["Canada"][self.year]
 		elif self.city_name in ["Louisville", "Minneapolis", "Austin", "Norfolk", "Kansas City", "Chicago", "Calgary"]:
 			self.energy_mix_conf = self.energymix_db["US"][self.year]
+		elif self.city_name in ["dummy_city"]:
+			self.energy_mix_conf = self.energymix_db["dummy_country"][self.year]
 		else:
 			raise Exception("Energy mix unavailable for the city of {} in year {}".format(self.city_name, self.year))
 
