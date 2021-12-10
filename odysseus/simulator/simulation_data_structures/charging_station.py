@@ -1,7 +1,7 @@
 import datetime
 
 import simpy
-from odysseus.supply_modelling.charging_station import Pole
+from odysseus.supply_modelling.stations.charging_station import Pole
 
 
 class ChargingStation(Pole):

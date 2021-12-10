@@ -13,16 +13,15 @@ from odysseus.city_scenario.abstract_city_scenario import AbstractCityScenario
 
 class CityScenario(AbstractCityScenario):
 
-    def __init__(self, city_name, read_config_from_file=False, city_scenario_config=None, in_folder_name=None):
+    def __init__(self, city_name, data_source_id, city_scenario_config=None, read_config_from_file=False, in_folder_name=None):
 
-        super(CityScenario, self).__init__(city_name, city_scenario_config["data_source_id"])
-        self.bin_side_length = int(city_scenario_config["bin_side_length"])
+        super(CityScenario, self).__init__(city_name, data_source_id)
 
-        if read_config_from_file and in_folder_name:
-            self.folder_name = in_folder_name
-        elif city_scenario_config:
+        if city_scenario_config:
             self.city_scenario_config = city_scenario_config
             self.folder_name = self.city_scenario_config["folder_name"]
+        if read_config_from_file and in_folder_name:
+            self.folder_name = in_folder_name
         else:
             raise IOError("Wrong arguments for CityScenario!")
 
@@ -33,6 +32,8 @@ class CityScenario(AbstractCityScenario):
         )
         if read_config_from_file and in_folder_name:
             self.read_config_from_folder_name()
+
+        self.bin_side_length = int(self.city_scenario_config["bin_side_length"])
 
     def init_train_test(
             self, start_year_train, start_month_train, end_year_train, end_month_train,

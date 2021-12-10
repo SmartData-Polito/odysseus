@@ -1,5 +1,7 @@
-class Vehicle(object):
+class Vehicle:
+
 	def __init__(self, vehicle_config, energy_mix_object):
+
 		self.engine_type = vehicle_config["engine_type"] #gasoline, diesel, lpg, gnc, electric
 		self.consumption = vehicle_config["consumption"] #km/l, km/kWh
 		self.capacity = vehicle_config["fuel_capacity"] #kWh (electric), Liter (gasoline,diesel,lpg), kilograms (gnc)

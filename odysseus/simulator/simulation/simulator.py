@@ -1,20 +1,16 @@
 import copy
 import datetime
-import pytz
 
 import simpy
 
-from odysseus.simulator.simulation_data_structures.zone import Zone
-from odysseus.simulator.simulation_data_structures.vehicle import Vehicle
-from odysseus.simulator.simulation_data_structures.charging_station import ChargingStation
-from odysseus.simulator.simulation_data_structures.booking import SimBooking
+from odysseus.simulator.simulation_data_structures.sim_booking import SimBooking
 
 from odysseus.simulator.simulation.charging_strategies import ChargingStrategy
 from odysseus.simulator.simulation.scooter_relocation_strategies import ScooterRelocationStrategy
 from odysseus.simulator.simulation.vehicle_relocation_strategies import VehicleRelocationStrategy
 
-from odysseus.supply_modelling.vehicle_conf import vehicle_conf
-from odysseus.supply_modelling.station_conf import station_conf
+from odysseus.supply_modelling.fleet.vehicle_conf import vehicle_conf
+from odysseus.supply_modelling.stations.station_conf import station_conf
 from odysseus.simulator.simulation.sim_metrics import SimMetrics
 
 from odysseus.utils.bookings_utils import *
@@ -85,7 +81,8 @@ class SharedMobilitySim:
 
         self.sim_input.supply_model.init_for_simulation(
             self.env, self.start, station_conf, vehicle_conf,
-            self.sim_input.supply_model_conf["engine_type"], self.sim_input.supply_model_conf["profile_type"],
+            self.sim_input.supply_model_conf["engine_type"],
+            self.sim_input.supply_model_conf["profile_type"],
             self.sim_input.supply_model_conf["vehicle_model_name"]
         )
         self.zone_dict = self.sim_input.supply_model.zone_dict

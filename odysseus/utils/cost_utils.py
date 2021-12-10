@@ -30,7 +30,7 @@ def insert_scenario_costs(df, sim_scenario_conf, vehicles_cost_conf, poles_cost_
 
 def insert_sim_costs(df, sim_scenario_conf, fuel_costs, administrative_cost_conf, vehicles_cost_conf):
 	df['relocation_cost'] = df.cum_relo_ret_t * administrative_cost_conf['relocation_workers_hourly_cost']
-	df['energy_cost'] = get_fuelcost_from_energy(sim_scenario_conf["engine_type"],fuel_costs,df.tot_tanktowheel_energy)
+	df['energy_cost'] = get_fuelcost_from_energy(sim_scenario_conf["engine_type"], fuel_costs, df.tot_tanktowheel_energy)
 	df['revenues'] = (df.tot_mobility_duration / 60) * vehicles_cost_conf[sim_scenario_conf["engine_type"]][
 		sim_scenario_conf["vehicle_model_name"]
 	]["cost_permin"]

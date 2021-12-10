@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
+
+from odysseus.supply_modelling.fleet.fleet import Fleet
+
 from odysseus.simulator.simulation_data_structures.zone import Zone
 from odysseus.simulator.simulation_data_structures.vehicle import Vehicle
 from odysseus.simulator.simulation_data_structures.charging_station import ChargingStation
@@ -32,23 +35,30 @@ def geodataframe_charging_points(city, engine_type, station_location):
 
 class SupplyModel:
 
-    def __init__(self, supply_model_conf):
+    def __init__(
+            self, city_name, data_source_id,
+            city_scenario_folder, supply_model_folder, supply_model_conf, init_from_map_config=False
+    ):
 
+        self.city_name = city_name
+        self.data_source_id = data_source_id
+        self.city_scenario_folder = city_scenario_folder
+        self.supply_model_folder = supply_model_folder
         self.supply_model_conf = supply_model_conf
+        self.init_from_map_config = init_from_map_config
 
-        self.city_name = self.supply_model_conf["city"]
-        self.city_scenario_folder = self.supply_model_conf["city_scenario_folder"]
         self.supply_model_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "supply_modelling",
             "supply_models",
             self.city_name,
-            self.city_scenario_folder
+            self.supply_model_folder
         )
 
         self.city_scenario = CityScenario(
-            city=self.city_name,
-            from_file=True,
+            city_name=self.city_name,
+            data_source_id=self.data_source_id,
+            read_config_from_file=True,
             in_folder_name=self.city_scenario_folder
         )
         self.city_scenario.read_city_scenario_for_supply_model()
@@ -61,10 +71,6 @@ class SupplyModel:
         self.avg_speed_std = self.numerical_params_dict["avg_speed_std"]
         self.max_driving_distance = self.numerical_params_dict["max_driving_distance"]
         self.year_energy_mix = int(self.numerical_params_dict["year_energy_mix"])
-
-        self.n_vehicles_sim = int(self.supply_model_conf["n_vehicles"])
-        self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
-        self.n_charging_zones = int(self.supply_model_conf["n_charging_zones"])
 
         self.n_charging_poles_by_zone = {}
         self.vehicles_soc_dict = {}
@@ -80,28 +86,37 @@ class SupplyModel:
         self.zone_dict = dict()
         self.charging_stations_dict = dict()
         self.real_n_charging_zones = 0
+
+        self.fleet = Fleet(self.grid)
         self.vehicles_list = list()
 
         self.simpy_env = None
 
+        if not init_from_map_config:
+
+            self.n_vehicles_sim = int(self.supply_model_conf["n_vehicles"])
+            self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
+            self.n_charging_zones = int(self.supply_model_conf["n_charging_zones"])
+
+        elif init_from_map_config:
+
+            pass
+
     def init_vehicles(self):
 
-        vehicles_random_soc = list(np.random.uniform(25, 100, self.n_vehicles_sim).astype(int))
-        self.vehicles_soc_dict = {i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)}
-        top_o_zones = self.grid.zone_id_origin_count.sort_values(ascending=False).iloc[:31]
-        vehicles_random_zones = list(np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round())
-        self.vehicles_zones = []
-        for i in vehicles_random_zones:
-            self.vehicles_zones.append(self.grid.loc[int(top_o_zones.index[i])].zone_id)
-        self.vehicles_zones = {i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)}
-        self.available_vehicles_dict = {int(zone): [] for zone in self.grid.zone_id}
-        for vehicle in range(len(self.vehicles_zones)):
-            zone = self.vehicles_zones[vehicle]
-            self.available_vehicles_dict[zone] += [vehicle]
+        if not self.init_from_map_config:
 
-        self.vehicles_soc_dict = {int(k): float(v) for k, v in self.vehicles_soc_dict.items()}
-        self.vehicles_zones = {int(k): int(v) for k, v in self.vehicles_zones.items()}
-        self.available_vehicles_dict = {int(k): v for k, v in self.available_vehicles_dict.items()}
+            self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict = \
+                self.fleet.init_vehicles_from_fleet_size(
+                    self.n_vehicles_sim
+                )
+
+        elif self.init_from_map_config:
+
+            self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict = \
+                self.fleet.init_vehicles_from_map_config(
+                    self.n_vehicles_sim
+                )
 
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
 
@@ -113,7 +128,9 @@ class SupplyModel:
 
                 top_dest_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:self.n_charging_zones]
 
-                self.n_charging_poles_by_zone = dict((top_dest_zones / top_dest_zones.sum() * self.tot_n_charging_poles))
+                self.n_charging_poles_by_zone = dict((
+                        top_dest_zones / top_dest_zones.sum() * self.tot_n_charging_poles
+                ))
 
                 assigned_cps = 0
                 for zone_id in self.n_charging_poles_by_zone:
@@ -125,7 +142,9 @@ class SupplyModel:
                         self.n_charging_poles_by_zone[zone_id] += 1
                         assigned_cps += 1
 
-                self.n_charging_poles_by_zone = dict(pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
+                self.n_charging_poles_by_zone = dict(
+                    pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna()
+                )
 
             elif self.supply_model_conf["cps_placement_policy"] == "old_manual":
 
@@ -147,7 +166,7 @@ class SupplyModel:
                     "openstreetmap",
                     "station_locations.json"
                 )
-                f = open(stations_path,"r")
+                f = open(stations_path, "r")
                 station_locations = json.load(f)
                 f.close()
                 cps_points = geodataframe_charging_points(
@@ -155,8 +174,8 @@ class SupplyModel:
                 )
                 self.n_charging_poles_by_zone = {}
                 value = 0
-                for (p,n) in zip(cps_points.geometry,cps_points.n_poles):
-                    for (geom,zone) in zip(self.grid.geometry,self.grid.zone_id):
+                for (p, n) in zip(cps_points.geometry, cps_points.n_poles):
+                    for (geom, zone) in zip(self.grid.geometry, self.grid.zone_id):
                         if geom.intersects(p):
                             if zone in self.n_charging_poles_by_zone.keys():
                                 self.n_charging_poles_by_zone[zone] += n
@@ -183,27 +202,28 @@ class SupplyModel:
                 cps_points = geodataframe_charging_points(
                     self.city_name, self.supply_model_conf["engine_type"], station_locations
                 )
-                self.n_charging_poles_by_zone_inf = {}
+                temp_n_charging_poles_by_zone_inf = {}
 
                 for (p, n) in zip(cps_points.geometry, cps_points.n_poles):
                     for (geom, zone) in zip(self.grid.geometry, self.grid.zone_id):
                         if geom.intersects(p):
                             if zone in self.n_charging_poles_by_zone.keys():
-                                self.n_charging_poles_by_zone_inf[zone] += n
+                                temp_n_charging_poles_by_zone_inf[zone] += n
                             else:
-                                self.n_charging_poles_by_zone_inf[zone] = n
+                                temp_n_charging_poles_by_zone_inf[zone] = n
 
                 top_dest_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:self.n_charging_zones]
                 self.n_charging_poles_by_zone = dict(
-                    (top_dest_zones / top_dest_zones.sum() * self.tot_n_charging_poles))
+                    (top_dest_zones / top_dest_zones.sum() * self.tot_n_charging_poles)
+                )
                 assigned_cps = 0
                 for zone_id in self.n_charging_poles_by_zone:
-                    if zone_id in self.n_charging_poles_by_zone_inf.keys():
+                    if zone_id in temp_n_charging_poles_by_zone_inf.keys():
                         zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
                         assigned_cps += zone_n_cps
                         self.n_charging_poles_by_zone[zone_id] = zone_n_cps
                 for zone_id in self.n_charging_poles_by_zone:
-                    if zone_id in self.n_charging_poles_by_zone_inf.keys():
+                    if zone_id in temp_n_charging_poles_by_zone_inf.keys():
                         if assigned_cps < self.tot_n_charging_poles:
                             self.n_charging_poles_by_zone[zone_id] += 1
                             assigned_cps += 1

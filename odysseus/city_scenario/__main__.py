@@ -61,8 +61,9 @@ for city_scenario_config in city_scenario_configs_list:
 
     city_scenario = CityScenario(
         city_name=city_scenario_config["city"],
+        data_source_id=city_scenario_config["data_source_id"],
+        city_scenario_config=city_scenario_config,
         read_config_from_file=False,
-        city_scenario_config=city_scenario_config
     )
     city_scenario.init_train_test(
         int(city_scenario_config["train_range"][0]), int(city_scenario_config["train_range"][1]),

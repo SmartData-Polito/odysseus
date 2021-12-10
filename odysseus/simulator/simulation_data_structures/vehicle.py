@@ -1,7 +1,7 @@
 import simpy
-import random
 import datetime
-from odysseus.supply_modelling.vehicle import Vehicle as Vehicle_definition
+from odysseus.supply_modelling.fleet.vehicle import Vehicle as Vehicle_definition
+
 
 class Vehicle(Vehicle_definition):
 
