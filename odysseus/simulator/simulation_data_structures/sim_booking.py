@@ -18,8 +18,16 @@ class SimBooking(SimEvent):
         self.chosen_destination = chosen_destination
         self.booking_dict["origin_id"] = self.chosen_origin.zone_id
         self.booking_dict["destination_id"] = self.chosen_destination.zone_id
-        self.booking_dict = get_distances(self.booking_dict, grid)
-        self.booking_dict = get_walking_distances(self.booking_dict, grid)
+
+        # COMPUTING DISTANCES WITH GEOPANDAS INSIDE THE SIMULATION IS VERY EXPENSIVE
+        # TODO -> solve case when euclidean_distance = 0 (two way trips)
+        self.booking_dict["euclidean_distance"] = self.booking_request.sim_input.distance_matrix.loc[
+            self.booking_dict["origin_id"], self.booking_dict["destination_id"]
+        ] + 1
+        self.booking_dict["driving_distance"] = self.booking_dict["euclidean_distance"] * 1.4
+        #self.booking_dict = get_distances(self.booking_dict, grid)
+        #self.booking_dict = get_walking_distances(self.booking_dict, grid)
+
         self.booking_dict["start_soc"] = vehicle.soc.level
         self.booking_dict["plate"] = vehicle.plate
         self.vehicle = vehicle

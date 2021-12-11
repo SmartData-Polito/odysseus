@@ -10,7 +10,7 @@ from odysseus.simulator.simulation.scooter_relocation_strategies import ScooterR
 from odysseus.simulator.simulation.vehicle_relocation_strategies import VehicleRelocationStrategy
 
 from odysseus.supply_modelling.fleet.vehicle_conf import vehicle_conf
-from odysseus.supply_modelling.stations.station_conf import station_conf
+from odysseus.supply_modelling.service_stations.station_conf import station_conf
 from odysseus.simulator.simulation.sim_metrics import SimMetrics
 
 from odysseus.utils.bookings_utils import *

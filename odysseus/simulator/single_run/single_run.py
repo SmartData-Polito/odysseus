@@ -28,12 +28,15 @@ def single_run(conf_dict):
         "figures", city, conf_dict["sim_scenario_name"], "single_run", sim_general_conf["conf_id"]
     )
 
-    print(datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"], "City scenario initialised!")
+    print(datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"], "CityScenario initialised!")
 
     sim_input = SimInput(conf_dict)
     sim_input.init_vehicles()
     sim_input.init_charging_poles()
     sim_input.init_relocation()
+
+    start = datetime.datetime.now()
+    print(datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"], "SimInput initialised!")
 
     if sim_technique == "eventG":
         sim_eventG = run_eventG_sim(sim_input=sim_input)
@@ -48,9 +51,10 @@ def single_run(conf_dict):
         sim_stats = simOutput_traceB.sim_stats
         simOutput = simOutput_traceB
 
+    end = datetime.datetime.now()
     print(
-        datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"], "Simulation finished!",
-        "Creating output.."
+        datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"],
+        "Simulation finished, duration:", (end-start).total_seconds(), "Creating output.."
     )
 
     sim_stats.to_csv(os.path.join(results_path, "sim_stats.csv"))

@@ -91,7 +91,8 @@ parser.set_defaults(
     n_relocation_workers=[1],
 
     city_scenario_folder=["default"],
-    supply_model_folder=["default"],
+    supply_model_folder=["test"],
+    #supply_model_folder=["test"],
 
 )
 
@@ -109,7 +110,8 @@ for supply_model_config in supply_model_configs_list:
         supply_model_config["data_source_id"],
         supply_model_config["city_scenario_folder"],
         supply_model_config["supply_model_folder"],
-        supply_model_config
+        supply_model_config,
+        init_from_map_json_config=True
     )
     supply_model.init_vehicles()
     supply_model.init_charging_poles()

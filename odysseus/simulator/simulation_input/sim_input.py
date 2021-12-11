@@ -87,7 +87,7 @@ class SimInput:
 		)
 
 		if self.sim_general_conf["sim_technique"] == "traceB":
-			self.bookings = pickle.Unpickler(open(os.path.join(demand_model_path, "bookings_test.pickle"), "rb")).load()
+			self.bookings = pickle.Unpickler(open(os.path.join(city_scenario_path, "bookings_test.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
 		elif self.sim_general_conf["sim_technique"] == "eventG":
 			self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
@@ -160,7 +160,11 @@ class SimInput:
 				city_scenario_folder=self.city_scenario_folder,
 			)
 
-			self.supply_model = SupplyModel(self.supply_model_conf)
+			self.supply_model = SupplyModel(
+				self.city, self.data_source_id,
+				self.city_scenario_folder, None,
+				self.supply_model_conf
+			)
 
 	def get_booking_requests_list(self):
 

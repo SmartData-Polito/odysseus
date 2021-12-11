@@ -5,7 +5,7 @@ import numpy as np
 
 from odysseus.simulator.simulation.simulator import SharedMobilitySim
 
-from odysseus.simulator.simulation_data_structures.booking_request import SimBookingRequest
+from odysseus.simulator.simulation_data_structures.sim_booking_request import SimBookingRequest
 from odysseus.utils.bookings_utils import *
 
 np.random.seed(44)

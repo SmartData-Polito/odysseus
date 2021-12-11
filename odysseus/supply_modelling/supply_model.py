@@ -3,10 +3,10 @@ import pickle
 import json
 import numpy as np
 import pandas as pd
-import geopandas as gpd
-from shapely.geometry import Point
+
 
 from odysseus.supply_modelling.fleet.fleet import Fleet
+from odysseus.supply_modelling.service_stations.service_stations import ServiceStations
 
 from odysseus.simulator.simulation_data_structures.zone import Zone
 from odysseus.simulator.simulation_data_structures.vehicle import Vehicle
@@ -17,27 +17,13 @@ from odysseus.city_scenario.city_scenario import CityScenario
 from odysseus.city_scenario.energymix_loader import EnergyMix
 
 
-def geodataframe_charging_points(city, engine_type, station_location):
-    charging_points = station_location[city][engine_type]
-    points_list = []
-
-    for point in charging_points.keys():
-        points_list.append(
-            {
-                "geometry": Point(
-                    charging_points[point]["longitude"], charging_points[point]["latitude"]
-                ),
-                "n_poles": charging_points[point]["n_poles"]
-            }
-        )
-    return gpd.GeoDataFrame(points_list)
-
-
 class SupplyModel:
 
     def __init__(
-            self, city_name, data_source_id,
-            city_scenario_folder, supply_model_folder, supply_model_conf, init_from_map_config=False
+            self,
+            city_name, data_source_id,
+            city_scenario_folder, supply_model_folder,
+            supply_model_conf, init_from_map_json_config=False
     ):
 
         self.city_name = city_name
@@ -45,15 +31,9 @@ class SupplyModel:
         self.city_scenario_folder = city_scenario_folder
         self.supply_model_folder = supply_model_folder
         self.supply_model_conf = supply_model_conf
-        self.init_from_map_config = init_from_map_config
+        self.init_from_map_config = init_from_map_json_config
 
-        self.supply_model_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "supply_modelling",
-            "supply_models",
-            self.city_name,
-            self.supply_model_folder
-        )
+        self.supply_model_path = None
 
         self.city_scenario = CityScenario(
             city_name=self.city_name,
@@ -83,28 +63,26 @@ class SupplyModel:
 
         self.initial_relocation_workers_positions = []
 
+        self.service_stations = ServiceStations(city_name, self.grid)
         self.zone_dict = dict()
         self.charging_stations_dict = dict()
         self.real_n_charging_zones = 0
+        self.tot_n_charging_poles = 0
+        self.n_charging_zones = 0
 
         self.fleet = Fleet(self.grid)
         self.vehicles_list = list()
+        self.n_vehicles_sim = 0
 
         self.simpy_env = None
-
-        if not init_from_map_config:
-
-            self.n_vehicles_sim = int(self.supply_model_conf["n_vehicles"])
-            self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
-            self.n_charging_zones = int(self.supply_model_conf["n_charging_zones"])
-
-        elif init_from_map_config:
-
-            pass
 
     def init_vehicles(self):
 
         if not self.init_from_map_config:
+
+            self.n_vehicles_sim = int(self.supply_model_conf["n_vehicles"])
+            self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
+            self.n_charging_zones = int(self.supply_model_conf["n_charging_zones"])
 
             self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict = \
                 self.fleet.init_vehicles_from_fleet_size(
@@ -113,130 +91,38 @@ class SupplyModel:
 
         elif self.init_from_map_config:
 
+            self.init_supply_model_path()
             self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict = \
                 self.fleet.init_vehicles_from_map_config(
-                    self.n_vehicles_sim
+                    self.supply_model_path
                 )
 
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
+
+    def init_supply_model_path(self):
+        assert self.supply_model_folder
+        self.supply_model_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "supply_modelling",
+            "supply_models",
+            self.city_name,
+            self.supply_model_folder
+        )
 
     def init_charging_poles(self):
 
         if self.supply_model_conf["distributed_cps"]:
 
-            if self.supply_model_conf["cps_placement_policy"] == "num_parkings":
+            if not self.init_from_map_config:
 
-                top_dest_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:self.n_charging_zones]
-
-                self.n_charging_poles_by_zone = dict((
-                        top_dest_zones / top_dest_zones.sum() * self.tot_n_charging_poles
-                ))
-
-                assigned_cps = 0
-                for zone_id in self.n_charging_poles_by_zone:
-                    zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
-                    assigned_cps += zone_n_cps
-                    self.n_charging_poles_by_zone[zone_id] = zone_n_cps
-                for zone_id in self.n_charging_poles_by_zone:
-                    if assigned_cps < self.tot_n_charging_poles:
-                        self.n_charging_poles_by_zone[zone_id] += 1
-                        assigned_cps += 1
-
-                self.n_charging_poles_by_zone = dict(
-                    pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna()
+                self.service_stations.init_charging_poles_from_policy(
+                    self.supply_model_conf["stations_placement_policy"],
+                    self.supply_model_conf["engine_type"],
                 )
 
-            elif self.supply_model_conf["cps_placement_policy"] == "old_manual":
+            elif self.init_from_map_config:
 
-                for zone_id in self.supply_model_conf["cps_zones"]:
-                    if zone_id in self.valid_zones:
-                        self.n_charging_poles_by_zone[zone_id] = 4
-                    else:
-                        print("Zone", zone_id, "does not exist!")
-                        exit(0)
-
-            elif self.supply_model_conf["cps_placement_policy"] == "real_positions":
-                stations_path = os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)),
-                    "city_data_manager",
-                    "data",
-                    self.supply_model_conf["city"],
-                    "raw",
-                    "geo",
-                    "openstreetmap",
-                    "station_locations.json"
-                )
-                f = open(stations_path, "r")
-                station_locations = json.load(f)
-                f.close()
-                cps_points = geodataframe_charging_points(
-                    self.city_name, self.supply_model_conf["engine_type"], station_locations
-                )
-                self.n_charging_poles_by_zone = {}
-                value = 0
-                for (p, n) in zip(cps_points.geometry, cps_points.n_poles):
-                    for (geom, zone) in zip(self.grid.geometry, self.grid.zone_id):
-                        if geom.intersects(p):
-                            if zone in self.n_charging_poles_by_zone.keys():
-                                self.n_charging_poles_by_zone[zone] += n
-                            else:
-                                self.n_charging_poles_by_zone[zone] = n
-                            value += n
-                self.tot_n_charging_poles = value
-                self.n_charging_zones = len(self.n_charging_poles_by_zone.keys())
-
-            elif self.supply_model_conf["cps_placement_policy"] == "realpos_numpark":
-                stations_path = os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)),
-                    "city_data_manager",
-                    "data",
-                    self.supply_model_conf["city"],
-                    "raw",
-                    "geo",
-                    "openstreetmap",
-                    "station_locations.json"
-                )
-                f = open(stations_path, "r")
-                station_locations = json.load(f)
-                f.close()
-                cps_points = geodataframe_charging_points(
-                    self.city_name, self.supply_model_conf["engine_type"], station_locations
-                )
-                temp_n_charging_poles_by_zone_inf = {}
-
-                for (p, n) in zip(cps_points.geometry, cps_points.n_poles):
-                    for (geom, zone) in zip(self.grid.geometry, self.grid.zone_id):
-                        if geom.intersects(p):
-                            if zone in self.n_charging_poles_by_zone.keys():
-                                temp_n_charging_poles_by_zone_inf[zone] += n
-                            else:
-                                temp_n_charging_poles_by_zone_inf[zone] = n
-
-                top_dest_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:self.n_charging_zones]
-                self.n_charging_poles_by_zone = dict(
-                    (top_dest_zones / top_dest_zones.sum() * self.tot_n_charging_poles)
-                )
-                assigned_cps = 0
-                for zone_id in self.n_charging_poles_by_zone:
-                    if zone_id in temp_n_charging_poles_by_zone_inf.keys():
-                        zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
-                        assigned_cps += zone_n_cps
-                        self.n_charging_poles_by_zone[zone_id] = zone_n_cps
-                for zone_id in self.n_charging_poles_by_zone:
-                    if zone_id in temp_n_charging_poles_by_zone_inf.keys():
-                        if assigned_cps < self.tot_n_charging_poles:
-                            self.n_charging_poles_by_zone[zone_id] += 1
-                            assigned_cps += 1
-
-                self.n_charging_poles_by_zone = dict(
-                    pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
-
-            self.n_charging_poles_by_zone = {int(k): int(v) for k, v in self.n_charging_poles_by_zone.items()}
-            zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
-            self.zones_cp_distances = self.grid.to_crs("epsg:3857").centroid.apply(
-                lambda x: self.grid.loc[zones_with_cps].to_crs("epsg:3857").centroid.distance(x)
-            )
-            self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
+                self.service_stations.init_charging_poles_from_map_config(self.supply_model_path)
 
     def init_relocation(self):
 
@@ -256,11 +142,15 @@ class SupplyModel:
 
     def save_results(self):
 
+        self.init_supply_model_path()
+
         os.makedirs(self.supply_model_path, exist_ok=True)
 
         with open(os.path.join(self.supply_model_path, "supply_model.pickle"), "wb") as f:
             pickle.dump(self, f)
 
+        with open(os.path.join(self.supply_model_path, "supply_model_conf.json"), "w") as f:
+            json.dump(self.supply_model_conf, f, sort_keys=True, indent=4)
         with open(os.path.join(self.supply_model_path, "n_charging_poles_by_zone.json"), "w") as f:
             json.dump(self.n_charging_poles_by_zone, f, sort_keys=True, indent=4)
         with open(os.path.join(self.supply_model_path, "vehicles_soc_dict.json"), "w") as f:
