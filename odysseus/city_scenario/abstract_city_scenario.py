@@ -38,10 +38,11 @@ class AbstractCityScenario:
         self.bin_side_length = None
         self.grid = pd.DataFrame()
         self.grid_matrix = pd.DataFrame()
-
         self.valid_zones = None
         self.zones_valid_zones_distances = None
         self.closest_valid_zone = None
+        self.distance_matrix = None
+        self.closest_zones = None
 
         self.neighbors_dict = dict()
         self.max_out_flow = float('-inf')
@@ -65,7 +66,6 @@ class AbstractCityScenario:
         self.max_driving_distance = self.bookings_train.driving_distance.max()
 
         self.valid_zones = self.get_valid_zones()
-        print(self.valid_zones)
         self.zones_valid_zones_distances = self.grid.to_crs("epsg:3857").centroid.apply(
             lambda x: self.grid.to_crs("epsg:3857").loc[self.valid_zones].centroid.distance(x)
         )
@@ -100,6 +100,15 @@ class AbstractCityScenario:
         self.avg_in_flows_train = self.get_avg_in_flows()
 
         self.energy_mix = EnergyMix(self.city_name, self.year_energy_mix)
+
+        self.distance_matrix = self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.apply(
+            lambda x: self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.distance(x).sort_values()
+        )
+        self.closest_zones = dict()
+        for zone_id in self.valid_zones:
+            self.closest_zones[zone_id] = list(
+                self.distance_matrix[self.distance_matrix > 0].loc[zone_id].sort_values().dropna().index.values
+            )
 
     def map_zones_on_trips(self, zones):
 
@@ -136,9 +145,11 @@ class AbstractCityScenario:
 
         bookings = bookings.sort_values("start_time")
 
+        # TODO -> integrate routing API
         if "driving_distance" not in bookings.columns:
             bookings["driving_distance"] = bookings.euclidean_distance * 1.4
 
+        # TODO -> check different behaviors with additional time columns
         #bookings = get_time_group_columns(bookings)
         bookings["hour"] = bookings.start_hour
         bookings["daytype"] = bookings.start_daytype
@@ -158,11 +169,9 @@ class AbstractCityScenario:
         ) + bookings.random_seconds_end.apply(
             lambda sec: datetime.timedelta(seconds=sec)
         )
-        print(bookings[["start_time", "end_time"]].dtypes)
 
         bookings["start_time"] = bookings["start_time"].dt.tz_convert(self.tz)
         bookings["end_time"] = bookings["end_time"].dt.tz_convert(self.tz)
-        print(bookings.shape)
         #bookings = get_time_group_columns(bookings)
 
         bookings["hour"] = bookings.start_hour
@@ -176,19 +185,16 @@ class AbstractCityScenario:
             lambda sec: datetime.timedelta(seconds=sec)
         ))
         bookings["end_time"] = pd.to_datetime(bookings["end_time"], utc=True).dt.tz_convert(self.tz)
-        print(bookings[["start_time", "end_time"]].dtypes)
 
         bookings.loc[:, "duration"] = (
                 bookings.end_time - bookings.start_time
         ).apply(lambda x: x.total_seconds())
-        print(bookings.shape)
 
         bookings = bookings.sort_values("start_time")
         bookings.loc[:, "ia_timeout"] = (
                 bookings.start_time - bookings.start_time.shift()
         ).apply(lambda x: x.total_seconds()).abs()
         bookings = bookings.loc[bookings.ia_timeout >= 0]
-        print(bookings.shape)
 
         bookings = bookings[bookings.duration > 0]
         bookings = bookings[bookings.driving_distance >= 0]
@@ -228,19 +234,14 @@ class AbstractCityScenario:
         dest_zones_count_test = self.bookings_test.destination_id.value_counts()
 
         valid_origin_zones_train = origin_zones_count_train[(origin_zones_count_train > count_threshold)]
-        print(valid_origin_zones_train)
         valid_dest_zones_train = dest_zones_count_train[(dest_zones_count_train > count_threshold)]
-        print(valid_dest_zones_train)
 
         valid_origin_zones_test = origin_zones_count_test[(origin_zones_count_test > count_threshold)]
-        print(valid_origin_zones_test)
         valid_dest_zones_test = dest_zones_count_test[(dest_zones_count_test > count_threshold)]
-        print(valid_origin_zones_test)
 
         valid_zones_train = valid_origin_zones_train.index.intersection(
             valid_dest_zones_train.index
         ).astype(int)
-        print(valid_zones_train)
 
         valid_zones_test = valid_origin_zones_test.index.intersection(
             valid_dest_zones_test.index
@@ -360,6 +361,10 @@ class AbstractCityScenario:
         self.bookings_test.to_pickle(os.path.join(self.city_scenario_path, "bookings_test.pickle"))
         self.closest_valid_zone.to_csv(os.path.join(self.city_scenario_path, "closest_valid_zone.csv"))
         self.closest_valid_zone.to_pickle(os.path.join(self.city_scenario_path, "closest_valid_zone.pickle"))
+        self.distance_matrix.to_csv(os.path.join(self.city_scenario_path, "distance_matrix.csv"))
+        self.distance_matrix.to_pickle(os.path.join(self.city_scenario_path, "distance_matrix.pickle"))
+        #self.closest_zones.to_csv(os.path.join(self.city_scenario_path, "closest_zones.csv"))
+        #self.closest_zones.to_pickle(os.path.join(self.city_scenario_path, "closest_zones.pickle"))
 
         with open(os.path.join(self.city_scenario_path, "valid_zones.pickle"), "wb") as f:
             pickle.dump(self.valid_zones, f)
@@ -367,6 +372,8 @@ class AbstractCityScenario:
             pickle.dump(self.avg_out_flows_train, f)
         with open(os.path.join(self.city_scenario_path, "avg_in_flows_train.pickle"), "wb") as f:
             pickle.dump(self.avg_in_flows_train, f)
+        with open(os.path.join(self.city_scenario_path, "closest_zones.pickle"), "wb") as f:
+            pickle.dump(self.closest_zones, f)
 
         numerical_params_dict = {
             "n_vehicles_original": self.n_vehicles_original,

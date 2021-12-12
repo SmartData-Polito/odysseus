@@ -138,6 +138,15 @@ class DummyCityScenario(AbstractCityScenario):
 
         self.map_zones_on_trips(self.grid)
 
+        self.distance_matrix = self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.apply(
+            lambda x: self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.distance(x).sort_values()
+        )
+        self.closest_zones = dict()
+        for zone_id in self.valid_zones:
+            self.closest_zones[zone_id] = list(
+                self.distance_matrix[self.distance_matrix > 0].loc[zone_id].sort_values().dropna().index.values
+            )
+
         self.bookings_train["euclidean_distance"] = self.bookings_train[
             ["origin_id", "destination_id"]
         ].apply(

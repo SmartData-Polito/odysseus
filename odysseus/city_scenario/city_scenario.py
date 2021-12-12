@@ -20,7 +20,7 @@ class CityScenario(AbstractCityScenario):
         if city_scenario_config:
             self.city_scenario_config = city_scenario_config
             self.folder_name = self.city_scenario_config["folder_name"]
-        if read_config_from_file and in_folder_name:
+        elif read_config_from_file and in_folder_name:
             self.folder_name = in_folder_name
         else:
             raise IOError("Wrong arguments for CityScenario!")
@@ -85,11 +85,3 @@ class CityScenario(AbstractCityScenario):
         self.grid["zone_id"] = self.grid.index.values
         self.map_zones_on_trips(self.grid)
 
-        self.distance_matrix = self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.apply(
-            lambda x: self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.distance(x).sort_values()
-        )
-        self.closest_zones = dict()
-        for zone_id in self.valid_zones:
-            self.closest_zones[zone_id] = list(
-                self.distance_matrix[self.distance_matrix > 0].loc[zone_id].sort_values().dropna().index.values
-            )

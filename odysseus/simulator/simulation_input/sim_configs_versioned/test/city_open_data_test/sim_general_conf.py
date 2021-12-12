@@ -8,7 +8,7 @@ sim_general_conf_grid = {
     "sim_run_mode": ["single_run"],
     "sim_technique": ["traceB"],
     "sim_scenario_name": ["louisville_test"],
-    "save_history": [False],
+    "save_history": [True],
 
     # Time  parameters
     "year": [2019],

@@ -20,7 +20,7 @@ class TraceDrivenSim (SharedMobilitySim):
 
         print(datetime.datetime.now(), "Simulation started ...")
 
-        for booking_request_dict in self.sim_input.booking_requests_list[:100]:
+        for booking_request_dict in self.sim_input.booking_requests_list:
 
             if booking_request_dict["origin_id"] in self.valid_zones\
                     and booking_request_dict["destination_id"] in self.valid_zones:

@@ -22,14 +22,10 @@ def get_time_group_columns(trips_df_norm):
         trips_df_norm.loc[:, "start_time"] = trips_df_norm.start_time
         trips_df_norm.loc[:, "end_time"] = trips_df_norm.end_time
 
-    #print(trips_df_norm[["start_time", "end_time"]])
-
     if "duration" not in trips_df_norm:
         trips_df_norm.loc[:, "duration"] = (
                 trips_df_norm.end_time - trips_df_norm.start_time
         ).apply(lambda dt: dt.total_seconds())
-
-    #print(trips_df_norm[["start_time", "end_time"]])
 
     if "vehicle_id" in trips_df_norm.columns and "t_parking_before" not in trips_df_norm.columns:
         for vehicle, vehicle_df in trips_df_norm.groupby("vehicle_id"):
@@ -39,8 +35,6 @@ def get_time_group_columns(trips_df_norm):
             trips_df_norm.loc[vehicle_df.index, "t_parking_after"] = (
                     vehicle_df.start_time.shift(-1) - vehicle_df.end_time
             ).apply(lambda dt: dt.total_seconds())
-
-    #print(trips_df_norm[["start_time", "end_time"]])
 
     if "year" not in trips_df_norm:
         trips_df_norm.loc[:, "start_year"] = trips_df_norm.start_time.apply(lambda dt: dt.year)
@@ -54,8 +48,6 @@ def get_time_group_columns(trips_df_norm):
         trips_df_norm.loc[:, "start_day"] = trips_df_norm.start_time.apply(lambda dt: dt.day)
         trips_df_norm.loc[:, "end_day"] = trips_df_norm.end_time.apply(lambda dt: dt.day)
         trips_df_norm.loc[:, "day"] = trips_df_norm.loc[:, "start_day"]
-
-    print(trips_df_norm.shape)
 
     if "start_hour" not in trips_df_norm:
         trips_df_norm.loc[:, "start_hour"] = trips_df_norm.start_time.apply(lambda d: d.hour).astype(int)
