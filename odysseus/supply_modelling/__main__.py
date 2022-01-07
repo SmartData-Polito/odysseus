@@ -92,7 +92,6 @@ parser.set_defaults(
 
     city_scenario_folder=["default"],
     supply_model_folder=["test"],
-    #supply_model_folder=["test"],
 
 )
 

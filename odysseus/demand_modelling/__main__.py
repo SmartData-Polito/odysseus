@@ -1,7 +1,9 @@
 import os
 import argparse
+import datetime
 
 from odysseus.demand_modelling.demand_model import DemandModel
+from odysseus.demand_modelling.demand_models.hourly_ods_count import HourlyODsCountDemandModel
 
 from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 
@@ -18,6 +20,10 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "-t", "--demand_model_type", nargs="+",
+    help="specify demand model type"
+)
+parser.add_argument(
     "-k", "--kde_bandwidth", nargs="+",
     help="specify kde bandwidths"
 )
@@ -28,10 +34,13 @@ parser.add_argument(
 )
 
 parser.set_defaults(
+
     city=["Louisville"],
     data_source_id=["city_open_data"],
+    demand_model_type=["hourly_ods_count"],
     kde_bandwidth=["1"],
     city_scenario_folder=["default"],
+
 )
 
 args = parser.parse_args()
@@ -41,6 +50,25 @@ demand_model_configs_list = SimConfGrid(demand_model_configs_grid).conf_list
 
 for demand_model_config in demand_model_configs_list:
 
-    print(demand_model_config)
-    demand_model = DemandModel(demand_model_config)
-    demand_model.save_results()
+    print(args.demand_model_type)
+    if demand_model_config["demand_model_type"] == "hourly_ods_count":
+        demand_model = HourlyODsCountDemandModel(
+            demand_model_config["city"],
+            demand_model_config["data_source_id"],
+            demand_model_config
+        )
+        demand_model.get_hourly_ods()
+        booking_requests_list = demand_model.generate_booking_requests_list(
+            datetime.datetime(2021, 1, 1),
+            datetime.datetime(2021, 1, 2),
+        )
+    else:
+        demand_model = DemandModel(
+            demand_model_config["city"],
+            demand_model_config["data_source_id"],
+            demand_model_config
+        )
+        demand_model.get_hourly_ods()
+        demand_model.get_requests_rates()
+        demand_model.get_trip_kdes()
+        demand_model.save_results()

@@ -91,6 +91,7 @@ class SimInput:
 		if self.sim_general_conf["sim_technique"] == "traceB":
 			self.bookings = pickle.Unpickler(open(os.path.join(city_scenario_path, "bookings_test.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
+
 		elif self.sim_general_conf["sim_technique"] == "eventG":
 			self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
 			self.avg_request_rate = pd.DataFrame(self.request_rates.values()).mean().mean()

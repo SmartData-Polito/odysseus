@@ -3,6 +3,31 @@ import pandas as pd
 from odysseus.utils.geospatial_utils import get_od_distance
 
 
+def create_booking_request_dict(
+        timeout, current_datetime, origin_id, destination_id
+):
+
+    booking_request_dict = dict()
+
+    booking_request_dict["ia_timeout"] = timeout
+    booking_request_dict["start_time"] = current_datetime
+    booking_request_dict["date"] = current_datetime.date()
+    current_hour = current_datetime.hour
+    current_weekday = current_datetime.weekday()
+    if current_weekday in [5, 6]:
+        current_daytype = "weekend"
+    else:
+        current_daytype = "weekday"
+    booking_request_dict["hour"] = current_hour
+    booking_request_dict["weekday"] = current_weekday
+    booking_request_dict["daytype"] = current_daytype
+
+    booking_request_dict["origin_id"] = origin_id
+    booking_request_dict["destination_id"] = destination_id
+
+    return booking_request_dict
+
+
 def update_req_time_info(booking_request_dict):
 	booking_request_dict["date"] = booking_request_dict["start_time"].date()
 	booking_request_dict["hour"] = booking_request_dict["start_time"].hour

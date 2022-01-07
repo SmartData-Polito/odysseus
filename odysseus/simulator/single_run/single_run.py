@@ -28,14 +28,13 @@ def single_run(conf_dict):
         "figures", city, conf_dict["sim_scenario_name"], "single_run", sim_general_conf["conf_id"]
     )
 
-    print(datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"], "CityScenario initialised!")
-
     sim_input = SimInput(conf_dict)
     sim_input.init_vehicles()
     sim_input.init_charging_poles()
     sim_input.init_relocation()
 
     start = datetime.datetime.now()
+
     print(datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"], "SimInput initialised!")
 
     if sim_technique == "eventG":
@@ -45,7 +44,7 @@ def single_run(conf_dict):
         sim_stats = simOutput_eventG.sim_stats
         simOutput = simOutput_eventG
     elif sim_technique == "traceB":
-        sim_traceB = run_traceB_sim (sim_input=sim_input)
+        sim_traceB = run_traceB_sim(sim_input=sim_input)
         simOutput_traceB = SimOutput(sim_traceB)
         simOutput_traceB.save_output(results_path, sim_general_conf, supply_model_conf)
         sim_stats = simOutput_traceB.sim_stats
@@ -80,14 +79,17 @@ def single_run(conf_dict):
     )
 
     if sim_general_conf["save_history"]:
+
         plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name, figures_path)
         plotter.plot_events_profile_barh()
         plotter.plot_events_t()
         plotter.plot_fleet_status_t()
-        plotter.plot_events_hourly_count_boxplot("bookings_train", "start")
-        plotter.plot_events_hourly_count_boxplot("charges", "start")
-        plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
-        plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
+
+        # TODO -> Seaborn boxplots are cool but slow
+        #plotter.plot_events_hourly_count_boxplot("bookings_train", "start")
+        #plotter.plot_events_hourly_count_boxplot("charges", "start")
+        #plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
+        #plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
 
         plotter.plot_city_zones()
         plotter.plot_charging_infrastructure()

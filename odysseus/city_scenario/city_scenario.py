@@ -13,7 +13,10 @@ from odysseus.city_scenario.abstract_city_scenario import AbstractCityScenario
 
 class CityScenario(AbstractCityScenario):
 
-    def __init__(self, city_name, data_source_id, city_scenario_config=None, read_config_from_file=False, in_folder_name=None):
+    def __init__(
+            self, city_name, data_source_id,
+            city_scenario_config=None, read_config_from_file=False, in_folder_name=None
+    ):
 
         super(CityScenario, self).__init__(city_name, data_source_id)
 

@@ -1,68 +1,56 @@
 import os
+import json
 import pickle
-import datetime
 
 from sklearn.neighbors import KernelDensity
 
-from odysseus.utils.geospatial_utils import *
-
-from odysseus.utils.time_utils import *
-
 from odysseus.city_scenario.city_scenario import CityScenario
+
+from odysseus.utils.bookings_utils import *
 
 
 class DemandModel:
 
-    def __init__(self, demand_model_config):
+    def __init__(
+            self,
+            city_name,
+            data_source_id,
+            demand_model_config
+    ):
 
         self.demand_model_config = demand_model_config
 
-        self.city_name = self.demand_model_config["city"]
+        self.city_name = city_name
+        self.data_source_id = data_source_id
+
         self.city_scenario_folder = self.demand_model_config["city_scenario_folder"]
         self.demand_model_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "demand_modelling",
-            "demand_models",
+            "city_demand_models",
             self.city_name,
             self.city_scenario_folder
         )
 
         self.city_scenario = CityScenario(
-            city=self.city_name,
-            from_file=True,
+            city_name=self.city_name,
+            data_source_id=self.data_source_id,
+            read_config_from_file=True,
             in_folder_name=self.city_scenario_folder
         )
         self.city_scenario.read_city_scenario_for_demand_model()
         self.bookings_train = self.city_scenario.bookings_train
         self.grid = self.city_scenario.grid
 
-        self.data_source_id = demand_model_config["data_source_id"]
         self.kde_bw = float(self.demand_model_config["kde_bandwidth"])
 
-        self.avg_request_rate, self.request_rates = self.get_requests_rates()
-        self.trip_kdes = self.get_trip_kdes()
-        self.hourly_ods = dict()
+        self.avg_request_rate = -1
+        self.request_rates = dict()
+        self.trip_kdes = dict()
+        self.od_matrices = dict()
 
         self.max_out_flow = float('-inf')
         self.max_in_flow = float('-inf')
-
-    def get_hourly_ods(self):
-
-        for hour, hour_df in self.bookings_train.groupby("hour"):
-            self.hourly_ods[hour] = pd.DataFrame(
-                index=self.grid.index,
-                columns=self.grid.index
-            )
-            hourly_od = pd.pivot_table(
-                hour_df,
-                values="start_time",
-                index="origin_id",
-                columns="destination_id",
-                aggfunc=len,
-                fill_value=0
-            )
-            self.hourly_ods[hour].loc[hourly_od.index, hourly_od.columns] = hourly_od
-            self.hourly_ods[hour].fillna(0, inplace=True)
 
     def get_requests_rates(self):
 
@@ -119,7 +107,26 @@ class DemandModel:
 
         os.makedirs(self.demand_model_path, exist_ok=True)
 
+        with open(os.path.join(self.demand_model_path, "demand_model_config.json"), "w") as f:
+            json.dump(self.demand_model_config, f, sort_keys=True, indent=4)
+
         with open(os.path.join(self.demand_model_path, "request_rates.pickle"), "wb") as f:
             pickle.dump(self.request_rates, f)
+        with open(os.path.join(self.demand_model_path, "request_rates.json"), "w") as f:
+            json.dump(self.request_rates, f, sort_keys=True, indent=4)
+
         with open(os.path.join(self.demand_model_path, "trip_kdes.pickle"), "wb") as f:
             pickle.dump(self.trip_kdes, f)
+
+        for daytype in self.od_matrices.keys():
+            daytype_writer = pd.ExcelWriter(
+                os.path.join(self.demand_model_path, "_".join([daytype, "od_matrices.xlsx"])),
+            )
+            for hour in range(24):
+                self.od_matrices[daytype][hour].to_excel(
+                    daytype_writer, sheet_name="_".join([daytype, str(hour)])
+                )
+            daytype_writer.save()
+
+        with open(os.path.join(self.demand_model_path, "od_matrices.pickle"), "wb") as f:
+            pickle.dump(self.od_matrices, f)
