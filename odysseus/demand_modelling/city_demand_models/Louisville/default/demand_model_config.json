@@ -1,6 +1,0 @@
-{
-    "city": "Louisville",
-    "city_scenario_folder": "default",
-    "data_source_id": "city_open_data",
-    "kde_bandwidth": "1"
-}

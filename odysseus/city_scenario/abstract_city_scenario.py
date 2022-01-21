@@ -424,3 +424,4 @@ class AbstractCityScenario:
 
         self.grid = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "grid.pickle"), "rb")).load()
         self.bookings_train = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "bookings_train.pickle"), "rb")).load()
+        self.closest_valid_zones = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "closest_valid_zone.pickle"), "rb")).load()

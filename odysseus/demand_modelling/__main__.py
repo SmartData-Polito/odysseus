@@ -33,6 +33,11 @@ parser.add_argument(
     help="Specify city scenario folder name "
 )
 
+parser.add_argument(
+    "-D", "--city_demand_model_folder", nargs="+",
+    help="Specify city demand model folder name "
+)
+
 parser.set_defaults(
 
     city=["Louisville"],
@@ -40,6 +45,7 @@ parser.set_defaults(
     demand_model_type=["hourly_ods_count"],
     kde_bandwidth=["1"],
     city_scenario_folder=["default"],
+    city_demand_model_folder=["hourly_ods_count_trial"],
 
 )
 
@@ -51,16 +57,12 @@ demand_model_configs_list = SimConfGrid(demand_model_configs_grid).conf_list
 for demand_model_config in demand_model_configs_list:
 
     print(args.demand_model_type)
+
     if demand_model_config["demand_model_type"] == "hourly_ods_count":
         demand_model = HourlyODsCountDemandModel(
             demand_model_config["city"],
             demand_model_config["data_source_id"],
             demand_model_config
-        )
-        demand_model.get_hourly_ods()
-        booking_requests_list = demand_model.generate_booking_requests_list(
-            datetime.datetime(2021, 1, 1),
-            datetime.datetime(2021, 1, 2),
         )
     else:
         demand_model = DemandModel(
@@ -68,7 +70,10 @@ for demand_model_config in demand_model_configs_list:
             demand_model_config["data_source_id"],
             demand_model_config
         )
-        demand_model.get_hourly_ods()
-        demand_model.get_requests_rates()
-        demand_model.get_trip_kdes()
-        demand_model.save_results()
+
+    demand_model.fit_model()
+    booking_requests_list = demand_model.generate_booking_requests_list(
+        datetime.datetime(2022, 1, 1),
+        datetime.datetime(2022, 1, 2),
+    )
+    demand_model.save_results()
