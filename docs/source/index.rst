@@ -28,9 +28,10 @@ Its goal is to provide a general, easy-to-use framework to simulate shared mobil
 
 Internally, it makes use of several open-source Python libraries for geospatial and mobility analysis, such as geopandas (https://geopandas.org/) and scikit-mobility [5] (https://scikit-mobility.github.io/scikit-mobility/).
 
-ODySSEUS is composed by four main functional modules, each one coming with its own API, command line interface and GUI:
+ODySSEUS is composed by four main functional modules, each one coming with its own command line interface:
 
 - **City Data Manager**
+- **City Scenario**
 - **Demand Modelling**
 - **Supply Modelling**
 - **Simulator**
