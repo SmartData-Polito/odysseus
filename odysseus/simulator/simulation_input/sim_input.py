@@ -139,6 +139,8 @@ class SimInput:
 			self.n_charging_zones = 0
 			self.tot_n_charging_poles = 0
 
+		self.supply_model_conf["n_charging_zones"] = self.n_charging_zones
+
 		self.n_charging_poles_by_zone = {}
 		self.vehicles_soc_dict = {}
 		self.vehicles_zones = {}

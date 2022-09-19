@@ -12,9 +12,9 @@ from odysseus.simulator.simulation_data_structures.zone import Zone
 from odysseus.simulator.simulation_data_structures.vehicle import Vehicle
 from odysseus.simulator.simulation_data_structures.charging_station import ChargingStation
 
-from odysseus.city_scenario.city_scenario import CityScenario
+from odysseus.city_scenario.city_scenario_from_wgs84_trips import CityScenarioFromTrips
 
-from odysseus.city_scenario.energymix_loader import EnergyMix
+from odysseus.city_scenario.energy_mix_loader import EnergyMix
 
 
 class SupplyModel:
@@ -35,7 +35,7 @@ class SupplyModel:
 
         self.supply_model_path = None
 
-        self.city_scenario = CityScenario(
+        self.city_scenario = CityScenarioFromTrips(
             city_name=self.city_name,
             data_source_id=self.data_source_id,
             read_config_from_file=True,
@@ -116,7 +116,7 @@ class SupplyModel:
             if not self.init_from_map_config:
 
                 self.service_stations.init_charging_poles_from_policy(
-                    self.supply_model_conf["stations_placement_policy"],
+                    self.supply_model_conf["cps_placement_policy"],
                     self.supply_model_conf["engine_type"],
                 )
 
@@ -124,7 +124,9 @@ class SupplyModel:
 
                 self.service_stations.init_charging_poles_from_map_config(self.supply_model_path)
 
-    def init_relocation(self):
+    def init_relocation(self, n_initial_zones=30):
+
+        n_initial_zones = min(n_initial_zones, len(self.grid))
 
         if "n_relocation_workers" in self.supply_model_conf:
 
@@ -133,7 +135,7 @@ class SupplyModel:
             top_o_zones = self.grid.zone_id_origin_count.sort_values(ascending=False).iloc[:31]
 
             workers_random_zones = list(
-                np.random.uniform(0, 30, n_relocation_workers).astype(int).round()
+                np.random.uniform(0, n_initial_zones, n_relocation_workers).astype(int).round()
             )
 
             self.initial_relocation_workers_positions = [

@@ -87,15 +87,15 @@ class EFFCS_SimOutputPlotter ():
 		self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 
 		if self.sim_output.supply_model_conf["distributed_cps"]:
-
-			charging_zones = pd.Index(self.sim_charges.zone_id.unique())
-			charging_poles_by_zone = self.sim_charges.zone_id.value_counts()
-			self.grid.loc[charging_zones, "poles_count"] = charging_poles_by_zone
-			self.grid.plot(color="white", edgecolor="black", ax=ax)
-			self.grid.loc[self.sim_output.valid_zones].plot(column="poles_count", ax=ax).plot()
-			self.grid.loc[charging_zones].plot(ax=ax)
-			plt.savefig(os.path.join(self.figures_path, "cps_locations.png"), transparent=True)
-			plt.close()
+			if len(self.sim_charges):
+				charging_zones = pd.Index(self.sim_charges.zone_id.unique())
+				charging_poles_by_zone = self.sim_charges.zone_id.value_counts()
+				self.grid.loc[charging_zones, "poles_count"] = charging_poles_by_zone
+				self.grid.plot(color="white", edgecolor="black", ax=ax)
+				self.grid.loc[self.sim_output.valid_zones].plot(column="poles_count", ax=ax).plot()
+				self.grid.loc[charging_zones].plot(ax=ax)
+				plt.savefig(os.path.join(self.figures_path, "cps_locations.png"), transparent=True)
+				plt.close()
 
 	def plot_events_profile_barh (self):
 

@@ -8,7 +8,7 @@ from odysseus.utils.time_utils import *
 from odysseus.utils.geospatial_utils import *
 from odysseus.path_config.path_config import *
 
-from odysseus.city_scenario.energymix_loader import EnergyMix
+from odysseus.city_scenario.energy_mix_loader import EnergyMix
 
 
 class AbstractCityScenario:
@@ -248,6 +248,7 @@ class AbstractCityScenario:
         ).astype(int)
 
         self.valid_zones = valid_zones_train.intersection(valid_zones_test)
+        print(valid_zones_train, valid_zones_test, self.valid_zones)
 
         return self.valid_zones
 

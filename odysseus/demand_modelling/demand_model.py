@@ -2,7 +2,7 @@ import os
 import json
 import pickle
 
-from odysseus.city_scenario.city_scenario import CityScenario
+from odysseus.city_scenario.city_scenario_from_wgs84_trips import CityScenarioFromTrips
 
 from odysseus.utils.bookings_utils import *
 
@@ -30,7 +30,7 @@ class DemandModel:
             self.city_scenario_folder
         )
 
-        self.city_scenario = CityScenario(
+        self.city_scenario = CityScenarioFromTrips(
             city_name=self.city_name,
             data_source_id=self.data_source_id,
             read_config_from_file=True,

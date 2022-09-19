@@ -39,7 +39,7 @@ parser.add_argument(
 
 parser.set_defaults(
     campaign_name="test",
-    conf_name="city_open_data_test",
+    conf_name="generated_od_test",
     city_scenario_folder="default",
     existing_supply_model_folder=None,
 )
@@ -54,6 +54,7 @@ versioned_conf_path = os.path.join(
     campaign_name,
     conf_name,
 )
+print(versioned_conf_path)
 
 sim_general_conf_grid = get_sim_configs_from_path(versioned_conf_path, "sim_general_conf", "sim_general_conf_grid")
 demand_model_conf_grid = get_sim_configs_from_path(versioned_conf_path, "demand_model_conf", "demand_model_conf_grid")

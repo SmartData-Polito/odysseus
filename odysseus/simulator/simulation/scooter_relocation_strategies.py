@@ -110,8 +110,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
                 relocation_zone_id = None
 
-                if self.simInput.supply_model_conf_grid["scooter_relocation_strategy"] in ["reactive_post_charge",
-                                                                                      "reactive_post_trip"]:
+                if self.simInput.supply_model_conf_grid["scooter_relocation_strategy"] in ["reactive_post_charge", "reactive_post_trip"]:
 
                     scheduled_relocation = None
                     for proposed_relocation in self.scheduled_scooter_relocations:

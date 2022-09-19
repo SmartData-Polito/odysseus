@@ -1,6 +1,6 @@
 import pandas as pd
 
-from odysseus.city_data_manager.city_data_source.trips_data_source.big_data_db_trips import BigDataDBTrips
+from odysseus.city_data_manager.trips_data_source.big_data_db_trips import BigDataDBTrips
 
 from odysseus.city_data_manager.city_geo_trips.city_geo_trips import CityGeoTrips
 

@@ -19,6 +19,7 @@ class Fleet:
         return self.vehicles_soc_dict
 
     def init_vehicles_random_zones(self, n_initial_zones=30):
+        n_initial_zones = min(n_initial_zones, len(self.grid))
         top_o_zones = self.grid.zone_id_origin_count.sort_values(ascending=False).iloc[:n_initial_zones+1]
         vehicles_random_zones = list(np.random.uniform(0, n_initial_zones, self.n_vehicles_sim).astype(int).round())
         self.vehicles_zones = []
