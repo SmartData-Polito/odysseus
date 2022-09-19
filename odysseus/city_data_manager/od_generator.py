@@ -29,15 +29,30 @@ def generate_week_config(
     return week_config
 
 
-def get_od_df(
-        hourly_count_dict
+def generate_hourly_od_count_dict(week_config, how="uniform"):
+    hourly_od_count_dict = dict()
+    if how == "uniform":
+        for week_daytype in week_config["week_slots"].keys():
+            hourly_od_count_dict[week_daytype] = {}
+            for day_slot in week_config["day_slots"][week_daytype]:
+                hour_min = int(week_config["day_slots"][week_daytype][day_slot].split("_")[0])
+                hour_max = int(week_config["day_slots"][week_daytype][day_slot].split("_")[1])
+                for hour in range(hour_min, hour_max):
+                    hourly_od_count_dict[week_daytype][hour] = dict()
+                    for origin in zone_ids:
+                        hourly_od_count_dict[week_daytype][hour][origin] = {}
+                        for destination in zone_ids:
+                            hourly_od_count_dict[week_daytype][hour][origin][destination] = 3
+    return hourly_od_count_dict
+
+
+def get_hourly_od_df(
+        hourly_count_dict, week_daytype, hour
 ):
     od_df = pd.DataFrame()
-    for week_daytype in week_config["week_slots"].keys():
-        for day_slot in week_config["day_slots"][week_daytype]:
-            for origin in zone_ids:
-                for destination in zone_ids:
-                    od_df.loc[origin, destination] = hourly_count_dict[week_daytype][day_slot][origin][destination]
+    for origin in zone_ids:
+        for destination in zone_ids:
+            od_df.loc[origin, destination] = hourly_count_dict[week_daytype][hour][origin][destination]
     return od_df
 
 
@@ -52,9 +67,23 @@ def generate_od_from_week_config(
     for week_daytype in week_config["week_slots"].keys():
         od_matrices[week_daytype] = {}
         for day_slot in week_config["day_slots"][week_daytype]:
-            if od_type == "count":
-                assert "hourly_count_dict" in kwargs
-                od_matrices[week_daytype][day_slot] = get_od_df(kwargs["hourly_count_dict"])
+            hour_min = int(week_config["day_slots"][week_daytype][day_slot].split("_")[0])
+            hour_max = int(week_config["day_slots"][week_daytype][day_slot].split("_")[1])
+            for hour in range(hour_min, hour_max):
+                if od_type == "count":
+                    assert "hourly_od_count_dict" in kwargs
+                    od_matrices[week_daytype][str(hour)] = get_hourly_od_df(
+                        kwargs["hourly_od_count_dict"], week_daytype, hour
+                    )
+
+    os.makedirs(os.path.join(root_data_path, city_name, "norm", "od_matrices", "my_data_source", ), exist_ok=True)
+    for week_slot in od_matrices:
+        for day_slot in od_matrices[week_slot]:
+            od_matrices[week_slot][day_slot].to_csv(os.path.join(
+                root_data_path, city_name, "norm", "od_matrices", "my_data_source",
+                "_".join([str(week_slot), week_config["day_slots"][week_slot][day_slot]]) + ".csv"
+            ))
+
     return od_matrices
 
 
@@ -106,6 +135,36 @@ def get_grid_indexes(grid_matrix, bookings, zone_ids):
     return bookings
 
 
+def generate_trips_from_od(
+        od_matrices, train_start_datetime, train_end_datetime, test_start_datetime, test_end_datetime
+):
+    train_booking_requests = pd.DataFrame(generate_booking_requests_list(
+        train_start_datetime,
+        train_end_datetime,
+        od_matrices
+    ))
+    norm_trips_data_path = os.path.join(
+        root_data_path, city_name, "norm", "trips", "my_data_source",
+    )
+    os.makedirs(norm_trips_data_path, exist_ok=True)
+
+    test_booking_requests = pd.DataFrame(generate_booking_requests_list(
+        test_start_datetime,
+        test_end_datetime,
+        od_matrices
+    ))
+
+    train_booking_requests = get_grid_indexes(grid_matrix, train_booking_requests, zone_ids)
+    test_booking_requests = get_grid_indexes(grid_matrix, test_booking_requests, zone_ids)
+
+    train_booking_requests.to_csv(os.path.join(
+        norm_trips_data_path, "bookings_train.csv"
+    ))
+    test_booking_requests.to_csv(os.path.join(
+        norm_trips_data_path, "bookings_test.csv"
+    ))
+
+
 week_config = generate_week_config(
     week_slots_type="weekday_weekend",
     day_slots_type="hours",
@@ -121,61 +180,22 @@ print(grid_matrix)
 
 zone_ids = np.ravel(grid_matrix.values)
 
-hourly_count_dict = dict()
-for week_daytype in week_config["week_slots"].keys():
-    hourly_count_dict[week_daytype] = {}
-    for day_slot in week_config["day_slots"][week_daytype]:
-        hourly_count_dict[week_daytype][day_slot] = dict()
-        for origin in zone_ids:
-            hourly_count_dict[week_daytype][day_slot][origin] = {}
-            for destination in zone_ids:
-                hourly_count_dict[week_daytype][day_slot][origin][destination] = 3
+hourly_od_count_dict = generate_hourly_od_count_dict(week_config, "uniform")
 
 od_matrices = generate_od_from_week_config(
     week_slots_type="weekday_weekend",
     day_slots_type="hours",
     week_config=week_config,
     od_type="count",
-    hourly_count_dict=hourly_count_dict
+    hourly_od_count_dict=hourly_od_count_dict
 )
 
 city_name = "my_city_3X3"
 
-os.makedirs(os.path.join(root_data_path, city_name, "norm", "od_matrices", "my_data_source",), exist_ok=True)
-for week_slot in od_matrices:
-    for day_slot in od_matrices[week_slot]:
-        od_matrices[week_slot][day_slot].to_csv(os.path.join(
-            root_data_path, city_name, "norm", "od_matrices", "my_data_source",
-            "_".join([str(week_slot), week_config["day_slots"][week_slot][day_slot]]) + ".csv"
-        ))
-
-
-train_booking_requests = pd.DataFrame(generate_booking_requests_list(
+generate_trips_from_od(
+    od_matrices,
     datetime.datetime(2023, 1, 1, 0, 0, 1),
     datetime.datetime(2023, 1, 8, 0, 0, 1),
-    od_matrices
-))
-print(train_booking_requests.shape)
-norm_trips_data_path = os.path.join(
-    root_data_path, city_name, "norm", "trips", "my_data_source",
-)
-os.makedirs(norm_trips_data_path, exist_ok=True)
-
-
-test_booking_requests = pd.DataFrame(generate_booking_requests_list(
     datetime.datetime(2023, 1, 8, 0, 0, 1),
-    datetime.datetime(2023, 1, 15, 1, 0, 1),
-    od_matrices
-))
-print(test_booking_requests.shape)
-
-
-train_booking_requests = get_grid_indexes(grid_matrix, train_booking_requests, zone_ids)
-test_booking_requests = get_grid_indexes(grid_matrix, test_booking_requests, zone_ids)
-
-train_booking_requests.to_csv(os.path.join(
-    norm_trips_data_path, "bookings_train.csv"
-))
-test_booking_requests.to_csv(os.path.join(
-    norm_trips_data_path, "bookings_test.csv"
-))
+    datetime.datetime(2023, 1, 15, 0, 0, 1),
+)

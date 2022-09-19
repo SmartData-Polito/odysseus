@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from odysseus.simulator.simulation_output.sim_stats import SimStats
 from odysseus.utils.cost_utils import insert_sim_costs, insert_scenario_costs
-from odysseus.supply_modelling.costs_conf import *
+from odysseus.supply_modelling.cost_config import *
 
 
 class SimOutput():

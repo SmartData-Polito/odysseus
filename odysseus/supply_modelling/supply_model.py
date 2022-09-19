@@ -128,15 +128,14 @@ class SupplyModel:
                     self.supply_model_conf["cps_placement_policy"],
                     self.supply_model_conf["engine_type"],
                 )
-                self.n_charging_poles_by_zone = self.service_stations.n_charging_poles_by_zone
-                self.zones_cp_distances = self.service_stations.zones_cp_distances
-                self.closest_cp_zone = self.service_stations.closest_cp_zone
 
             elif self.init_from_map_config:
 
                 self.service_stations.init_charging_poles_from_map_config(self.supply_model_path)
 
-        # self.zones_cp_distances = pd.Series(dtype=float)
+            self.n_charging_poles_by_zone = self.service_stations.n_charging_poles_by_zone
+            self.zones_cp_distances = self.service_stations.zones_cp_distances
+            self.closest_cp_zone = self.service_stations.closest_cp_zone
 
     def init_relocation(self, n_initial_zones=30):
 
