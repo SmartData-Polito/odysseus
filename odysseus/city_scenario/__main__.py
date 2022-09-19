@@ -45,9 +45,9 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    data_from=["trips"],
-    city=["New_York_City"],
-    data_source_id=["citi_bike"],
+    data_from=["od"],
+    city=["my_city_3X3"],
+    data_source_id=["my_data_source"],
     bin_side_length=[500],
     train_range=("2017", "1", "2017", "1"),
     test_range=("2017", "1", "2017", "1"),
@@ -82,12 +82,9 @@ for city_scenario_config in city_scenario_configs_list:
 
     elif city_scenario_config["data_from"] == "od":
 
-        city_scenario_config["city"] = "my_city"
-        city_scenario_config["data_source_id"] = "my_data_source"
-
         print(city_scenario_config)
         city_scenario = CityScenarioFromOD(
-            "my_city", "my_data_source", city_scenario_config=city_scenario_config
+            city_scenario_config["city"], "my_data_source", city_scenario_config=city_scenario_config
         )
 
     else:

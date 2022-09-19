@@ -20,7 +20,7 @@ class SimStats():
 
 		# Sim Stats creation
 
-		self.sim_stats = pd.Series(name="sim_stats")
+		self.sim_stats = pd.Series(name="sim_stats", dtype=object)
 
 		self.sim_stats = pd.concat([
 			self.sim_stats,

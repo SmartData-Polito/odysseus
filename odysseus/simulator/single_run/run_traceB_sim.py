@@ -34,6 +34,7 @@ def get_traceB_sim_stats(conf_tuple):
     sim_input.init_vehicles()
     sim_input.init_charging_poles()
     sim_input.init_relocation()
+    print(sim_input.supply_model.zones_cp_distances)
     sim_traceB = run_traceB_sim(sim_input)
     simOutput_traceB = SimOutput(sim_traceB)
     return simOutput_traceB.sim_stats

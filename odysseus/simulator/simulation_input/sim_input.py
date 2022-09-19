@@ -145,8 +145,8 @@ class SimInput:
 		self.vehicles_soc_dict = {}
 		self.vehicles_zones = {}
 
-		self.zones_cp_distances = pd.Series()
-		self.closest_cp_zone = pd.Series()
+		self.zones_cp_distances = pd.Series(dtype=float)
+		self.closest_cp_zone = pd.Series(dtype=float)
 
 		if supply_model is not None:
 

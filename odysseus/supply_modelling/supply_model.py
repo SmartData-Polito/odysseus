@@ -43,6 +43,17 @@ class SupplyModel:
         )
         self.city_scenario.read_city_scenario_for_supply_model()
 
+        if not supply_model_conf:
+            self.tot_n_charging_poles = 0
+            self.n_charging_zones = 0
+            self.n_vehicles_sim = 0
+        else:
+            self.tot_n_charging_poles = self.supply_model_conf["tot_n_charging_poles"]
+            self.n_charging_zones = self.supply_model_conf["n_charging_zones"]
+            self.n_vehicles_sim = self.supply_model_conf["n_vehicles"]
+
+        self.real_n_charging_zones = 0
+
         self.grid = self.city_scenario.grid
         self.valid_zones = self.city_scenario.valid_zones
         self.neighbors_dict = self.city_scenario.neighbors_dict
@@ -57,22 +68,20 @@ class SupplyModel:
         self.vehicles_zones = {}
         self.available_vehicles_dict = {}
 
-        self.zones_cp_distances = pd.Series()
-        self.closest_cp_zone = pd.Series()
+        self.zones_cp_distances = pd.Series(dtype=float)
+        self.closest_cp_zone = pd.Series(dtype=float)
         self.energy_mix = EnergyMix(self.city_name, self.year_energy_mix)
 
         self.initial_relocation_workers_positions = []
 
-        self.service_stations = ServiceStations(city_name, self.grid)
+        self.service_stations = ServiceStations(
+            city_name, self.grid, self.tot_n_charging_poles, self.n_charging_zones
+        )
         self.zone_dict = dict()
         self.charging_stations_dict = dict()
-        self.real_n_charging_zones = 0
-        self.tot_n_charging_poles = 0
-        self.n_charging_zones = 0
 
         self.fleet = Fleet(self.grid)
         self.vehicles_list = list()
-        self.n_vehicles_sim = 0
 
         self.simpy_env = None
 
@@ -119,10 +128,15 @@ class SupplyModel:
                     self.supply_model_conf["cps_placement_policy"],
                     self.supply_model_conf["engine_type"],
                 )
+                self.n_charging_poles_by_zone = self.service_stations.n_charging_poles_by_zone
+                self.zones_cp_distances = self.service_stations.zones_cp_distances
+                self.closest_cp_zone = self.service_stations.closest_cp_zone
 
             elif self.init_from_map_config:
 
                 self.service_stations.init_charging_poles_from_map_config(self.supply_model_path)
+
+        # self.zones_cp_distances = pd.Series(dtype=float)
 
     def init_relocation(self, n_initial_zones=30):
 

@@ -85,6 +85,7 @@ class SharedMobilitySim:
             self.sim_input.supply_model_conf["profile_type"],
             self.sim_input.supply_model_conf["vehicle_model_name"]
         )
+
         self.zone_dict = self.sim_input.supply_model.zone_dict
         self.charging_stations_dict = self.sim_input.supply_model.charging_stations_dict
         self.real_n_charging_zones = self.sim_input.supply_model.real_n_charging_zones

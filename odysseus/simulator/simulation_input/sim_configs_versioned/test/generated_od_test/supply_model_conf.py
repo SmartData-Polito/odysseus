@@ -1,6 +1,6 @@
 supply_model_conf_grid = {
 
-	"n_vehicles_factor": [1],
+	"n_vehicles": [100],
 	"engine_type": ["gasoline"],
 	"profile_type": [""],
 	"vehicle_model_name": ["VW Golf 7 1.0 TSI 2018"],
@@ -9,12 +9,12 @@ supply_model_conf_grid = {
 
 	"alpha_policy": ['auto'],
 	"beta": [100],
-	"n_poles_n_vehicles_factor": [0.2],
+	"tot_n_charging_poles": [20],
 
-	"cps_placement_policy": [""],
+	"cps_placement_policy": ["num_parkings"],
 	"distributed_cps": [True],
-	"system_cps": [False],
-	"cps_zones_percentage": [0.1],
+	"system_cps": [True],
+	"n_charging_zones": [4],
 
 	"battery_swap": [False],
 	"avg_reach_time": [0],

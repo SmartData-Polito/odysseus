@@ -32,7 +32,6 @@ def single_run(conf_dict):
     sim_input.init_vehicles()
     sim_input.init_charging_poles()
     sim_input.init_relocation()
-
     start = datetime.datetime.now()
 
     print(datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"], "SimInput initialised!")

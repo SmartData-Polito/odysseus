@@ -56,11 +56,11 @@ class EnergyMix:
 			self.energy_mix_conf = self.energymix_db["Canada"][self.year]
 		elif self.city_name in ["Louisville", "Minneapolis", "Austin", "Norfolk", "Kansas City", "Chicago", "Calgary"]:
 			self.energy_mix_conf = self.energymix_db["US"][self.year]
-		elif self.city_name in ["my_city"]:
+		elif self.city_name.startswith("my_city"):
 			self.energy_mix_conf = self.energymix_db["dummy_country"][self.year]
 		else:
 			raise Exception(
-				"Energy mix unavailable for city:{} country:dummy_country year:{}".format(self.city_name, self.year)
+				"Energy mix unavailable for city:{}, year:{}".format(self.city_name, self.year)
 			)
 
 	# TODO -> automate city-country association

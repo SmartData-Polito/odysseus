@@ -49,13 +49,13 @@ def read_stations_osm_format(city_name, grid, engine_type):
 
 class ServiceStations:
 
-    def __init__(self, city_name, grid):
+    def __init__(self, city_name, grid, tot_n_charging_poles, n_charging_zones):
 
         self.city_name = city_name
         self.grid = grid
 
-        self.tot_n_charging_poles = 0
-        self.n_charging_zones = 0
+        self.tot_n_charging_poles = tot_n_charging_poles
+        self.n_charging_zones = n_charging_zones
         self.n_charging_poles_by_zone = None
         self.zones_cp_distances = None
         self.closest_cp_zone = None
@@ -129,8 +129,8 @@ class ServiceStations:
                 self.n_charging_poles_by_zone = dict(
                     pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
 
-            self.n_charging_poles_by_zone = {int(k): int(v) for k, v in self.n_charging_poles_by_zone.items()}
-            self.get_station_distances()
+        self.n_charging_poles_by_zone = {int(k): int(v) for k, v in self.n_charging_poles_by_zone.items()}
+        self.get_station_distances()
 
     def init_charging_poles_from_map_config(self, supply_model_path):
 

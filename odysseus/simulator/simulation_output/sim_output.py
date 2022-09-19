@@ -1,3 +1,4 @@
+import datetime
 import os
 import pandas as pd
 from odysseus.simulator.simulation_output.sim_stats import SimStats
@@ -36,9 +37,9 @@ class SimOutput():
 				self.sim_vehicle_relocations = pd.DataFrame(sim.vehicleRelocationStrategy.sim_vehicle_relocations)
 
 			if "end_time" not in self.sim_system_charges_bookings:
-				self.sim_system_charges_bookings["end_time"] = pd.Series()
+				self.sim_system_charges_bookings["end_time"] = pd.Series(dtype=object)
 			if "end_time" not in self.sim_users_charges_bookings:
-				self.sim_users_charges_bookings["end_time"] = pd.Series()
+				self.sim_users_charges_bookings["end_time"] = pd.Series(dtype=object)
 
 			if len(self.sim_system_charges_bookings):
 				self.sim_system_charges_bookings["end_hour"] = self.sim_system_charges_bookings["end_time"].apply(

@@ -9,8 +9,8 @@ from odysseus.utils.bookings_utils import *
 
 
 def generate_week_config(
-        week_slots_type="weekday_weekend",
-        day_slots_type="hours",
+        week_slots_type,
+        day_slots_type,
         week_slots_config=None,
         day_slots_config=None
 ):
@@ -29,7 +29,9 @@ def generate_week_config(
     return week_config
 
 
-def get_od_df(hourly_count_dict):
+def get_od_df(
+        hourly_count_dict
+):
     od_df = pd.DataFrame()
     for week_daytype in week_config["week_slots"].keys():
         for day_slot in week_config["day_slots"][week_daytype]:
@@ -40,6 +42,8 @@ def get_od_df(hourly_count_dict):
 
 
 def generate_od_from_week_config(
+        week_slots_type,
+        day_slots_type,
         week_config,
         od_type,
         **kwargs
@@ -88,10 +92,31 @@ def generate_booking_requests_list(start_datetime, end_datetime, od_matrices):
     return booking_requests_list
 
 
-week_config = generate_week_config()
+def get_grid_indexes(grid_matrix, bookings, zone_ids):
+    zone_coords_dict = {}
+    for j in grid_matrix.columns:
+        for i in grid_matrix.index:
+            zone_coords_dict[grid_matrix.iloc[i, j]] = (i, j)
+
+    for zone in zone_ids:
+        bookings.loc[bookings.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
+        bookings.loc[bookings.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
+        bookings.loc[bookings.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
+        bookings.loc[bookings.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
+    return bookings
+
+
+week_config = generate_week_config(
+    week_slots_type="weekday_weekend",
+    day_slots_type="hours",
+)
 print(week_config)
 
-grid_matrix = get_city_grid_as_matrix((0, 0, 1000, 1000), 500, "dummy_crs")
+grid_matrix = get_city_grid_as_matrix(
+    (0, 0, 1500, 1500),
+    500,
+    "dummy_crs"
+)
 print(grid_matrix)
 
 zone_ids = np.ravel(grid_matrix.values)
@@ -106,13 +131,21 @@ for week_daytype in week_config["week_slots"].keys():
             for destination in zone_ids:
                 hourly_count_dict[week_daytype][day_slot][origin][destination] = 3
 
-od_matrices = generate_od_from_week_config(week_config, "count", hourly_count_dict=hourly_count_dict)
+od_matrices = generate_od_from_week_config(
+    week_slots_type="weekday_weekend",
+    day_slots_type="hours",
+    week_config=week_config,
+    od_type="count",
+    hourly_count_dict=hourly_count_dict
+)
 
-os.makedirs(os.path.join(root_data_path, "my_city", "norm", "od_matrices", "my_data_source",), exist_ok=True)
+city_name = "my_city_3X3"
+
+os.makedirs(os.path.join(root_data_path, city_name, "norm", "od_matrices", "my_data_source",), exist_ok=True)
 for week_slot in od_matrices:
     for day_slot in od_matrices[week_slot]:
         od_matrices[week_slot][day_slot].to_csv(os.path.join(
-            root_data_path, "my_city", "norm", "od_matrices", "my_data_source",
+            root_data_path, city_name, "norm", "od_matrices", "my_data_source",
             "_".join([str(week_slot), week_config["day_slots"][week_slot][day_slot]]) + ".csv"
         ))
 
@@ -124,7 +157,7 @@ train_booking_requests = pd.DataFrame(generate_booking_requests_list(
 ))
 print(train_booking_requests.shape)
 norm_trips_data_path = os.path.join(
-    root_data_path, "my_city", "norm", "trips", "my_data_source",
+    root_data_path, city_name, "norm", "trips", "my_data_source",
 )
 os.makedirs(norm_trips_data_path, exist_ok=True)
 
@@ -137,22 +170,8 @@ test_booking_requests = pd.DataFrame(generate_booking_requests_list(
 print(test_booking_requests.shape)
 
 
-def get_grid_indexes(bookings, zone_ids):
-    zone_coords_dict = {}
-    for j in grid_matrix.columns:
-        for i in grid_matrix.index:
-            zone_coords_dict[grid_matrix.iloc[i, j]] = (i, j)
-
-    for zone in zone_ids:
-        bookings.loc[bookings.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
-        bookings.loc[bookings.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
-        bookings.loc[bookings.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
-        bookings.loc[bookings.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
-    return bookings
-
-
-train_booking_requests = get_grid_indexes(train_booking_requests, zone_ids)
-test_booking_requests = get_grid_indexes(test_booking_requests, zone_ids)
+train_booking_requests = get_grid_indexes(grid_matrix, train_booking_requests, zone_ids)
+test_booking_requests = get_grid_indexes(grid_matrix, test_booking_requests, zone_ids)
 
 train_booking_requests.to_csv(os.path.join(
     norm_trips_data_path, "bookings_train.csv"
