@@ -12,13 +12,13 @@ class TripsDataSource:
 	TripsDataSource is an abstract class that contains the information needed to describe a trip.
 	This class is implemented by the other classes of this module. The constructor method takes as parameters:
 
-    :param city_name: City name. The name also serves to determine the timezone to which the city belongs
-    :type city_name: str
-    :param data_source_id: Data source from which the information is taken. This allows us to have multiple data sources associated with the same city (for example from different operators)
-    :type data_source_id: str
-    :param vehicles_type_id: Type of service represented by the data source (e.g. car sharing or e-scooter)
-    :type vehicles_type_id: str
-    """
+	:param city_name: City name. The name also serves to determine the timezone to which the city belongs
+	:type city_name: str
+	:param data_source_id: Data source from which the information is taken. This allows us to have multiple data sources associated with the same city (for example from different operators)
+	:type data_source_id: str
+	:param vehicles_type_id: Type of service represented by the data source (e.g. car sharing or e-scooter)
+	:type vehicles_type_id: str
+	"""
 
 	def __init__(self, city_name, data_source_id, vehicles_type_id):
 
