@@ -150,8 +150,6 @@ class CityScenarioFromOD(AbstractCityScenario):
 
         self.map_zones_on_trips(self.grid)
 
-        print(self.valid_zones)
-
         self.distance_matrix = self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.apply(
             lambda x: self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.distance(x).sort_values()
         )

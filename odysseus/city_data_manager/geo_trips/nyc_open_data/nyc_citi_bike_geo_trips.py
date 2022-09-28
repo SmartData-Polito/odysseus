@@ -2,8 +2,8 @@ import pandas as pd
 import geopandas as gpd
 import shapely
 
-from odysseus.city_data_manager.trips_data_source.new_york_city_bikes_trips import NewYorkCityBikeTrips
-from odysseus.city_data_manager.city_geo_trips.city_geo_trips import CityGeoTrips
+from odysseus.city_data_manager.geo_trips.nyc_open_data.nyc_citi_bike_trips import NewYorkCityBikeTrips
+from odysseus.city_data_manager.geo_trips.city_geo_trips import CityGeoTrips
 
 
 class NewYorkCityBikeGeoTrips(CityGeoTrips):

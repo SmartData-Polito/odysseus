@@ -2,9 +2,9 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import LineString
 
-from odysseus.city_data_manager.trips_data_source.austin_scooter_trips import AustinScooterTrips
-from odysseus.city_data_manager.geo_data_source.austin_census_tracts import AustinCensusTracts
-from odysseus.city_data_manager.city_geo_trips.city_geo_trips import CityGeoTrips
+from odysseus.city_data_manager.geo_trips.us_escooter_pilots.austin_scooter_trips import AustinScooterTrips
+from odysseus.city_data_manager.geo_trips.us_escooter_pilots.austin_census_tracts import AustinCensusTracts
+from odysseus.city_data_manager.geo_trips.city_geo_trips import CityGeoTrips
 from odysseus.utils.geospatial_utils import get_random_point_from_shape
 
 class AustinGeoTrips(CityGeoTrips):

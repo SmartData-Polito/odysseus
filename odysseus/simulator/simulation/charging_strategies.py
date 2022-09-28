@@ -11,28 +11,6 @@ class ChargingStrategy(ChargingPrimitives):
 			charging_zone_id = booking_request["destination_id"]
 			charging_outward_distance = 0
 
-			if self.sim_input.supply_model_conf["scooter_relocation"] \
-				and self.sim_input.supply_model_conf["scooter_relocation_strategy"] == "post_battery_swap":
-
-				if operator == "system":
-					relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
-						booking_request,
-						vehicles=[vehicle.plate]
-					)
-
-					if relocated:
-						charging_zone_id = scooter_relocation["end_zone_id"]
-
-						if self.sim_input.supply_model_conf["time_estimation"]:
-							timeout_return = scooter_relocation["duration"]
-
-					else:
-						timeout_return = 0
-
-			else:
-				timeout_return = 0
-
-
 			if operator == "system":
 				timeout_outward = np.random.exponential(
 					self.sim_input.supply_model_conf[
@@ -96,14 +74,18 @@ class ChargingStrategy(ChargingPrimitives):
 						random_zone_id].charging_station.capacity:
 						free_pole_flag = 1
 						charging_zone_id = random_zone_id
-						cr_soc_delta = self.get_cr_soc_delta(booking_request["destination_id"], charging_zone_id, vehicle)
+						cr_soc_delta = self.get_cr_soc_delta(
+							booking_request["destination_id"], charging_zone_id, vehicle
+						)
 						if cr_soc_delta > booking_request["end_soc"]:
 							free_pole_flag = 0
 						else:
 							charging_zone_id = charging_zone_id
 					if free_pole_flag == 1 or zones_by_distance.empty :
 						break
+
 			elif charging_relocation_strategy == 'closest_queueing':
+
 				zones_by_distance = self.sim_input.supply_model.zones_cp_distances.loc[
 					int(booking_request["destination_id"])
 				].sort_values()
@@ -113,7 +95,7 @@ class ChargingStrategy(ChargingPrimitives):
 					free_pole_flag = 1
 					charging_zone_id = zone
 					cr_soc_delta = self.get_cr_soc_delta(
-						booking_request["destination_id"], charging_zone_id, self.vehicles_list[vehicle]
+						booking_request["destination_id"], charging_zone_id, vehicle
 					)
 					if cr_soc_delta > booking_request["end_soc"]:
 						free_pole_flag = 0

@@ -5,46 +5,14 @@ import pandas as pd
 from odysseus.utils.path_utils import check_create_path
 from odysseus.utils.time_utils import get_time_group_columns
 from odysseus.path_config.path_config import data_paths_dict
+from odysseus.city_data_manager.od_matrices.od_data_source import ODmatrixDataSource
 
 
-class ODmatrixDataSource:
-
-    """
-
-    ODmatrixDataSource is a class that contains procedures to read and process OD matrices.
-
-    :param city_name: City name.
-    :type city_name: str
-
-    :param data_source_id: Data source from which the information is taken.
-    This allows us to have multiple data sources associated with the same city (for example from different operators)
-    :type data_source_id: str
-
-    :param vehicles_type_id: Type of service represented by the data source (e.g. car sharing or e-scooter)
-    :type vehicles_type_id: str
-
-    """
+class virtualODDataSource(ODmatrixDataSource):
 
     def __init__(self, city_name, data_source_id, vehicles_type_id):
 
-        self.city_name = city_name
-        self.data_source_id = data_source_id
-        self.vehicles_type_id = vehicles_type_id
-        self.data_type_id = "od_matrices"
-
-        self.raw_data_path = os.path.join(
-            data_paths_dict[self.city_name]["raw"][self.data_type_id],
-            self.data_source_id,
-        )
-
-        self.norm_data_path = os.path.join(
-            data_paths_dict[self.city_name]["norm"][self.data_type_id],
-            self.data_source_id
-        )
-        check_create_path(self.norm_data_path)
-
-        self.trips_df = pd.DataFrame()
-        self.trips_df_norm = pd.DataFrame()
+        super().__init__(city_name, data_source_id, vehicles_type_id)
 
     def load_raw(self):
 

@@ -2,7 +2,7 @@ import os
 import argparse
 
 from odysseus.city_scenario.city_scenario_from_wgs84_trips import CityScenarioFromTrips
-from odysseus.city_scenario.city_scenario_from_od import CityScenarioFromOD
+from odysseus.city_scenario.city_scenario_from_virtual_od import CityScenarioFromOD
 from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 
 parser = argparse.ArgumentParser()
@@ -46,7 +46,7 @@ parser.add_argument(
 
 parser.set_defaults(
     data_from=["od"],
-    city=["my_city_3X3"],
+    city=["my_city_3X3_generated"],
     data_source_id=["my_data_source"],
     bin_side_length=[500],
     train_range=("2017", "1", "2017", "1"),

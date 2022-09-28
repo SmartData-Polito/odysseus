@@ -1,13 +1,13 @@
 sim_general_conf_grid = {
 
     # City and data source parameters
-    "city": ["my_city_3X3"],
+    "city": ["my_city_3X3_generated"],
     "data_source_id": ["my_data_source"],
 
     # Run parameters
     "sim_run_mode": ["single_run"],
-    "sim_technique": ["traceB"],
-    "sim_scenario_name": ["od_test_3X3"],
+    "sim_technique": ["eventG"],
+    "sim_scenario_name": ["od_test_3X3_no_relo"],
     "save_history": [True],
 
     # Time  parameters

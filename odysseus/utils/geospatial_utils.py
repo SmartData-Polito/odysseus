@@ -136,14 +136,14 @@ def get_haversine_distance(lon1, lat1, lon2, lat2):
     return c * r * 1000
 
 
-def get_od_distance(grid, origin_id, destination_id):
+def get_od_distance(grid, origin_id, destination_id, crs="epsg:3857"):
     x1 = grid.loc[origin_id, "geometry"].centroid.x
     y1 = grid.loc[origin_id, "geometry"].centroid.y
     x2 = grid.loc[destination_id, "geometry"].centroid.x
     y2 = grid.loc[destination_id, "geometry"].centroid.y
-    if grid.crs == "epsg:4326":
+    if crs == "epsg:4326":
         return get_haversine_distance(x1, y1, x2, y2)
-    elif grid.crs == "epsg:3857":
+    elif crs == "epsg:3857":
         return math.dist((x1, y1), (x2, y2))
 
 
@@ -167,3 +167,5 @@ def get_out_flow_count(trips_origins):
     ).count().rename(columns={"start_time": "out_flow_count"})
 
     return out_flow_count
+
+

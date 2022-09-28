@@ -16,7 +16,8 @@ class ODmatrixDataSource:
     :param city_name: City name.
     :type city_name: str
 
-    :param data_source_id: Data source from which the information is taken. This allows us to have multiple data sources associated with the same city (for example from different operators)
+    :param data_source_id: Data source from which the information is taken.
+    This allows us to have multiple data sources associated with the same city (for example from different operators)
     :type data_source_id: str
 
     :param vehicles_type_id: Type of service represented by the data source (e.g. car sharing or e-scooter)
@@ -63,8 +64,6 @@ class ODmatrixDataSource:
 
         :return: A normalized pandas.DataFrame
         """
-        self.trips_df_norm = get_time_group_columns(self.trips_df_norm)
-        return self.trips_df_norm
 
     def save_norm(self):
         """
@@ -73,30 +72,6 @@ class ODmatrixDataSource:
 
         :return: nothing
         """
-        print(self.trips_df_norm.shape)
-
-        for year in self.trips_df_norm.start_year.unique():
-            for month in self.trips_df_norm.start_month.unique():
-
-                trips_df_norm_year_month = self.trips_df_norm[
-                    (self.trips_df_norm.start_year == year) & (self.trips_df_norm.start_month == month)
-                    ]
-
-                print(trips_df_norm_year_month.shape)
-
-                if len(trips_df_norm_year_month):
-                    trips_df_norm_year_month.to_csv(
-                        os.path.join(
-                            self.norm_data_path,
-                            "_".join([str(year), str(month)]) + ".csv"
-                        )
-                    )
-                    trips_df_norm_year_month.to_pickle(
-                        os.path.join(
-                            self.norm_data_path,
-                            "_".join([str(year), str(month)]) + ".pickle"
-                        )
-                    )
 
     def load_norm(self, year, month):
         """
@@ -115,8 +90,3 @@ class ODmatrixDataSource:
             self.data_source_id,
             "_".join([str(year), str(month)]) + ".csv"
         )
-        if os.path.exists(data_path):
-            self.trips_df_norm = pd.read_csv(data_path).iloc[:, 1:]
-            return self.trips_df_norm
-        else:
-            return pd.DataFrame()

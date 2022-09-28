@@ -1,8 +1,11 @@
 import json
+import datetime
+import pandas as pd
+import numpy as np
 
 from odysseus.path_config.path_config import *
-
-from odysseus.city_data_manager.od_matrices.od_to_trips import *
+from odysseus.utils.geospatial_utils import get_city_grid_as_matrix
+from odysseus.city_data_manager.od_matrices.virtual_od.od_to_trips import generate_trips_from_od
 
 
 def read_od_matrices(

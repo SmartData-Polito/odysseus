@@ -10,8 +10,8 @@ def create_booking_request_dict(
 	booking_request_dict = dict()
 
 	booking_request_dict["ia_timeout"] = timeout
-	booking_request_dict["start_time"] = current_datetime
-	booking_request_dict["date"] = current_datetime.date()
+	booking_request_dict["start_time"] = current_datetime.__str__()
+	booking_request_dict["date"] = current_datetime.date().__str__()
 	current_hour = current_datetime.hour
 	current_weekday = current_datetime.weekday()
 	if current_weekday in [5, 6]:
@@ -22,8 +22,8 @@ def create_booking_request_dict(
 	booking_request_dict["weekday"] = current_weekday
 	booking_request_dict["daytype"] = current_daytype
 
-	booking_request_dict["origin_id"] = origin_id
-	booking_request_dict["destination_id"] = destination_id
+	booking_request_dict["origin_id"] = int(origin_id)
+	booking_request_dict["destination_id"] = int(destination_id)
 
 	return booking_request_dict
 
@@ -91,3 +91,17 @@ def add_consumption_emission_info(booking_or_request_dict, vehicle):
 		booking_or_request_dict["welltotank_emissions"] + booking_or_request_dict["tanktowheel_emissions"]
 
 	return booking_or_request_dict
+
+
+def get_grid_indexes(grid_matrix, bookings, zone_ids):
+	zone_coords_dict = {}
+	for j in grid_matrix.columns:
+		for i in grid_matrix.index:
+			zone_coords_dict[grid_matrix.iloc[i, j]] = (i, j)
+
+	for zone in zone_ids:
+		bookings.loc[bookings.origin_id == zone, "origin_i"] = zone_coords_dict[zone][0]
+		bookings.loc[bookings.origin_id == zone, "origin_j"] = zone_coords_dict[zone][1]
+		bookings.loc[bookings.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
+		bookings.loc[bookings.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
+	return bookings

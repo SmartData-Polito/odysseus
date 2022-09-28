@@ -34,6 +34,13 @@ parser.add_argument(
     help="specify vehicle model among the supported ones"
 )
 
+# ---> Stations
+
+parser.add_argument(
+    "-sc", "--stations_config_mode", nargs="+",
+    help="specify how to configure stations"
+)
+
 # ---> Charging
 
 parser.add_argument(
@@ -75,23 +82,27 @@ parser.add_argument(
 
 parser.set_defaults(
 
-    city=["Louisville"],
-    data_source_id=["city_open_data"],
+    city=["my_city_3X3"],
+    data_source_id=["my_data_source"],
 
-    n_vehicles=["500"],
+    vehicles_config_mode=["manual"],
     engine_type=["electric"],
     vehicle_model_name=["generic e-scooter"],
+    n_vehicles=["100"],
+    vehicles_initial_placement=["random"],
+    vehicles_initial_soc=["random"],
 
+    stations_config_mode=["manual"],
     distributed_cps=[True],
     profile_type=["wall_plug"],
     cps_placement_policy=["num_parkings"],
-    tot_n_charging_poles=["100"],
-    n_charging_zones=["10"],
+    tot_n_charging_poles=["20"],
+    n_charging_zones=["3"],
 
     n_relocation_workers=[1],
 
     city_scenario_folder=["default"],
-    supply_model_folder=["test"],
+    supply_model_folder=["default"],
 
 )
 
@@ -110,7 +121,7 @@ for supply_model_config in supply_model_configs_list:
         supply_model_config["city_scenario_folder"],
         supply_model_config["supply_model_folder"],
         supply_model_config,
-        init_from_map_json_config=True
+        init_from_map_json_config=False
     )
     supply_model.init_vehicles()
     supply_model.init_charging_poles()

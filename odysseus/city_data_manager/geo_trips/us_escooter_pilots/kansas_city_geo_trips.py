@@ -1,7 +1,7 @@
 import pandas as pd
 
-from odysseus.city_data_manager.trips_data_source.kansas_city_scooter_trips import KansasCityScooterTrips
-from odysseus.city_data_manager.city_geo_trips.city_geo_trips import CityGeoTrips
+from odysseus.city_data_manager.geo_trips.us_escooter_pilots.kansas_city_scooter_trips import KansasCityScooterTrips
+from odysseus.city_data_manager.geo_trips.city_geo_trips import CityGeoTrips
 
 
 class KansasCityGeoTrips(CityGeoTrips):

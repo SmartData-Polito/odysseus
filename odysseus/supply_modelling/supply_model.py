@@ -43,15 +43,9 @@ class SupplyModel:
         )
         self.city_scenario.read_city_scenario_for_supply_model()
 
-        if not supply_model_conf:
-            self.tot_n_charging_poles = 0
-            self.n_charging_zones = 0
-            self.n_vehicles_sim = 0
-        else:
-            self.tot_n_charging_poles = self.supply_model_conf["tot_n_charging_poles"]
-            self.n_charging_zones = self.supply_model_conf["n_charging_zones"]
-            self.n_vehicles_sim = self.supply_model_conf["n_vehicles"]
-
+        self.tot_n_charging_poles = int(supply_model_conf["tot_n_charging_poles"])
+        self.n_charging_zones = int(supply_model_conf["n_charging_zones"])
+        self.n_vehicles_sim = 0
         self.real_n_charging_zones = 0
 
         self.grid = self.city_scenario.grid
@@ -87,7 +81,7 @@ class SupplyModel:
 
     def init_vehicles(self):
 
-        if not self.init_from_map_config:
+        if self.supply_model_conf["vehicles_config_mode"] == "sim_config":
 
             self.n_vehicles_sim = int(self.supply_model_conf["n_vehicles"])
             self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
@@ -95,8 +89,10 @@ class SupplyModel:
 
             self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict = \
                 self.fleet.init_vehicles_from_fleet_size(
-                    self.n_vehicles_sim
+                    self.n_vehicles_sim,
+                    self.supply_model_conf["vehicles_initial_placement"]
                 )
+            print(self.available_vehicles_dict)
 
         elif self.init_from_map_config:
 

@@ -87,15 +87,14 @@ class EFFCS_SimOutputPlotter ():
 		self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 
 		if self.sim_output.supply_model_conf["distributed_cps"]:
-			if len(self.sim_charges):
-				charging_zones = pd.Index(self.sim_charges.zone_id.unique())
-				charging_poles_by_zone = self.sim_charges.zone_id.value_counts()
-				self.grid.loc[charging_zones, "poles_count"] = charging_poles_by_zone
-				self.grid.plot(color="white", edgecolor="black", ax=ax)
-				self.grid.loc[self.sim_output.valid_zones].plot(column="poles_count", ax=ax).plot()
-				self.grid.loc[charging_zones].plot(ax=ax)
-				plt.savefig(os.path.join(self.figures_path, "cps_locations.png"), transparent=True)
-				plt.close()
+			charging_zones = self.sim_output.n_charging_poles_by_zone.keys()
+			charging_poles_by_zone = self.sim_output.n_charging_poles_by_zone
+			self.grid.loc[charging_zones, "poles_count"] = charging_poles_by_zone
+			self.grid.plot(color="white", edgecolor="black", ax=ax)
+			self.grid.loc[self.sim_output.valid_zones].plot(column="poles_count", ax=ax, legend=True)
+			#self.grid.loc[charging_zones].plot(ax=ax)
+			plt.savefig(os.path.join(self.figures_path, "cps_locations.png"), transparent=True)
+			plt.close()
 
 	def plot_events_profile_barh (self):
 
@@ -165,7 +164,7 @@ class EFFCS_SimOutputPlotter ():
 
 	def plot_events_hourly_count_boxplot (self, which_df, start_or_end):
 
-		if which_df == "bookings_train":
+		if which_df == "bookings":
 			df = self.sim_bookings
 		if which_df == "charges":
 			df = self.sim_charges
@@ -195,7 +194,7 @@ class EFFCS_SimOutputPlotter ():
 
 	def plot_events_hourly_count_boxplot (self, which_df, start_or_end):
 
-		if which_df == "bookings_train":
+		if which_df == "bookings":
 			df = self.sim_bookings
 		if which_df == "charges":
 			df = self.sim_charges
@@ -268,6 +267,14 @@ class EFFCS_SimOutputPlotter ():
 	def plot_choropleth (self, col):
 
 		fig, ax = plt.subplots(1, 1, figsize=(15,15))
+
+		plt.title("")
+		plt.xlabel(None)
+		plt.xticks([])
+		plt.ylabel(None)
+		plt.yticks([])
+		self.grid.plot(color="white", edgecolor="black", ax=ax)
+
 		self.grid.dropna(subset=[col]).plot(column=col, ax=ax, legend=True)
 		plt.xlabel(None)
 		plt.xticks([])

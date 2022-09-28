@@ -43,8 +43,8 @@ class PoissonKdeDemandModel(DemandModel):
             self.request_rates[daytype] = {}
             for hour in range(24):
                 hour_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
-                self.request_rates[daytype][hour] = hour_df.city.count() / (
-                    len(daytype_bookings_gdf.date.unique())
+                self.request_rates[daytype][hour] = len(hour_df) / (
+                    len(daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour].date.unique())
                 ) / 3600
             for hour in range(24):
                 hour_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
@@ -121,8 +121,6 @@ class PoissonKdeDemandModel(DemandModel):
 
             o_id = self.city_scenario.grid_matrix.loc[origin_i, origin_j]
             d_id = self.city_scenario.grid_matrix.loc[destination_i, destination_j]
-            o_id = self.city_scenario.closest_valid_zone.loc[o_id]
-            d_id = self.city_scenario.closest_valid_zone.loc[d_id]
             booking_request = create_booking_request_dict(timeout_sec, current_datetime, o_id, d_id)
             booking_requests_list.append(booking_request)
 
@@ -150,16 +148,4 @@ class PoissonKdeDemandModel(DemandModel):
         with open(os.path.join(self.demand_model_path, "trip_kdes.pickle"), "wb") as f:
             pickle.dump(self.trip_kdes, f)
 
-        for daytype in self.od_matrices.keys():
-            daytype_writer = pd.ExcelWriter(
-                os.path.join(self.demand_model_path, "_".join([daytype, "od_matrices.xlsx"])),
-            )
-            for hour in range(24):
-                self.od_matrices[daytype][hour].to_excel(
-                    daytype_writer, sheet_name="_".join([daytype, str(hour)])
-                )
-            daytype_writer.save()
-
-        with open(os.path.join(self.demand_model_path, "od_matrices.pickle"), "wb") as f:
-            pickle.dump(self.od_matrices, f)
 

@@ -83,7 +83,7 @@ class SimInput:
 		demand_model_path = os.path.join(
 			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
 			"demand_modelling",
-			"demand_models",
+			"city_demand_models",
 			self.sim_general_conf["city"],
 			self.city_scenario_folder
 		)

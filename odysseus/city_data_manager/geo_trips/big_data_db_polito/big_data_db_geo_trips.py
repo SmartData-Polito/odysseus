@@ -1,8 +1,8 @@
 import pandas as pd
 
-from odysseus.city_data_manager.trips_data_source.big_data_db_trips import BigDataDBTrips
+from odysseus.city_data_manager.geo_trips.big_data_db_polito.big_data_db_trips import BigDataDBTrips
 
-from odysseus.city_data_manager.city_geo_trips.city_geo_trips import CityGeoTrips
+from odysseus.city_data_manager.geo_trips.city_geo_trips import CityGeoTrips
 
 
 class BigDataDBGeoTrips(CityGeoTrips):

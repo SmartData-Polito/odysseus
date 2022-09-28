@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from odysseus.city_data_manager.trips_data_source.trips_data_source import TripsDataSource
+from odysseus.city_data_manager.geo_trips.trips_data_source import TripsDataSource
 
 
 class MinneapolisScooterTrips(TripsDataSource):

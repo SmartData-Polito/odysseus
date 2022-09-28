@@ -78,6 +78,8 @@ class ModelDrivenSim(SharedMobilitySim):
                 )
             )
 
+            # print(self.current_datetime, self.n_booking_requests)
+
             if timeout_sec < 60 * 60:
                 yield self.env.timeout(timeout_sec)
                 booking_request_dict = self.create_booking_request_dict(timeout_sec)

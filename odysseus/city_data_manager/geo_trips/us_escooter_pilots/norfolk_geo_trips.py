@@ -2,9 +2,9 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import LineString
 
-from odysseus.city_data_manager.trips_data_source.norfolk_scooter_trips import NorfolkScooterTrips
+from odysseus.city_data_manager.geo_trips.us_escooter_pilots.norfolk_scooter_trips import NorfolkScooterTrips
 from odysseus.city_data_manager.geo_data_source import NorfolkCensusTracts
-from odysseus.city_data_manager.city_geo_trips.city_geo_trips import CityGeoTrips
+from odysseus.city_data_manager.geo_trips.city_geo_trips import CityGeoTrips
 from odysseus.utils.geospatial_utils import get_random_point_from_shape
 
 class NorfolkGeoTrips(CityGeoTrips):

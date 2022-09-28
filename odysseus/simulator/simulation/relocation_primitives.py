@@ -28,7 +28,7 @@ def init_scooter_relocation(vehicle_ids, start_time, start_zone_ids, end_zone_id
     return scooter_relocation
 
 
-class ScooterRelocationPrimitives:
+class RelocationPrimitives:
 
     def __init__(self, env, sim):
 
@@ -50,7 +50,7 @@ class ScooterRelocationPrimitives:
 
         self.relocation_workers_resource = simpy.Resource(
             self.env,
-            capacity=self.simInput.supply_model_conf_grid["n_relocation_workers"]
+            capacity=self.simInput.supply_model_conf["n_relocation_workers"]
         )
 
         self.current_hour_origin_count = {}
@@ -83,12 +83,12 @@ class ScooterRelocationPrimitives:
             initial_position = self.simInput.supply_model.initial_relocation_workers_positions[i]
             self.relocation_workers.append(Worker(env, worker_id, initial_position))
 
-        if "window_width" in dict(self.simInput.supply_model_conf_grid["scooter_relocation_technique"]):
-            self.window_width = dict(self.simInput.supply_model_conf_grid["scooter_relocation_technique"])["window_width"]
+        if "window_width" in dict(self.simInput.supply_model_conf["relocation_technique"]):
+            self.window_width = dict(self.simInput.supply_model_conf["relocation_technique"])["window_width"]
         else:
             self.window_width = 1
 
-        if self.simInput.supply_model_conf_grid["scooter_relocation_strategy"] == "predictive":
+        if self.simInput.supply_model_conf["relocation_strategy"] == "predictive":
 
             from odysseus.simulator.simulation_input.prediction_model import PredictionModel
 
@@ -193,7 +193,7 @@ class ScooterRelocationPrimitives:
                 total_distance += distance
                 self.sim_metrics.update_metrics("avg_relocation_step_distance", distance)
 
-                duration = distance / 1000 / self.simInput.supply_model_conf_grid["avg_relocation_speed"] * 3600
+                duration = distance / 1000 / self.simInput.supply_model_conf["avg_relocation_speed"] * 3600
                 total_duration += duration
 
                 # Simulate step navigation time
@@ -229,7 +229,7 @@ class ScooterRelocationPrimitives:
                 total_distance += distance
                 self.sim_metrics.update_metrics("avg_relocation_step_distance", distance)
 
-                duration = distance / 1000 / self.simInput.supply_model_conf_grid["avg_relocation_speed"] * 3600
+                duration = distance / 1000 / self.simInput.supply_model_conf["avg_relocation_speed"] * 3600
                 total_duration += duration
 
                 # Simulate step navigation time
@@ -270,8 +270,8 @@ class ScooterRelocationPrimitives:
             scooter_relocation["end_zone_ids"][0],
             scooter_relocation["end_time"]
         )
-        if "save_history" in self.simInput.supply_model_conf_grid:
-            if self.simInput.supply_model_conf_grid["save_history"]:
+        if "save_history" in self.simInput.supply_model_conf:
+            if self.simInput.supply_model_conf["save_history"]:
                 self.sim_scooter_relocations += [scooter_relocation]
         self.n_scooter_relocations += 1
         self.tot_scooter_relocations_distance += scooter_relocation["distance"]

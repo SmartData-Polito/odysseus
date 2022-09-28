@@ -104,8 +104,8 @@ class SimStats():
 		self.sim_stats.loc["tot_mobility_distance"] = sim.tot_mobility_distance
 		self.sim_stats.loc["tot_mobility_duration"] = sim.tot_mobility_duration
 
-		if self.supply_model_conf["scooter_relocation"]:
-			if "scooter_relocation" in self.supply_model_conf and self.supply_model_conf["scooter_relocation"]:
+		if self.supply_model_conf["relocation"]:
+			if "relocation" in self.supply_model_conf and self.supply_model_conf["relocation"]:
 				self.sim_stats.loc["n_scooter_relocations"] = sim.scooterRelocationStrategy.n_scooter_relocations
 				self.sim_stats.loc["tot_scooter_relocations_distance"] = \
 					sim.scooterRelocationStrategy.tot_scooter_relocations_distance

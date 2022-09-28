@@ -11,11 +11,11 @@ from mlrose import TSPOpt, genetic_alg
 
 import numpy as np
 import pandas as pd
-from odysseus.simulator.simulation.scooter_relocation_primitives import *
+from odysseus.simulator.simulation.relocation_primitives import *
 from odysseus.utils.time_utils import weekday2vec
 
 
-class ScooterRelocationStrategy(ScooterRelocationPrimitives):
+class RelocationStrategy(RelocationPrimitives):
 
     def check_scooter_relocation(self, booking_request, vehicles=None):
 
@@ -23,9 +23,9 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
         relocated_vehicles = vehicles
         scooter_relocation = {}
 
-        if self.simInput.supply_model_conf_grid["battery_swap"]:
+        if self.simInput.supply_model_conf["battery_swap"]:
 
-            if self.simInput.supply_model_conf_grid["scooter_relocation_strategy"] == "magic_relocation":
+            if self.simInput.supply_model_conf["relocation_strategy"] == "magic_relocation":
 
                 booking_request_zone_column = int(np.floor(
                     booking_request["origin_id"] / self.simInput.grid_matrix.shape[0]
@@ -110,7 +110,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
                 relocation_zone_id = None
 
-                if self.simInput.supply_model_conf_grid["scooter_relocation_strategy"] in ["reactive_post_charge", "reactive_post_trip"]:
+                if self.simInput.supply_model_conf["relocation_strategy"] in ["reactive_post_charge", "reactive_post_trip"]:
 
                     scheduled_relocation = None
                     for proposed_relocation in self.scheduled_scooter_relocations:
@@ -158,7 +158,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                         relocation_zone_id
                     )
 
-                    duration = distance / 1000 / self.simInput.supply_model_conf_grid["avg_relocation_speed"] * 3600
+                    duration = distance / 1000 / self.simInput.supply_model_conf["avg_relocation_speed"] * 3600
 
                     scooter_relocation = init_scooter_relocation(relocated_vehicles, booking_request["end_time"],
                                                                  [booking_request["destination_id"]],
@@ -185,7 +185,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
         """
         ending_zone_ids = []
         n_dropped_vehicles_list = []
-        technique = dict(self.simInput.supply_model_conf_grid["scooter_relocation_technique"])["end"]
+        technique = dict(self.simInput.supply_model_conf["relocation_technique"])["end"]
 
         if technique == "kde_sampling":
 
@@ -258,7 +258,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
         """
         starting_zone_ids = []
         n_picked_vehicles_list = []
-        technique = dict(self.simInput.supply_model_conf_grid["scooter_relocation_technique"])["start"]
+        technique = dict(self.simInput.supply_model_conf["relocation_technique"])["start"]
 
         if technique == "aggregation":
 
@@ -305,7 +305,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
         pred_out_flows_list = []
         pred_in_flows_list = []
 
-        if self.simInput.supply_model_conf_grid["scooter_relocation_strategy"] == "predictive":
+        if self.simInput.supply_model_conf["relocation_strategy"] == "predictive":
 
             # Prepare flows from past hours
             if self.current_hour_origin_count:
@@ -421,8 +421,8 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
             # Choose the maximum number of 'pick up' and 'drop off' zones proposals to be computed
             n_relocations = int(len(self.available_vehicles_dict) / 2)  # an upper bound
-            if self.simInput.supply_model_conf_grid["scooter_relocation_strategy"] in ["proactive", "predictive"] \
-                    and "relocation_capacity" not in self.simInput.supply_model_conf_grid:
+            if self.simInput.supply_model_conf["relocation_strategy"] in ["proactive", "predictive"] \
+                    and "relocation_capacity" not in self.simInput.supply_model_conf:
                 n_free_workers = self.relocation_workers_resource.capacity - self.relocation_workers_resource.count
                 n_relocations = min(n_relocations, n_free_workers)
 
@@ -437,11 +437,11 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
             if self.starting_zone_ids and self.ending_zone_ids:
 
-                if self.simInput.supply_model_conf_grid["scooter_relocation_strategy"] in ["proactive", "predictive"] \
-                        and "relocation_capacity" in self.simInput.supply_model_conf_grid:
+                if self.simInput.supply_model_conf["relocation_strategy"] in ["proactive", "predictive"] \
+                        and "relocation_capacity" in self.simInput.supply_model_conf:
                     # Distribute proposed 'pick up' and 'drop off' zones between scheduled relocations
 
-                    relocation_capacity = self.simInput.supply_model_conf_grid["relocation_capacity"]
+                    relocation_capacity = self.simInput.supply_model_conf["relocation_capacity"]
 
                     pick_up_zone_ids = self.starting_zone_ids.copy()
                     n_picked_vehicles_list = self.n_picked_vehicles_list.copy()
@@ -472,38 +472,38 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
                             "drop_off": {}
                         }
 
-                        if "relocation_profitability_check" in self.simInput.supply_model_conf_grid:
-                            relocation_profitability_check = self.simInput.supply_model_conf_grid["relocation_profitability_check"]
+                        if "relocation_profitability_check" in self.simInput.supply_model_conf:
+                            relocation_profitability_check = self.simInput.supply_model_conf["relocation_profitability_check"]
                         else:
                             relocation_profitability_check = True
 
-                        if "relocation_vehicle_consumption" in self.simInput.supply_model_conf_grid:
-                            relocation_vehicle_consumption = self.simInput.supply_model_conf_grid["relocation_vehicle_consumption"]
+                        if "relocation_vehicle_consumption" in self.simInput.supply_model_conf:
+                            relocation_vehicle_consumption = self.simInput.supply_model_conf["relocation_vehicle_consumption"]
                         else:
                             relocation_vehicle_consumption = 7  # l/100km
 
-                        if "diesel_price" in self.simInput.supply_model_conf_grid:
-                            diesel_price = self.simInput.supply_model_conf_grid["diesel_price"]
+                        if "diesel_price" in self.simInput.supply_model_conf:
+                            diesel_price = self.simInput.supply_model_conf["diesel_price"]
                         else:
                             diesel_price = 0.65  # $/l (USA)
 
-                        if "unlock_fee" in self.simInput.supply_model_conf_grid:
-                            unlock_fee = self.simInput.supply_model_conf_grid["unlock_fee"]
+                        if "unlock_fee" in self.simInput.supply_model_conf:
+                            unlock_fee = self.simInput.supply_model_conf["unlock_fee"]
                         else:
                             unlock_fee = 1  # $
 
-                        if "rent_fee" in self.simInput.supply_model_conf_grid:
-                            rent_fee = self.simInput.supply_model_conf_grid["rent_fee"]
+                        if "rent_fee" in self.simInput.supply_model_conf:
+                            rent_fee = self.simInput.supply_model_conf["rent_fee"]
                         else:
                             rent_fee = 0.15  # $/min
 
-                        if "avg_relocation_distance" in self.simInput.supply_model_conf_grid:
-                            avg_relocation_distance = self.simInput.supply_model_conf_grid["avg_relocation_distance"]
+                        if "avg_relocation_distance" in self.simInput.supply_model_conf:
+                            avg_relocation_distance = self.simInput.supply_model_conf["avg_relocation_distance"]
                         else:
                             avg_relocation_distance = 1  # km
 
-                        if "avg_trip_duration" in self.simInput.supply_model_conf_grid:
-                            avg_trip_duration = self.simInput.supply_model_conf_grid["avg_trip_duration"]
+                        if "avg_trip_duration" in self.simInput.supply_model_conf:
+                            avg_trip_duration = self.simInput.supply_model_conf["avg_trip_duration"]
                         else:
                             avg_trip_duration = 10  # min
 
@@ -632,7 +632,7 @@ class ScooterRelocationStrategy(ScooterRelocationPrimitives):
 
                         self.scheduled_scooter_relocations.append(scheduled_relocation)
 
-                if self.simInput.supply_model_conf_grid["scooter_relocation_strategy"] in ["proactive", "predictive"]:
+                if self.simInput.supply_model_conf["relocation_strategy"] in ["proactive", "predictive"]:
                     # Try to trigger immediately the relocation process
 
                     n_free_workers = self.relocation_workers_resource.capacity - self.relocation_workers_resource.count

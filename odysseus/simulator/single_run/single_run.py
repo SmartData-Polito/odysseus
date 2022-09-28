@@ -85,7 +85,7 @@ def single_run(conf_dict):
         plotter.plot_fleet_status_t()
 
         # TODO -> Seaborn boxplots are cool but slow
-        #plotter.plot_events_hourly_count_boxplot("bookings_train", "start")
+        #plotter.plot_events_hourly_count_boxplot("bookings", "start")
         #plotter.plot_events_hourly_count_boxplot("charges", "start")
         #plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
         #plotter.plot_n_vehicles_charging_hourly_mean_boxplot()

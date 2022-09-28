@@ -2,49 +2,8 @@ import os
 import json
 import numpy as np
 import pandas as pd
-import geopandas as gpd
-from shapely.geometry import Point
 
-
-def read_stations_osm_format(city_name, grid, engine_type):
-
-    stations_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)),
-        "city_data_manager",
-        "data",
-        city_name,
-        "raw",
-        "geo",
-        "openstreetmap",
-        "station_locations.json"
-    )
-    f = open(stations_path, "r")
-    station_locations = json.load(f)
-    f.close()
-    charging_points = station_locations[city_name][engine_type]
-    points_list = []
-
-    for point in charging_points.keys():
-        points_list.append(
-            {
-                "geometry": Point(
-                    charging_points[point]["longitude"], charging_points[point]["latitude"]
-                ),
-                "n_poles": charging_points[point]["n_poles"]
-            }
-        )
-    stations_gdf = gpd.GeoDataFrame(points_list)
-    n_poles_by_zone = {}
-    tot_n_poles = 0
-    for (p, n) in zip(stations_gdf.geometry, stations_gdf.n_poles):
-        for (geom, zone) in zip(grid.geometry, grid.zone_id):
-            if geom.intersects(p):
-                if zone in n_poles_by_zone.keys():
-                    n_poles_by_zone[zone] += n
-                else:
-                    n_poles_by_zone[zone] = n
-                tot_n_poles += n
-    return n_poles_by_zone, stations_gdf, tot_n_poles
+from odysseus.supply_modelling.service_stations.service_stations_utils import read_stations_osm_format
 
 
 class ServiceStations:
@@ -61,18 +20,20 @@ class ServiceStations:
         self.closest_cp_zone = None
 
     def get_station_distances(self):
+
         zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index.astype(int)
         self.zones_cp_distances = self.grid.to_crs("epsg:3857").centroid.apply(
             lambda x: self.grid.loc[zones_with_cps].to_crs("epsg:3857").centroid.distance(x)
         )
         self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
 
-    def init_charging_poles_from_policy(self, stations_placement_policy, engine_type):
+    def init_charging_poles_from_policy(
+            self, stations_placement_policy, engine_type
+    ):
 
         if stations_placement_policy == "num_parkings":
 
             top_dest_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:self.n_charging_zones]
-
             self.n_charging_poles_by_zone = dict((
                 top_dest_zones / top_dest_zones.sum() * self.tot_n_charging_poles
             ))
@@ -128,6 +89,12 @@ class ServiceStations:
 
                 self.n_charging_poles_by_zone = dict(
                     pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
+
+        elif stations_placement_policy == "uniform":
+            self.n_charging_poles_by_zone = {
+                zone_id: int(self.tot_n_charging_poles / self.n_charging_zones)
+                for zone_id in self.grid.index.values
+            }
 
         self.n_charging_poles_by_zone = {int(k): int(v) for k, v in self.n_charging_poles_by_zone.items()}
         self.get_station_distances()

@@ -1,4 +1,11 @@
-from odysseus.city_data_manager.od_matrices.od_generator import *
+import os
+import datetime
+import pandas as pd
+
+from odysseus.utils.time_utils import get_daytype_from_weekday
+from odysseus.utils.bookings_utils import create_booking_request_dict
+from odysseus.utils.bookings_utils import get_grid_indexes
+from odysseus.path_config.path_config import root_data_path
 
 
 def generate_booking_requests_list(
@@ -66,3 +73,5 @@ def generate_trips_from_od(
     test_booking_requests.to_csv(os.path.join(
         norm_trips_data_path, "bookings_test.csv"
     ))
+
+    return train_booking_requests, test_booking_requests

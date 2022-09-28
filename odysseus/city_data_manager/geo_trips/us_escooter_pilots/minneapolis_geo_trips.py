@@ -2,10 +2,10 @@ import pandas as pd
 import geopandas as gpd
 import shapely
 
-from odysseus.city_data_manager.trips_data_source.minneapolis_scooter_trips import MinneapolisScooterTrips
-from odysseus.city_data_manager.geo_data_source import MinneapolisCenterlines
-from odysseus.city_data_manager.geo_data_source import MinneapolisTrailsBikes
-from odysseus.city_data_manager.city_geo_trips.city_geo_trips import CityGeoTrips
+from odysseus.city_data_manager.geo_trips.us_escooter_pilots.minneapolis_scooter_trips import MinneapolisScooterTrips
+from odysseus.city_data_manager.geo_trips.us_escooter_pilots.minneapolis_centerlines import MinneapolisCenterlines
+from odysseus.city_data_manager.geo_trips.us_escooter_pilots.minneapolis_trails_bikes import MinneapolisTrailsBikes
+from odysseus.city_data_manager.geo_trips.city_geo_trips import CityGeoTrips
 from odysseus.utils.geospatial_utils import get_random_point_from_linestring
 
 

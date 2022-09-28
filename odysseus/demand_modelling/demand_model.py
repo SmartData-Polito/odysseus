@@ -29,6 +29,7 @@ class DemandModel:
             self.city_name,
             self.city_scenario_folder
         )
+        os.makedirs(self.demand_model_path, exist_ok=True)
 
         self.city_scenario = CityScenarioFromTrips(
             city_name=self.city_name,

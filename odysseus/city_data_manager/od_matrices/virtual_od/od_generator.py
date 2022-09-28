@@ -1,7 +1,6 @@
 import json
 import os.path
 import datetime
-import pandas as pd
 
 from odysseus.path_config.path_config import root_data_path
 from odysseus.utils.geospatial_utils import *
@@ -9,7 +8,7 @@ from odysseus.utils.time_utils import *
 from odysseus.utils.bookings_utils import *
 
 
-from odysseus.city_data_manager.od_matrices.od_to_trips import *
+from odysseus.city_data_manager.od_matrices.virtual_od.od_to_trips import *
 
 
 def generate_week_config(
@@ -185,10 +184,10 @@ grid_matrix = get_city_grid_as_matrix(
 
 zone_ids = np.ravel(grid_matrix.values)
 
-hourly_od_count_dict = generate_hourly_od_count_dict(week_config, zone_ids, "uniform", count=3)
+hourly_od_count_dict = generate_hourly_od_count_dict(week_config, zone_ids, "uniform", count=1)
 
 od_matrices_by_dayslots, od_matrices_by_hour = generate_od_from_week_config(
-    city_name="my_city_3X3",
+    city_name="my_city_3X3_generated",
     data_source_id="my_data_source",
     week_config=week_config,
     zone_ids=zone_ids,
@@ -196,13 +195,13 @@ od_matrices_by_dayslots, od_matrices_by_hour = generate_od_from_week_config(
     hourly_od_count_dict=hourly_od_count_dict
 )
 
-generate_trips_from_od(
-    "my_city_3X3",
+train_booking_requests, test_booking_requests = generate_trips_from_od(
+    "my_city_3X3_generated",
     od_matrices_by_hour,
     grid_matrix,
     zone_ids,
     datetime.datetime(2023, 1, 1, 0, 0, 1),
-    datetime.datetime(2023, 1, 8, 0, 0, 1),
-    datetime.datetime(2023, 1, 8, 0, 0, 1),
-    datetime.datetime(2023, 1, 15, 0, 0, 1),
+    datetime.datetime(2023, 2, 1, 0, 0, 1),
+    datetime.datetime(2023, 2, 1, 0, 0, 1),
+    datetime.datetime(2023, 3, 1, 0, 0, 1),
 )

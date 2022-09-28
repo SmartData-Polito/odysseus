@@ -2,7 +2,7 @@ import os
 
 import geopandas as gpd
 
-from odysseus.city_data_manager.geo_data_source.geo_data_source import GeoDataSource
+from odysseus.city_data_manager.geo_trips.geo_data_source import GeoDataSource
 
 
 class CalgaryHexagonalGrid(GeoDataSource):
