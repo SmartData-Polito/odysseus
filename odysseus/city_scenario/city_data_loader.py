@@ -58,6 +58,7 @@ class CityDataLoader:
             "trips.pickle"
         )
         self.year_month_trips = gpd.GeoDataFrame(pd.read_pickle(path))
+
         path = os.path.join(
             self.points_data_path,
             "origins.pickle"
@@ -121,6 +122,7 @@ class CityDataLoader:
             lambda pp: get_haversine_distance(pp["start_longitude"], pp["start_latitude"], pp["end_longitude"], pp["end_latitude"]),
             axis=1
         )
+        print(self.trips.shape)
 
         if self.city_name == 'Vancouver':
             self.trips = self.trips[self.trips.start_longitude < -122.9]

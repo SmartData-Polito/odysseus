@@ -3,7 +3,7 @@ import geopandas as gpd
 from shapely.geometry import LineString
 
 from odysseus.city_data_manager.geo_trips.us_escooter_pilots.calgary_scooter_trips import CalgaryScooterTrips
-from odysseus.city_data_manager.geo_data_source import CalgaryHexagonalGrid
+from odysseus.city_data_manager.geo_trips.us_escooter_pilots.calgary_hexagonal_grid import CalgaryHexagonalGrid
 from odysseus.city_data_manager.geo_trips.city_geo_trips import CityGeoTrips
 from odysseus.utils.geospatial_utils import get_random_point_from_shape
 

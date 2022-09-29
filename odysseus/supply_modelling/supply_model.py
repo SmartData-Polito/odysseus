@@ -92,7 +92,6 @@ class SupplyModel:
                     self.n_vehicles_sim,
                     self.supply_model_conf["vehicles_initial_placement"]
                 )
-            print(self.available_vehicles_dict)
 
         elif self.init_from_map_config:
 
@@ -105,6 +104,7 @@ class SupplyModel:
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
 
     def init_supply_model_path(self):
+
         assert self.supply_model_folder
         self.supply_model_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),

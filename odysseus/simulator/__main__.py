@@ -5,8 +5,8 @@ import warnings
 warnings.simplefilter("ignore", UserWarning)
 
 from odysseus.simulator.simulation_input.sim_input_paths import simulation_input_paths
-from odysseus.simulator.single_run.single_run import single_run
-from odysseus.simulator.multiple_runs.multiple_runs import multiple_runs
+from odysseus.simulator.simulation_run.single_run import single_run
+from odysseus.simulator.simulation_run.multiple_runs import multiple_runs
 from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 from odysseus.utils.path_utils import *
 from odysseus.path_config.path_config import *
@@ -39,7 +39,7 @@ parser.add_argument(
 
 parser.set_defaults(
     campaign_name="test",
-    conf_name="generated_od_test",
+    conf_name="enjoy_test",
     city_scenario_folder="default",
     existing_supply_model_folder=None,
 )
@@ -59,6 +59,7 @@ print(versioned_conf_path)
 sim_general_conf_grid = get_sim_configs_from_path(versioned_conf_path, "sim_general_conf", "sim_general_conf_grid")
 demand_model_conf_grid = get_sim_configs_from_path(versioned_conf_path, "demand_model_conf", "demand_model_conf_grid")
 supply_model_conf_grid = get_sim_configs_from_path(versioned_conf_path, "supply_model_conf", "supply_model_conf_grid")
+
 multiple_runs_conf_grid = get_sim_configs_from_path(versioned_conf_path, "multiple_runs_conf", "sim_scenario_conf_grid")
 
 confs_dict = dict()

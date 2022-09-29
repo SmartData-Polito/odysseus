@@ -136,7 +136,7 @@ def get_haversine_distance(lon1, lat1, lon2, lat2):
     return c * r * 1000
 
 
-def get_od_distance(grid, origin_id, destination_id, crs="epsg:3857"):
+def get_od_distance(grid, origin_id, destination_id, crs="epsg:4326"):
     x1 = grid.loc[origin_id, "geometry"].centroid.x
     y1 = grid.loc[origin_id, "geometry"].centroid.y
     x2 = grid.loc[destination_id, "geometry"].centroid.x

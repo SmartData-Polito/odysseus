@@ -4,7 +4,9 @@ from odysseus.utils.bookings_utils import *
 
 class SimBookingRequest(SimEvent):
 
-    def __init__(self, env, sim_input, vehicles_list, booking_request_dict, vehicle_research_policy="neighbors_1"):
+    def __init__(
+            self, env, sim_input, vehicles_list, booking_request_dict,
+    ):
         super().__init__(env, "booking_request")
         self.sim_input = sim_input
         self.available_vehicles_dict = self.sim_input.supply_model.available_vehicles_dict
@@ -12,7 +14,6 @@ class SimBookingRequest(SimEvent):
         self.closest_zones = self.sim_input.closest_zones
         self.vehicles_list = vehicles_list
         self.booking_request_dict = booking_request_dict
-        self.vehicle_research_policy = vehicle_research_policy
 
     def search_max_soc_vehicle(self, zone_id):
         available_vehicles_soc_dict = {
@@ -111,11 +112,15 @@ class SimBookingRequest(SimEvent):
 
         return flags_return_dict, chosen_vehicle_id, chosen_origin_id
 
-    def search_vehicle(self):
+    def search_vehicle(self, vehicle_research_policy):
 
         #print(type(self.booking_request_dict["origin_id"]), type(list(self.available_vehicles_dict.keys())[0]))
 
-        if self.vehicle_research_policy == "neighbors_1":
+        if vehicle_research_policy == "zone":
+            return self.search_vehicle_in_zone(
+                int(self.booking_request_dict["origin_id"])
+            )
+        elif vehicle_research_policy == "neighbors_1":
             flags_return_dict, chosen_vehicle_id, chosen_origin_id = self.search_vehicle_in_zone(
                 int(self.booking_request_dict["origin_id"])
             )
@@ -124,7 +129,7 @@ class SimBookingRequest(SimEvent):
                 return flags_return_dict, chosen_vehicle_id, chosen_origin_id
             else:
                 return self.search_vehicle_in_neighbors()
-        elif self.vehicle_research_policy == "closest_vehicle":
+        elif vehicle_research_policy == "closest_vehicle":
             flags_return_dict, chosen_vehicle_id, chosen_origin_id = self.search_vehicle_in_zone(
                 int(self.booking_request_dict["origin_id"])
             )

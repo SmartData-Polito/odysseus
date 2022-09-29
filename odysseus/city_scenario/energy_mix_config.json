@@ -57,6 +57,19 @@
 			"waste": 1.67,
 			"solar": 7.82,
 			"geothermal": 2.11
+		},
+		"2020" : {
+			"nuclear": 0,
+			"natural_gas": 44.37,
+			"coal": 10.69,
+			"oil": 3.81,
+			"biomass": 5.79,
+			"other": 0.21,
+			"hydro": 17.43,
+			"wind": 6.12,
+			"waste": 1.67,
+			"solar": 7.82,
+			"geothermal": 2.11
 		}
 	},
 

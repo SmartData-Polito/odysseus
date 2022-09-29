@@ -264,7 +264,7 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_choropleth (self, col):
+	def plot_choropleth (self, col, annotate=False):
 
 		fig, ax = plt.subplots(1, 1, figsize=(15,15))
 
@@ -281,10 +281,16 @@ class EFFCS_SimOutputPlotter ():
 		plt.ylabel(None)
 		plt.yticks([])
 		plt.title(col + " chorophlet map")
+
+		if annotate:
+			for idx, row in self.grid.iterrows():
+				plt.annotate(
+					text=row[col], xy=row['coords'], horizontalalignment='center'
+				)
 		plt.savefig(
 			os.path.join(
 				self.figures_path,
-				"_".join([col, "clorophlet", "map.png"])
+				"_".join([col, "chorophlet", "map.png"])
 			), transparent=True
 		)
 		plt.close()

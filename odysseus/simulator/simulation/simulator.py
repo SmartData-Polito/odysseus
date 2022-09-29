@@ -189,7 +189,9 @@ class SharedMobilitySim:
         self.charging_outward_distance = [self.chargingStrategy.charging_outward_distance]
         self.charging_return_distance = [self.chargingStrategy.charging_return_distance]
 
-        flags_return_dict, chosen_vehicle_id, chosen_origin_id = booking_request.search_vehicle()
+        flags_return_dict, chosen_vehicle_id, chosen_origin_id = booking_request.search_vehicle(
+            "zone"
+        )
 
         available_vehicle_flag = flags_return_dict["available_vehicle_flag"]
         found_vehicle_flag = flags_return_dict["found_vehicle_flag"]

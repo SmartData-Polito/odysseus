@@ -33,13 +33,13 @@ class Fleet:
             zone = self.vehicles_zones[vehicle]
             self.available_vehicles_dict[zone] += [vehicle]
 
-    def init_vehicles_from_fleet_size(self, n_vehicles_sim, how="uniform"):
+    def init_vehicles_from_fleet_size(self, n_vehicles_sim, how):
         self.n_vehicles_sim = int(n_vehicles_sim)
         self.vehicles_soc_dict = self.init_vehicles_soc()
         if how == "random":
             self.init_vehicles_random_zones()
-            self.init_available_vehicles_dict()
         elif how == "uniform":
+            # TODO -> decide rule when division is not exact
             n_vehicles_per_zone = int(n_vehicles_sim / len(self.grid))
             current_zone_id = 0
             current_zone_count = 0
@@ -47,10 +47,10 @@ class Fleet:
             for i in range(self.n_vehicles_sim):
                 self.vehicles_zones[i] = current_zone_id
                 current_zone_count += 1
-                if current_zone_count >= n_vehicles_per_zone:
+                if current_zone_count >= n_vehicles_per_zone + 1:
                     current_zone_count = 0
                     current_zone_id += 1
-            self.init_available_vehicles_dict()
+        self.init_available_vehicles_dict()
         self.vehicles_soc_dict = {int(k): float(v) for k, v in self.vehicles_soc_dict.items()}
         self.vehicles_zones = {int(k): int(v) for k, v in self.vehicles_zones.items()}
         self.available_vehicles_dict = {int(k): v for k, v in self.available_vehicles_dict.items()}

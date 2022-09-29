@@ -1,3 +1,4 @@
+import datetime
 import os
 import argparse
 
@@ -49,8 +50,8 @@ parser.set_defaults(
     city=["my_city_3X3_generated"],
     data_source_id=["my_data_source"],
     bin_side_length=[500],
-    train_range=("2017", "1", "2017", "1"),
-    test_range=("2017", "1", "2017", "1"),
+    train_range=("2020", "9", "2020", "9"),
+    test_range=("2020", "9", "2020", "9"),
     folder_name=["default"]
 )
 
@@ -59,6 +60,8 @@ city_scenario_configs_grid = vars(args)
 city_scenario_configs_grid["train_range"] = [tuple(city_scenario_configs_grid["train_range"])]
 city_scenario_configs_grid["test_range"] = [tuple(city_scenario_configs_grid["test_range"])]
 city_scenario_configs_list = SimConfGrid(city_scenario_configs_grid).conf_list
+
+start = datetime.datetime.now()
 
 for city_scenario_config in city_scenario_configs_list:
 
@@ -96,3 +99,7 @@ for city_scenario_config in city_scenario_configs_list:
         city_scenario.save_results()
     else:
         print("City Scenario not configured properly!")
+
+end = datetime.datetime.now()
+
+print("City scenario execution time:", (end-start).total_seconds())

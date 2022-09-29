@@ -66,8 +66,8 @@ class AbstractCityScenario:
         self.max_driving_distance = self.bookings_train.driving_distance.max()
 
         self.valid_zones = self.get_valid_zones()
-        self.zones_valid_zones_distances = self.grid.to_crs("epsg:3857").centroid.apply(
-            lambda x: self.grid.to_crs("epsg:3857").loc[self.valid_zones].centroid.distance(x)
+        self.zones_valid_zones_distances = self.grid.centroid.apply(
+            lambda x: self.grid.loc[self.valid_zones].centroid.distance(x)
         )
         self.closest_valid_zone = self.zones_valid_zones_distances.idxmin(axis=1)
         self.grid = self.grid.loc[self.valid_zones]
@@ -101,9 +101,9 @@ class AbstractCityScenario:
 
         self.energy_mix = EnergyMix(self.city_name, self.year_energy_mix)
 
-        self.distance_matrix = self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.apply(
-            lambda x: self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.distance(x).sort_values()
-        )
+        self.distance_matrix = self.grid.loc[self.valid_zones].centroid.apply(
+            lambda x: self.grid.loc[self.valid_zones].centroid.distance(x).sort_values()
+        ) * 111139
         self.closest_zones = dict()
         for zone_id in self.valid_zones:
             self.closest_zones[zone_id] = list(
@@ -248,22 +248,21 @@ class AbstractCityScenario:
         ).astype(int)
 
         self.valid_zones = valid_zones_train.intersection(valid_zones_test)
-        print(valid_zones_train, valid_zones_test, self.valid_zones)
 
         return self.valid_zones
 
-    def get_neighbors_dicts(self, max_n_hops=1):
+    def get_neighbors_dicts(self, user_max_n_hops=1):
 
         n_rows = len(self.grid_matrix.index)
         n_cols = len(self.grid_matrix.columns)
-        for current_max_n_hops in range(1, max_n_hops+1):
+        for current_max_n_hops in range(1, user_max_n_hops + 1):
             for i in self.grid_matrix.index:
                 for j in self.grid_matrix.columns:
                     zone = self.grid_matrix.iloc[i, j]
-                    i_up = i-max_n_hops if i-max_n_hops >= 0 else 0
-                    i_low = i+max_n_hops if i+max_n_hops < len(self.grid_matrix.index) else n_rows - 1
-                    j_left = j-max_n_hops if j-max_n_hops >= 0 else 0
-                    j_right = j+max_n_hops if j+max_n_hops < len(self.grid_matrix.columns) else n_cols - 1
+                    i_up = i - user_max_n_hops if i - user_max_n_hops >= 0 else 0
+                    i_low = i + user_max_n_hops if i + user_max_n_hops < len(self.grid_matrix.index) else n_rows - 1
+                    j_left = j - user_max_n_hops if j - user_max_n_hops >= 0 else 0
+                    j_right = j + user_max_n_hops if j + user_max_n_hops < len(self.grid_matrix.columns) else n_cols - 1
                     self.neighbors_dict[int(zone)] = dict()
                     for ii in range(i_up, i_low+1):
                         for jj in range(j_left, j_right+1):

@@ -10,7 +10,7 @@ from odysseus.city_data_manager.geo_trips.us_escooter_pilots.norfolk_geo_trips i
 from odysseus.city_data_manager.geo_trips.us_escooter_pilots.kansas_city_geo_trips import KansasCityGeoTrips
 from odysseus.city_data_manager.geo_trips.us_escooter_pilots.chicago_geo_trips import ChicagoGeoTrips
 from odysseus.city_data_manager.geo_trips.us_escooter_pilots.calgary_geo_trips import CalgaryGeoTrips
-
+from odysseus.city_data_manager.geo_trips.enjoy.enjoy_geo_trips import EnjoyGeoTrips
 
 parser = argparse.ArgumentParser()
 
@@ -54,6 +54,9 @@ for city in args.cities:
 
                 elif data_source_id == "big_data_db":
                     geo_trips_ds = BigDataDBGeoTrips(city, data_source_id, year=int(year), month=int(month))
+
+                elif data_source_id == "enjoy":
+                    geo_trips_ds = EnjoyGeoTrips(city, data_source_id, year=int(year), month=int(month))
 
                 elif data_source_id == "city_open_data":
                     if city == "Louisville":
