@@ -29,20 +29,32 @@ def generate_week_config(
     if week_slots_type == "weekday_weekend":
 
         week_config["week_slots"] = dict()
-        week_config["week_slots"]["weekday"] = [w for w in range(0, 6)]
-        week_config["week_slots"]["weekend"] = [6, 7]
+        week_config["week_slots"]["weekday"] = [w for w in range(0, 5)]
+        week_config["week_slots"]["weekend"] = [5, 6]
         week_config["day_slots"] = dict()
         week_config["day_slots"]["weekday"] = dict()
         week_config["day_slots"]["weekend"] = dict()
 
-    if day_slots_type == "hours":
+    elif week_slots_type == "generic_day":
+
+        week_config["week_slots"] = dict()
+        week_config["week_slots"]["generic_day"] = [w for w in range(0, 7)]
+        week_config["day_slots"] = dict()
+        week_config["day_slots"]["generic_day"] = dict()
+
+    if day_slots_type == "generic_hour":
+
+        for week_slot in week_config["week_slots"]:
+            week_config["day_slots"][week_slot]["generic_hour"] = list(range(24))
+
+    elif day_slots_type == "hours":
 
         for week_slot in week_config["week_slots"]:
             for h in range(24):
                 week_config["day_slots"][week_slot][str(h)] = [h]
                 week_config["day_slots"][week_slot][str(h)] = [h]
 
-    if day_slots_type == "daymoments":
+    elif day_slots_type == "daymoments":
 
         for week_slot in week_config["week_slots"]:
 
@@ -158,50 +170,3 @@ def generate_od_from_week_config(
             ))
 
     return od_matrices_by_dayslots, od_matrices_by_hour
-
-
-week_config = generate_week_config(
-    week_slots_type="weekday_weekend",
-    day_slots_type="daymoments",
-)
-base_path = os.path.join(root_data_path, "my_city_3X3", "norm", "od_matrices", "my_data_source")
-os.makedirs(base_path, exist_ok=True)
-with open(os.path.join(base_path, "week_config.json"), "w") as f:
-    json.dump(week_config, f, indent=4)
-
-grid_config = {
-    "cell_type": "square",
-    "n_rows": 3,
-    "n_cols": 3,
-    "bin_side_length": 500
-}
-
-grid_matrix = get_city_grid_as_matrix(
-    (0, 0, grid_config["n_cols"]*grid_config["bin_side_length"], grid_config["n_rows"]*grid_config["bin_side_length"]),
-    grid_config["bin_side_length"],
-    "dummy_crs"
-)
-
-zone_ids = np.ravel(grid_matrix.values)
-
-hourly_od_count_dict = generate_hourly_od_count_dict(week_config, zone_ids, "uniform", count=1)
-
-od_matrices_by_dayslots, od_matrices_by_hour = generate_od_from_week_config(
-    city_name="my_city_3X3_generated",
-    data_source_id="my_data_source",
-    week_config=week_config,
-    zone_ids=zone_ids,
-    od_type="count",
-    hourly_od_count_dict=hourly_od_count_dict
-)
-
-train_booking_requests, test_booking_requests = generate_trips_from_od(
-    "my_city_3X3_generated",
-    od_matrices_by_hour,
-    grid_matrix,
-    zone_ids,
-    datetime.datetime(2023, 1, 1, 0, 0, 1),
-    datetime.datetime(2023, 2, 1, 0, 0, 1),
-    datetime.datetime(2023, 2, 1, 0, 0, 1),
-    datetime.datetime(2023, 3, 1, 0, 0, 1),
-)

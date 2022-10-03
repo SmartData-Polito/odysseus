@@ -39,11 +39,12 @@ def update_req_time_info(booking_request_dict):
 	return booking_request_dict
 
 
-def get_distances(booking_or_request_dict, grid, min_distance=500, orography_factor=1.4):
+def get_distances(booking_or_request_dict, grid_centroids, min_distance=500, orography_factor=1.4, crs="epsg:4326"):
 	booking_or_request_dict["euclidean_distance"] = get_od_distance(
-		grid,
+		grid_centroids,
 		booking_or_request_dict["origin_id"],
-		booking_or_request_dict["destination_id"]
+		booking_or_request_dict["destination_id"],
+		crs
 	)
 
 	if booking_or_request_dict["euclidean_distance"] == 0:
@@ -53,16 +54,18 @@ def get_distances(booking_or_request_dict, grid, min_distance=500, orography_fac
 	return booking_or_request_dict
 
 
-def get_walking_distances(booking_dict, grid):
+def get_walking_distances(booking_dict, grid_centroids, grid_crs):
 	booking_dict["origin_walking_distance"] = get_od_distance(
-		grid,
+		grid_centroids,
 		booking_dict["req_origin_id"],
-		booking_dict["origin_id"]
+		booking_dict["origin_id"],
+		grid_crs
 	)
 	booking_dict["destination_walking_distance"] = get_od_distance(
-		grid,
+		grid_centroids,
 		booking_dict["req_destination_id"],
-		booking_dict["destination_id"]
+		booking_dict["destination_id"],
+		grid_crs
 	)
 	return booking_dict
 

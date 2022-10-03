@@ -21,18 +21,21 @@ class SimBookingRequest(SimEvent):
         }
         max_soc = max(available_vehicles_soc_dict.values())
         max_soc_vehicle = max(available_vehicles_soc_dict, key=available_vehicles_soc_dict.get)
-        if self.vehicles_list[max_soc_vehicle].soc.level > abs(
-            self.vehicles_list[max_soc_vehicle].consumption_to_percentage(
+        trip_consumption_percentage = self.vehicles_list[max_soc_vehicle].consumption_to_percentage(
                 self.vehicles_list[max_soc_vehicle].distance_to_consumption(
                     self.booking_request_dict["driving_distance"] / 1000
                 )
             )
+        if self.vehicles_list[max_soc_vehicle].soc.level > abs(
+                trip_consumption_percentage
         ):
             return True, max_soc_vehicle, max_soc
         else:
             return False, max_soc_vehicle, max_soc
 
     def search_vehicle_in_zone(self, zone_id):
+
+        print(self.available_vehicles_dict)
 
         available_vehicle_flag = False
         found_vehicle_flag = False
@@ -45,6 +48,7 @@ class SimBookingRequest(SimEvent):
             found_vehicle_flag, max_soc_vehicle_origin, max_soc_origin = self.search_max_soc_vehicle(zone_id)
             max_soc_vehicle_id = max_soc_vehicle_origin
             max_soc_zone_id = self.booking_request_dict["origin_id"]
+            print(found_vehicle_flag, max_soc_vehicle_origin, max_soc_origin)
 
         flags_return_dict = dict(
             available_vehicle_flag = available_vehicle_flag,

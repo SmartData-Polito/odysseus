@@ -48,6 +48,10 @@ class SimInput:
 		# 		self.distance_matrix[self.distance_matrix > 0].loc[zone_id].sort_values().dropna().index.values
 		# 	)
 
+		self.grid["centroid_x"] = self.grid.loc[:, "geometry"].centroid.x
+		self.grid["centroid_y"] = self.grid.loc[:, "geometry"].centroid.y
+		self.grid_crs = self.grid.crs
+
 		self.start = datetime.datetime(
 			self.sim_general_conf["year"],
 			self.sim_general_conf["month_start"],

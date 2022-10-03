@@ -47,11 +47,11 @@ parser.add_argument(
 
 parser.set_defaults(
     data_from=["od"],
-    city=["my_city_3X3_generated"],
+    city=["my_city_2X2_1"],
     data_source_id=["my_data_source"],
     bin_side_length=[500],
-    train_range=("2020", "9", "2020", "9"),
-    test_range=("2020", "9", "2020", "9"),
+    train_range=("2023", "1", "2023", "1"),
+    test_range=("2023", "1", "2023", "1"),
     folder_name=["default"]
 )
 
@@ -82,6 +82,7 @@ for city_scenario_config in city_scenario_configs_list:
             int(city_scenario_config["test_range"][2]), int(city_scenario_config["test_range"][3]),
         )
         city_scenario.create_squared_city_grid()
+        city_scenario.create_city_scenario_from_trips_data()
 
     elif city_scenario_config["data_from"] == "od":
 
@@ -89,6 +90,7 @@ for city_scenario_config in city_scenario_configs_list:
         city_scenario = CityScenarioFromOD(
             city_scenario_config["city"], "my_data_source", city_scenario_config=city_scenario_config
         )
+        city_scenario.create_city_scenario_from_trips_data()
 
     else:
 

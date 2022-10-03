@@ -39,7 +39,7 @@ parser.add_argument(
 
 parser.set_defaults(
     campaign_name="test",
-    conf_name="enjoy_test",
+    conf_name="generated_od_test",
     city_scenario_folder="default",
     existing_supply_model_folder=None,
 )

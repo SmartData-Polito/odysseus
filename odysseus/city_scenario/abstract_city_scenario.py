@@ -193,7 +193,7 @@ class AbstractCityScenario:
         bookings = bookings.sort_values("start_time")
         bookings.loc[:, "ia_timeout"] = (
                 bookings.start_time - bookings.start_time.shift()
-        ).apply(lambda x: x.total_seconds()).abs()
+        ).apply(lambda x: x.total_seconds()).abs().fillna(10)
         bookings = bookings.loc[bookings.ia_timeout >= 0]
 
         bookings = bookings[bookings.duration > 0]
@@ -239,15 +239,15 @@ class AbstractCityScenario:
         valid_origin_zones_test = origin_zones_count_test[(origin_zones_count_test > count_threshold)]
         valid_dest_zones_test = dest_zones_count_test[(dest_zones_count_test > count_threshold)]
 
-        valid_zones_train = valid_origin_zones_train.index.intersection(
+        valid_zones_train = valid_origin_zones_train.index.union(
             valid_dest_zones_train.index
         ).astype(int)
 
-        valid_zones_test = valid_origin_zones_test.index.intersection(
+        valid_zones_test = valid_origin_zones_test.index.union(
             valid_dest_zones_test.index
         ).astype(int)
 
-        self.valid_zones = valid_zones_train.intersection(valid_zones_test)
+        self.valid_zones = valid_zones_train.union(valid_zones_test)
 
         return self.valid_zones
 

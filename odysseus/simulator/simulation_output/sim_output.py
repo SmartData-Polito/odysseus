@@ -15,6 +15,7 @@ class SimOutput():
 		self.sim_general_conf = sim.sim_input.sim_general_conf
 		self.supply_model_conf = sim.sim_input.supply_model_conf
 		self.grid = sim.sim_input.grid
+		self.grid = self.grid.loc[:, ~self.grid.columns.duplicated()]
 		self.n_charging_poles_by_zone = sim.sim_input.supply_model.n_charging_poles_by_zone
 
 		# Sim Stats creation
@@ -34,6 +35,12 @@ class SimOutput():
 			self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
 			self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
 			self.sim_users_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
+
+			print(
+				self.sim_booking_requests.shape,
+				self.sim_bookings.shape,
+				self.sim_unsatisfied_requests.shape
+			)
 
 			if "end_time" not in self.sim_system_charges_bookings:
 				self.sim_system_charges_bookings["end_time"] = pd.Series(dtype=object)
@@ -92,11 +99,17 @@ class SimOutput():
 			else:
 				self.sim_stats.loc["fraction_charge_deaths"] = 0
 
-			self.sim_stats.loc["soc_avg"] = \
-				self.sim_bookings.start_soc.mean()
+			if len(self.sim_bookings):
+				self.sim_stats.loc["soc_avg"] = \
+					self.sim_bookings.start_soc.mean()
+			else:
+				self.sim_stats.loc["soc_avg"] = 0
 
-			self.sim_stats.loc["soc_med"] = \
-				self.sim_bookings.start_soc.median()
+			if len(self.sim_bookings):
+				self.sim_stats.loc["soc_med"] = \
+					self.sim_bookings.start_soc.median()
+			else:
+				self.sim_stats.loc["soc_med"] = 0
 
 			if len(self.sim_charges):
 				self.sim_stats.loc["charging_time_avg"] = \
@@ -124,25 +137,27 @@ class SimOutput():
 			else:
 				self.sim_stats.loc["n_charges_by_vehicle_users_avg"] = 0
 
-			self.sim_stats.loc["tot_potential_mobility_distance"] = self.sim_booking_requests.driving_distance.sum()
-			self.sim_stats.loc["tot_potential_mobility_duration"] = self.sim_booking_requests.duration.sum()
-			self.sim_stats.loc["tot_potential_welltotank_energy"] = self.sim_booking_requests.welltotank_kwh.sum()
-			self.sim_stats.loc["tot_potential_tanktowheel_energy"] = self.sim_booking_requests.tanktowheel_kwh.sum()
-			self.sim_stats.loc["tot_potential_mobility_energy"] = self.sim_booking_requests.soc_delta_kwh.sum()
-			self.sim_stats.loc[
-				"tot_potential_welltotank_co2_emissions"] = self.sim_booking_requests.welltotank_emissions.sum() / 1000
-			self.sim_stats.loc[
-				"tot_potential_welltowheel_co2_emissions"] = self.sim_booking_requests.tanktowheel_emissions.sum() / 1000
-			self.sim_stats.loc["tot_potential_co2_emissions_kg"] = self.sim_booking_requests.co2_emissions.sum() / 1000
+			if len(self.sim_bookings):
+				self.sim_stats.loc["tot_potential_mobility_distance"] = self.sim_booking_requests.driving_distance.sum()
+				self.sim_stats.loc["tot_potential_mobility_duration"] = self.sim_booking_requests.duration.sum()
+				self.sim_stats.loc["tot_potential_welltotank_energy"] = self.sim_booking_requests.welltotank_kwh.sum()
+				self.sim_stats.loc["tot_potential_tanktowheel_energy"] = self.sim_booking_requests.tanktowheel_kwh.sum()
+				self.sim_stats.loc["tot_potential_mobility_energy"] = self.sim_booking_requests.soc_delta_kwh.sum()
+				self.sim_stats.loc[
+					"tot_potential_welltotank_co2_emissions"] = self.sim_booking_requests.welltotank_emissions.sum() / 1000
+				self.sim_stats.loc[
+					"tot_potential_welltowheel_co2_emissions"] = self.sim_booking_requests.tanktowheel_emissions.sum() / 1000
+				self.sim_stats.loc["tot_potential_co2_emissions_kg"] = self.sim_booking_requests.co2_emissions.sum() / 1000
 
-			self.sim_stats.loc["tot_mobility_distance"] = self.sim_bookings.driving_distance.sum()
-			self.sim_stats.loc["tot_mobility_duration"] = self.sim_bookings.duration.sum()
-			self.sim_stats.loc["tot_welltotank_energy"] = self.sim_bookings.welltotank_kwh.sum()
-			self.sim_stats.loc["tot_tanktowheel_energy"] = self.sim_bookings.tanktowheel_kwh.sum()
-			self.sim_stats.loc["tot_mobility_energy"] = self.sim_bookings.soc_delta_kwh.sum()
-			self.sim_stats.loc["tot_welltotank_co2_emissions"] = self.sim_bookings.welltotank_emissions.sum() / 1000
-			self.sim_stats.loc["tot_tanktowheel_co2_emissions"] = self.sim_bookings.tanktowheel_emissions.sum() / 1000
-			self.sim_stats.loc["tot_co2_emissions_kg"] = self.sim_bookings.co2_emissions.sum() / 1000
+			if len(self.sim_bookings):
+				self.sim_stats.loc["tot_mobility_distance"] = self.sim_bookings.driving_distance.sum()
+				self.sim_stats.loc["tot_mobility_duration"] = self.sim_bookings.duration.sum()
+				self.sim_stats.loc["tot_welltotank_energy"] = self.sim_bookings.welltotank_kwh.sum()
+				self.sim_stats.loc["tot_tanktowheel_energy"] = self.sim_bookings.tanktowheel_kwh.sum()
+				self.sim_stats.loc["tot_mobility_energy"] = self.sim_bookings.soc_delta_kwh.sum()
+				self.sim_stats.loc["tot_welltotank_co2_emissions"] = self.sim_bookings.welltotank_emissions.sum() / 1000
+				self.sim_stats.loc["tot_tanktowheel_co2_emissions"] = self.sim_bookings.tanktowheel_emissions.sum() / 1000
+				self.sim_stats.loc["tot_co2_emissions_kg"] = self.sim_bookings.co2_emissions.sum() / 1000
 
 			if len(self.sim_charges):
 				self.sim_stats.loc["tot_charging_energy"] = self.sim_charges["soc_delta_kwh"].sum()

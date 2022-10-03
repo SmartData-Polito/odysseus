@@ -25,26 +25,11 @@ class ODmatrixDataSource:
 
     """
 
-    def __init__(self, city_name, data_source_id, vehicles_type_id):
+    def __init__(self, city_name, data_source_id):
 
         self.city_name = city_name
         self.data_source_id = data_source_id
-        self.vehicles_type_id = vehicles_type_id
         self.data_type_id = "od_matrices"
-
-        self.raw_data_path = os.path.join(
-            data_paths_dict[self.city_name]["raw"][self.data_type_id],
-            self.data_source_id,
-        )
-
-        self.norm_data_path = os.path.join(
-            data_paths_dict[self.city_name]["norm"][self.data_type_id],
-            self.data_source_id
-        )
-        check_create_path(self.norm_data_path)
-
-        self.trips_df = pd.DataFrame()
-        self.trips_df_norm = pd.DataFrame()
 
     def load_raw(self):
 
@@ -67,26 +52,14 @@ class ODmatrixDataSource:
 
     def save_norm(self):
         """
-        It stores normalized data both in a csv file and in a pickle file. The files produced are of the format
-        *<year>_<month number>.csv* (or .pickle). For example *2017_11.csv*.
+        It stores normalized data as a collection of .csv containing OD matrices for a certain week_slot and day_slot.
+        It also stores the .json configurations for the city grid and the time division.
 
         :return: nothing
         """
 
     def load_norm(self, year, month):
         """
-        Load a previously created normalized file from memory. It requests month and year as parameters, and checks if
-        the file for that period exists in memory (looking for it with the same format as *save_norm* in the city folder).
-        If it exists, it returns a pandas.DataFrame containing the data read, otherwise it returns an empty DataFrame
-
-        :param year: year expressed as a four-digit number (e.g. 1999)
-        :type year: int
-        :param month: month expressed as a number (e.g. for November the method expects to receive 11)
-        :type month: int
-        :return: If the file exists, it returns a pandas.DataFrame containing the data read, otherwise it returns an empty DataFrame
+        Load a previously created set of OD matrices with their configurations.
         """
-        data_path = os.path.join(
-            data_paths_dict[self.city_name]["norm"][self.data_type_id],
-            self.data_source_id,
-            "_".join([str(year), str(month)]) + ".csv"
-        )
+

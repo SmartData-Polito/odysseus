@@ -8,13 +8,14 @@ supply_model_conf_grid = {
 	# -> vehicles
 
 	"vehicles_config_mode": ["sim_config"],
-	"vehicles_initial_placement": ["uniform"],
 	"vehicle_model_name": ["VW Golf 7 1.0 TSI 2018"],
-	"n_vehicles": [40],
+	"vehicles_initial_placement": ["random_greedy"],
+	"n_vehicles": [1],
 
 	# -> charging
 
 	"stations_config_mode": ["sim_config"],
+
 	"distributed_cps": [True],
 	"system_cps": [True],
 	"profile_type": [""],

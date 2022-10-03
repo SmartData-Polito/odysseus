@@ -4,6 +4,13 @@ import numpy as np
 import pandas as pd
 
 
+def get_daytype_from_week_config(week_config, weekday):
+    for daytype in week_config["week_slots"]:
+        for day in week_config["week_slots"][daytype]:
+            if day == weekday:
+                return daytype
+
+
 def get_daytype_from_weekday(weekday):
     if weekday in [5, 6]:
         return "weekend"

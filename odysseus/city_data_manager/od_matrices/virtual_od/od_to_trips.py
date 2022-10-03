@@ -2,21 +2,21 @@ import os
 import datetime
 import pandas as pd
 
-from odysseus.utils.time_utils import get_daytype_from_weekday
+from odysseus.utils.time_utils import get_daytype_from_week_config
 from odysseus.utils.bookings_utils import create_booking_request_dict
 from odysseus.utils.bookings_utils import get_grid_indexes
 from odysseus.path_config.path_config import root_data_path
 
 
 def generate_booking_requests_list(
-        od_matrices, start_datetime, end_datetime
+        od_matrices, week_config, start_datetime, end_datetime
 ):
     booking_requests_list = list()
     current_datetime = start_datetime
     print(current_datetime)
     current_hour = current_datetime.hour
     current_weekday = current_datetime.weekday()
-    current_daytype = get_daytype_from_weekday(current_weekday)
+    current_daytype = get_daytype_from_week_config(week_config, current_weekday)
     seconds_spent = 0
     while current_datetime < end_datetime:
         for o_id in od_matrices[current_daytype][current_hour].index:
@@ -39,17 +39,18 @@ def generate_booking_requests_list(
         current_datetime += datetime.timedelta(seconds=3600)
         current_hour = current_datetime.hour
         current_weekday = current_datetime.weekday()
-        current_daytype = get_daytype_from_weekday(current_weekday)
+        current_daytype = get_daytype_from_week_config(week_config, current_weekday)
 
     return booking_requests_list
 
 
 def generate_trips_from_od(
-        city_name, od_matrices, grid_matrix, zone_ids,
+        city_name, od_matrices, week_config, grid_matrix, zone_ids,
         train_start_datetime, train_end_datetime, test_start_datetime, test_end_datetime
 ):
     train_booking_requests = pd.DataFrame(generate_booking_requests_list(
         od_matrices,
+        week_config,
         train_start_datetime,
         train_end_datetime,
     ))
@@ -60,6 +61,7 @@ def generate_trips_from_od(
 
     test_booking_requests = pd.DataFrame(generate_booking_requests_list(
         od_matrices,
+        week_config,
         test_start_datetime,
         test_end_datetime,
     ))

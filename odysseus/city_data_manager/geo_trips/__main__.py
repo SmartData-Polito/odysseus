@@ -43,6 +43,7 @@ parser.set_defaults(
 )
 
 args = parser.parse_args()
+
 for city in args.cities:
     for data_source_id in args.data_source_ids:
         for year in args.years:

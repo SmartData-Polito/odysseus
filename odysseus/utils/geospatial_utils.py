@@ -73,6 +73,31 @@ def get_city_grid_as_gdf(total_bounds, bin_side_length, crs="epsg:4326"):
     return grid
 
 
+def get_city_grid_as_gdf_v2(total_bounds, bin_side_length, crs="epsg:4326"):
+    x_min, y_min, x_max, y_max = total_bounds
+    width, height, rows, cols = get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length)
+
+    x_left = x_min
+    x_right = x_min + width
+    polygons = []
+    for i in range(rows):
+        y_top = y_max
+        y_bottom = y_max - height
+        for j in range(cols):
+            polygons.append(Polygon([(x_left, y_top), (x_right, y_top), (x_right, y_bottom), (x_left, y_bottom)]))
+            y_top = y_top - height
+            y_bottom = y_bottom - height
+        x_left = x_left + width
+        x_right = x_right + width
+    grid = gpd.GeoDataFrame({"geometry": polygons})
+    grid["zone_id"] = range(len(grid))
+    if crs == "epsg:4326":
+        grid.crs = crs
+    if crs == "dummy_crs":
+        grid.crs = "epsg:3857"
+    return grid
+
+
 def get_city_grid_as_matrix(total_bounds, bin_side_length, crs="epsg:4326"):
     x_min, y_min, x_max, y_max = total_bounds
     if crs == "epsg:4326":
@@ -87,6 +112,16 @@ def get_city_grid_as_matrix(total_bounds, bin_side_length, crs="epsg:4326"):
             grid_matrix[i].append(zone_id)
             zone_id += 1
     return pd.DataFrame(grid_matrix)
+
+
+def get_grid_matrix_from_config(grid_config):
+    grid_matrix = get_city_grid_as_matrix(
+        (0, 0, grid_config["n_cols"] * grid_config["bin_side_length"],
+         grid_config["n_rows"] * grid_config["bin_side_length"]),
+        grid_config["bin_side_length"],
+        "dummy_crs"
+    )
+    return grid_matrix
 
 
 def get_random_point_from_linestring (linestring):
@@ -136,11 +171,11 @@ def get_haversine_distance(lon1, lat1, lon2, lat2):
     return c * r * 1000
 
 
-def get_od_distance(grid, origin_id, destination_id, crs="epsg:4326"):
-    x1 = grid.loc[origin_id, "geometry"].centroid.x
-    y1 = grid.loc[origin_id, "geometry"].centroid.y
-    x2 = grid.loc[destination_id, "geometry"].centroid.x
-    y2 = grid.loc[destination_id, "geometry"].centroid.y
+def get_od_distance(grid_centroids, origin_id, destination_id, crs="epsg:3857"):
+    x1 = grid_centroids.loc[origin_id, "centroid_x"]
+    y1 = grid_centroids.loc[origin_id, "centroid_y"]
+    x2 = grid_centroids.loc[destination_id, "centroid_x"]
+    y2 = grid_centroids.loc[destination_id, "centroid_y"]
     if crs == "epsg:4326":
         return get_haversine_distance(x1, y1, x2, y2)
     elif crs == "epsg:3857":

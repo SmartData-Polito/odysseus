@@ -55,6 +55,7 @@ class CityScenarioFromOD(AbstractCityScenario):
         self.bookings_train.start_time = pd.to_datetime(self.bookings_train.start_time, utc=True)
         self.bookings_train.end_time = pd.to_datetime(self.bookings_train.end_time, utc=True)
         self.bookings_train = get_time_group_columns(self.bookings_train)
+
         valid_zones_train = set(self.bookings_train.origin_id.values).union(set(self.bookings_train.destination_id.values))
 
         self.bookings_test = pd.read_csv(os.path.join(
@@ -73,13 +74,12 @@ class CityScenarioFromOD(AbstractCityScenario):
 
     def create_squared_city_grid(self, n_zones_x, n_zones_y, bin_side_length):
 
-        print(bin_side_length)
-
         self.bin_side_length = bin_side_length
         total_bounds = (
             0, 0, n_zones_x * bin_side_length, n_zones_y * bin_side_length
         )
-        self.grid = get_city_grid_as_gdf(total_bounds, bin_side_length, "dummy_crs")
+        self.grid = get_city_grid_as_gdf_v2(total_bounds, bin_side_length, "dummy_crs")
+
         self.grid_matrix = get_city_grid_as_matrix(total_bounds, bin_side_length, "dummy_crs")
 
         self.bookings_train["origin_id"] = self.bookings_train[["origin_i", "origin_j"]].apply(
@@ -162,13 +162,17 @@ class CityScenarioFromOD(AbstractCityScenario):
         self.bookings_train["euclidean_distance"] = self.bookings_train[
             ["origin_id", "destination_id"]
         ].apply(
-            lambda s: get_od_distance(grid=self.grid, origin_id=s[0], destination_id=s[1]), axis=1
+            lambda s: get_od_distance(
+                grid=self.grid, origin_id=s[0], destination_id=s[1], crs="epsg:3857"
+            ), axis=1
         )
         self.bookings_train = self.get_input_bookings_filtered(self.bookings_train).dropna()
 
         self.bookings_test["euclidean_distance"] = self.bookings_test[
             ["origin_id", "destination_id"]
         ].apply(
-            lambda s: get_od_distance(grid=self.grid, origin_id=s[0], destination_id=s[1]), axis=1
+            lambda s: get_od_distance(
+                grid=self.grid, origin_id=s[0], destination_id=s[1], crs="epsg:3857"
+            ), axis=1
         )
         self.bookings_test = self.get_input_bookings_filtered(self.bookings_test).dropna()

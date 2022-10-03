@@ -205,9 +205,10 @@ class ChargingPrimitives:
 
 	def get_timeout(self, origin_id, destination_id):
 		distance = get_od_distance(
-			self.sim_input.grid,
+			self.sim_input.grid_centroids,
 			origin_id,
-			destination_id
+			destination_id,
+			self.sim_input.grid_crs
 		)
 		if distance == 0:
 			distance = self.sim_input.supply_model.city_scenario.bin_side_length
@@ -215,9 +216,10 @@ class ChargingPrimitives:
 
 	def get_cr_soc_delta(self, origin_id, destination_id, vehicle):
 		distance = get_od_distance(
-			self.sim_input.grid,
+			self.sim_input.grid_centroids,
 			origin_id,
-			destination_id
+			destination_id,
+			self.sim_input.grid_crs
 		)
 		if distance == 0:
 			distance = self.sim_input.supply_model.city_scenario.bin_side_length
@@ -225,9 +227,10 @@ class ChargingPrimitives:
 
 	def get_distance(self, origin_id, destination_id):
 		distance = get_od_distance(
-			self.sim_input.grid,
+			self.sim_input.grid_centroids,
 			origin_id,
-			destination_id
+			destination_id,
+			self.sim_input.grid_crs
 		)
 		if distance == 0:
 			distance = self.sim_input.supply_model.city_scenario.bin_side_length

@@ -97,9 +97,10 @@ class RelocationStrategy(RelocationPrimitives):
                     relocated_vehicles = [max_soc_vehicle]
 
                     distance = get_od_distance(
-                        self.simInput.grid,
+                        self.simInput.grid_centroids,
                         max_soc_vehicle_zone,
-                        relocation_zone_id
+                        relocation_zone_id,
+                        self.simInput.grid_crs
                     )
 
                     scooter_relocation = init_scooter_relocation(relocated_vehicles, booking_request["start_time"],
@@ -153,9 +154,10 @@ class RelocationStrategy(RelocationPrimitives):
                     relocated = True
 
                     distance = get_od_distance(
-                        self.simInput.grid,
+                        self.simInput.grid_centroids,
                         booking_request["destination_id"],
-                        relocation_zone_id
+                        relocation_zone_id,
+                        self.simInput.grid_crs
                     )
 
                     duration = distance / 1000 / self.simInput.supply_model_conf["avg_relocation_speed"] * 3600
@@ -647,9 +649,10 @@ class RelocationStrategy(RelocationPrimitives):
                             if first_pick_up_zone_id not in workers_distances_by_zone:
                                 workers_distances_by_zone[first_pick_up_zone_id] = {}
                             workers_distances_by_zone[first_pick_up_zone_id][worker] = get_od_distance(
-                                self.simInput.grid,
+                                self.simInput.grid_centroids,
                                 worker.current_position,
-                                first_pick_up_zone_id
+                                first_pick_up_zone_id,
+                                self.simInput.grid_crs
                             )
 
                         for i in range(min(n_relocations, len(self.scheduled_scooter_relocations), n_free_workers)):
@@ -733,9 +736,10 @@ class RelocationStrategy(RelocationPrimitives):
         for i in range(len(other_zone_ids)):
             other_zone_id = other_zone_ids[i]
             distance_from_starting_zone = get_od_distance(
-                self.simInput.grid,
+                self.simInput.grid_centroids,
                 starting_zone_id,
-                other_zone_id
+                other_zone_id,
+                self.simInput.grid_crs
             )
             zone_distances.append(distance_from_starting_zone)
             if distance_from_starting_zone > max_distance:

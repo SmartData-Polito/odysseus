@@ -49,6 +49,7 @@ class SupplyModel:
         self.real_n_charging_zones = 0
 
         self.grid = self.city_scenario.grid
+        self.grid = self.grid.loc[:, ~self.grid.columns.duplicated()]
         self.valid_zones = self.city_scenario.valid_zones
         self.neighbors_dict = self.city_scenario.neighbors_dict
         self.numerical_params_dict = self.city_scenario.numerical_params_dict

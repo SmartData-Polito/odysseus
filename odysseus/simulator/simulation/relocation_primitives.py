@@ -186,9 +186,10 @@ class RelocationPrimitives:
                 step_end = collection_path[j]
 
                 distance = get_od_distance(
-                    self.simInput.grid,
+                    self.simInput.grid_centroids,
                     step_start,
-                    step_end
+                    step_end,
+                    self.sim_input.grid_crs
                 )
                 total_distance += distance
                 self.sim_metrics.update_metrics("avg_relocation_step_distance", distance)
@@ -222,9 +223,10 @@ class RelocationPrimitives:
                 step_end = distribution_path[j]
 
                 distance = get_od_distance(
-                    self.simInput.grid,
+                    self.simInput.grid_centroids,
                     step_start,
-                    step_end
+                    step_end,
+                    self.simInput.grid_crs
                 )
                 total_distance += distance
                 self.sim_metrics.update_metrics("avg_relocation_step_distance", distance)
