@@ -94,13 +94,14 @@ class SupplyModel:
                     self.supply_model_conf["vehicles_initial_placement"]
                 )
 
-        elif self.init_from_map_config:
+        elif self.supply_model_conf["vehicles_config_mode"] == "vehicles_zones":
 
-            self.init_supply_model_path()
+            frozset = self.supply_model_conf["vehicles_zones"]
+            #dict1 = {x: i for i, s in enumerate(self.supply_model_conf["vehicles_zones"]) for x in s}
+            self.n_vehicles_sim = len(self.supply_model_conf["vehicles_zones"])
+            self.fleet.n_vehicles_sim = self.n_vehicles_sim
             self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict = \
-                self.fleet.init_vehicles_from_map_config(
-                    self.supply_model_path
-                )
+                self.fleet.init_from_vehicles_zones(dict(frozset))
 
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
 

@@ -107,6 +107,10 @@ class SimInput:
 			self.demand_model_conf["requests_rate_factor"] = self.rate_ratio
 
 		# supply
+
+		if self.supply_model_conf["vehicles_config_mode"] == "vehicles_zones":
+			self.n_vehicles_sim = len(self.supply_model_conf["vehicles_zones"])
+
 		if "n_vehicles" in self.supply_model_conf.keys():
 			self.n_vehicles_sim = self.supply_model_conf["n_vehicles"]
 		elif "n_vehicles_factor" in self.supply_model_conf.keys():

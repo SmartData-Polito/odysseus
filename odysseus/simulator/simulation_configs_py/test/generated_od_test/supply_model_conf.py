@@ -7,10 +7,12 @@ supply_model_conf_grid = {
 
 	# -> vehicles
 
-	"vehicles_config_mode": ["sim_config"],
+	"vehicles_config_mode": ["vehicles_zones"],
 	"vehicle_model_name": ["VW Golf 7 1.0 TSI 2018"],
-	"vehicles_initial_placement": ["random_greedy"],
-	"n_vehicles": [1],
+	#"vehicles_initial_placement": ["random_greedy"],
+	"vehicles_zones": [
+		frozenset({0: 1}.items())
+	],
 
 	# -> charging
 

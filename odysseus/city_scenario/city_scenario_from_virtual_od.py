@@ -80,6 +80,10 @@ class CityScenarioFromOD(AbstractCityScenario):
         )
         self.grid = get_city_grid_as_gdf_v2(total_bounds, bin_side_length, "dummy_crs")
 
+        self.grid["centroid_x"] = self.grid.loc[:, "geometry"].centroid.x
+        self.grid["centroid_y"] = self.grid.loc[:, "geometry"].centroid.y
+        self.grid_crs = self.grid.crs
+
         self.grid_matrix = get_city_grid_as_matrix(total_bounds, bin_side_length, "dummy_crs")
 
         self.bookings_train["origin_id"] = self.bookings_train[["origin_i", "origin_j"]].apply(
@@ -163,7 +167,7 @@ class CityScenarioFromOD(AbstractCityScenario):
             ["origin_id", "destination_id"]
         ].apply(
             lambda s: get_od_distance(
-                grid=self.grid, origin_id=s[0], destination_id=s[1], crs="epsg:3857"
+                grid_centroids=self.grid, origin_id=s[0], destination_id=s[1], crs=self.grid_crs
             ), axis=1
         )
         self.bookings_train = self.get_input_bookings_filtered(self.bookings_train).dropna()
@@ -172,7 +176,7 @@ class CityScenarioFromOD(AbstractCityScenario):
             ["origin_id", "destination_id"]
         ].apply(
             lambda s: get_od_distance(
-                grid=self.grid, origin_id=s[0], destination_id=s[1], crs="epsg:3857"
+                grid_centroids=self.grid, origin_id=s[0], destination_id=s[1], crs=self.grid_crs
             ), axis=1
         )
         self.bookings_test = self.get_input_bookings_filtered(self.bookings_test).dropna()

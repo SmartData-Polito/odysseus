@@ -21,7 +21,6 @@ class Fleet:
     def init_vehicles_random_zones(self, n_initial_zones=30):
         n_initial_zones = min(n_initial_zones, len(self.grid))
         grid_origin_count = self.grid[["zone_id_origin_count"]].iloc[:, 0].fillna(0)
-        print(grid_origin_count)
         top_o_zones = grid_origin_count.sort_values(ascending=False).iloc[:n_initial_zones+1]
         vehicles_random_zones = list(np.random.uniform(0, n_initial_zones, self.n_vehicles_sim).astype(int).round())
         self.vehicles_zones = []
@@ -30,6 +29,7 @@ class Fleet:
         self.vehicles_zones = {i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)}
 
     def init_available_vehicles_dict(self):
+        print(self.grid.zone_id)
         self.available_vehicles_dict = {int(zone): [] for zone in self.grid.zone_id}
         for vehicle in range(len(self.vehicles_zones)):
             zone = self.vehicles_zones[vehicle]
@@ -62,12 +62,8 @@ class Fleet:
         self.available_vehicles_dict = {int(k): v for k, v in self.available_vehicles_dict.items()}
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
 
-    def init_vehicles_from_map_config(self, supply_model_path):
-        with open(os.path.join(supply_model_path, "available_vehicles_dict.json"), "r") as f:
-            self.available_vehicles_dict = json.load(f)
-        with open(os.path.join(supply_model_path, "vehicles_soc_dict.json"), "r") as f:
-            self.vehicles_soc_dict = json.load(f)
-        with open(os.path.join(supply_model_path, "vehicles_zones.json"), "r") as f:
-            self.vehicles_zones = json.load(f)
-        self.n_vehicles_sim = len(self.vehicles_zones)
+    def init_from_vehicles_zones(self, vehicle_zones):
+        self.vehicles_soc_dict = self.init_vehicles_soc()
+        self.vehicles_zones = vehicle_zones
+        self.init_available_vehicles_dict()
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict

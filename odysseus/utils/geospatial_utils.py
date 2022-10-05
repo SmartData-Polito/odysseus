@@ -77,18 +77,19 @@ def get_city_grid_as_gdf_v2(total_bounds, bin_side_length, crs="epsg:4326"):
     x_min, y_min, x_max, y_max = total_bounds
     width, height, rows, cols = get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length)
 
-    x_left = x_min
-    x_right = x_min + width
+    y_top = y_max
+    y_bottom = y_max - height
     polygons = []
-    for i in range(rows):
-        y_top = y_max
-        y_bottom = y_max - height
-        for j in range(cols):
+    for j in range(cols):
+        x_left = x_min
+        x_right = x_min + width
+        for i in range(rows):
             polygons.append(Polygon([(x_left, y_top), (x_right, y_top), (x_right, y_bottom), (x_left, y_bottom)]))
-            y_top = y_top - height
-            y_bottom = y_bottom - height
-        x_left = x_left + width
-        x_right = x_right + width
+            x_left = x_left + width
+            x_right = x_right + width
+        y_top = y_top - height
+        y_bottom = y_bottom - height
+
     grid = gpd.GeoDataFrame({"geometry": polygons})
     grid["zone_id"] = range(len(grid))
     if crs == "epsg:4326":

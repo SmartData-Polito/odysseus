@@ -51,7 +51,10 @@ class EFFCS_SimOutputPlotter ():
 
 		self.sim_vehicles_events = pd.concat([
 			self.sim_bookings, self.sim_charges
-		], ignore_index=True, sort=False).sort_values("start_time")
+		], ignore_index=True, sort=False)
+
+		if len(self.sim_vehicles_events):
+			self.sim_vehicles_events.sort_values("start_time", inplace=True)
 
 		self.sim_charge_deaths = sim_output.sim_charge_deaths
 
@@ -264,7 +267,7 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_choropleth (self, col, annotate=False):
+	def plot_choropleth (self, col, annotate=True):
 
 		fig, ax = plt.subplots(1, 1, figsize=(15, 15))
 

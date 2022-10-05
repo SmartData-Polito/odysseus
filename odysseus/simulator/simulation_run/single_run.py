@@ -81,7 +81,8 @@ def single_run(conf_dict):
 
         plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name, figures_path)
         plotter.plot_events_profile_barh()
-        plotter.plot_events_t()
+        if len(simOutput.sim_bookings):
+            plotter.plot_events_t()
         plotter.plot_fleet_status_t()
 
         # TODO -> Seaborn boxplots are cool but slow

@@ -228,26 +228,32 @@ class AbstractCityScenario:
         #     int(self.sim_general_conf["k_zones_factor"] * len(self.grid))
         # ).index
 
-        origin_zones_count_train = self.bookings_train.origin_id.value_counts()
-        dest_zones_count_train = self.bookings_train.destination_id.value_counts()
-        origin_zones_count_test = self.bookings_test.origin_id.value_counts()
-        dest_zones_count_test = self.bookings_test.destination_id.value_counts()
+        if count_threshold >= 0:
 
-        valid_origin_zones_train = origin_zones_count_train[(origin_zones_count_train > count_threshold)]
-        valid_dest_zones_train = dest_zones_count_train[(dest_zones_count_train > count_threshold)]
+            origin_zones_count_train = self.bookings_train.origin_id.value_counts()
+            dest_zones_count_train = self.bookings_train.destination_id.value_counts()
+            origin_zones_count_test = self.bookings_test.origin_id.value_counts()
+            dest_zones_count_test = self.bookings_test.destination_id.value_counts()
 
-        valid_origin_zones_test = origin_zones_count_test[(origin_zones_count_test > count_threshold)]
-        valid_dest_zones_test = dest_zones_count_test[(dest_zones_count_test > count_threshold)]
+            valid_origin_zones_train = origin_zones_count_train[(origin_zones_count_train > count_threshold)]
+            valid_dest_zones_train = dest_zones_count_train[(dest_zones_count_train > count_threshold)]
 
-        valid_zones_train = valid_origin_zones_train.index.union(
-            valid_dest_zones_train.index
-        ).astype(int)
+            valid_origin_zones_test = origin_zones_count_test[(origin_zones_count_test > count_threshold)]
+            valid_dest_zones_test = dest_zones_count_test[(dest_zones_count_test > count_threshold)]
 
-        valid_zones_test = valid_origin_zones_test.index.union(
-            valid_dest_zones_test.index
-        ).astype(int)
+            valid_zones_train = valid_origin_zones_train.index.union(
+                valid_dest_zones_train.index
+            ).astype(int)
 
-        self.valid_zones = valid_zones_train.union(valid_zones_test)
+            valid_zones_test = valid_origin_zones_test.index.union(
+                valid_dest_zones_test.index
+            ).astype(int)
+
+            self.valid_zones = valid_zones_train.union(valid_zones_test)
+
+        else:
+
+            self.valid_zones = list(range(len(self.grid_matrix.values.ravel())))
 
         return self.valid_zones
 
