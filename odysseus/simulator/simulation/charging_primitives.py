@@ -31,8 +31,8 @@ class ChargingPrimitives:
 		self.zone_dict = sim.zone_dict
 
 		if self.sim_input.supply_model_conf["battery_swap"] \
-				and self.sim_input.supply_model_conf["scooter_relocation"]:
-			self.scooterRelocationStrategy = sim.scooterRelocationStrategy
+				and self.sim_input.supply_model_conf["relocation"]:
+			self.relocation_strategy = sim.relocation_strategy
 
 		self.workers = simpy.Resource(
 			self.env,

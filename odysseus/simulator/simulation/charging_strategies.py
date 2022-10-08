@@ -220,7 +220,7 @@ class ChargingStrategy(ChargingPrimitives):
 				and self.sim_input.supply_model_conf["scooter_relocation"]:
 
 				if self.sim_input.supply_model_conf["scooter_relocation_strategy"] == "reactive_post_charge":
-					relocated, scooter_relocation = self.scooterRelocationStrategy.check_scooter_relocation(
+					relocated, scooter_relocation = self.relocation_strategy.check_scooter_relocation(
 						booking_request,
 						vehicles=[vehicle.plate]
 					)
@@ -228,7 +228,7 @@ class ChargingStrategy(ChargingPrimitives):
 					if relocated:
 						relocation_zone_id = scooter_relocation["end_zone_ids"][0]
 						yield self.env.process(
-							self.scooterRelocationStrategy.relocate_scooter_single_zone(scooter_relocation))
+							self.relocation_strategy.relocate_single_zone(scooter_relocation))
 
 		else:
 

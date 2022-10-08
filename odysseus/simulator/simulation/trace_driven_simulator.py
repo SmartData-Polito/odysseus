@@ -32,7 +32,7 @@ class TraceDrivenSim (SharedMobilitySim):
 
                 if self.sim_input.supply_model_conf["relocation"] \
                         and self.sim_input.supply_model_conf["relocation_strategy"] in ["predictive"]:
-                    self.scooterRelocationStrategy.update_current_hour_stats(booking_request_dict)
+                    self.relocation_strategy.update_current_hour_stats(booking_request_dict)
 
                 yield self.env.timeout(booking_request_dict["ia_timeout"])
 

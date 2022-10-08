@@ -14,8 +14,6 @@ from odysseus.utils.path_utils import get_output_path
 
 def multiple_runs(config_grids_dict, configs_list, n_cpus=mp.cpu_count()):
 
-	# print(config_grids_dict)
-
 	sim_general_config_grid = config_grids_dict["sim_general_config_grid"]
 	demand_model_config_grid = config_grids_dict["demand_model_config_grid"]
 	supply_model_config_grid = config_grids_dict["supply_model_config_grid"]
@@ -24,35 +22,9 @@ def multiple_runs(config_grids_dict, configs_list, n_cpus=mp.cpu_count()):
 	sim_scenario_name = config_grids_dict["sim_general_config_grid"]["sim_scenario_name"][0]
 	city = config_grids_dict["sim_general_config_grid"]["city"][0]
 
-	# if "n_cpus" not in conf_dict:
-	# 	n_cpus = mp.cpu_count()
-	# else:
-	# 	n_cpus = conf_dict["n_cpus"]
-
 	results_path = get_output_path("results", city, sim_scenario_name, "multiple_runs")
 
 	pool = mp.Pool(n_cpus, maxtasksperchild=1)
-
-	pool_stats_dict = {}
-
-	# configs_list = list()
-	# sim_general_conf_list = SimConfGrid(sim_general_config_grid).conf_list
-	#
-	# # for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
-	# # 	sim_general_conf["general_conf_id"] = general_conf_id
-	# # 	demand_conf_grid = SimConfGrid(demand_model_config_grid)
-	# # 	for demand_conf_id, demand_model_conf in enumerate(demand_conf_grid.conf_list):
-	# # 		supply_conf_grid = SimConfGrid(supply_model_config_grid)
-	# # 		for supply_model_conf_id, supply_model_config_grid in enumerate(supply_conf_grid.conf_list):
-	# # 			parameters_dict = {
-	# # 				"city_scenario_folder": conf_dict["city_scenario_folder"],
-	# # 				"sim_general_conf": sim_general_conf,
-	# # 				"sim_scenario_name": sim_general_conf["sim_scenario_name"],
-	# # 				"demand_model_conf": demand_model_conf,
-	# # 				"supply_model_conf": supply_model_config_grid,
-	# # 				"supply_model_object": None
-	# # 			}
-	# # 			configs_list.append(parameters_dict)
 
 	with tqdm(
 			total=len(configs_list), unit="sim", postfix=str(n_cpus)+" cpu(s)", smoothing=0, dynamic_ncols=True
@@ -61,7 +33,7 @@ def multiple_runs(config_grids_dict, configs_list, n_cpus=mp.cpu_count()):
 		def print_error(err):
 			tqdm.write(
 				str(datetime.datetime.now()) + " ERROR: Simulation failed! Cause: " + str(err) + " " + \
-				traceback.format_exc() + " - " + str(sys.exc_info()),
+				traceback.format_exc(),
 				file=sys.stderr
 			)
 			pbar.update()
@@ -79,7 +51,7 @@ def multiple_runs(config_grids_dict, configs_list, n_cpus=mp.cpu_count()):
 				run_sim_only_stats,
 				(conf_tuple,),
 				callback=collect_result,
-				# error_callback=print_error
+				error_callback=print_error
 			)
 			async_results.append(async_result)
 

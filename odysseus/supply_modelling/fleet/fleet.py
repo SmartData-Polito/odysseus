@@ -18,7 +18,7 @@ class Fleet:
         self.vehicles_soc_dict = {i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)}
         return self.vehicles_soc_dict
 
-    def init_vehicles_random_zones(self, n_initial_zones=30):
+    def init_vehicles_random_greedy(self, n_initial_zones=30):
         n_initial_zones = min(n_initial_zones, len(self.grid))
         grid_origin_count = self.grid[["zone_id_origin_count"]].iloc[:, 0].fillna(0)
         top_o_zones = grid_origin_count.sort_values(ascending=False).iloc[:n_initial_zones+1]
@@ -27,6 +27,10 @@ class Fleet:
         for i in vehicles_random_zones:
             self.vehicles_zones.append(self.grid.loc[int(top_o_zones.index[i])].zone_id)
         self.vehicles_zones = {i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)}
+
+    def init_vehicles_random(self, n_initial_zones=30):
+        vehicles_random_zones = list(np.random.uniform(0, n_initial_zones, self.n_vehicles_sim).astype(int).round())
+        self.vehicles_zones = {i: vehicles_random_zones[i] for i in range(len(vehicles_random_zones))}
 
     def init_available_vehicles_dict(self):
         self.available_vehicles_dict = {int(zone): [] for zone in self.grid.zone_id}
@@ -39,8 +43,11 @@ class Fleet:
         self.n_vehicles_sim = int(n_vehicles_sim)
         self.vehicles_soc_dict = self.init_vehicles_soc()
 
-        if how == "random_greedy":
-            self.init_vehicles_random_zones()
+        if how == "random":
+            self.init_vehicles_random()
+
+        elif how == "random_greedy":
+            self.init_vehicles_random_greedy()
 
         elif how == "uniform":
             # TODO -> decide rule when division is not exact

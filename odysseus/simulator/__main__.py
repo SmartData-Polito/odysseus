@@ -35,10 +35,10 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    campaign_name="test",
-    conf_name="enjoy_test",
+    campaign_name="switch_0",
+    conf_name="fleet_dim_fuel",
     city_scenario_folder="default",
-    sim_run_mode="multiple_runs"
+    sim_run_mode="single_run"
 )
 
 args = parser.parse_args()
@@ -78,37 +78,18 @@ for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
                 "demand_model_conf": demand_model_conf,
                 "supply_model_conf": supply_model_conf,
                 "supply_model_object": None,
-                "conf_id": str(supply_model_conf_id)
+                "conf_id": "_".join(
+                    [str(general_conf_id), str(demand_conf_id), str(supply_model_conf_id)]
+                )
             }
-
-            #parameters_dict["conf_id"] = str(supply_model_conf_id)
-
-            # print(parameters_dict["sim_general_conf"]["conf_id"])
-            # print(parameters_dict["supply_model_conf"]["n_vehicles"])
-            #
-            # # continue
-
             configs_list.append(parameters_dict)
-
             conf_id += 1
-
-            # configs_list[-1]["sim_general_conf"]["conf_id"] = "_".join(
-            #     [str(general_conf_id), str(demand_conf_id), str(supply_model_conf_id)]
-            # )
-            # print(configs_list[-1]["sim_general_conf"])
-
-# for parameters_dict in configs_list:
-#     print(parameters_dict["sim_general_conf"]["conf_id"])
-#     print(parameters_dict["sim_general_conf"])
 
 if args.sim_run_mode == "single_run":
     for parameters_dict in configs_list:
-        #print(parameters_dict["conf_id"])
-        #print(parameters_dict["supply_model_conf"]["n_vehicles"])
         single_run(parameters_dict)
 
-
-if args.sim_run_mode == "multiple_runs":
+elif args.sim_run_mode == "multiple_runs":
     for parameters_dict in configs_list:
         parameters_dict["sim_general_conf"]["save_history"] = False
         if args.n_cpus is not None:

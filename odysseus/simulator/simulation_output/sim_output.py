@@ -23,18 +23,23 @@ class SimOutput():
 		sim_stats_obj = SimStats()
 		self.sim_stats = sim_stats_obj.get_stats_from_sim(sim)
 		self.sim_stats = sim_stats_obj.sim_stats
+		insert_scenario_costs(self.sim_stats, self.supply_model_conf, vehicle_cost, charging_station_costs)
+		insert_sim_costs(self.sim_stats, self.supply_model_conf, fuel_costs, administrative_cost_conf, vehicle_cost)
+		self.sim_stats.loc[
+			"profit"
+		] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - self.sim_stats["sim_cost"]
 
 		if self.sim_general_conf["save_history"]:
 
 			self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
 			self.sim_bookings = pd.DataFrame(sim.sim_bookings)
 
-			self.sim_charges = pd.DataFrame(sim.chargingStrategy.sim_charges)
+			self.sim_charges = pd.DataFrame(sim.charging_strategy.sim_charges)
 			self.sim_not_enough_energy_requests = pd.DataFrame(sim.sim_booking_requests_deaths)
 			self.sim_no_close_vehicle_requests = pd.DataFrame(sim.sim_no_close_vehicle_requests)
 			self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
-			self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
-			self.sim_users_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
+			self.sim_system_charges_bookings = pd.DataFrame(sim.charging_strategy.list_system_charging_bookings)
+			self.sim_users_charges_bookings = pd.DataFrame(sim.charging_strategy.list_users_charging_bookings)
 
 			print(
 				self.sim_booking_requests.shape,
@@ -58,7 +63,7 @@ class SimOutput():
 				)
 
 			self.sim_unfeasible_charge_bookings = pd.DataFrame(
-				sim.chargingStrategy.sim_unfeasible_charge_bookings
+				sim.charging_strategy.sim_unfeasible_charge_bookings
 			)
 
 			self.sim_booking_requests["n_vehicles_charging_system"] = \
@@ -76,7 +81,7 @@ class SimOutput():
 			self.sim_booking_requests["n_vehicles_dead"] = \
 				pd.Series(sim.list_n_vehicles_dead)
 
-			self.sim_charge_deaths = pd.DataFrame(sim.chargingStrategy.sim_unfeasible_charge_bookings)
+			self.sim_charge_deaths = pd.DataFrame(sim.charging_strategy.sim_unfeasible_charge_bookings)
 
 			self.sim_stats.loc["n_charging_requests_system"] = len(self.sim_system_charges_bookings)
 
@@ -164,7 +169,7 @@ class SimOutput():
 			else:
 				self.sim_stats.loc["tot_charging_energy"] = 0
 
-			self.sim_stats.loc["tot_charging_return_distance"] = sim.chargingStrategy.charging_return_distance
+			self.sim_stats.loc["tot_charging_return_distance"] = sim.charging_strategy.charging_return_distance
 
 			if len(self.sim_charges) and "system" in self.sim_charges.operator.unique():
 				self.sim_stats.loc["fraction_charges_system"] = \
@@ -290,11 +295,6 @@ class SimOutput():
 				] = self.sim_charge_deaths.origin_id.value_counts()
 
 			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
-			insert_scenario_costs(self.sim_stats, self.supply_model_conf, vehicle_cost, charging_station_costs)
-			insert_sim_costs(self.sim_stats, self.supply_model_conf, fuel_costs, administrative_cost_conf, vehicle_cost)
-			self.sim_stats.loc[
-				"profit"
-			] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - self.sim_stats["sim_cost"]
 
 			self.vehicles_history = pd.DataFrame()
 			for vehicle in sim.vehicles_list:
@@ -303,19 +303,19 @@ class SimOutput():
 				self.vehicles_history = pd.concat([self.vehicles_history, vehicle_df], ignore_index=True)
 
 			self.stations_history = pd.DataFrame()
-			for key in sim.chargingStrategy.charging_stations_dict:
-				station_df = pd.DataFrame(sim.chargingStrategy.charging_stations_dict[key].status_dict_list)
+			for key in sim.charging_strategy.charging_stations_dict:
+				station_df = pd.DataFrame(sim.charging_strategy.charging_stations_dict[key].status_dict_list)
 				station_df["id"] = key
 				self.stations_history = pd.concat([self.stations_history, station_df], ignore_index=True)
 
 			self.zones_history = pd.DataFrame()
-			for key in sim.chargingStrategy.zone_dict:
-				zone_df = pd.DataFrame(sim.chargingStrategy.zone_dict[key].status_dict_list)
+			for key in sim.charging_strategy.zone_dict:
+				zone_df = pd.DataFrame(sim.charging_strategy.zone_dict[key].status_dict_list)
 				zone_df["zone_id"] = key
 				self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)
 
 			if self.supply_model_conf["relocation"]:
-				self.relocation_history = pd.DataFrame(sim.scooterRelocationStrategy.sim_scooter_relocations)
+				self.relocation_history = pd.DataFrame(sim.relocation_strategy.sim_scooter_relocations)
 
 		for key in self.sim_stats.index:
 			if key.startswith("fraction"):

@@ -123,7 +123,7 @@ class RelocationPrimitives:
                     prediction_model_configs["time_horizon_three"], self.city_shape,
                     8, mask=mask, path=prediction_model_path)
 
-    def relocate_scooter_single_zone(self, scooter_relocation, move_vehicles=False, worker=None):
+    def relocate_single_zone(self, relocation_record, move_vehicles=False, worker=None):
 
         with self.relocation_workers_resource.request() as relocation_worker_request:
             yield relocation_worker_request
@@ -131,42 +131,42 @@ class RelocationPrimitives:
             if worker:
                 worker.start_working()
 
-            self.n_scooters_relocating += len(scooter_relocation["vehicle_ids"])
-            yield self.env.timeout(scooter_relocation["duration"])
-            self.n_scooters_relocating -= len(scooter_relocation["vehicle_ids"])
+            self.n_scooters_relocating += len(relocation_record["vehicle_ids"])
+            yield self.env.timeout(relocation_record["duration"])
+            self.n_scooters_relocating -= len(relocation_record["vehicle_ids"])
 
             if worker:
                 worker.stop_working()
-                worker.update_position(scooter_relocation["end_zone_ids"][0])
+                worker.update_position(relocation_record["end_zone_ids"][0])
 
         if move_vehicles:
 
             self.pick_up_scooter(
-                scooter_relocation["start_zone_ids"][0],
-                scooter_relocation["start_time"],
+                relocation_record["start_zone_ids"][0],
+                relocation_record["start_time"],
                 move_vehicles=True,
-                vehicle_ids=scooter_relocation["vehicle_ids"]
+                vehicle_ids=relocation_record["vehicle_ids"]
             )
             self.drop_off_scooter(
-                scooter_relocation["end_zone_ids"][0],
-                scooter_relocation["end_time"],
+                relocation_record["end_zone_ids"][0],
+                relocation_record["end_time"],
                 move_vehicles=True,
-                vehicle_ids=scooter_relocation["vehicle_ids"]
+                vehicle_ids=relocation_record["vehicle_ids"]
             )
 
         else:
 
             self.pick_up_scooter(
-                scooter_relocation["start_zone_ids"][0],
-                scooter_relocation["start_time"]
+                relocation_record["start_zone_ids"][0],
+                relocation_record["start_time"]
             )
 
             self.drop_off_scooter(
-                scooter_relocation["end_zone_ids"][0],
-                scooter_relocation["end_time"]
+                relocation_record["end_zone_ids"][0],
+                relocation_record["end_time"]
             )
 
-        self.update_relocation_stats(scooter_relocation)
+        self.update_relocation_stats(relocation_record)
 
     def relocate_scooter_multiple_zones(self, scheduled_relocation, collection_path, distribution_path, worker):
         with self.relocation_workers_resource.request() as relocation_worker_request:

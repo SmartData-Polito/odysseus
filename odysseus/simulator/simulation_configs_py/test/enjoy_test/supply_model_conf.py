@@ -10,7 +10,7 @@ supply_model_config_grid = {
 	"vehicles_config_mode": ["sim_config"],
 	"vehicles_initial_placement": ["random_greedy"],
 	"vehicle_model_name": ["Smart fortwo Electric Drive 2018"],
-	"n_vehicles": list(range(50, 150, 50)),
+	"n_vehicles": list(range(50, 1000, 50)),
 
 	# -> charging
 

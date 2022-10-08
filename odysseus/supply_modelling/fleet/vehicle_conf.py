@@ -1,4 +1,5 @@
 vehicle_conf = {
+
 	"gasoline": {
 		"Seat Leon 1.5 TSI 2020": {
 			"engine_type": "gasoline",
@@ -15,6 +16,7 @@ vehicle_conf = {
 			# "costs": vehicle_cost["gasoline"]["VW Golf 7 1.0 TSI 2018"]
 		}
 	},
+
 	"diesel": {
 		"Seat Leon 2.0 TDI 2020": {
 			"engine_type": "diesel",
@@ -31,6 +33,7 @@ vehicle_conf = {
 			# "costs": vehicle_cost["diesel"]["VW Golf 7 2.0 TDI 2018"]
 		}
 	},
+
 	"lpg": {
 		"Kia Rio 1.2 GPL 2020": {
 			"engine_type": "lpg",
@@ -48,6 +51,7 @@ vehicle_conf = {
 			# "costs": vehicle_cost["lpg"]["Opel Corsa 1.4 EcoTech"]
 		}
 	},
+
 	"cng": {
 		"Seat Leon 1.5 TGI 2020": {
 			"engine_type": "cng",
@@ -65,6 +69,7 @@ vehicle_conf = {
 			# "costs": vehicle_cost["cng"]["VW Golf 7 1.4 TGI 2018"]
 		}
 	},
+
 	"electric": {
 		"Fiat 500e 2020": {
 			"engine_type": "electric",

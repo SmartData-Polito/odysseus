@@ -17,10 +17,13 @@ docs_html/*
 odysseus/data/*
 odysseus/city_scenario/city_scenarios/*
 odysseus/demand_modelling/city_demand_models/*
-odysseus/supply_modelling/supply_models/*
+odysseus/supply_modelling/city_supply_models/*
 odysseus/simulator/figures/*
 odysseus/simulator/results/*
 odysseus/simulator/simulation_input/sim_current_config/
+
+odysseus/simulator/simulation_configs_py/itsc_2021/*
+odysseus/simulator/simulation_configs_py/switch_0/*
 
 *.pickle
 *.h5

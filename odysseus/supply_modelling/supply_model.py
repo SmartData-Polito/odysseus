@@ -111,7 +111,7 @@ class SupplyModel:
         self.supply_model_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "supply_modelling",
-            "supply_models",
+            "city_supply_models",
             self.city_name,
             self.supply_model_folder
         )

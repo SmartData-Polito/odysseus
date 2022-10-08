@@ -99,21 +99,21 @@ class SimStats():
 		else:
 			self.sim_stats.loc["fraction_deaths_unsatisfied"] = 0
 
-		self.sim_stats.loc["n_charges"] = sim.chargingStrategy.n_charges
+		self.sim_stats.loc["n_charges"] = sim.charging_strategy.n_charges
 
 		self.sim_stats.loc["tot_mobility_distance"] = sim.tot_mobility_distance
 		self.sim_stats.loc["tot_mobility_duration"] = sim.tot_mobility_duration
 
 		if self.supply_model_conf["relocation"]:
 			if "relocation" in self.supply_model_conf and self.supply_model_conf["relocation"]:
-				self.sim_stats.loc["n_scooter_relocations"] = sim.scooterRelocationStrategy.n_scooter_relocations
+				self.sim_stats.loc["n_scooter_relocations"] = sim.relocation_strategy.n_scooter_relocations
 				self.sim_stats.loc["tot_scooter_relocations_distance"] = \
-					sim.scooterRelocationStrategy.tot_scooter_relocations_distance
+					sim.relocation_strategy.tot_scooter_relocations_distance
 				self.sim_stats.loc["tot_scooter_relocations_duration"] = \
-					sim.scooterRelocationStrategy.tot_scooter_relocations_duration
-				if sim.scooterRelocationStrategy.n_scooter_relocations:
+					sim.relocation_strategy.tot_scooter_relocations_duration
+				if sim.relocation_strategy.n_scooter_relocations:
 					self.sim_stats.loc["avg_n_vehicles_relocated"] = \
-						sim.scooterRelocationStrategy.n_vehicles_tot / sim.scooterRelocationStrategy.n_scooter_relocations
+						sim.relocation_strategy.n_vehicles_tot / sim.relocation_strategy.n_scooter_relocations
 				else:
 					self.sim_stats.loc["avg_n_vehicles_relocated"] = 0
 
@@ -121,7 +121,7 @@ class SimStats():
 				tot_jobs = 0
 				max_jobs = float('-inf')
 				min_jobs = float('inf')
-				for worker in sim.scooterRelocationStrategy.relocation_workers:
+				for worker in sim.relocation_strategy.relocation_workers:
 					n_workers += 1
 					tot_jobs += worker.n_jobs
 					if worker.n_jobs > max_jobs:

@@ -1,12 +1,20 @@
 vehicle_cost = {
 	"gasoline": {
+		"Seat Leon 1.5 TSI 2020": {
+			# "retail_price": 16612.06,
+			"leasing_cost": 2614.32,
+			"washing_cost": 8,
+			"disinfection_cost": 15,
+			"cost_permin": 0.26
+		},
 		"VW Golf 7 1.0 TSI 2018": {
 			# "retail_price": 16612.06,
 			"leasing_cost": 2614.32,
 			"washing_cost": 8,
 			"disinfection_cost": 15,
 			"cost_permin": 0.26
-		}
+		},
+
 	},
 	"diesel": {
 		"VW Golf 7 2.0 TDI 2018": {
