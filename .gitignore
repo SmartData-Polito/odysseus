@@ -9,9 +9,10 @@ venv*/
 odysseus/webapp/apis/api_cityDataManager/norm-data.json
 odysseus/webapp/apis/api_cityDataManager/raw-data.json
 
-*.ipynb
+simple_demo_0/*
 
 data/*
+docs_html/*
 
 odysseus/data/*
 odysseus/city_scenario/city_scenarios/*

@@ -78,7 +78,7 @@ class CityScenarioFromOD(AbstractCityScenario):
         total_bounds = (
             0, 0, n_zones_x * bin_side_length, n_zones_y * bin_side_length
         )
-        self.grid = get_city_grid_as_gdf_v2(total_bounds, bin_side_length, "dummy_crs")
+        self.grid = get_city_grid_as_gdf(total_bounds, bin_side_length, "dummy_crs")
 
         self.grid["centroid_x"] = self.grid.loc[:, "geometry"].centroid.x
         self.grid["centroid_y"] = self.grid.loc[:, "geometry"].centroid.y

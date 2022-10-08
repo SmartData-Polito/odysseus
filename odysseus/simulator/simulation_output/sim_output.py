@@ -323,7 +323,7 @@ class SimOutput():
 
 	def save_output(self, results_path, sim_general_conf, sim_scenario_conf):
 
-		if sim_general_conf["save_history"]:
+		if True:
 
 			self.sim_booking_requests.to_csv(
 				os.path.join(

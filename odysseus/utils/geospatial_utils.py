@@ -12,78 +12,51 @@ from scipy.spatial.distance import euclidean
 def get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length):
     p1 = (y_min, x_min)
     p2 = (y_max, x_min)
-    print(p1, p2)
     height = math.dist(p1, p2)
-    rows = height / bin_side_length
 
     # width changes depending on the city, casuse longitude distances vary depending on the latitude.
     p1 = (y_min, x_min)
     p2 = (y_min, x_max)
-    print(p1, p2)
     width = math.dist(p1, p2)
-    cols = width / bin_side_length
 
-    return width, height, int(rows), int(cols)
+    return width, height
 
 
-def get_rows_cols_from_wgs84_bounds(x_min, y_min, x_max, y_max, bin_side_length):
+def get_width_height_from_wgs84_bounds(x_min, y_min, bin_side_length):
     # this has to be pretty much the same long all the longitudes
     # cause paralles are equidistant, so equal for every city
+
     p1 = (y_min, x_min)
     p2 = (y_min + 0.01, x_min)
     height_001 = haversine(p1, p2, unit=Unit.METERS)
     height = (0.01 * bin_side_length) / height_001
 
-    # width changes depending on the city, casuse longitude distances vary depending on the latitude.
+    # width changes depending on the city, cause longitude distances vary depending on the latitude.
     p1 = (y_min, x_min)
     p2 = (y_min, x_min + 0.01)
     width_001 = haversine(p1, p2, unit=Unit.METERS)
     width = (0.01 * bin_side_length) / width_001
 
-    rows = int(np.ceil((y_max - y_min) / height))
-    cols = int(np.ceil((x_max - x_min) / width))
-
-    return width, height, rows, cols
+    return width, height
 
 
 def get_city_grid_as_gdf(total_bounds, bin_side_length, crs="epsg:4326"):
+
     x_min, y_min, x_max, y_max = total_bounds
+
+    width, height = 0, 0
     if crs == "epsg:4326":
-        width, height, rows, cols = get_rows_cols_from_wgs84_bounds(x_min, y_min, x_max, y_max, bin_side_length)
+        width, height = get_width_height_from_wgs84_bounds(x_min, y_min, bin_side_length)
     elif crs == "dummy_crs":
-        width, height, rows, cols = get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length)
-    x_left = x_min
-    x_right = x_min + width
-    polygons = []
-    for i in range(rows):
-        y_top = y_min
-        y_bottom = y_min + height
-        for j in range(cols):
-            polygons.append(Polygon([(x_left, y_top), (x_right, y_top), (x_right, y_bottom), (x_left, y_bottom)]))
-            y_top = y_top + height
-            y_bottom = y_bottom + height
-        x_left = x_left + width
-        x_right = x_right + width
-    grid = gpd.GeoDataFrame({"geometry": polygons})
-    grid["zone_id"] = range(len(grid))
-    if crs == "epsg:4326":
-        grid.crs = crs
-    if crs == "dummy_crs":
-        grid.crs = "epsg:3857"
-    return grid
-
-
-def get_city_grid_as_gdf_v2(total_bounds, bin_side_length, crs="epsg:4326"):
-    x_min, y_min, x_max, y_max = total_bounds
-    width, height, rows, cols = get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length)
+        width, height = get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length)
 
     y_top = y_max
     y_bottom = y_max - height
     polygons = []
-    for j in range(cols):
+    while y_bottom > y_min:
         x_left = x_min
         x_right = x_min + width
-        for i in range(rows):
+        while x_right < x_max:
             polygons.append(Polygon([(x_left, y_top), (x_right, y_top), (x_right, y_bottom), (x_left, y_bottom)]))
             x_left = x_left + width
             x_right = x_right + width
@@ -91,27 +64,42 @@ def get_city_grid_as_gdf_v2(total_bounds, bin_side_length, crs="epsg:4326"):
         y_bottom = y_bottom - height
 
     grid = gpd.GeoDataFrame({"geometry": polygons})
+
     grid["zone_id"] = range(len(grid))
     if crs == "epsg:4326":
         grid.crs = crs
     if crs == "dummy_crs":
         grid.crs = "epsg:3857"
+
     return grid
 
 
 def get_city_grid_as_matrix(total_bounds, bin_side_length, crs="epsg:4326"):
     x_min, y_min, x_max, y_max = total_bounds
+    width, height = 0, 0
     if crs == "epsg:4326":
-        width, height, rows, cols = get_rows_cols_from_wgs84_bounds(x_min, y_min, x_max, y_max, bin_side_length)
+        width, height = get_width_height_from_wgs84_bounds(x_min, y_min, bin_side_length)
     elif crs == "dummy_crs":
-        width, height, rows, cols = get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length)
+        width, height = get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length)
+
     grid_matrix = []
     zone_id = 0
-    for i in range(rows):
-        grid_matrix.append([])
-        for j in range(cols):
+    i = 0
+    y_top = y_max
+    y_bottom = y_max - height
+    while y_bottom > y_min:
+        x_left = x_min
+        x_right = x_min + width
+        grid_matrix.append(list())
+        while x_right < x_max:
             grid_matrix[i].append(zone_id)
             zone_id += 1
+            x_left = x_left + width
+            x_right = x_right + width
+        y_top = y_top - height
+        y_bottom = y_bottom - height
+        i += 1
+
     return pd.DataFrame(grid_matrix)
 
 
@@ -204,4 +192,40 @@ def get_out_flow_count(trips_origins):
 
     return out_flow_count
 
+
+def get_grid_indexes_dict(grid_matrix):
+    grid_indexes_dict = {}
+    for j in grid_matrix.columns:
+        for i in grid_matrix.index:
+            grid_indexes_dict[grid_matrix.iloc[i, j]] = (i, j)
+    return grid_indexes_dict
+
+
+def get_distance_matrix(
+        grid_indexes_dict, origin_zones, destination_zones, bin_side_length
+):
+    distance_matrix = dict()
+    for o_id in origin_zones:
+        distance_matrix[o_id] = dict()
+        for d_id in destination_zones:
+            o_i, o_j = grid_indexes_dict[o_id]
+            d_i, d_j = grid_indexes_dict[d_id]
+            distance_matrix[o_id][d_id] = math.dist((o_j, o_i), (d_j, d_i)) * bin_side_length
+    return pd.DataFrame(distance_matrix)
+
+
+def get_closest_zone_from_grid_matrix(grid_indexes_dict, origin_zones, destination_zones):
+    closest_zones = dict()
+    for o_id in origin_zones:
+        min_od_dist = 10e12
+        min_dist_zone = -1
+        for d_id in destination_zones:
+            o_i, o_j = grid_indexes_dict[o_id]
+            d_i, d_j = grid_indexes_dict[d_id]
+            od_dist = math.dist((o_j, o_i), (d_j, d_i))
+            if od_dist < min_od_dist:
+                min_od_dist = od_dist
+                min_dist_zone = d_id
+            closest_zones[o_id] = min_dist_zone
+    return closest_zones
 

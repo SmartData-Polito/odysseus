@@ -1,23 +1,23 @@
-supply_model_conf_grid = {
+supply_model_config_grid = {
 
 	# -> energy supply
 
-	"engine_type": ["gasoline"],
+	"engine_type": ["electric"],
 	"year_energymix": ["2020"],
 
 	# -> vehicles
 
 	"vehicles_config_mode": ["sim_config"],
-	"vehicles_initial_placement": ["random"],
-	"vehicle_model_name": ["VW Golf 7 1.0 TSI 2018"],
-	"n_vehicles": [100],
+	"vehicles_initial_placement": ["random_greedy"],
+	"vehicle_model_name": ["Smart fortwo Electric Drive 2018"],
+	"n_vehicles": list(range(50, 150, 50)),
 
 	# -> charging
 
 	"stations_config_mode": ["sim_config"],
 	"distributed_cps": [True],
 	"system_cps": [True],
-	"profile_type": [""],
+	"profile_type": ["single_phase_1"],
 
 	"charging_config_mode": ["sim_config"],
 	"cps_placement_policy": ["num_parkings"],

@@ -9,7 +9,7 @@ supply_model_conf_grid = {
 
 	"vehicles_config_mode": ["vehicles_zones"],
 	"vehicle_model_name": ["VW Golf 7 1.0 TSI 2018"],
-	#"vehicles_initial_placement": ["random_greedy"],
+	# "vehicles_initial_placement": ["random_greedy"],
 	"vehicles_zones": [
 		frozenset({0: 1}.items())
 	],

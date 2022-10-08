@@ -1,6 +1,8 @@
 import json
 import pickle
 import datetime
+
+import pandas as pd
 import pytz
 
 from odysseus.city_scenario.city_data_loader import CityDataLoader
@@ -37,7 +39,9 @@ class AbstractCityScenario:
 
         self.bin_side_length = None
         self.grid = pd.DataFrame()
+        self.grid_crs = None
         self.grid_matrix = pd.DataFrame()
+        self.grid_indexes_dict = dict()
         self.valid_zones = None
         self.zones_valid_zones_distances = None
         self.closest_valid_zone = None
@@ -65,12 +69,23 @@ class AbstractCityScenario:
         self.avg_speed_kmh_std = self.bookings_train.avg_speed_kmh.std()
         self.max_driving_distance = self.bookings_train.driving_distance.max()
 
+        import warnings
+        warnings.filterwarnings("ignore")
+
+        self.grid["centroid_x"] = self.grid.loc[:, "geometry"].centroid.x
+        self.grid["centroid_y"] = self.grid.loc[:, "geometry"].centroid.y
+        self.grid_crs = self.grid.crs
+
         self.valid_zones = self.get_valid_zones()
-        self.zones_valid_zones_distances = self.grid.centroid.apply(
-            lambda x: self.grid.loc[self.valid_zones].centroid.distance(x)
+
+        self.grid_indexes_dict = get_grid_indexes_dict(self.grid_matrix)
+
+        self.closest_valid_zone = get_closest_zone_from_grid_matrix(
+            self.grid_indexes_dict, self.grid.index.values, self.valid_zones
         )
-        self.closest_valid_zone = self.zones_valid_zones_distances.idxmin(axis=1)
-        self.grid = self.grid.loc[self.valid_zones]
+        self.closest_valid_zone = pd.Series(self.closest_valid_zone)
+
+        # self.grid = self.grid.loc[self.valid_zones]
 
         self.bookings_train = self.bookings_train.loc[
             (self.bookings_train.origin_id.isin(self.valid_zones)) & (
@@ -101,14 +116,14 @@ class AbstractCityScenario:
 
         self.energy_mix = EnergyMix(self.city_name, self.year_energy_mix)
 
-        self.distance_matrix = self.grid.loc[self.valid_zones].centroid.apply(
-            lambda x: self.grid.loc[self.valid_zones].centroid.distance(x).sort_values()
-        ) * 111139
-        self.closest_zones = dict()
-        for zone_id in self.valid_zones:
-            self.closest_zones[zone_id] = list(
-                self.distance_matrix[self.distance_matrix > 0].loc[zone_id].sort_values().dropna().index.values
-            )
+        self.distance_matrix = get_distance_matrix(
+            self.grid_indexes_dict, self.valid_zones, self.valid_zones, self.bin_side_length
+        )
+
+        self.closest_zones = get_closest_zone_from_grid_matrix(
+            self.grid_indexes_dict, self.valid_zones, self.valid_zones
+        )
+        self.closest_zones = pd.Series(self.closest_zones)
 
     def map_zones_on_trips(self, zones):
 
@@ -116,38 +131,38 @@ class AbstractCityScenario:
             self.trips_origins_train,
             zones,
             how='left',
-            op='intersects'
+            predicate='intersects'
         )
         self.trips_destinations_train = gpd.sjoin(
             self.trips_destinations_train,
             zones,
             how='left',
-            op='intersects'
+            predicate='intersects'
         )
         self.trips_origins_test = gpd.sjoin(
             self.trips_origins_test,
             zones,
             how='left',
-            op='intersects'
+            predicate='intersects'
         )
         self.trips_destinations_test = gpd.sjoin(
             self.trips_destinations_test,
             zones,
             how='left',
-            op='intersects'
+            predicate='intersects'
         )
         self.bookings_train["origin_id"] = self.trips_origins_train.zone_id
         self.bookings_train["destination_id"] = self.trips_destinations_train.zone_id
         self.bookings_test["origin_id"] = self.trips_origins_test.zone_id
         self.bookings_test["destination_id"] = self.trips_destinations_test.zone_id
 
-    def get_input_bookings_filtered(self, bookings):
+    def get_input_bookings_filtered(self, bookings, orography_factor=1.4):
 
         bookings = bookings.sort_values("start_time")
 
-        # TODO -> integrate routing API
+        # TODO -> integrate routing API (cfr. sim_bookings)
         if "driving_distance" not in bookings.columns:
-            bookings["driving_distance"] = bookings.euclidean_distance * 1.4
+            bookings["driving_distance"] = bookings.euclidean_distance * orography_factor
 
         # TODO -> check different behaviors with additional time columns
         #bookings = get_time_group_columns(bookings)
@@ -249,11 +264,17 @@ class AbstractCityScenario:
                 valid_dest_zones_test.index
             ).astype(int)
 
-            self.valid_zones = valid_zones_train.union(valid_zones_test)
+            self.valid_zones = valid_zones_train.intersection(valid_zones_test)
 
         else:
 
-            self.valid_zones = list(range(len(self.grid_matrix.values.ravel())))
+            origin_zones = set(self.bookings_train.origin_id.dropna().unique()).union(
+                set(self.bookings_test.origin_id.dropna().unique())
+            )
+            destination_zones = set(self.bookings_train.destination_id.dropna().unique()).union(
+                set(self.bookings_test.destination_id.dropna().unique())
+            )
+            self.valid_zones = list(origin_zones.union(destination_zones))
 
         return self.valid_zones
 

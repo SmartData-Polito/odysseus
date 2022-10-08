@@ -39,17 +39,6 @@ class SimInput:
 		self.distance_matrix = pickle.Unpickler(open(os.path.join(city_scenario_path, "distance_matrix.pickle"), "rb")).load()
 		self.closest_zones = pickle.Unpickler(open(os.path.join(city_scenario_path, "closest_zones.pickle"), "rb")).load()
 
-		# self.distance_matrix = self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.apply(
-		# 	lambda x: self.grid.loc[self.valid_zones].to_crs("epsg:3857").centroid.distance(x).sort_values()
-		# )
-		# self.closest_zones = dict()
-		# for zone_id in self.valid_zones:
-		# 	self.closest_zones[zone_id] = list(
-		# 		self.distance_matrix[self.distance_matrix > 0].loc[zone_id].sort_values().dropna().index.values
-		# 	)
-
-		self.grid["centroid_x"] = self.grid.loc[:, "geometry"].centroid.x
-		self.grid["centroid_y"] = self.grid.loc[:, "geometry"].centroid.y
 		self.grid_crs = self.grid.crs
 
 		self.start = datetime.datetime(
@@ -180,6 +169,9 @@ class SimInput:
 			)
 
 	def get_booking_requests_list(self):
+
+		self.bookings["start_time"] = pd.to_datetime(self.bookings["start_time"])
+		self.bookings["end_time"] = pd.to_datetime(self.bookings["end_time"])
 
 		return self.bookings[[
 			"origin_id",

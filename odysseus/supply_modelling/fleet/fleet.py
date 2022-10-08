@@ -29,7 +29,6 @@ class Fleet:
         self.vehicles_zones = {i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)}
 
     def init_available_vehicles_dict(self):
-        print(self.grid.zone_id)
         self.available_vehicles_dict = {int(zone): [] for zone in self.grid.zone_id}
         for vehicle in range(len(self.vehicles_zones)):
             zone = self.vehicles_zones[vehicle]

@@ -55,33 +55,45 @@ class CityScenarioFromTrips(AbstractCityScenario):
                 start_month_test, start_year_test, end_month_test, end_year_test
             )
         self.bookings_test = self.get_input_bookings_filtered(self.bookings_test).dropna()
+
         self.year_energy_mix = end_year_test
         self.tz = self.loader.tz
 
     def create_squared_city_grid(self):
+
+        min_longitude = min(
+            self.trips_origins_train.start_longitude.min(), self.trips_destinations_train.end_longitude.min(),
+            self.trips_origins_test.start_longitude.min(), self.trips_destinations_test.end_longitude.min()
+        )
+        min_latitude = min(
+            self.trips_origins_train.start_latitude.min(), self.trips_destinations_train.end_latitude.min(),
+            self.trips_origins_test.start_latitude.min(), self.trips_destinations_test.end_latitude.min()
+        )
+        max_longitude = min(
+            self.trips_origins_train.start_longitude.max(), self.trips_destinations_train.end_longitude.max(),
+            self.trips_origins_test.start_longitude.max(), self.trips_destinations_test.end_longitude.max()
+        )
+        max_latitude = min(
+            self.trips_origins_train.start_latitude.max(), self.trips_destinations_train.end_latitude.max(),
+            self.trips_origins_test.start_latitude.max(), self.trips_destinations_test.end_latitude.max()
+        )
+
         self.grid = get_city_grid_as_gdf(
             (
-                min(self.trips_origins_train.start_longitude.min(), self.trips_destinations_train.end_longitude.min(),
-                    self.trips_origins_test.start_longitude.min(), self.trips_destinations_test.end_longitude.min()),
-                min(self.trips_origins_train.start_latitude.min(), self.trips_destinations_train.end_latitude.min(),
-                    self.trips_origins_test.start_latitude.min(), self.trips_destinations_test.end_latitude.min()),
-                max(self.trips_origins_train.start_longitude.max(), self.trips_destinations_train.end_longitude.max(),
-                    self.trips_origins_test.start_longitude.max(), self.trips_destinations_test.end_longitude.max()),
-                max(self.trips_origins_train.start_latitude.max(), self.trips_destinations_train.end_latitude.max(),
-                    self.trips_origins_test.start_latitude.max(), self.trips_destinations_test.end_latitude.max())
+                min_longitude,
+                min_latitude,
+                max_longitude,
+                max_latitude
             ),
             self.bin_side_length
         )
+
         self.grid_matrix = get_city_grid_as_matrix(
             (
-                min(self.trips_origins_train.start_longitude.min(), self.trips_destinations_train.end_longitude.min(),
-                    self.trips_origins_test.start_longitude.min(), self.trips_destinations_test.end_longitude.min()),
-                min(self.trips_origins_train.start_latitude.min(), self.trips_destinations_train.end_latitude.min(),
-                    self.trips_origins_test.start_latitude.min(), self.trips_destinations_test.end_latitude.min()),
-                max(self.trips_origins_train.start_longitude.max(), self.trips_destinations_train.end_longitude.max(),
-                    self.trips_origins_test.start_longitude.max(), self.trips_destinations_test.end_longitude.max()),
-                max(self.trips_origins_train.start_latitude.max(), self.trips_destinations_train.end_latitude.max(),
-                    self.trips_origins_test.start_latitude.max(), self.trips_destinations_test.end_latitude.max())
+                min_longitude,
+                min_latitude,
+                max_longitude,
+                max_latitude
             ),
             self.bin_side_length
         )

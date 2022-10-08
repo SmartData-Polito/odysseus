@@ -4,9 +4,7 @@ import pickle
 
 import pandas as pd
 
-from odysseus.simulator.simulation_input.sim_input import SimInput
-from odysseus.simulator.simulation_run.run_traceB_sim import run_traceB_sim
-from odysseus.simulator.simulation_run.run_eventG_sim import run_eventG_sim
+from odysseus.simulator.simulation_run.sim_run import *
 from odysseus.simulator.simulation_output.sim_output import SimOutput
 from odysseus.simulator.simulation_output.sim_output_plotter import EFFCS_SimOutputPlotter
 from odysseus.utils.path_utils import get_output_path
@@ -22,10 +20,10 @@ def single_run(conf_dict):
     sim_technique = sim_general_conf["sim_technique"]
 
     results_path = get_output_path(
-        "results", city, conf_dict["sim_scenario_name"], "single_run", sim_general_conf["conf_id"]
+        "results", city, conf_dict["sim_scenario_name"], "single_run", conf_dict["conf_id"]
     )
     figures_path = get_output_path(
-        "figures", city, conf_dict["sim_scenario_name"], "single_run", sim_general_conf["conf_id"]
+        "figures", city, conf_dict["sim_scenario_name"], "single_run", conf_dict["conf_id"]
     )
 
     sim_input = SimInput(conf_dict)
@@ -34,24 +32,15 @@ def single_run(conf_dict):
     sim_input.init_relocation()
     start = datetime.datetime.now()
 
-    print(datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"], "SimInput initialised!")
+    print(datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"], "SimInput initialised!")
 
-    if sim_technique == "eventG":
-        sim_eventG = run_eventG_sim(sim_input=sim_input)
-        simOutput_eventG = SimOutput(sim_eventG)
-        simOutput_eventG.save_output(results_path, sim_general_conf, supply_model_conf)
-        sim_stats = simOutput_eventG.sim_stats
-        simOutput = simOutput_eventG
-    elif sim_technique == "traceB":
-        sim_traceB = run_traceB_sim(sim_input=sim_input)
-        simOutput_traceB = SimOutput(sim_traceB)
-        simOutput_traceB.save_output(results_path, sim_general_conf, supply_model_conf)
-        sim_stats = simOutput_traceB.sim_stats
-        simOutput = simOutput_traceB
+    sim = run_sim(sim_input, sim_technique)
+    sim_output = SimOutput(sim)
+    sim_stats = sim_output.sim_stats
 
     end = datetime.datetime.now()
     print(
-        datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"],
+        datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"],
         "Simulation finished, duration:", (end-start).total_seconds(), "Creating output.."
     )
 
@@ -60,28 +49,30 @@ def single_run(conf_dict):
     pd.Series(supply_model_conf).to_csv(os.path.join(results_path, "sim_scenario_conf.csv"))
 
     pickle.dump(
-        simOutput,
+        sim_output,
         open(os.path.join(results_path, "sim_output.pickle"), "wb")
     )
 
-    simOutput.grid.to_pickle(
+    sim_output.grid.to_pickle(
         os.path.join(
             results_path,
             "grid.pickle"
         )
     )
-    simOutput.grid.to_file(
+    sim_output.grid.to_file(
         os.path.join(
             results_path,
             "grid.dbf"
         )
     )
 
+    sim_output.save_output(results_path, sim_general_conf, supply_model_conf)
+
     if sim_general_conf["save_history"]:
 
-        plotter = EFFCS_SimOutputPlotter(simOutput, city, sim_scenario_name, figures_path)
+        plotter = EFFCS_SimOutputPlotter(sim_output, city, sim_scenario_name, figures_path)
         plotter.plot_events_profile_barh()
-        if len(simOutput.sim_bookings):
+        if len(sim_output.sim_bookings):
             plotter.plot_events_t()
         plotter.plot_fleet_status_t()
 
@@ -102,11 +93,11 @@ def single_run(conf_dict):
             "not_enough_energy_origins_count",
             "charge_deaths_origins_count",
         ]:
-            if col in simOutput.grid:
+            if col in sim_output.grid:
                 plotter.plot_choropleth(col)
 
     print(
-        datetime.datetime.now(), city, sim_scenario_name, sim_general_conf["conf_id"],
+        datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"],
         "Output created!"
     )
 

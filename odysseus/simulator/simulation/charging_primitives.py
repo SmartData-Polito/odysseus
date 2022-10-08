@@ -205,7 +205,7 @@ class ChargingPrimitives:
 
 	def get_timeout(self, origin_id, destination_id):
 		distance = get_od_distance(
-			self.sim_input.grid_centroids,
+			self.sim_input.grid,
 			origin_id,
 			destination_id,
 			self.sim_input.grid_crs
@@ -216,7 +216,7 @@ class ChargingPrimitives:
 
 	def get_cr_soc_delta(self, origin_id, destination_id, vehicle):
 		distance = get_od_distance(
-			self.sim_input.grid_centroids,
+			self.sim_input.grid,
 			origin_id,
 			destination_id,
 			self.sim_input.grid_crs
@@ -227,7 +227,7 @@ class ChargingPrimitives:
 
 	def get_distance(self, origin_id, destination_id):
 		distance = get_od_distance(
-			self.sim_input.grid_centroids,
+			self.sim_input.grid,
 			origin_id,
 			destination_id,
 			self.sim_input.grid_crs

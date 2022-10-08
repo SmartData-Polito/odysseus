@@ -1,13 +1,4 @@
-import os
-import pytz
-import pandas as pd
-
-from odysseus.utils.path_utils import check_create_path
-from odysseus.utils.time_utils import get_time_group_columns
-from odysseus.path_config.path_config import data_paths_dict
-
-
-class ODmatrixDataSource:
+class AbstractODmatrixDataSource:
 
     """
 
@@ -58,7 +49,7 @@ class ODmatrixDataSource:
         :return: nothing
         """
 
-    def load_norm(self, year, month):
+    def load_norm(self):
         """
         Load a previously created set of OD matrices with their configurations.
         """

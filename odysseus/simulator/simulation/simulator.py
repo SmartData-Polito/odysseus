@@ -198,8 +198,6 @@ class SharedMobilitySim:
         available_vehicle_flag_same_zone = flags_return_dict["available_vehicle_flag_same_zone"]
         available_vehicle_flag_not_same_zone = flags_return_dict["available_vehicle_flag_not_same_zone"]
 
-        print(available_vehicle_flag, found_vehicle_flag, available_vehicle_flag_same_zone)
-
         if found_vehicle_flag:
             booking_request_dict = add_consumption_emission_info(
                 booking_request_dict, self.vehicles_list[chosen_vehicle_id]
@@ -210,7 +208,6 @@ class SharedMobilitySim:
                 self.zone_dict[chosen_origin_id],
                 self.zone_dict[booking_request_dict["destination_id"]],
                 self.vehicles_list[chosen_vehicle_id],
-                self.sim_input.grid
             )
             self.env.process(self.execute_booking(booking, chosen_vehicle_id, chosen_origin_id))
 

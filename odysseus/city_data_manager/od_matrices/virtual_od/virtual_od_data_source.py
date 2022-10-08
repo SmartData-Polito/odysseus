@@ -6,10 +6,11 @@ from odysseus.utils.path_utils import check_create_path
 from odysseus.utils.time_utils import get_time_group_columns
 from odysseus.path_config.path_config import data_paths_dict
 from odysseus.city_data_manager.od_matrices.virtual_od.od_generator import *
-from odysseus.city_data_manager.od_matrices.od_data_source import ODmatrixDataSource
+from odysseus.city_data_manager.od_matrices.od_data_source import AbstractODmatrixDataSource
+from odysseus.city_data_manager.od_matrices.virtual_od.od_reader import *
 
 
-class virtualODDataSource(ODmatrixDataSource):
+class VirtualODDataSource(AbstractODmatrixDataSource):
 
     def __init__(self, city_name, data_source_id):
 
@@ -58,5 +59,7 @@ class virtualODDataSource(ODmatrixDataSource):
     def save_norm(self):
         pass
 
-    def load_norm(self, year, month):
-        pass
+    def load_norm(self):
+        od_matrices_by_hour, week_config, grid_config = read_od_matrices(self.city_name, self.data_source_id)
+        return od_matrices_by_hour, week_config, grid_config
+

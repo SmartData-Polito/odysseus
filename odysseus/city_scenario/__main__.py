@@ -1,5 +1,4 @@
 import datetime
-import os
 import argparse
 
 from odysseus.city_scenario.city_scenario_from_wgs84_trips import CityScenarioFromTrips
@@ -46,12 +45,12 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    data_from=["od"],
-    city=["my_city_2X2_1"],
-    data_source_id=["my_data_source"],
+    data_from=["trips"],
+    city=["Roma"],
+    data_source_id=["enjoy"],
     bin_side_length=[500],
-    train_range=("2023", "1", "2023", "1"),
-    test_range=("2023", "1", "2023", "1"),
+    train_range=("2020", "9", "2020", "9"),
+    test_range=("2020", "9", "2020", "9"),
     folder_name=["default"]
 )
 
@@ -96,8 +95,7 @@ for city_scenario_config in city_scenario_configs_list:
 
         city_scenario = None
 
-    if city_scenario:
-        city_scenario.create_city_scenario_from_trips_data()
+    if city_scenario is not None:
         city_scenario.save_results()
     else:
         print("City Scenario not configured properly!")

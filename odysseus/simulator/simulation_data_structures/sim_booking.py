@@ -6,7 +6,10 @@ from odysseus.utils.bookings_utils import *
 
 class SimBooking(SimEvent):
 
-    def __init__(self, env, booking_request, chosen_origin, chosen_destination, vehicle, grid):
+    def __init__(
+            self, env, booking_request, chosen_origin, chosen_destination, vehicle,
+            orography_factor=1.4
+    ):
 
         super().__init__(env, "booking")
         self.booking_request = booking_request
@@ -24,7 +27,7 @@ class SimBooking(SimEvent):
         self.booking_dict["euclidean_distance"] = self.booking_request.sim_input.distance_matrix.loc[
             self.booking_dict["origin_id"], self.booking_dict["destination_id"]
         ] + 1
-        self.booking_dict["driving_distance"] = self.booking_dict["euclidean_distance"] * 1.4
+        self.booking_dict["driving_distance"] = self.booking_dict["euclidean_distance"] * orography_factor
         #self.booking_dict = get_distances(self.booking_dict, grid)
         #self.booking_dict = get_walking_distances(self.booking_dict, grid)
 

@@ -12,6 +12,8 @@ from odysseus.utils.path_utils import *
 from odysseus.path_config.path_config import *
 
 
+start = datetime.datetime.now()
+
 parser = argparse.ArgumentParser()
 
 
@@ -31,17 +33,12 @@ parser.add_argument(
     help="specify conf name"
 )
 
-parser.add_argument(
-    "-s", "--existing_supply_model_folder",
-    help="Specify the folder in which is stored a supply model"
-)
-
 
 parser.set_defaults(
     campaign_name="test",
-    conf_name="generated_od_test",
+    conf_name="enjoy_test",
     city_scenario_folder="default",
-    existing_supply_model_folder=None,
+    sim_run_mode="multiple_runs"
 )
 
 args = parser.parse_args()
@@ -56,73 +53,68 @@ versioned_conf_path = os.path.join(
 )
 print(versioned_conf_path)
 
-sim_general_conf_grid = get_sim_configs_from_path(versioned_conf_path, "sim_general_conf", "sim_general_conf_grid")
-demand_model_conf_grid = get_sim_configs_from_path(versioned_conf_path, "demand_model_conf", "demand_model_conf_grid")
-supply_model_conf_grid = get_sim_configs_from_path(versioned_conf_path, "supply_model_conf", "supply_model_conf_grid")
+sim_general_conf_grid = get_sim_configs_from_path(versioned_conf_path, "sim_general_conf", "sim_general_config_grid")
+demand_model_conf_grid = get_sim_configs_from_path(versioned_conf_path, "demand_model_conf", "demand_model_config_grid")
+supply_model_conf_grid = get_sim_configs_from_path(versioned_conf_path, "supply_model_conf", "supply_model_config_grid")
 
-multiple_runs_conf_grid = get_sim_configs_from_path(versioned_conf_path, "multiple_runs_conf", "sim_scenario_conf_grid")
-
-confs_dict = dict()
-confs_dict["multiple_runs"] = multiple_runs_conf_grid
-confs_dict["single_run"] = demand_model_conf_grid
+config_grids_dict = dict()
+config_grids_dict["sim_general_config_grid"] = sim_general_conf_grid
+config_grids_dict["demand_model_config_grid"] = demand_model_conf_grid
+config_grids_dict["supply_model_config_grid"] = supply_model_conf_grid
 
 sim_general_conf_list = SimConfGrid(sim_general_conf_grid).conf_list
-
+configs_list = list()
+conf_id = 0
 for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
-
     sim_general_conf["general_conf_id"] = general_conf_id
+    demand_conf_grid = SimConfGrid(demand_model_conf_grid)
+    for demand_conf_id, demand_model_conf in enumerate(demand_conf_grid.conf_list):
+        supply_conf_grid = SimConfGrid(supply_model_conf_grid)
+        for supply_model_conf_id, supply_model_conf in enumerate(supply_conf_grid.conf_list):
+            parameters_dict = {
+                "city_scenario_folder": args.city_scenario_folder,
+                "sim_general_conf": sim_general_conf,
+                "sim_scenario_name": sim_general_conf["sim_scenario_name"],
+                "demand_model_conf": demand_model_conf,
+                "supply_model_conf": supply_model_conf,
+                "supply_model_object": None,
+                "conf_id": str(supply_model_conf_id)
+            }
 
-    sim_run_mode = sim_general_conf["sim_run_mode"]
+            #parameters_dict["conf_id"] = str(supply_model_conf_id)
 
-    if args.existing_supply_model_folder is not None:
-        existing_supply_model_folder = args.existing_supply_model_folder
-        city_supply_models_path = os.path.join(supply_models_path, sim_general_conf["city"])
-        folder_path = os.path.join(city_supply_models_path, existing_supply_model_folder)
-        if not os.path.exists(city_supply_models_path):
-            print("No supply model found for " + sim_general_conf["city"] + "!")
-            exit(3)
+            # print(parameters_dict["sim_general_conf"]["conf_id"])
+            # print(parameters_dict["supply_model_conf"]["n_vehicles"])
+            #
+            # # continue
 
-        if not os.path.exists(folder_path):
-            print("Non-existent folder.")
-            print("Available folders", str(os.listdir(existing_supply_model_folder)))
-            exit(1)
-        else:
-            if "supply_model.pickle" not in os.listdir(folder_path):
-                print("The folder must contain the supply_model.pickle file")
-                exit(2)
-            else:
-                print("Existing object. I am recovering it...")
+            configs_list.append(parameters_dict)
 
-                # TODO -> read supply model data structure by data structure
-                # at least the ones which make sense to modify manually
-                # TODO -> reparametrise OR raise exception if parameters are not coherent/cohese
+            conf_id += 1
 
-                with open(os.path.join(folder_path, "supply_model.pickle"), "rb") as f:
-                    supply_model = pickle.load(f)
-    else:
-        supply_model = None
+            # configs_list[-1]["sim_general_conf"]["conf_id"] = "_".join(
+            #     [str(general_conf_id), str(demand_conf_id), str(supply_model_conf_id)]
+            # )
+            # print(configs_list[-1]["sim_general_conf"])
 
-    if sim_run_mode == "single_run":
-        demand_conf_grid = SimConfGrid(demand_model_conf_grid)
-        for demand_conf_id, demand_model_conf in enumerate(demand_conf_grid.conf_list):
-            supply_conf_grid = SimConfGrid(supply_model_conf_grid)
-            for supply_model_conf_id, supply_model_conf in enumerate(supply_conf_grid.conf_list):
-                parameters_dict = {
-                    "city_scenario_folder": args.city_scenario_folder,
-                    "sim_general_conf": sim_general_conf,
-                    "sim_scenario_name": sim_general_conf["sim_scenario_name"],
-                    "demand_model_conf": demand_model_conf,
-                    "supply_model_conf": supply_model_conf,
-                    "supply_model_object": supply_model
-                }
-                parameters_dict["sim_general_conf"]["conf_id"] = "_".join(
-                    [str(general_conf_id), str(demand_conf_id), str(supply_model_conf_id)]
-                )
-                single_run(parameters_dict)
+# for parameters_dict in configs_list:
+#     print(parameters_dict["sim_general_conf"]["conf_id"])
+#     print(parameters_dict["sim_general_conf"])
 
-    elif sim_run_mode == "multiple_runs":
-        print(multiple_runs_conf_grid)
+if args.sim_run_mode == "single_run":
+    for parameters_dict in configs_list:
+        #print(parameters_dict["conf_id"])
+        #print(parameters_dict["supply_model_conf"]["n_vehicles"])
+        single_run(parameters_dict)
+
+
+if args.sim_run_mode == "multiple_runs":
+    for parameters_dict in configs_list:
         parameters_dict["sim_general_conf"]["save_history"] = False
         if args.n_cpus is not None:
             parameters_dict["n_cpus"] = int(args.n_cpus)
-        multiple_runs(parameters_dict)
+    multiple_runs(config_grids_dict, configs_list)
+
+end = datetime.datetime.now()
+
+print("Total execution time:", (end-start).total_seconds())

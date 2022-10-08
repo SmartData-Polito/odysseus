@@ -46,9 +46,9 @@ vehicle_cost = {
 		"Smart fortwo Electric Drive 2018": {
 			# "retail_price": 16279.92,
 			"leasing_cost": 3690,
-			"washing_cost": 8,
-			"disinfection_cost": 15,
-			"cost_permin": 0.19
+			"washing_cost": 1,
+			"disinfection_cost": 5,
+			"cost_permin": 0.26
 		},
 		"generic e-scooter": {
 			"leasing_cost": 0,

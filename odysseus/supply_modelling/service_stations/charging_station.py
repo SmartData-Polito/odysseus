@@ -9,9 +9,9 @@ class Pole(object):
 			self.voltage_output = station_config["voltage_output"]
 			self.current_output= station_config["current_output"]
 			self.profile_type = station_config["profile_type"]
-			if self.profile_type in ["wall_plug","single_phase_1","single_phase_2","dcfc_1","dcfc_2"]:
+			if self.profile_type in ["wall_plug", "single_phase_1", "single_phase_2", "dcfc_1", "dcfc_2"]:
 				self.flow_rate = self.voltage_output * self.current_output
-			elif self.profile_type in ["three_phase_1","three_phase_2","three_phase_3"]:
+			elif self.profile_type in ["three_phase_1", "three_phase_2", "three_phase_3"]:
 				self.flow_rate = self.voltage_output * self.current_output * sqrt(3)
 			# self.cost = station_config["cost"]
 		elif self.fuel_type in ["gasoline","diesel", "lpg","cng"]:

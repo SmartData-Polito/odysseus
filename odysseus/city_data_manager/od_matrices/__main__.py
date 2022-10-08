@@ -62,7 +62,7 @@ parser.set_defaults(
 
 args = parser.parse_args()
 
-od_data_source = virtualODDataSource(args.city, args.data_source_id)
+od_data_source = VirtualODDataSource(args.city, args.data_source_id)
 
 if not args.read:
 
@@ -70,7 +70,7 @@ if not args.read:
 
 else:
 
-    od_matrices_by_hour, week_config, grid_config = read_od_matrices(args.city, args.data_source_id)
+    od_matrices_by_hour, week_config, grid_config = od_data_source.load_norm()
     grid_matrix = get_grid_matrix_from_config(grid_config)
 
 zone_ids = np.ravel(grid_matrix.values)

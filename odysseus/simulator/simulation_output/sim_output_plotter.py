@@ -60,7 +60,7 @@ class EFFCS_SimOutputPlotter ():
 
 		self.sim_output = sim_output
 
-	def plot_city_zones(self, annotate=True):
+	def plot_city_zones(self, annotate=False):
 
 		fig, ax = plt.subplots(1, 1, figsize=(15, 15))
 		plt.title("")
@@ -267,7 +267,7 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_choropleth (self, col, annotate=True):
+	def plot_choropleth (self, col, annotate=False):
 
 		fig, ax = plt.subplots(1, 1, figsize=(15, 15))
 
