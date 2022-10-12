@@ -11,11 +11,14 @@ City Data Manager
    :maxdepth: 2
    :caption: Moduli:
 
-   city_data_source/index
-   city_geo_trips/index
+   geo_trips/index
+   od_matrices/index
 
-Introduction
------------------------------
+The City Data Manager module takes care of data acquisition/generation and formatting.
 
-The City Data Manager module takes care of data preprocessing. The simulator supports heterogeneous data sources thanks to this module which, starting from a generic input data format, transforms them following the same format adopted by the other simulator modules.
-The module is divided into two submodules, City Geo Trips and City Data Source.
+The currently supported mobility data types are:
+
+- **Geo Trips**
+   - Record of a certain mobility trip with spatial and temporal information
+- **Origin-Destination matrices**
+   - Description of the flow between zones at different moments of the day, week, month, ...

@@ -77,7 +77,7 @@ def generate_week_config(
     return week_config
 
 
-def generate_hourly_od_count_dict(week_config, zone_ids, how="uniform", **kwargs):
+def generate_hourly_od_count_dict(week_config, zone_ids, how, **kwargs):
 
     """
     This function generates a nested dictionary containing hourly OD matrices.
@@ -95,6 +95,20 @@ def generate_hourly_od_count_dict(week_config, zone_ids, how="uniform", **kwargs
                         hourly_od_count_dict[week_daytype][hour][origin] = {}
                         for destination in zone_ids:
                             hourly_od_count_dict[week_daytype][hour][origin][destination] = kwargs["count"]
+    if how == "simple_cyclic":
+        for week_daytype in week_config["week_slots"].keys():
+            hourly_od_count_dict[week_daytype] = {}
+            for day_slot in week_config["day_slots"][week_daytype]:
+                day_slot_hours = week_config["day_slots"][week_daytype][day_slot]
+                for origin in zone_ids:
+                    hours = range(origin, 24, len(zone_ids))
+                    for hour in sorted(set(day_slot_hours).intersection(hours)):
+                        hourly_od_count_dict[week_daytype][hour] = dict()
+                        hourly_od_count_dict[week_daytype][hour][origin] = {}
+                        destination = (origin + 1) % len(zone_ids)
+                        hourly_od_count_dict[week_daytype][hour][origin][destination] = kwargs["count"]
+                        print(hour, origin, hourly_od_count_dict[week_daytype][hour][origin])
+
     return hourly_od_count_dict
 
 
@@ -111,7 +125,14 @@ def get_hourly_od_from_count(
         for destination in zone_ids:
             for day_slot in week_config["day_slots"][week_daytype]:
                 if hour in week_config["day_slots"][week_daytype][day_slot]:
-                    od_df.loc[origin, destination] = hourly_count_dict[week_daytype][hour][origin][destination]
+                    if origin in hourly_count_dict[week_daytype][hour].keys():
+                        if destination in hourly_count_dict[week_daytype][hour][origin].keys():
+                            od_df.loc[origin, destination] = hourly_count_dict[week_daytype][hour][origin][destination]
+                        else:
+                            od_df.loc[origin, destination] = 0
+                    else:
+                        od_df.loc[origin, destination] = 0
+
     return od_df
 
 
@@ -126,8 +147,15 @@ def get_day_slot_od_from_count(
     od_df = pd.DataFrame()
     for origin in zone_ids:
         for destination in zone_ids:
-            for hour in week_config["day_slots"][week_daytype][day_slot][:1]:
-                od_df.loc[origin, destination] = hourly_count_dict[week_daytype][hour][origin][destination]
+            for hour in week_config["day_slots"][week_daytype][day_slot]:
+                if origin in hourly_count_dict[week_daytype][hour].keys():
+                    if destination in hourly_count_dict[week_daytype][hour][origin].keys():
+                        od_df.loc[origin, destination] = hourly_count_dict[week_daytype][hour][origin][destination]
+                    else:
+                        od_df.loc[origin, destination] = 0
+                else:
+                    od_df.loc[origin, destination] = 0
+
     return od_df
 
 

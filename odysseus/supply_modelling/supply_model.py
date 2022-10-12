@@ -70,7 +70,8 @@ class SupplyModel:
         self.initial_relocation_workers_positions = []
 
         self.service_stations = ServiceStations(
-            city_name, self.grid, self.tot_n_charging_poles, self.n_charging_zones
+            city_name, self.grid, self.tot_n_charging_poles, self.n_charging_zones,
+            self.city_scenario.grid_indexes_dict, self.city_scenario.bin_side_length
         )
         self.zone_dict = dict()
         self.charging_stations_dict = dict()

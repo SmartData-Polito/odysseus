@@ -75,9 +75,12 @@ class CityScenarioFromOD(AbstractCityScenario):
     def create_squared_city_grid(self, n_zones_x, n_zones_y, bin_side_length):
 
         self.bin_side_length = bin_side_length
+
         total_bounds = (
             0, 0, n_zones_x * bin_side_length, n_zones_y * bin_side_length
         )
+        print(total_bounds)
+
         self.grid = get_city_grid_as_gdf(total_bounds, bin_side_length, "dummy_crs")
 
         self.grid["centroid_x"] = self.grid.loc[:, "geometry"].centroid.x
@@ -85,6 +88,9 @@ class CityScenarioFromOD(AbstractCityScenario):
         self.grid_crs = self.grid.crs
 
         self.grid_matrix = get_city_grid_as_matrix(total_bounds, bin_side_length, "dummy_crs")
+
+        print(self.grid)
+        print(self.grid_matrix)
 
         self.bookings_train["origin_id"] = self.bookings_train[["origin_i", "origin_j"]].apply(
             lambda s: self.grid_matrix.loc[s[0], s[1]], axis=1

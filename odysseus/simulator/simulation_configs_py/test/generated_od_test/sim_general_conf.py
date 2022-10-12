@@ -1,14 +1,15 @@
-sim_general_conf_grid = {
+sim_general_config_grid = {
 
     # City and data source parameters
-    "city": ["my_city_2X2_1"],
+    "city": ["my_city_2X2_2"],
     "data_source_id": ["my_data_source"],
 
     # Run parameters
     "sim_run_mode": ["single_run"],
     "sim_technique": ["traceB"],
-    "sim_scenario_name": ["my_city_2X2_1_test"],
+    "sim_scenario_name": ["cyclic_requests"],
     "save_history": [True],
+    "auto_plotting": [True],
 
     # Time  parameters
     "year": [2023],

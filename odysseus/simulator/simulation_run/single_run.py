@@ -1,6 +1,7 @@
 import datetime
 import os
 import pickle
+import json
 
 import pandas as pd
 
@@ -26,9 +27,14 @@ def single_run(conf_dict):
         "figures", city, conf_dict["sim_scenario_name"], "single_run", conf_dict["conf_id"]
     )
 
+    print(datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"], "Initialising SimInput..")
+
     sim_input = SimInput(conf_dict)
+    #print(datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"], "Initialising vehicles..")
     sim_input.init_vehicles()
+    #print(datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"], "Initialising charging poles..")
     sim_input.init_charging_poles()
+    #print(datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"], "Initialising relocation..")
     sim_input.init_relocation()
     start = datetime.datetime.now()
 
@@ -43,6 +49,7 @@ def single_run(conf_dict):
         datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"],
         "Simulation finished, duration:", (end-start).total_seconds(), "Creating output.."
     )
+    start = datetime.datetime.now()
 
     sim_stats.to_csv(os.path.join(results_path, "sim_stats.csv"))
     pd.Series(sim_general_conf).to_csv(os.path.join(results_path, "sim_general_conf.csv"))
@@ -52,6 +59,9 @@ def single_run(conf_dict):
         sim_output,
         open(os.path.join(results_path, "sim_output.pickle"), "wb")
     )
+
+    with open(os.path.join(results_path, "n_charging_poles_by_zone.json"), "w") as f:
+        json.dump(sim_output.n_charging_poles_by_zone, f)
 
     sim_output.grid.to_pickle(
         os.path.join(
@@ -68,7 +78,7 @@ def single_run(conf_dict):
 
     sim_output.save_output(results_path, sim_general_conf, supply_model_conf)
 
-    if sim_general_conf["save_history"]:
+    if sim_general_conf["auto_plotting"]:
 
         plotter = EFFCS_SimOutputPlotter(sim_output, city, sim_scenario_name, figures_path)
         plotter.plot_events_profile_barh()
@@ -96,9 +106,11 @@ def single_run(conf_dict):
             if col in sim_output.grid:
                 plotter.plot_choropleth(col)
 
+    end = datetime.datetime.now()
+
     print(
         datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"],
-        "Output created!"
+        "Output created, duration: {} seconds".format((end-start).total_seconds())
     )
 
     return sim_stats

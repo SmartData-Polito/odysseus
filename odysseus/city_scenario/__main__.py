@@ -45,13 +45,13 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    data_from=["trips"],
-    city=["Roma"],
-    data_source_id=["enjoy"],
+    data_from=["od"],
+    city=["my_city_2X2_2"],
+    data_source_id=["my_data_source"],
     bin_side_length=[500],
-    train_range=("2020", "9", "2020", "9"),
-    test_range=("2020", "9", "2020", "9"),
-    folder_name=["default"]
+    train_range=("2023", "1", "2023", "1"),
+    test_range=("2023", "1", "2023", "1"),
+    folder_name=["cyclic_scenario"]
 )
 
 args = parser.parse_args()

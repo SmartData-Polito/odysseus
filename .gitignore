@@ -13,6 +13,7 @@ simple_demo_0/*
 
 data/*
 docs_html/*
+docs_backup/*
 
 odysseus/data/*
 odysseus/city_scenario/city_scenarios/*

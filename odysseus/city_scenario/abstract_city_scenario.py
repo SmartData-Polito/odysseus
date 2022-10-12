@@ -61,70 +61,6 @@ class AbstractCityScenario:
         self.city_scenario_path = None
         self.city_scenario_config = dict()
 
-    def create_city_scenario_from_trips_data(self):
-
-        self.avg_speed_mean = self.bookings_train.avg_speed.mean()
-        self.avg_speed_std = self.bookings_train.avg_speed.std()
-        self.avg_speed_kmh_mean = self.bookings_train.avg_speed_kmh.mean()
-        self.avg_speed_kmh_std = self.bookings_train.avg_speed_kmh.std()
-        self.max_driving_distance = self.bookings_train.driving_distance.max()
-
-        import warnings
-        warnings.filterwarnings("ignore")
-
-        self.grid["centroid_x"] = self.grid.loc[:, "geometry"].centroid.x
-        self.grid["centroid_y"] = self.grid.loc[:, "geometry"].centroid.y
-        self.grid_crs = self.grid.crs
-
-        self.valid_zones = self.get_valid_zones()
-
-        self.grid_indexes_dict = get_grid_indexes_dict(self.grid_matrix)
-
-        self.closest_valid_zone = get_closest_zone_from_grid_matrix(
-            self.grid_indexes_dict, self.grid.index.values, self.valid_zones
-        )
-        self.closest_valid_zone = pd.Series(self.closest_valid_zone)
-
-        # self.grid = self.grid.loc[self.valid_zones]
-
-        self.bookings_train = self.bookings_train.loc[
-            (self.bookings_train.origin_id.isin(self.valid_zones)) & (
-                self.bookings_train.destination_id.isin(self.valid_zones)
-            )
-        ]
-        self.grid["origin_count"] = self.bookings_train.origin_id.value_counts()
-        self.grid["destination_count"] = self.bookings_train.destination_id.value_counts()
-        reqs_per_zone = self.bookings_train.origin_id.value_counts(
-            normalize=False
-        ).rename('zone_id')
-        self.grid = self.grid.join(reqs_per_zone, how='left', on='zone_id', rsuffix='_origin_count')
-
-        if 'plate' in self.bookings_train:
-            self.n_vehicles_original = len(self.bookings_train.plate.unique())
-        elif 'vehicle_id' in self.bookings_train:
-            self.n_vehicles_original = len(self.bookings_train.vehicle_id.unique())
-        else:
-            self.n_vehicles_original = 100
-
-        self.neighbors_dict = self.get_neighbors_dicts()
-        self.get_grid_indexes()
-
-        self.max_out_flow = float('-inf')
-        self.max_in_flow = float('-inf')
-        self.avg_out_flows_train = self.get_avg_out_flows()
-        self.avg_in_flows_train = self.get_avg_in_flows()
-
-        self.energy_mix = EnergyMix(self.city_name, self.year_energy_mix)
-
-        self.distance_matrix = get_distance_matrix(
-            self.grid_indexes_dict, self.valid_zones, self.valid_zones, self.bin_side_length
-        )
-
-        self.closest_zones = get_closest_zone_from_grid_matrix(
-            self.grid_indexes_dict, self.valid_zones, self.valid_zones
-        )
-        self.closest_zones = pd.Series(self.closest_zones)
-
     def map_zones_on_trips(self, zones):
 
         self.trips_origins_train = gpd.sjoin(
@@ -365,6 +301,70 @@ class AbstractCityScenario:
 
         return self.avg_in_flows_train
 
+    def create_city_scenario_from_trips_data(self):
+
+        self.avg_speed_mean = self.bookings_train.avg_speed.mean()
+        self.avg_speed_std = self.bookings_train.avg_speed.std()
+        self.avg_speed_kmh_mean = self.bookings_train.avg_speed_kmh.mean()
+        self.avg_speed_kmh_std = self.bookings_train.avg_speed_kmh.std()
+        self.max_driving_distance = self.bookings_train.driving_distance.max()
+
+        import warnings
+        warnings.filterwarnings("ignore")
+
+        self.grid["centroid_x"] = self.grid.loc[:, "geometry"].centroid.x
+        self.grid["centroid_y"] = self.grid.loc[:, "geometry"].centroid.y
+        self.grid_crs = self.grid.crs
+
+        self.valid_zones = self.get_valid_zones()
+
+        self.grid_indexes_dict = get_grid_indexes_dict(self.grid_matrix)
+
+        self.closest_valid_zone = get_closest_zone_from_grid_matrix(
+            self.grid_indexes_dict, self.grid.index.values, self.valid_zones
+        )
+        self.closest_valid_zone = pd.Series(self.closest_valid_zone)
+
+        # self.grid = self.grid.loc[self.valid_zones]
+
+        self.bookings_train = self.bookings_train.loc[
+            (self.bookings_train.origin_id.isin(self.valid_zones)) & (
+                self.bookings_train.destination_id.isin(self.valid_zones)
+            )
+        ]
+        self.grid["origin_count"] = self.bookings_train.origin_id.value_counts()
+        self.grid["destination_count"] = self.bookings_train.destination_id.value_counts()
+        reqs_per_zone = self.bookings_train.origin_id.value_counts(
+            normalize=False
+        ).rename('zone_id')
+        self.grid = self.grid.join(reqs_per_zone, how='left', on='zone_id', rsuffix='_origin_count')
+
+        if 'plate' in self.bookings_train:
+            self.n_vehicles_original = len(self.bookings_train.plate.unique())
+        elif 'vehicle_id' in self.bookings_train:
+            self.n_vehicles_original = len(self.bookings_train.vehicle_id.unique())
+        else:
+            self.n_vehicles_original = 100
+
+        self.neighbors_dict = self.get_neighbors_dicts()
+        self.get_grid_indexes()
+
+        self.max_out_flow = float('-inf')
+        self.max_in_flow = float('-inf')
+        self.avg_out_flows_train = self.get_avg_out_flows()
+        self.avg_in_flows_train = self.get_avg_in_flows()
+
+        self.energy_mix = EnergyMix(self.city_name, self.year_energy_mix)
+
+        self.distance_matrix = get_distance_matrix(
+            self.grid_indexes_dict, self.valid_zones, self.valid_zones, self.bin_side_length
+        )
+
+        self.closest_zones = get_closest_zone_from_grid_matrix(
+            self.grid_indexes_dict, self.valid_zones, self.valid_zones
+        )
+        self.closest_zones = pd.Series(self.closest_zones)
+
     def save_results(self):
 
         os.makedirs(self.city_scenario_path, exist_ok=True)
@@ -401,6 +401,8 @@ class AbstractCityScenario:
             pickle.dump(self.avg_in_flows_train, f)
         with open(os.path.join(self.city_scenario_path, "closest_zones.pickle"), "wb") as f:
             pickle.dump(self.closest_zones, f)
+        with open(os.path.join(self.city_scenario_path, "grid_indexes_dict.pickle"), "wb") as f:
+            pickle.dump(self.grid_indexes_dict, f)
 
         numerical_params_dict = {
             "n_vehicles_original": self.n_vehicles_original,
@@ -444,6 +446,7 @@ class AbstractCityScenario:
         self.valid_zones = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "valid_zones.pickle"), "rb")).load()
         self.neighbors_dict = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "neighbors_dict.pickle"), "rb")).load()
         self.numerical_params_dict = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "numerical_params_dict.pickle"), "rb")).load()
+        self.grid_indexes_dict = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "grid_indexes_dict.pickle"), "rb")).load()
 
     def read_city_scenario_for_demand_model(self):
 

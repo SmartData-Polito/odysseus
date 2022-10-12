@@ -6,25 +6,22 @@
 Installation Guide
 =================================
 
+Prerequisites
+---------------------------------------
+
+- **Python 3.8 or higher**
+- **Dedicated virtual environment (venv or conda)**
+
 Setup repository, environment and data
 ---------------------------------------
 
-First, let's clone the public git repository and install all the necessary libraries..
+First, let's clone the public git repository and install all the necessary libraries.
 
    .. code-block:: console
 
-     git clone https://github.com/AleCioc/odysseus my-odysseus-folder
-     pip install --user -r my-odysseus-folder/requirements.txt
+      git clone https://github.com/SmartData-Polito/odysseus my-odysseus-folder
+      mv my-odysseus-folder
+      pip install --user -r requirements.txt
 
-We need some mobility data to start playing with odysseus.
-You can find some sample data at [].
-Move them in the raw data folder of the city you have chosen.
+Installing geospatial libraries may require different steps while being on Windows, Mac or Linux.
 
-::
-
-    my-odysseus-folder
-    ├── odysseus
-    │   ├── city_data_manager
-    │   │   ├── data
-    │   │   │   ├── Torino
-    │   │   │   │   ├── raw

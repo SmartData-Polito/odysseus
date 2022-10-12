@@ -4,7 +4,7 @@ Geo Data Source
 =================================
 
 
-.. automodule:: odysseus.city_data_manager.city_data_source.geo_data_source.geo_data_source
+.. automodule:: odysseus.city_data_manager.geo_trips.geo_data_source
    :imported-members:
    :members:
    :undoc-members:

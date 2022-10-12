@@ -88,10 +88,6 @@ class SharedMobilitySim:
         self.zone_dict = self.sim_input.supply_model.zone_dict
         self.charging_stations_dict = self.sim_input.supply_model.charging_stations_dict
 
-        # print(self.sim_input.grid_matrix)
-        # for zone_id in self.charging_stations_dict:
-        #     print(zone_id, self.charging_stations_dict[zone_id].num_poles)
-
         self.real_n_charging_zones = self.sim_input.supply_model.real_n_charging_zones
         self.vehicles_list = self.sim_input.supply_model.vehicles_list
 
@@ -190,7 +186,7 @@ class SharedMobilitySim:
         self.charging_return_distance = [self.charging_strategy.charging_return_distance]
 
         flags_return_dict, chosen_vehicle_id, chosen_origin_id = booking_request.search_vehicle(
-            "zone"
+            self.sim_input.demand_model_conf["vehicle_research_policy"]
         )
 
         available_vehicle_flag = flags_return_dict["available_vehicle_flag"]

@@ -119,6 +119,7 @@ class SimBookingRequest(SimEvent):
             return self.search_vehicle_in_zone(
                 int(self.booking_request_dict["origin_id"])
             )
+
         elif vehicle_research_policy == "neighbors_1":
             flags_return_dict, chosen_vehicle_id, chosen_origin_id = self.search_vehicle_in_zone(
                 int(self.booking_request_dict["origin_id"])
@@ -127,6 +128,7 @@ class SimBookingRequest(SimEvent):
                 return flags_return_dict, chosen_vehicle_id, chosen_origin_id
             else:
                 return self.search_vehicle_in_neighbors()
+
         elif vehicle_research_policy == "closest_vehicle":
             flags_return_dict, chosen_vehicle_id, chosen_origin_id = self.search_vehicle_in_zone(
                 int(self.booking_request_dict["origin_id"])

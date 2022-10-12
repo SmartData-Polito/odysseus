@@ -1,31 +1,42 @@
 import os
 import json
-import numpy as np
-import pandas as pd
 
+from odysseus.utils.geospatial_utils import *
 from odysseus.supply_modelling.service_stations.service_stations_utils import read_stations_osm_format
 
 
 class ServiceStations:
 
-    def __init__(self, city_name, grid, tot_n_charging_poles, n_charging_zones):
+    def __init__(self, city_name, grid, tot_n_charging_poles, n_charging_zones, grid_indexes_dict,
+                 bin_side_length):
 
         self.city_name = city_name
         self.grid = grid
-
         self.tot_n_charging_poles = tot_n_charging_poles
         self.n_charging_zones = n_charging_zones
+        self.grid_indexes_dict = grid_indexes_dict
+        self.bin_side_length = bin_side_length
+
         self.n_charging_poles_by_zone = None
         self.zones_cp_distances = None
         self.closest_cp_zone = None
 
     def get_station_distances(self):
 
-        zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index.astype(int)
-        self.zones_cp_distances = self.grid.to_crs("epsg:3857").centroid.apply(
-            lambda x: self.grid.loc[zones_with_cps].to_crs("epsg:3857").centroid.distance(x)
+        # zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index.astype(int)
+        # self.zones_cp_distances = self.grid.to_crs("epsg:3857").centroid.apply(
+        #     lambda x: self.grid.loc[zones_with_cps].to_crs("epsg:3857").centroid.distance(x)
+        # )
+        # self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
+
+        self.zones_cp_distances = get_distance_matrix(
+            self.grid_indexes_dict, self.grid_indexes_dict.keys(), self.n_charging_poles_by_zone.keys(),
+            self.bin_side_length
         )
-        self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
+
+        self.closest_cp_zone = get_closest_zone_from_grid_matrix(
+            self.grid_indexes_dict, self.grid_indexes_dict.keys(), self.n_charging_poles_by_zone.keys()
+        )
 
     def init_charging_poles_from_policy(
             self, stations_placement_policy, engine_type
@@ -96,7 +107,10 @@ class ServiceStations:
                 for zone_id in self.grid.index.values
             }
 
-        self.n_charging_poles_by_zone = {int(k): int(v) for k, v in self.n_charging_poles_by_zone.items()}
+        self.n_charging_poles_by_zone = {
+            int(k): int(v) for k, v in self.n_charging_poles_by_zone.items() if v > 0
+        }
+
         self.get_station_distances()
 
     def init_charging_poles_from_map_config(self, supply_model_path):

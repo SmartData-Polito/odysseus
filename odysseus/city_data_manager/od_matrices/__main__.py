@@ -1,7 +1,7 @@
 import argparse
 import datetime
 
-from odysseus.city_data_manager.od_matrices.virtual_od.od_reader import *
+from odysseus.city_data_manager.od_matrices.virtual_od.od_generator import generate_trips_from_od
 from odysseus.city_data_manager.od_matrices.virtual_od.virtual_od_data_source import *
 
 parser = argparse.ArgumentParser()
@@ -23,18 +23,18 @@ parser.add_argument(
 
 parser.add_argument(
     "-ws", "--week_slots_type",
-    help="specify how to divide days within a week", choices=["weekday_weekend"]
+    help="specify how to divide days within a week", choices=["generic_day", "weekday_weekend"]
 )
 
 parser.add_argument(
     "-ds", "--day_slots_type",
-    help="specify how to divide hours within a day", choices=["daymoments", "hours"]
+    help="specify how to divide hours within a day", choices=["generic_hour", "daymoments", "hours"]
 )
 
 parser.add_argument(
-    "-nd", "--n_days",
-    nargs=2, metavar=('train_days', 'test_days'),
-    help="specify number of train days and test days to generate"
+    "-nh", "--n_hours",
+    nargs=2, metavar=('train_hours', 'test_hours'),
+    help="specify number of train hours and test hours to generate"
 )
 
 parser.add_argument(
@@ -51,13 +51,13 @@ parser.add_argument(
 
 parser.set_defaults(
     read=False,
-    city="my_city_2X2_1",
+    city="my_city_2X2_2",
     data_source_id="my_data_source",
     week_slots_type="generic_day",
     day_slots_type="generic_hour",
-    n_hours=(1, 1),
+    n_hours=(24, 24),
     grid_params=(2, 2, 500),
-    od_params=(1, ),
+    od_params=("simple_cyclic", 1, ),
 )
 
 args = parser.parse_args()
@@ -80,15 +80,15 @@ train_end_time = train_start_time + datetime.timedelta(hours=args.n_hours[0])
 test_start_time = train_end_time
 test_end_time = test_start_time + datetime.timedelta(hours=args.n_hours[1])
 
-
-train_booking_requests, test_booking_requests = generate_trips_from_od(
-    args.city,
-    od_matrices_by_hour,
-    week_config,
-    grid_matrix,
-    zone_ids,
-    train_start_time,
-    train_end_time,
-    test_start_time,
-    test_end_time,
-)
+if args.od_params[1] > 0:
+    train_booking_requests, test_booking_requests = generate_trips_from_od(
+        args.city,
+        od_matrices_by_hour,
+        week_config,
+        grid_matrix,
+        zone_ids,
+        train_start_time,
+        train_end_time,
+        test_start_time,
+        test_end_time,
+    )

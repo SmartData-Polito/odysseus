@@ -41,12 +41,6 @@ class SimOutput():
 			self.sim_system_charges_bookings = pd.DataFrame(sim.charging_strategy.list_system_charging_bookings)
 			self.sim_users_charges_bookings = pd.DataFrame(sim.charging_strategy.list_users_charging_bookings)
 
-			print(
-				self.sim_booking_requests.shape,
-				self.sim_bookings.shape,
-				self.sim_unsatisfied_requests.shape
-			)
-
 			if "end_time" not in self.sim_system_charges_bookings:
 				self.sim_system_charges_bookings["end_time"] = pd.Series(dtype=object)
 			if "end_time" not in self.sim_users_charges_bookings:
@@ -323,7 +317,7 @@ class SimOutput():
 
 	def save_output(self, results_path, sim_general_conf, sim_scenario_conf):
 
-		if True:
+		if sim_general_conf["save_history"]:
 
 			self.sim_booking_requests.to_csv(
 				os.path.join(

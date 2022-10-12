@@ -1,14 +1,8 @@
-import os.path
+from odysseus.city_data_manager.geo_trips.enjoy.enjoy_geo_trips import *
 
-import pandas as pd
-
-from odysseus.path_config.path_config import root_data_path
-
-df = pd.read_csv(
-    os.path.join(root_data_path, "Roma", "raw", "trips", "enjoy", "trips_202209281355.csv")
-).rename(columns={
-    "end_lat": "end_latitude",
-    "end_lon": "end_longitude"
-})
-
-print(df.columns)
+enjoy_geo_trips = EnjoyGeoTrips(
+    "Roma", "enjoy", 2020, 10
+)
+enjoy_geo_trips.get_trips_od_gdfs()
+enjoy_geo_trips.save_points_data()
+enjoy_geo_trips.save_trips()

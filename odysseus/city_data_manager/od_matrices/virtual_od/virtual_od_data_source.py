@@ -1,22 +1,38 @@
 import os
-import pytz
-import pandas as pd
+import json
+import numpy as np
 
-from odysseus.utils.path_utils import check_create_path
-from odysseus.utils.time_utils import get_time_group_columns
-from odysseus.path_config.path_config import data_paths_dict
-from odysseus.city_data_manager.od_matrices.virtual_od.od_generator import *
-from odysseus.city_data_manager.od_matrices.od_data_source import AbstractODmatrixDataSource
-from odysseus.city_data_manager.od_matrices.virtual_od.od_reader import *
+from odysseus.city_data_manager.od_matrices.virtual_od.od_generator import (
+    generate_week_config, generate_hourly_od_count_dict, generate_od_from_week_config, root_data_path
+)
+from odysseus.city_data_manager.od_matrices.virtual_od.od_reader import get_grid_matrix_from_config, read_od_matrices
 
 
-class VirtualODDataSource(AbstractODmatrixDataSource):
+class VirtualODDataSource:
+
+    """
+    This abstract class is used to define virtual OD matrices without explicit geographical information.
+
+    :param city_id: User-defined city name
+    :type city_id: str
+    :param data_source_id: User-defined data source id (might be useful to represent different scenarios)
+    :type data_source_id: str
+    """
 
     def __init__(self, city_name, data_source_id):
 
-        super().__init__(city_name, data_source_id)
+        self.city_name = city_name
+        self.data_source_id = data_source_id
+        self.data_type_id = "od_matrices"
 
     def generate(self, args):
+
+        """
+        This method is used to generate OD matrices depending on arguments provided from the command-line interface.
+
+        :param args: Command line arguments
+        :type args: parser.ArgumentParser()
+        """
 
         week_config = generate_week_config(
             week_slots_type=args.week_slots_type,
@@ -42,8 +58,9 @@ class VirtualODDataSource(AbstractODmatrixDataSource):
         zone_ids = np.ravel(grid_matrix.values)
 
         hourly_od_count_dict = generate_hourly_od_count_dict(
-            week_config, zone_ids, "uniform", count=args.od_params[0]
+            week_config, zone_ids, args.od_params[0], count=args.od_params[1]
         )
+        print(hourly_od_count_dict)
 
         od_matrices_by_dayslots, od_matrices_by_hour = generate_od_from_week_config(
             city_name=args.city,
@@ -53,6 +70,8 @@ class VirtualODDataSource(AbstractODmatrixDataSource):
             od_type="count",
             hourly_od_count_dict=hourly_od_count_dict
         )
+
+        print(od_matrices_by_dayslots)
 
         return od_matrices_by_dayslots, od_matrices_by_hour, grid_matrix, week_config
 

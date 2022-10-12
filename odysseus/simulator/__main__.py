@@ -2,7 +2,6 @@ import argparse
 import datetime
 import pickle
 import warnings
-warnings.simplefilter("ignore", UserWarning)
 
 from odysseus.simulator.simulation_input.sim_input_paths import simulation_input_paths
 from odysseus.simulator.simulation_run.single_run import single_run
@@ -11,6 +10,8 @@ from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 from odysseus.utils.path_utils import *
 from odysseus.path_config.path_config import *
 
+
+warnings.simplefilter("ignore", UserWarning)
 
 start = datetime.datetime.now()
 
@@ -33,6 +34,10 @@ parser.add_argument(
     help="specify conf name"
 )
 
+parser.add_argument(
+    "-sf", "--city_scenario_folder",
+    help="specify city scenario folder name"
+)
 
 parser.set_defaults(
     campaign_name="switch_0",

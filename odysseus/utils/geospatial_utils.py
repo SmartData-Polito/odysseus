@@ -6,23 +6,11 @@ from shapely.geometry import Point, LineString, Polygon
 import geopandas as gpd
 from math import radians, cos, sin, asin, sqrt
 from haversine import haversine, Unit
-from scipy.spatial.distance import euclidean
-
-
-def get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length):
-    p1 = (y_min, x_min)
-    p2 = (y_max, x_min)
-    height = math.dist(p1, p2)
-
-    # width changes depending on the city, casuse longitude distances vary depending on the latitude.
-    p1 = (y_min, x_min)
-    p2 = (y_min, x_max)
-    width = math.dist(p1, p2)
-
-    return width, height
+# from scipy.spatial.distance import euclidean
 
 
 def get_width_height_from_wgs84_bounds(x_min, y_min, bin_side_length):
+
     # this has to be pretty much the same long all the longitudes
     # cause paralles are equidistant, so equal for every city
 
@@ -43,25 +31,27 @@ def get_width_height_from_wgs84_bounds(x_min, y_min, bin_side_length):
 def get_city_grid_as_gdf(total_bounds, bin_side_length, crs="epsg:4326"):
 
     x_min, y_min, x_max, y_max = total_bounds
-
-    width, height = 0, 0
     if crs == "epsg:4326":
         width, height = get_width_height_from_wgs84_bounds(x_min, y_min, bin_side_length)
+        step_x = width
+        step_y = height
     elif crs == "dummy_crs":
-        width, height = get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length)
+        step_x = step_y = bin_side_length
+    else:
+        raise Exception("Geospatial Grid non properly configured!")
 
     y_top = y_max
-    y_bottom = y_max - height
+    y_bottom = y_max - step_y
     polygons = []
-    while y_bottom > y_min:
+    while y_bottom >= y_min:
         x_left = x_min
-        x_right = x_min + width
-        while x_right < x_max:
+        x_right = x_min + step_x
+        while x_right <= x_max:
             polygons.append(Polygon([(x_left, y_top), (x_right, y_top), (x_right, y_bottom), (x_left, y_bottom)]))
-            x_left = x_left + width
-            x_right = x_right + width
-        y_top = y_top - height
-        y_bottom = y_bottom - height
+            x_left = x_left + step_x
+            x_right = x_right + step_x
+        y_top = y_top - step_y
+        y_bottom = y_bottom - step_y
 
     grid = gpd.GeoDataFrame({"geometry": polygons})
 
@@ -76,28 +66,31 @@ def get_city_grid_as_gdf(total_bounds, bin_side_length, crs="epsg:4326"):
 
 def get_city_grid_as_matrix(total_bounds, bin_side_length, crs="epsg:4326"):
     x_min, y_min, x_max, y_max = total_bounds
-    width, height = 0, 0
     if crs == "epsg:4326":
         width, height = get_width_height_from_wgs84_bounds(x_min, y_min, bin_side_length)
+        step_x = width
+        step_y = height
     elif crs == "dummy_crs":
-        width, height = get_rows_cols_from_dummy_bounds(x_min, y_min, x_max, y_max, bin_side_length)
+        step_x = step_y = bin_side_length
+    else:
+        raise Exception("Grid Matrix non properly configured!")
 
     grid_matrix = []
     zone_id = 0
     i = 0
     y_top = y_max
-    y_bottom = y_max - height
-    while y_bottom > y_min:
+    y_bottom = y_max - step_y
+    while y_bottom >= y_min:
         x_left = x_min
-        x_right = x_min + width
+        x_right = x_min + step_x
         grid_matrix.append(list())
-        while x_right < x_max:
+        while x_right <= x_max:
             grid_matrix[i].append(zone_id)
             zone_id += 1
-            x_left = x_left + width
-            x_right = x_right + width
-        y_top = y_top - height
-        y_bottom = y_bottom - height
+            x_left = x_left + step_x
+            x_right = x_right + step_x
+        y_top = y_top - step_y
+        y_bottom = y_bottom - step_y
         i += 1
 
     return pd.DataFrame(grid_matrix)
@@ -204,6 +197,7 @@ def get_grid_indexes_dict(grid_matrix):
 def get_distance_matrix(
         grid_indexes_dict, origin_zones, destination_zones, bin_side_length
 ):
+
     distance_matrix = dict()
     for o_id in origin_zones:
         distance_matrix[o_id] = dict()
@@ -211,7 +205,8 @@ def get_distance_matrix(
             o_i, o_j = grid_indexes_dict[o_id]
             d_i, d_j = grid_indexes_dict[d_id]
             distance_matrix[o_id][d_id] = math.dist((o_j, o_i), (d_j, d_i)) * bin_side_length
-    return pd.DataFrame(distance_matrix)
+
+    return pd.DataFrame(distance_matrix).T
 
 
 def get_closest_zone_from_grid_matrix(grid_indexes_dict, origin_zones, destination_zones):
@@ -228,4 +223,3 @@ def get_closest_zone_from_grid_matrix(grid_indexes_dict, origin_zones, destinati
                 min_dist_zone = d_id
             closest_zones[o_id] = min_dist_zone
     return closest_zones
-
