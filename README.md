@@ -19,22 +19,23 @@ ODySSEUS is composed by four main functional modules, each one coming with its o
    * Create different demand models using:
       * [to be integrated using [5]] Standard mathematical models [5] (random walk models, exploration and preferential return model, etc.)
       * [to be integrated using [5]] Migration models [5] (gravity model, radiation model, etc.).
-      * Data-driven (e.g. Poisson/KDE estimation for generating mobility samples[3], Deep Learning for forecasting[6]) 
-   * Evaluate the goodness of a demand model under different viewpoints and compare different demand models.
+      * Poisson/KDE estimation for generating mobility samples[3]
+      * Deep Learning for forecasting mobility demand [6]
    * Create demand-side simulation scenarios.
 
 * Supply Modelling
    * Create fleets choosing between different modes and vehicles.
    * Create and configure refueling/charging infrastrucures and energy mix for electricity production.
+   * Define operator strategies to manage its resources
 
 * Simulator
    * Create and run simulation scenarios based on supply and demand configurations.
-   * Support for trip-level "micro" simulations (single_run) and timeframe-level "macro" simulations (multiple_runs).
    * Collect several performance metrics (satisfied demand, fleet handling cost, equivalent CO2 emissions, gross profit, ...)
-   * Detailed interface to analyse simulation results
 
 At the following link you can find a User Guide and the API reference:
-https://odysseus-simulator.readthedocs.io/en/latest/index.html
+https://odysseus-dev.readthedocs.io/en/latest/index.html
+
+Below a list of publications concerning the development and the use of ODySSEUS:
 
 [1] - Alessandro Ciociola, Michele Cocca, Danilo Giordano, Luca Vassio, Marco Mellia (2020) E-Scooter Sharing: Leveraging Open Data for System Design, In: 2020 IEEE/ACM 24th International Symposium on Distributed Simulation and Real Time Applications (DS-RT), pages 1-8, ISBN: 978-1-7281-7343-6
 
