@@ -17,10 +17,8 @@ ODySSEUS is composed by four main functional modules, each one coming with its o
 
 * Demand Modelling
    * Create different demand models using:
-      * [to be integrated using [5]] Standard mathematical models [5] (random walk models, exploration and preferential return model, etc.)
-      * [to be integrated using [5]] Migration models [5] (gravity model, radiation model, etc.).
-      * Poisson/KDE estimation for generating mobility samples[3]
-      * Deep Learning for forecasting mobility demand [6]
+      * Poisson/KDE estimation and mobility samples generation [3]
+      * Deep Learning to learn and forecast mobility demand [6]
    * Create demand-side simulation scenarios.
 
 * Supply Modelling
