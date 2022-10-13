@@ -6,63 +6,22 @@
 Installation Guide
 =================================
 
+Prerequisites
+---------------------------------------
+
+- **Python 3.8 or higher**
+- **Dedicated virtual environment (venv or conda)**
+
 Setup repository, environment and data
 ---------------------------------------
 
-First, let's clone the public git repository and move data into the right folder. For now, we skip explanations about *city_data_manager* functionalities.
+First, let's clone the public git repository and install all the necessary libraries.
 
    .. code-block:: console
 
-     git clone https://github.com/AleCioc/odysseus my-odysseus-folder
-     cp -r /home/det_tesi/a.ciociola/input_simulator/data my-odysseus-folder/odysseus/city_data_manager
+      git clone https://github.com/SmartData-Polito/odysseus my-odysseus-folder
+      mv my-odysseus-folder
+      pip install --user -r requirements.txt
 
+Installing geospatial libraries may require different steps while being on Windows, Mac or Linux.
 
-Then, let's install all the necessary libraries.
-
-   .. code-block:: console
-
-     pip install --user -r my-odysseus-folder/requirements.txt
-
-
-Configuring simulation input
------------------------------
-
-The folder *odysseus/simulator/simulation_input* contains configuration files for simulation.
-
-In particular:
-
-- **sim_configs_target.json**: contains the name of the configuration to run
-- **sim_configs_versioned**: contains one folder for each saved configuration e.g. *sim_configs_versioned/turin_iscc_set1* contains the configuration for the first set of simulation used in ISCC paper.
-
-Each configuration folder must contain the following Python files:
-
-- **sim_run_conf.py**: specifies used data source, run mode (single_run or multiple_runs), number of cores to use in case of multiple runs, simulation type (trace-driven or model-driven) and output folder name
-- **sim_general_conf.py**: specifies macroscopic parameters about spatial and temporal configuration, as well as fleet load factor policy.
-- **single_run_conf.py**: specifies scenario configuration for single run
-- **model_validation_conf.py**: special case of single run
-- **multiple_runs_conf.py**: specifies scenario configuration for multiple runs
-- **vehicle_config.py**: specifies vehicles characteristics
-- **cost_conf.py**: specifies cost/revenue configuration
-
-Let's create a new folder for a new configuration:
-
-
-   .. code-block:: console
-
-     cp -r /home/det_tesi/a.ciociola/input_simulator/ my-odysseus-folder/odysseus/simulator/simulation_input/sim_configs_versioned/
-
-Modify configurations as you desire, then run the simulator:
-
-   .. code-block:: console
-
-     cd my-odysseus-folder/
-     python -m odysseus.simulator
-
-Let's wait for simulation to finish and let's check the results folder and the figures folder (figures are created automatically only in single run mode)
-
-   .. code-block:: console
-
-     ls my-odysseus-folder/simulator/results/Torino/single_run/test
-     ls my-odysseus-folder/simulator/figures/Torino/single_run/test
-
-Done! Now we can explore our results and eventually produce other analysis and plots.

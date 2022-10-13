@@ -24,22 +24,14 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 class EFFCS_SimOutputPlotter ():
 
-	def __init__ (self, sim_output, city, sim_scenario_name):
+	def __init__ (self, sim_output, city, sim_scenario_name, figures_path):
 
 		self.sim_output = sim_output
 		self.city = city
 		self.grid = sim_output.grid
 		self.sim_scenario_name = sim_scenario_name
 
-		self.figures_path = os.path.join(
-			os.path.dirname(os.path.dirname(__file__)),
-			"figures",
-			city,
-			"single_run",
-			sim_scenario_name,
-		)
-		
-		os.makedirs(self.figures_path, exist_ok=True)
+		self.figures_path = figures_path
 
 		self.sim_booking_requests = sim_output.sim_booking_requests
 
@@ -59,13 +51,16 @@ class EFFCS_SimOutputPlotter ():
 
 		self.sim_vehicles_events = pd.concat([
 			self.sim_bookings, self.sim_charges
-		], ignore_index=True, sort=False).sort_values("start_time")
+		], ignore_index=True, sort=False)
+
+		if len(self.sim_vehicles_events):
+			self.sim_vehicles_events.sort_values("start_time", inplace=True)
 
 		self.sim_charge_deaths = sim_output.sim_charge_deaths
 
 		self.sim_output = sim_output
 
-	def plot_city_zones(self):
+	def plot_city_zones(self, annotate=False):
 
 		fig, ax = plt.subplots(1, 1, figsize=(15, 15))
 		plt.title("")
@@ -75,10 +70,11 @@ class EFFCS_SimOutputPlotter ():
 		plt.yticks([])
 		self.grid.plot(color="white", edgecolor="black", ax=ax)
 		self.grid['coords'] = self.grid['geometry'].apply(lambda x: x.centroid.coords[0])
-		for idx, row in self.grid.iterrows():
-			plt.annotate(
-				text=row['zone_id'], xy=row['coords'], horizontalalignment='center'
-			)
+		if annotate:
+			for idx, row in self.grid.iterrows():
+				plt.annotate(
+					text=row['zone_id'], xy=row['coords'], horizontalalignment='center'
+				)
 		plt.savefig(os.path.join(self.figures_path, "city_zones.png"), transparent=True)
 		plt.close()
 
@@ -93,21 +89,13 @@ class EFFCS_SimOutputPlotter ():
 		self.grid.plot(color="white", edgecolor="black", ax=ax)
 		self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 
-		if self.sim_output.supply_model_conf["hub"]:
-			self.grid.plot(color="white", edgecolor="black", ax=ax)
-			self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
-			self.grid.loc[[self.sim_output.sim_stats["hub_zone"]]].plot(ax=ax)
-			plt.savefig(os.path.join(self.figures_path, "hub_location.png"), transparent=True)
-			plt.close()
-
-		elif self.sim_output.supply_model_conf["distributed_cps"]:
-
-			charging_zones = pd.Index(self.sim_charges.zone_id.unique())
-			charging_poles_by_zone = self.sim_charges.zone_id.value_counts()
+		if self.sim_output.supply_model_conf["distributed_cps"]:
+			charging_zones = self.sim_output.n_charging_poles_by_zone.keys()
+			charging_poles_by_zone = self.sim_output.n_charging_poles_by_zone
 			self.grid.loc[charging_zones, "poles_count"] = charging_poles_by_zone
 			self.grid.plot(color="white", edgecolor="black", ax=ax)
-			self.grid.loc[self.sim_output.valid_zones].plot(column="poles_count", ax=ax).plot()
-			self.grid.loc[charging_zones].plot(ax=ax)
+			self.grid.loc[self.sim_output.valid_zones].plot(column="poles_count", ax=ax, legend=True)
+			#self.grid.loc[charging_zones].plot(ax=ax)
 			plt.savefig(os.path.join(self.figures_path, "cps_locations.png"), transparent=True)
 			plt.close()
 
@@ -135,7 +123,7 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_events_t (self):
+	def plot_events_t(self):
 
 		plt.figure(figsize=(15, 5))
 		self.sim_booking_requests.fillna(0).set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
@@ -159,7 +147,7 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_fleet_status_t (self):
+	def plot_fleet_status_t(self):
 
 		for col in [
 			"n_vehicles_available", "n_vehicles_charging_system", "n_vehicles_charging_users", "n_vehicles_booked"
@@ -177,9 +165,9 @@ class EFFCS_SimOutputPlotter ():
 			# plt.show()
 			plt.close()
 
-	def plot_events_hourly_count_boxplot (self, which_df, start_or_end):
+	def plot_events_hourly_count_boxplot(self, which_df, start_or_end):
 
-		if which_df == "bookings_train":
+		if which_df == "bookings":
 			df = self.sim_bookings
 		if which_df == "charges":
 			df = self.sim_charges
@@ -207,9 +195,9 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_events_hourly_count_boxplot (self, which_df, start_or_end):
+	def plot_events_hourly_count_boxplot(self, which_df, start_or_end):
 
-		if which_df == "bookings_train":
+		if which_df == "bookings":
 			df = self.sim_bookings
 		if which_df == "charges":
 			df = self.sim_charges
@@ -279,19 +267,33 @@ class EFFCS_SimOutputPlotter ():
 		# plt.show()
 		plt.close()
 
-	def plot_choropleth (self, col):
+	def plot_choropleth (self, col, annotate=False):
 
-		fig, ax = plt.subplots(1, 1, figsize=(15,15))
+		fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+
+		plt.title("")
+		plt.xlabel(None)
+		plt.xticks([])
+		plt.ylabel(None)
+		plt.yticks([])
+		self.grid.plot(color="white", edgecolor="black", ax=ax)
+
 		self.grid.dropna(subset=[col]).plot(column=col, ax=ax, legend=True)
 		plt.xlabel(None)
 		plt.xticks([])
 		plt.ylabel(None)
 		plt.yticks([])
-		plt.title(col + " chorophlet map")
+		plt.title(col + " choropleth map")
+
+		if annotate:
+			for idx, row in self.grid.iterrows():
+				plt.annotate(
+					text=row[col], xy=row['coords'], horizontalalignment='center'
+				)
 		plt.savefig(
 			os.path.join(
 				self.figures_path,
-				"_".join([col, "clorophlet", "map.png"])
+				"_".join([col, "choropleth", "map.png"])
 			), transparent=True
 		)
 		plt.close()

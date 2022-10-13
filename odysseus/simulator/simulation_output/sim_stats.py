@@ -1,43 +1,40 @@
 import pandas as pd
 
 
-
 class SimStats():
 
 	def __init__ (self):
-		pass
 
+		self.valid_zones = None
+		self.sim_general_conf = None
+		self.supply_model_conf = None
+		self.grid = None
+		self.sim_stats = None
 
 	def get_stats_from_sim (self, sim):
 
-		self.valid_zones = sim.simInput.valid_zones
-
-		self.sim_general_conf = sim.simInput.demand_model_config
-		self.sim_scenario_conf = sim.simInput.supply_model_conf
-
-		self.grid = sim.simInput.grid
+		self.valid_zones = sim.sim_input.valid_zones
+		self.sim_general_conf = sim.sim_input.sim_general_conf
+		self.supply_model_conf = sim.sim_input.supply_model_conf
+		self.grid = sim.sim_input.grid
 
 		# Sim Stats creation
 
-		self.sim_stats = pd.Series(name="sim_stats")
+		self.sim_stats = pd.Series(name="sim_stats", dtype=object)
 
 		self.sim_stats = pd.concat([
 			self.sim_stats,
-			pd.Series(sim.simInput.demand_model_config)
+			pd.Series(self.supply_model_conf)
 		])
 
-		self.sim_stats = pd.concat([
-			self.sim_stats,
-			pd.Series(sim.simInput.supply_model_conf)
-		])
-
-		self.sim_stats.loc["n_vehicles_sim"] = sim.simInput.n_vehicles_sim
-		self.sim_stats.loc["tot_n_charging_poles"] = sim.simInput.tot_n_charging_poles
-		self.sim_stats.loc["n_charging_zones"] = sim.simInput.n_charging_zones
+		self.sim_stats.loc["n_vehicles_sim"] = sim.sim_input.n_vehicles_sim
+		self.sim_stats.loc["tot_n_charging_poles"] = sim.sim_input.tot_n_charging_poles
+		self.sim_stats.loc["n_charging_zones"] = sim.sim_input.n_charging_zones
 
 		self.sim_stats["sim_duration"] = (sim.end - sim.start).total_seconds()
 		self.sim_stats.loc["tot_potential_charging_energy"] = self.sim_stats.loc["sim_duration"] / 3600 * (
-				self.sim_stats.loc["tot_n_charging_poles"] * 3.7
+			# TODO -> parametrise rated power
+			self.sim_stats.loc["tot_n_charging_poles"] * 3.7
 		)
 
 		self.sim_stats.loc["n_same_zone_trips"] = \
@@ -102,21 +99,21 @@ class SimStats():
 		else:
 			self.sim_stats.loc["fraction_deaths_unsatisfied"] = 0
 
-		self.sim_stats.loc["n_charges"] = sim.chargingStrategy.n_charges
+		self.sim_stats.loc["n_charges"] = sim.charging_strategy.n_charges
 
 		self.sim_stats.loc["tot_mobility_distance"] = sim.tot_mobility_distance
 		self.sim_stats.loc["tot_mobility_duration"] = sim.tot_mobility_duration
 
-		if self.sim_scenario_conf["scooter_relocation"]:
-			if "scooter_relocation" in self.sim_scenario_conf and self.sim_scenario_conf["scooter_relocation"]:
-				self.sim_stats.loc["n_scooter_relocations"] = sim.scooterRelocationStrategy.n_scooter_relocations
+		if self.supply_model_conf["relocation"]:
+			if "relocation" in self.supply_model_conf and self.supply_model_conf["relocation"]:
+				self.sim_stats.loc["n_scooter_relocations"] = sim.relocation_strategy.n_scooter_relocations
 				self.sim_stats.loc["tot_scooter_relocations_distance"] = \
-					sim.scooterRelocationStrategy.tot_scooter_relocations_distance
+					sim.relocation_strategy.tot_scooter_relocations_distance
 				self.sim_stats.loc["tot_scooter_relocations_duration"] = \
-					sim.scooterRelocationStrategy.tot_scooter_relocations_duration
-				if sim.scooterRelocationStrategy.n_scooter_relocations:
+					sim.relocation_strategy.tot_scooter_relocations_duration
+				if sim.relocation_strategy.n_scooter_relocations:
 					self.sim_stats.loc["avg_n_vehicles_relocated"] = \
-						sim.scooterRelocationStrategy.n_vehicles_tot / sim.scooterRelocationStrategy.n_scooter_relocations
+						sim.relocation_strategy.n_vehicles_tot / sim.relocation_strategy.n_scooter_relocations
 				else:
 					self.sim_stats.loc["avg_n_vehicles_relocated"] = 0
 
@@ -124,7 +121,7 @@ class SimStats():
 				tot_jobs = 0
 				max_jobs = float('-inf')
 				min_jobs = float('inf')
-				for worker in sim.scooterRelocationStrategy.relocation_workers:
+				for worker in sim.relocation_strategy.relocation_workers:
 					n_workers += 1
 					tot_jobs += worker.n_jobs
 					if worker.n_jobs > max_jobs:

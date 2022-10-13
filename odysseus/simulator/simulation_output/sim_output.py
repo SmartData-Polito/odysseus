@@ -1,18 +1,22 @@
+import datetime
+import os
 import pandas as pd
 from odysseus.simulator.simulation_output.sim_stats import SimStats
 from odysseus.utils.cost_utils import insert_sim_costs, insert_scenario_costs
-from odysseus.simulator.simulation_input.costs_conf import *
+from odysseus.supply_modelling.cost_config import *
 
 
 class SimOutput():
 
 	def __init__(self, sim):
 
-		self.valid_zones = sim.simInput.valid_zones
+		self.valid_zones = sim.sim_input.valid_zones
 
-		self.sim_general_conf = sim.simInput.demand_model_config
-		self.sim_scenario_conf = sim.simInput.supply_model_conf
-		self.grid = sim.simInput.grid
+		self.sim_general_conf = sim.sim_input.sim_general_conf
+		self.supply_model_conf = sim.sim_input.supply_model_conf
+		self.grid = sim.sim_input.grid
+		self.grid = self.grid.loc[:, ~self.grid.columns.duplicated()]
+		self.n_charging_poles_by_zone = sim.sim_input.supply_model.n_charging_poles_by_zone
 
 		# Sim Stats creation
 
@@ -20,27 +24,22 @@ class SimOutput():
 		self.sim_stats = sim_stats_obj.get_stats_from_sim(sim)
 		self.sim_stats = sim_stats_obj.sim_stats
 
-		
-
-
-
 		if self.sim_general_conf["save_history"]:
 
 			self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
 			self.sim_bookings = pd.DataFrame(sim.sim_bookings)
-			self.sim_charges = pd.DataFrame(sim.chargingStrategy.sim_charges)
+
+			self.sim_charges = pd.DataFrame(sim.charging_strategy.sim_charges)
 			self.sim_not_enough_energy_requests = pd.DataFrame(sim.sim_booking_requests_deaths)
 			self.sim_no_close_vehicle_requests = pd.DataFrame(sim.sim_no_close_vehicle_requests)
 			self.sim_unsatisfied_requests = pd.DataFrame(sim.sim_unsatisfied_requests)
-			self.sim_system_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_system_charging_bookings)
-			self.sim_users_charges_bookings = pd.DataFrame(sim.chargingStrategy.list_users_charging_bookings)
-			if self.sim_scenario_conf["vehicle_relocation"]:
-				self.sim_vehicle_relocations = pd.DataFrame(sim.vehicleRelocationStrategy.sim_vehicle_relocations)
+			self.sim_system_charges_bookings = pd.DataFrame(sim.charging_strategy.list_system_charging_bookings)
+			self.sim_users_charges_bookings = pd.DataFrame(sim.charging_strategy.list_users_charging_bookings)
 
 			if "end_time" not in self.sim_system_charges_bookings:
-				self.sim_system_charges_bookings["end_time"] = pd.Series()
+				self.sim_system_charges_bookings["end_time"] = pd.Series(dtype=object)
 			if "end_time" not in self.sim_users_charges_bookings:
-				self.sim_users_charges_bookings["end_time"] = pd.Series()
+				self.sim_users_charges_bookings["end_time"] = pd.Series(dtype=object)
 
 			if len(self.sim_system_charges_bookings):
 				self.sim_system_charges_bookings["end_hour"] = self.sim_system_charges_bookings["end_time"].apply(
@@ -53,7 +52,7 @@ class SimOutput():
 				)
 
 			self.sim_unfeasible_charge_bookings = pd.DataFrame(
-				sim.chargingStrategy.sim_unfeasible_charge_bookings
+				sim.charging_strategy.sim_unfeasible_charge_bookings
 			)
 
 			self.sim_booking_requests["n_vehicles_charging_system"] = \
@@ -71,7 +70,7 @@ class SimOutput():
 			self.sim_booking_requests["n_vehicles_dead"] = \
 				pd.Series(sim.list_n_vehicles_dead)
 
-			self.sim_charge_deaths = pd.DataFrame(sim.chargingStrategy.sim_unfeasible_charge_bookings)
+			self.sim_charge_deaths = pd.DataFrame(sim.charging_strategy.sim_unfeasible_charge_bookings)
 
 			self.sim_stats.loc["n_charging_requests_system"] = len(self.sim_system_charges_bookings)
 
@@ -94,11 +93,17 @@ class SimOutput():
 			else:
 				self.sim_stats.loc["fraction_charge_deaths"] = 0
 
-			self.sim_stats.loc["soc_avg"] = \
-				self.sim_bookings.start_soc.mean()
+			if len(self.sim_bookings):
+				self.sim_stats.loc["soc_avg"] = \
+					self.sim_bookings.start_soc.mean()
+			else:
+				self.sim_stats.loc["soc_avg"] = 0
 
-			self.sim_stats.loc["soc_med"] = \
-				self.sim_bookings.start_soc.median()
+			if len(self.sim_bookings):
+				self.sim_stats.loc["soc_med"] = \
+					self.sim_bookings.start_soc.median()
+			else:
+				self.sim_stats.loc["soc_med"] = 0
 
 			if len(self.sim_charges):
 				self.sim_stats.loc["charging_time_avg"] = \
@@ -126,32 +131,34 @@ class SimOutput():
 			else:
 				self.sim_stats.loc["n_charges_by_vehicle_users_avg"] = 0
 
-			self.sim_stats.loc["tot_potential_mobility_distance"] = self.sim_booking_requests.driving_distance.sum()
-			self.sim_stats.loc["tot_potential_mobility_duration"] = self.sim_booking_requests.duration.sum()
-			self.sim_stats.loc["tot_potential_welltotank_energy"] = self.sim_booking_requests.welltotank_kwh.sum()
-			self.sim_stats.loc["tot_potential_tanktowheel_energy"] = self.sim_booking_requests.tanktowheel_kwh.sum()
-			self.sim_stats.loc["tot_potential_mobility_energy"] = self.sim_booking_requests.soc_delta_kwh.sum()
-			self.sim_stats.loc[
-				"tot_potential_welltotank_co2_emissions"] = self.sim_booking_requests.welltotank_emissions.sum() / 1000
-			self.sim_stats.loc[
-				"tot_potential_welltowheel_co2_emissions"] = self.sim_booking_requests.tanktowheel_emissions.sum() / 1000
-			self.sim_stats.loc["tot_potential_co2_emissions_kg"] = self.sim_booking_requests.co2_emissions.sum() / 1000
+			if len(self.sim_bookings):
+				self.sim_stats.loc["tot_potential_mobility_distance"] = self.sim_booking_requests.driving_distance.sum()
+				self.sim_stats.loc["tot_potential_mobility_duration"] = self.sim_booking_requests.duration.sum()
+				self.sim_stats.loc["tot_potential_welltotank_energy"] = self.sim_booking_requests.welltotank_kwh.sum()
+				self.sim_stats.loc["tot_potential_tanktowheel_energy"] = self.sim_booking_requests.tanktowheel_kwh.sum()
+				self.sim_stats.loc["tot_potential_mobility_energy"] = self.sim_booking_requests.soc_delta_kwh.sum()
+				self.sim_stats.loc[
+					"tot_potential_welltotank_co2_emissions"] = self.sim_booking_requests.welltotank_emissions.sum() / 1000
+				self.sim_stats.loc[
+					"tot_potential_welltowheel_co2_emissions"] = self.sim_booking_requests.tanktowheel_emissions.sum() / 1000
+				self.sim_stats.loc["tot_potential_co2_emissions_kg"] = self.sim_booking_requests.co2_emissions.sum() / 1000
 
-			self.sim_stats.loc["tot_mobility_distance"] = self.sim_bookings.driving_distance.sum()
-			self.sim_stats.loc["tot_mobility_duration"] = self.sim_bookings.duration.sum()
-			self.sim_stats.loc["tot_welltotank_energy"] = self.sim_bookings.welltotank_kwh.sum()
-			self.sim_stats.loc["tot_tanktowheel_energy"] = self.sim_bookings.tanktowheel_kwh.sum()
-			self.sim_stats.loc["tot_mobility_energy"] = self.sim_bookings.soc_delta_kwh.sum()
-			self.sim_stats.loc["tot_welltotank_co2_emissions"] = self.sim_bookings.welltotank_emissions.sum() / 1000
-			self.sim_stats.loc["tot_tanktowheel_co2_emissions"] = self.sim_bookings.tanktowheel_emissions.sum() / 1000
-			self.sim_stats.loc["tot_co2_emissions_kg"] = self.sim_bookings.co2_emissions.sum() / 1000
+			if len(self.sim_bookings):
+				self.sim_stats.loc["tot_mobility_distance"] = self.sim_bookings.driving_distance.sum()
+				self.sim_stats.loc["tot_mobility_duration"] = self.sim_bookings.duration.sum()
+				self.sim_stats.loc["tot_welltotank_energy"] = self.sim_bookings.welltotank_kwh.sum()
+				self.sim_stats.loc["tot_tanktowheel_energy"] = self.sim_bookings.tanktowheel_kwh.sum()
+				self.sim_stats.loc["tot_mobility_energy"] = self.sim_bookings.soc_delta_kwh.sum()
+				self.sim_stats.loc["tot_welltotank_co2_emissions"] = self.sim_bookings.welltotank_emissions.sum() / 1000
+				self.sim_stats.loc["tot_tanktowheel_co2_emissions"] = self.sim_bookings.tanktowheel_emissions.sum() / 1000
+				self.sim_stats.loc["tot_co2_emissions_kg"] = self.sim_bookings.co2_emissions.sum() / 1000
 
 			if len(self.sim_charges):
 				self.sim_stats.loc["tot_charging_energy"] = self.sim_charges["soc_delta_kwh"].sum()
 			else:
 				self.sim_stats.loc["tot_charging_energy"] = 0
 
-			self.sim_stats.loc["tot_charging_return_distance"] = sim.chargingStrategy.charging_return_distance
+			self.sim_stats.loc["tot_charging_return_distance"] = sim.charging_strategy.charging_return_distance
 
 			if len(self.sim_charges) and "system" in self.sim_charges.operator.unique():
 				self.sim_stats.loc["fraction_charges_system"] = \
@@ -260,11 +267,11 @@ class SimOutput():
 
 			if self.sim_stats["n_unsatisfied"]:
 				self.grid[
-					"unsatisfied_demand_origins_fraction"
-				] = self.sim_unsatisfied_requests.origin_id.value_counts() / len(self.sim_unsatisfied_requests)
+					"unsatisfied_demand_origins"
+				] = self.sim_unsatisfied_requests.origin_id.value_counts()
 			else:
 				self.grid[
-					"unsatisfied_demand_origins_fraction"
+					"unsatisfied_demand_origins"
 				] = 0
 
 			if len(self.sim_not_enough_energy_requests):
@@ -277,11 +284,6 @@ class SimOutput():
 				] = self.sim_charge_deaths.origin_id.value_counts()
 
 			self.sim_stats.loc["max_driving_distance"] = self.sim_booking_requests.driving_distance.max()
-			insert_scenario_costs(self.sim_stats, self.sim_scenario_conf, vehicle_cost, charging_station_costs)
-			insert_sim_costs(self.sim_stats, self.sim_scenario_conf, fuel_costs, administrative_cost_conf,
-			                 vehicle_cost)
-			self.sim_stats.loc["profit"] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - \
-			                               self.sim_stats["sim_cost"]
 
 			self.vehicles_history = pd.DataFrame()
 			for vehicle in sim.vehicles_list:
@@ -290,27 +292,125 @@ class SimOutput():
 				self.vehicles_history = pd.concat([self.vehicles_history, vehicle_df], ignore_index=True)
 
 			self.stations_history = pd.DataFrame()
-			for key in sim.chargingStrategy.charging_stations_dict:
-				station_df = pd.DataFrame(sim.chargingStrategy.charging_stations_dict[key].status_dict_list)
+			for key in sim.charging_strategy.charging_stations_dict:
+				station_df = pd.DataFrame(sim.charging_strategy.charging_stations_dict[key].status_dict_list)
 				station_df["id"] = key
 				self.stations_history = pd.concat([self.stations_history, station_df], ignore_index=True)
 
 			self.zones_history = pd.DataFrame()
-			for key in sim.chargingStrategy.zone_dict:
-				zone_df = pd.DataFrame(sim.chargingStrategy.zone_dict[key].status_dict_list)
+			for key in sim.charging_strategy.zone_dict:
+				zone_df = pd.DataFrame(sim.charging_strategy.zone_dict[key].status_dict_list)
 				zone_df["zone_id"] = key
 				self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)
 
-			if self.sim_scenario_conf["scooter_relocation"]:
-				self.relocation_history = pd.DataFrame(sim.scooterRelocationStrategy.sim_scooter_relocations)
-
-		if "vehicle_relocation" in self.sim_scenario_conf and self.sim_scenario_conf["vehicle_relocation"]:
-			self.sim_stats.loc["n_vehicle_relocations"] = sim.vehicleRelocationStrategy.n_vehicle_relocations
-			self.sim_stats.loc["tot_vehicle_relocations_distance"] = \
-				sim.vehicleRelocationStrategy.tot_vehicle_relocations_distance
-			self.sim_stats.loc["tot_vehicle_relocations_duration"] = \
-				sim.vehicleRelocationStrategy.tot_vehicle_relocations_duration
+			if self.supply_model_conf["relocation"]:
+				self.relocation_history = pd.DataFrame(sim.relocation_strategy.sim_scooter_relocations)
 
 		for key in self.sim_stats.index:
 			if key.startswith("fraction"):
 				self.sim_stats["percentage" + key[8:]] = self.sim_stats[key] * 100
+
+		insert_scenario_costs(self.sim_stats, self.supply_model_conf, vehicle_cost, charging_station_costs)
+		insert_sim_costs(self.sim_stats, self.supply_model_conf, fuel_costs, administrative_cost_conf, vehicle_cost)
+		self.sim_stats.loc[
+			"profit"
+		] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - self.sim_stats["sim_cost"]
+
+	def save_output(self, results_path, sim_general_conf, sim_scenario_conf):
+
+		if sim_general_conf["history_to_file"]:
+
+			if not sim_general_conf["exclude_events_files"]:
+
+				self.sim_booking_requests.to_csv(
+					os.path.join(
+						results_path,
+						"sim_booking_requests.csv"
+					)
+				)
+				self.sim_bookings.to_csv(
+					os.path.join(
+						results_path,
+						"sim_bookings.csv"
+					)
+				)
+				self.sim_charges.to_csv(
+					os.path.join(
+						results_path,
+						"sim_charges.csv"
+					)
+				)
+				self.sim_not_enough_energy_requests.to_csv(
+					os.path.join(
+						results_path,
+						"sim_unsatisfied_no_energy.csv"
+					)
+				)
+				self.sim_no_close_vehicle_requests.to_csv(
+					os.path.join(
+						results_path,
+						"sim_unsatisfied_no_close_vehicle.csv"
+					)
+				)
+				self.sim_unsatisfied_requests.to_csv(
+					os.path.join(
+						results_path,
+						"sim_unsatisfied_requests.csv"
+					)
+				)
+				self.sim_system_charges_bookings.to_csv(
+					os.path.join(
+						results_path,
+						"sim_system_charges_bookings.csv"
+					)
+				)
+
+				self.sim_users_charges_bookings.to_csv(
+					os.path.join(
+						results_path,
+						"sim_users_charges_bookings.csv"
+					)
+				)
+				self.sim_unfeasible_charge_bookings.to_csv(
+					os.path.join(
+						results_path,
+						"sim_unfeasible_charge_bookings.csv"
+					)
+				)
+				self.sim_charge_deaths.to_csv(
+					os.path.join(
+						results_path,
+						"sim_unfeasible_charges.csv"
+					)
+				)
+
+			if not sim_general_conf["exclude_resources_files"]:
+
+				self.vehicles_history.to_csv(
+					os.path.join(
+						results_path,
+						"vehicles_history.csv"
+					)
+				)
+
+				self.stations_history.to_csv(
+					os.path.join(
+						results_path,
+						"stations_history.csv"
+					)
+				)
+
+				self.zones_history.to_csv(
+					os.path.join(
+						results_path,
+						"zones_history.csv"
+					)
+				)
+
+			if sim_scenario_conf["relocation"]:
+				self.relocation_history.to_csv(
+					os.path.join(
+						results_path,
+						"relocation_history.csv"
+					)
+				)

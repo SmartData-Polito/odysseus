@@ -1,28 +1,22 @@
 import simpy
-import random
 import datetime
-from odysseus.supply_modelling.vehicle import Vehicle as Vehicle_definition
+from odysseus.supply_modelling.fleet.vehicle import Vehicle as Vehicle_definition
+
 
 class Vehicle(Vehicle_definition):
 
     def __init__(self, env, plate, start_zone, start_soc,
-                 vehicle_config, energymix_conf, sim_scenario_conf, sim_start_time):
+                 vehicle_config, energymix_conf, engine_type, vehicle_model_name, sim_start_time):
 
-        engine_type = sim_scenario_conf["engine_type"]
-        model = sim_scenario_conf["vehicle_model_name"]
         if engine_type == "electric":
             energymix = energymix_conf
         else:
             energymix = {}
-        super().__init__(vehicle_config[engine_type][model], energymix)
+        super().__init__(vehicle_config[engine_type][vehicle_model_name], energymix)
 
         self.env = env
         self.plate = plate
         self.zone = start_zone
-        #self.alpha = sim_scenario_conf["alpha"]
-
-        #self.battery_capacity = vehicle_config["battery_capacity"]
-        #self.energy_efficiency = vehicle_config["energy_efficiency"]
 
         self.available = True
         self.soc = simpy.Container(env, init=start_soc, capacity=100)

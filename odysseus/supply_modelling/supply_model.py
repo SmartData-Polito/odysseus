@@ -3,239 +3,213 @@ import pickle
 import json
 import numpy as np
 import pandas as pd
-import geopandas as gpd
-from shapely.geometry import Point
-import datetime
-import pytz
-from odysseus.supply_modelling.energymix_loader import EnergyMix
 
 
+from odysseus.supply_modelling.fleet.fleet import Fleet
+from odysseus.supply_modelling.service_stations.service_stations import ServiceStations
 
-def geodataframe_charging_points(city,engine_type,station_location):
-    charging_points = station_location[city][engine_type]
-    points_list = []
+from odysseus.simulator.simulation_data_structures.zone import Zone
+from odysseus.simulator.simulation_data_structures.vehicle import Vehicle
+from odysseus.simulator.simulation_data_structures.charging_station import ChargingStation
 
-    for point in charging_points.keys():
-        points_list.append(
-            {
-                "geometry": Point(
-                    charging_points[point]["longitude"], charging_points[point]["latitude"]
-                ),
-                "n_poles": charging_points[point]["n_poles"]
-            }
-        )
-    return gpd.GeoDataFrame(points_list)
+from odysseus.city_scenario.city_scenario_from_wgs84_trips import CityScenarioFromTrips
+
+from odysseus.city_scenario.energy_mix_loader import EnergyMix
 
 
 class SupplyModel:
 
-    def __init__(self, supply_model_conf,year, demand_model_folder = "default_demand_model"):
+    def __init__(
+            self,
+            city_name, data_source_id,
+            city_scenario_folder, supply_model_folder,
+            supply_model_conf, init_from_map_json_config=False
+    ):
 
+        self.city_name = city_name
+        self.data_source_id = data_source_id
+        self.city_scenario_folder = city_scenario_folder
+        self.supply_model_folder = supply_model_folder
         self.supply_model_conf = supply_model_conf
+        self.init_from_map_config = init_from_map_json_config
 
-        self.city = self.supply_model_conf["city"]
+        self.supply_model_path = None
 
-        demand_model_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "demand_modelling",
-            "demand_models",
-            self.supply_model_conf["city"],
-            demand_model_folder
+        self.city_scenario = CityScenarioFromTrips(
+            city_name=self.city_name,
+            data_source_id=self.data_source_id,
+            read_config_from_file=True,
+            in_folder_name=self.city_scenario_folder
         )
+        self.city_scenario.read_city_scenario_for_supply_model()
 
-        self.grid = pickle.Unpickler(open(os.path.join(demand_model_path, "grid.pickle"), "rb")).load()
-        self.grid_matrix = pickle.Unpickler(open(os.path.join(demand_model_path, "grid_matrix.pickle"), "rb")).load()
-        self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
-        self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
-        self.valid_zones = pickle.Unpickler(open(os.path.join(demand_model_path, "valid_zones.pickle"), "rb")).load()
-        self.neighbors_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "neighbors_dict.pickle"), "rb")).load()
-        self.integers_dict = pickle.Unpickler(open(os.path.join(demand_model_path, "integers_dict.pickle"), "rb")).load()
+        self.tot_n_charging_poles = int(supply_model_conf["tot_n_charging_poles"])
+        self.n_charging_zones = int(supply_model_conf["n_charging_zones"])
+        self.n_vehicles_sim = 0
+        self.real_n_charging_zones = 0
 
-        self.n_vehicles_original = self.integers_dict["n_vehicles_original"]
-        self.avg_speed_mean = self.integers_dict["avg_speed_mean"]
-        self.avg_speed_std = self.integers_dict["avg_speed_std"]
-        self.avg_speed_kmh_mean = self.integers_dict["avg_speed_kmh_mean"]
-        self.avg_speed_kmh_std = self.integers_dict["avg_speed_kmh_std"]
-        self.max_driving_distance = self.integers_dict["max_driving_distance"]
-
-        self.n_vehicles_sim = self.supply_model_conf["n_vehicles"]
-        self.tot_n_charging_poles = self.supply_model_conf["tot_n_charging_poles"]
-        self.n_charging_zones = self.supply_model_conf["n_charging_zones"]
+        self.grid = self.city_scenario.grid
+        self.grid = self.grid.loc[:, ~self.grid.columns.duplicated()]
+        self.valid_zones = self.city_scenario.valid_zones
+        self.neighbors_dict = self.city_scenario.neighbors_dict
+        self.numerical_params_dict = self.city_scenario.numerical_params_dict
+        self.avg_speed_mean = self.numerical_params_dict["avg_speed_mean"]
+        self.avg_speed_std = self.numerical_params_dict["avg_speed_std"]
+        self.max_driving_distance = self.numerical_params_dict["max_driving_distance"]
+        self.year_energy_mix = int(self.numerical_params_dict["year_energy_mix"])
 
         self.n_charging_poles_by_zone = {}
         self.vehicles_soc_dict = {}
         self.vehicles_zones = {}
         self.available_vehicles_dict = {}
 
-        self.zones_cp_distances = pd.Series()
-        self.closest_cp_zone = pd.Series()
-        self.energy_mix = EnergyMix(self.city, year)
+        self.zones_cp_distances = pd.Series(dtype=float)
+        self.closest_cp_zone = pd.Series(dtype=float)
+        self.energy_mix = EnergyMix(self.city_name, self.year_energy_mix)
 
         self.initial_relocation_workers_positions = []
 
+        self.service_stations = ServiceStations(
+            city_name, self.grid, self.tot_n_charging_poles, self.n_charging_zones,
+            self.city_scenario.grid_indexes_dict, self.city_scenario.bin_side_length
+        )
+        self.zone_dict = dict()
+        self.charging_stations_dict = dict()
+
+        self.fleet = Fleet(self.grid, self.valid_zones)
+        self.vehicles_list = list()
+
+        self.simpy_env = None
+
     def init_vehicles(self):
 
-        vehicles_random_soc = list(
-            np.random.uniform(25, 100, self.n_vehicles_sim).astype(int)
-        )
+        if self.supply_model_conf["vehicles_config_mode"] == "sim_config":
 
-        self.vehicles_soc_dict = {
-            i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)
-        }
+            self.n_vehicles_sim = int(self.supply_model_conf["n_vehicles"])
+            self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
+            self.n_charging_zones = int(self.supply_model_conf["n_charging_zones"])
 
-        top_o_zones = self.grid.zone_id_origin_count.sort_values(ascending=False).iloc[:31]
+            self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict = \
+                self.fleet.init_vehicles_from_fleet_size(
+                    self.n_vehicles_sim,
+                    self.supply_model_conf["vehicles_initial_placement"]
+                )
 
-        vehicles_random_zones = list(
-            np.random.uniform(0, 30, self.n_vehicles_sim).astype(int).round()
-        )
+        elif self.supply_model_conf["vehicles_config_mode"] == "vehicles_zones":
 
-        self.vehicles_zones = []
-        for i in vehicles_random_zones:
-            self.vehicles_zones.append(self.grid.loc[int(top_o_zones.index[i])].zone_id)
-
-        self.vehicles_zones = {
-            i: self.vehicles_zones[i] for i in range(self.n_vehicles_sim)
-        }
-
-        self.available_vehicles_dict = {
-            int(zone): [] for zone in self.grid.zone_id
-        }
-
-        for vehicle in range(len(self.vehicles_zones)):
-            zone = self.vehicles_zones[vehicle]
-            self.available_vehicles_dict[zone] += [vehicle]
-
+            frozset = self.supply_model_conf["vehicles_zones"]
+            #dict1 = {x: i for i, s in enumerate(self.supply_model_conf["vehicles_zones"]) for x in s}
+            self.n_vehicles_sim = len(self.supply_model_conf["vehicles_zones"])
+            self.fleet.n_vehicles_sim = self.n_vehicles_sim
+            self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict = \
+                self.fleet.init_from_vehicles_zones(dict(frozset))
 
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
+
+    def init_supply_model_path(self):
+
+        assert self.supply_model_folder
+        self.supply_model_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "supply_modelling",
+            "city_supply_models",
+            self.city_name,
+            self.supply_model_folder
+        )
 
     def init_charging_poles(self):
 
         if self.supply_model_conf["distributed_cps"]:
 
-            if self.supply_model_conf["cps_placement_policy"] == "num_parkings":
+            if not self.init_from_map_config:
 
-                top_dest_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:self.n_charging_zones]
-
-                self.n_charging_poles_by_zone = dict((top_dest_zones / top_dest_zones.sum() * self.tot_n_charging_poles))
-
-                assigned_cps = 0
-                for zone_id in self.n_charging_poles_by_zone:
-                    zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
-                    assigned_cps += zone_n_cps
-                    self.n_charging_poles_by_zone[zone_id] = zone_n_cps
-                for zone_id in self.n_charging_poles_by_zone:
-                    if assigned_cps < self.tot_n_charging_poles:
-                        self.n_charging_poles_by_zone[zone_id] += 1
-                        assigned_cps += 1
-
-                self.n_charging_poles_by_zone = dict(pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
-
-            elif self.supply_model_conf["cps_placement_policy"] == "old_manual":
-
-                for zone_id in self.supply_model_conf["cps_zones"]:
-                    if zone_id in self.valid_zones:
-                        self.n_charging_poles_by_zone[zone_id] = 4
-                    else:
-                        print("Zone", zone_id, "does not exist!")
-                        exit(0)
-
-            elif self.supply_model_conf["cps_placement_policy"] == "real_positions":
-                stations_path = os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)),
-                    "city_data_manager",
-                    "data",
-                    self.supply_model_conf["city"],
-                    "raw",
-                    "geo",
-                    "openstreetmap",
-                    "station_locations.json"
+                self.service_stations.init_charging_poles_from_policy(
+                    self.supply_model_conf["cps_placement_policy"],
+                    self.supply_model_conf["engine_type"],
                 )
-                f = open(stations_path,"r")
-                station_locations = json.load(f)
-                f.close()
-                cps_points = geodataframe_charging_points(
-                    self.city, self.supply_model_conf["engine_type"], station_locations
-                )
-                self.n_charging_poles_by_zone = {}
-                value = 0
-                for (p,n) in zip(cps_points.geometry,cps_points.n_poles):
-                    for (geom,zone) in zip(self.grid.geometry,self.grid.zone_id):
-                        if geom.intersects(p):
-                            if zone in self.n_charging_poles_by_zone.keys():
-                                self.n_charging_poles_by_zone[zone] += n
-                            else:
-                                self.n_charging_poles_by_zone[zone] = n
-                            value += n
-                self.tot_n_charging_poles = value
-                self.n_charging_zones = len(self.n_charging_poles_by_zone.keys())
 
-            elif self.supply_model_conf["cps_placement_policy"] == "realpos_numpark":
-                stations_path = os.path.join(
-                    os.path.dirname(os.path.dirname(__file__)),
-                    "city_data_manager",
-                    "data",
-                    self.supply_model_conf["city"],
-                    "raw",
-                    "geo",
-                    "openstreetmap",
-                    "station_locations.json"
-                )
-                f = open(stations_path, "r")
-                station_locations = json.load(f)
-                f.close()
-                cps_points = geodataframe_charging_points(
-                    self.city, self.supply_model_conf["engine_type"], station_locations
-                )
-                self.n_charging_poles_by_zone_inf = {}
+            elif self.init_from_map_config:
 
-                for (p, n) in zip(cps_points.geometry, cps_points.n_poles):
-                    for (geom, zone) in zip(self.grid.geometry, self.grid.zone_id):
-                        if geom.intersects(p):
-                            if zone in self.n_charging_poles_by_zone.keys():
-                                self.n_charging_poles_by_zone_inf[zone] += n
-                            else:
-                                self.n_charging_poles_by_zone_inf[zone] = n
+                self.service_stations.init_charging_poles_from_map_config(self.supply_model_path)
 
-                top_dest_zones = self.grid.origin_count.sort_values(ascending=False).iloc[:self.n_charging_zones]
-                self.n_charging_poles_by_zone = dict(
-                    (top_dest_zones / top_dest_zones.sum() * self.tot_n_charging_poles))
-                assigned_cps = 0
-                for zone_id in self.n_charging_poles_by_zone:
-                    if zone_id in self.n_charging_poles_by_zone_inf.keys():
-                        zone_n_cps = int(np.floor(self.n_charging_poles_by_zone[zone_id]))
-                        assigned_cps += zone_n_cps
-                        self.n_charging_poles_by_zone[zone_id] = zone_n_cps
-                for zone_id in self.n_charging_poles_by_zone:
-                    if zone_id in self.n_charging_poles_by_zone_inf.keys():
-                        if assigned_cps < self.tot_n_charging_poles:
-                            self.n_charging_poles_by_zone[zone_id] += 1
-                            assigned_cps += 1
+            self.n_charging_poles_by_zone = self.service_stations.n_charging_poles_by_zone
+            self.zones_cp_distances = self.service_stations.zones_cp_distances
+            self.closest_cp_zone = self.service_stations.closest_cp_zone
 
-                self.n_charging_poles_by_zone = dict(
-                    pd.Series(self.n_charging_poles_by_zone).replace({0: np.NaN}).dropna())
+    def init_relocation(self, n_initial_zones=30):
 
-            zones_with_cps = pd.Series(self.n_charging_poles_by_zone).index
+        n_initial_zones = min(n_initial_zones, len(self.grid))
 
-            self.zones_cp_distances = self.grid.centroid.apply(
-                lambda x: self.grid.loc[zones_with_cps].centroid.distance(x)
-            )
-
-            self.closest_cp_zone = self.zones_cp_distances.idxmin(axis=1)
-
-    def init_relocation(self):
         if "n_relocation_workers" in self.supply_model_conf:
+
             n_relocation_workers = self.supply_model_conf["n_relocation_workers"]
 
             top_o_zones = self.grid.zone_id_origin_count.sort_values(ascending=False).iloc[:31]
 
             workers_random_zones = list(
-                np.random.uniform(0, 30, n_relocation_workers).astype(int).round()
+                np.random.uniform(0, n_initial_zones, n_relocation_workers).astype(int).round()
             )
 
-            self.initial_relocation_workers_positions = [self.grid.loc[int(top_o_zones.index[i])].zone_id for i in workers_random_zones]
+            self.initial_relocation_workers_positions = [
+                int(self.grid.loc[int(top_o_zones.index[i])].zone_id) for i in workers_random_zones
+            ]
 
-    def init_workers(self):
-        pass
+    def save_results(self):
 
+        self.init_supply_model_path()
 
+        os.makedirs(self.supply_model_path, exist_ok=True)
 
+        with open(os.path.join(self.supply_model_path, "supply_model.pickle"), "wb") as f:
+            pickle.dump(self, f)
+
+        with open(os.path.join(self.supply_model_path, "supply_model_conf.json"), "w") as f:
+            json.dump(self.supply_model_conf, f, sort_keys=True, indent=4)
+        with open(os.path.join(self.supply_model_path, "n_charging_poles_by_zone.json"), "w") as f:
+            json.dump(self.n_charging_poles_by_zone, f, sort_keys=True, indent=4)
+        with open(os.path.join(self.supply_model_path, "vehicles_soc_dict.json"), "w") as f:
+            json.dump(self.vehicles_soc_dict, f, sort_keys=True, indent=4)
+        with open(os.path.join(self.supply_model_path, "vehicles_zones.json"), "w") as f:
+            json.dump(self.vehicles_zones, f, sort_keys=True, indent=4)
+        with open(os.path.join(self.supply_model_path, "available_vehicles_dict.json"), "w") as f:
+            json.dump(self.available_vehicles_dict, f, sort_keys=True, indent=4)
+        with open(os.path.join(self.supply_model_path, "initial_relocation_workers_positions.json"), "w") as f:
+            json.dump(self.initial_relocation_workers_positions, f, sort_keys=True, indent=4)
+
+    def init_for_simulation(
+            self, simpy_env, start,
+            station_conf, vehicle_conf,
+            engine_type, profile_type, vehicle_model_name
+    ):
+
+        self.simpy_env = simpy_env
+
+        for zone_id in self.valid_zones:
+            self.zone_dict[zone_id] = Zone(self.simpy_env, zone_id, start, self.available_vehicles_dict[zone_id])
+
+        if self.supply_model_conf["distributed_cps"]:
+            for zone_id in self.n_charging_poles_by_zone:
+                zone_n_cps = self.n_charging_poles_by_zone[zone_id]
+                if zone_n_cps > 0:
+                    self.charging_stations_dict[zone_id] = ChargingStation(
+                        self.simpy_env, zone_n_cps, zone_id, station_conf, engine_type, profile_type, start
+                    )
+                    self.real_n_charging_zones += zone_n_cps
+
+        for i in range(self.n_vehicles_sim):
+            vehicle_object = Vehicle(
+                self.simpy_env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
+                vehicle_conf, self.energy_mix, engine_type, vehicle_model_name, start
+            )
+            self.vehicles_list.append(vehicle_object)
+
+        if "alpha_policy" in self.supply_model_conf:
+            if self.supply_model_conf["alpha_policy"] == "auto":
+                self.supply_model_conf["alpha"] = self.vehicles_list[0].consumption_to_percentage(
+                    self.vehicles_list[0].distance_to_consumption(
+                        self.max_driving_distance / 1000
+                    )
+                )
+            else:
+                print("Policy for alpha not recognised!")
+                exit(0)

@@ -1,179 +1,333 @@
-import simpy
 import datetime
+import json
+import os
 
-from odysseus.utils.vehicle_utils import *
+import numpy as np
+import simpy
+
+from odysseus.simulator.simulation_data_structures.worker import Worker
 from odysseus.utils.geospatial_utils import get_od_distance
 
 
-def init_relocate(charge_dict, vehicles_soc_dict, vehicle):
-	relocate = {}
-	relocate["plate"] = vehicle
-	relocate["start_time"] = charge_dict["end_time"]
-	relocate["date"] = charge_dict["start_time"].date()
-	relocate["hour"] = charge_dict["start_time"].hour
-	relocate["day_hour"] = charge_dict["start_time"].replace(minute=0, second=0, microsecond=0)
-	relocate["start_soc"] = vehicles_soc_dict[vehicle]
-	relocate["end_soc"] = vehicles_soc_dict[vehicle]
-	relocate["soc_delta"] = relocate["end_soc"] - relocate["start_soc"]
-	relocate["soc_delta_kwh"] = vehicle.tanktowheel_energy_from_perc(relocate["soc_delta"])
-	return relocate
+def init_scooter_relocation(vehicle_ids, start_time, start_zone_ids, end_zone_ids, distance, duration, worker_id='ND'):
+
+    scooter_relocation = {
+        "start_time": start_time,
+        "end_time": start_time + datetime.timedelta(seconds=duration),
+        "date": start_time.date(),
+        "hour": start_time.hour,
+        "day_hour": start_time.replace(minute=0, second=0, microsecond=0),
+        "n_vehicles": len(vehicle_ids),
+        "vehicle_ids": vehicle_ids,
+        "start_zone_ids": start_zone_ids,
+        "end_zone_ids": end_zone_ids,
+        "distance": distance,
+        "duration": duration,
+        "worker": worker_id
+    }
+    return scooter_relocation
 
 
 class RelocationPrimitives:
 
-	def __init__(self, env, sim):
+    def __init__(self, env, sim):
 
-		self.env = env
+        self.env = env
 
-		self.simInput = sim.simInput
+        self.start = sim.start
 
-		self.vehicles_soc_dict = sim.vehicles_soc_dict
+        self.simInput = sim.sim_input
 
-		self.vehicles_list = sim.vehicles_list
+        self.vehicles_soc_dict = sim.vehicles_soc_dict
 
-		self.relocation_stations_dict = self.simInput.valid_zones
+        self.vehicles_list = sim.vehicles_list
 
-		self.zone_dict = sim.zone_dict
+        self.available_vehicles_dict = sim.available_vehicles_dict
 
-		self.workers = simpy.Resource(
-			self.env,
-			capacity=self.simInput.supply_model_conf["n_relocate_workers"]
-		)
+        self.zone_dict = sim.zone_dict
 
-		# if self.simInput.sim_scenario_conf["hub"]:
-		# 	self.charging_hub = simpy.Resource(
-		# 		self.env,
-		# 		capacity=self.simInput.hub_n_charging_poles
-		# 	)
+        self.vehicles_zones = sim.vehicles_zones
 
-		# if self.simInput.sim_scenario_conf["distributed_cps"]:
-		# 	self.n_charging_poles_by_zone = self.simInput.n_charging_poles_by_zone
-		# 	self.charging_poles_dict = {}
-		# 	for zone, n in self.n_charging_poles_by_zone.items():
-		# 		if n > 0:
-		# 			self.charging_poles_dict[zone] = simpy.Resource(
-		# 				self.env,
-		# 				capacity=n
-		# 			)
+        self.relocation_workers_resource = simpy.Resource(
+            self.env,
+            capacity=self.simInput.supply_model_conf["n_relocation_workers"]
+        )
 
-		self.sim_relocates = []
-		self.sim_unfeasible_relocate_chargings = []
+        self.current_hour_origin_count = {}
+        self.current_hour_destination_count = {}
 
-		self.n_vehicles_relocating_system = 0
-		# self.n_vehicles_charging_users = 0
-		self.dead_vehicles = set()
-		self.n_dead_vehicles = 0
+        self.past_hours_origin_counts = []
+        self.past_hours_destination_counts = []
+        self.past_hours_n_bookings = []
 
-		self.list_system_relocating_chargings = []
+        self.n_scooter_relocations = 0
+        self.tot_scooter_relocations_distance = 0
+        self.tot_scooter_relocations_duration = 0
+        self.sim_scooter_relocations = []
+        self.n_vehicles_tot = 0
 
-	# self.list_users_charging_bookings = []
+        self.n_scooters_relocating = 0
 
-	def relocate_vehicle(
-			self,
-			relocate_dict
-	):
+        self.scheduled_scooter_relocations = []
+        self.starting_zone_ids = []
+        self.n_picked_vehicles_list = []
+        self.ending_zone_ids = []
+        self.n_dropped_vehicles_list = []
 
-		relocate = relocate_dict["relocate"]
-		resource = relocate_dict["resource"]
-		vehicle_id = relocate_dict["vehicle"]
-		operator = relocate_dict["operator"]
-		zone_id = relocate_dict["zone_id"]
-		# timeout_outward = relocate_dict["timeout_outward"]
-		timeout_return = relocate_dict["timeout_return"]
-		cr_soc_delta = relocate_dict["cr_soc_delta"]
+        self.sim_metrics = sim.sim_metrics
 
-		# def check_queuing():
-		# 	if self.simInput.sim_scenario_conf["queuing"]:
-		# 		return True
-		# 	else:
-		# 		if resource.count < resource.capacity:
-		# 			return True
-		# 		else:
-		# 			return False
+        self.relocation_workers = []
 
-		relocate["operator"] = operator
-		relocate["zone_id"] = zone_id
-		# relocate["timeout_outward"] = timeout_outward
-		relocate["timeout_return"] = timeout_return
-		relocate["cr_soc_delta"] = cr_soc_delta
-		relocate["cr_soc_delta_kwh"] = soc_to_kwh(cr_soc_delta)
+        for i in range(len(self.simInput.supply_model.initial_relocation_workers_positions)):
+            worker_id = i
+            initial_position = self.simInput.supply_model.initial_relocation_workers_positions[i]
+            self.relocation_workers.append(Worker(env, worker_id, initial_position))
 
-		with self.workers.request() as worker_request:
-			yield worker_request
-			yield self.env.timeout(relocate["timeout_return"])
-			# relocate["end"] = relocate["start"] - relocate["cr_soc_delta"]
-			self.vehicles_soc_dict[vehicle_id] = relocate["end_soc"]
-			relocate["end_soc"] -= relocate["cr_soc_delta"]
+        if "window_width" in dict(self.simInput.supply_model_conf["relocation_technique"]):
+            self.window_width = dict(self.simInput.supply_model_conf["relocation_technique"])["window_width"]
+        else:
+            self.window_width = 1
 
-		# with resource.request() as charging_request:
-		# 	yield charging_request
-		# 	# self.n_vehicles_charging_system += 1
-		# 	# yield self.env.timeout(charge["duration"])
+        if self.simInput.supply_model_conf["relocation_strategy"] == "predictive":
 
-		self.n_vehicles_relocating_system += 1
-		self.zone_dict[relocate["zone_id"]].add_vehicle(
-			relocate["start_time"]
-		)
-		# yield self.env.process(
-		# 	self.relocation_stations_dict[zone_id].charge(
-		# 		self.vehicles_list[vehicle_id],
-		# 		charge["start_time"],
-		# 		charge["cr_soc_delta"],
-		# 		charge["duration"]
-		# 	)
-		# )
+            from odysseus.simulator.simulation_input.prediction_model import PredictionModel
 
-		self.n_vehicles_relocating_system -= 1
-		relocate["end_time"] = relocate["start_time"] + datetime.timedelta(seconds=relocate["duration"])
-		self.sim_relocates += [relocate]
+            prediction_model_dir = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                "simulator",
+                "simulation_input",
+                "prediction_model",
+                self.simInput.supply_model_config["city"]
+            )
 
-	def check_system_relocate(self, charge_dict, vehicle):
-		# have enough battery to relocate
-		if self.vehicles_soc_dict[vehicle] > self.simInput.supply_model_conf["alpha"]:
-			relocate = init_relocate(
-				charge_dict,
-				self.vehicles_soc_dict,
-				vehicle
-				# self.simInput.sim_scenario_conf["beta"]
-			)
-			return True, relocate
-		else:
-			return False, None
+            with open(os.path.join(prediction_model_dir, "params.json"), "r") as f:
+                prediction_model_configs = json.load(f)
 
-	# def check_user_relocate(self, charging_request, vehicle):
-	#
-	# 	if charging_request["destination_id"] in self.relocation_stations_dict:
-	# 		if charging_request["end_soc"] < self.simInput.sim_scenario_conf["beta"]:
-	# 			if np.random.binomial(1, self.simInput.sim_scenario_conf["willingness"]):
-	# 				charge = init_relocate(
-	# 					charge_dict,
-	# 					self.vehicles_soc_dict,
-	# 					vehicle,
-	# 					self.simInput.sim_scenario_conf["beta"]
-	# 				)
-	# 				return True, charge
-	# 			else:
-	# 				return False, None
-	# 		else:
-	# 			return False, None
-	# 	else:
-	# 		return False, None
-	def get_timeout(self, origin_id, destination_id):
-		distance = get_od_distance(
-			self.simInput.grid,
-			origin_id,
-			destination_id
-		)
-		if distance == 0:
-			distance = self.simInput.demand_model_config["bin_side_length"]
-		return distance / 1000 / self.simInput.avg_speed_kmh_mean * 3600
+            self.city_shape = self.simInput.grid_matrix.shape
+            mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(
+                lambda zone_id: int(zone_id in self.simInput.valid_zones))).to_numpy()
+            mask = np.repeat(mask[:, :, np.newaxis], 2, axis=2)
 
-	def get_cr_soc_delta(self, origin_id, destination_id):
-		distance = get_od_distance(
-			self.simInput.grid,
-			origin_id,
-			destination_id
-		)
-		if distance == 0:
-			distance = self.simInput.demand_model_config["bin_side_length"]
-		return get_soc_delta(distance / 1000)
+            prediction_model_path = os.path.join(prediction_model_dir,
+                                                 prediction_model_configs["time_horizon_two"]["weights"])
+
+            self.prediction_model_time_horizon_two = PredictionModel(prediction_model_configs["time_horizon_two"],
+                                                                     self.city_shape,
+                                                                     8, mask=mask, path=prediction_model_path)
+
+            if self.window_width == 2:
+                prediction_model_path = os.path.join(prediction_model_dir,
+                                                     prediction_model_configs["time_horizon_three"]["weights"])
+
+                self.prediction_model_time_horizon_three = PredictionModel(
+                    prediction_model_configs["time_horizon_three"], self.city_shape,
+                    8, mask=mask, path=prediction_model_path)
+
+    def relocate_single_zone(self, relocation_record, move_vehicles=False, worker=None):
+
+        with self.relocation_workers_resource.request() as relocation_worker_request:
+            yield relocation_worker_request
+
+            if worker:
+                worker.start_working()
+
+            self.n_scooters_relocating += len(relocation_record["vehicle_ids"])
+            yield self.env.timeout(relocation_record["duration"])
+            self.n_scooters_relocating -= len(relocation_record["vehicle_ids"])
+
+            if worker:
+                worker.stop_working()
+                worker.update_position(relocation_record["end_zone_ids"][0])
+
+        if move_vehicles:
+
+            self.pick_up_scooter(
+                relocation_record["start_zone_ids"][0],
+                relocation_record["start_time"],
+                move_vehicles=True,
+                vehicle_ids=relocation_record["vehicle_ids"]
+            )
+            self.drop_off_scooter(
+                relocation_record["end_zone_ids"][0],
+                relocation_record["end_time"],
+                move_vehicles=True,
+                vehicle_ids=relocation_record["vehicle_ids"]
+            )
+
+        else:
+
+            self.pick_up_scooter(
+                relocation_record["start_zone_ids"][0],
+                relocation_record["start_time"]
+            )
+
+            self.drop_off_scooter(
+                relocation_record["end_zone_ids"][0],
+                relocation_record["end_time"]
+            )
+
+        self.update_relocation_stats(relocation_record)
+
+    def relocate_scooter_multiple_zones(self, scheduled_relocation, collection_path, distribution_path, worker):
+        with self.relocation_workers_resource.request() as relocation_worker_request:
+            yield relocation_worker_request
+
+            worker.start_working()
+
+            total_distance = 0
+            total_duration = 0
+            picked_vehicles = []
+            relocated_vehicles = []
+
+            # Navigate through collection path
+            for j in range(1, len(collection_path)):
+                # Step definition
+                step_start = collection_path[j - 1]
+                step_end = collection_path[j]
+
+                distance = get_od_distance(
+                    self.simInput.grid_centroids,
+                    step_start,
+                    step_end,
+                    self.sim_input.grid_crs
+                )
+                total_distance += distance
+                self.sim_metrics.update_metrics("avg_relocation_step_distance", distance)
+
+                duration = distance / 1000 / self.simInput.supply_model_conf["avg_relocation_speed"] * 3600
+                total_duration += duration
+
+                # Simulate step navigation time
+                yield self.env.timeout(duration)
+                worker.update_position(step_end)
+
+                # Pick up programmed scooters where available
+                current_time = self.start + datetime.timedelta(seconds=self.env.now)
+
+                actual_n_picked_vehicles = min(
+                    scheduled_relocation["pick_up"][step_end],
+                    len(self.available_vehicles_dict[step_end])
+                )
+
+                for k in range(actual_n_picked_vehicles):
+                    picked_vehicle = self.available_vehicles_dict[step_end].pop()
+                    picked_vehicles.append(picked_vehicle)
+                    self.pick_up_scooter(step_end, current_time)
+
+                self.n_scooters_relocating += actual_n_picked_vehicles
+
+            # Prosecute navigation through distribution path
+            for j in range(1, len(distribution_path)):
+                # Step definition
+                step_start = distribution_path[j - 1]
+                step_end = distribution_path[j]
+
+                distance = get_od_distance(
+                    self.simInput.grid_centroids,
+                    step_start,
+                    step_end,
+                    self.simInput.grid_crs
+                )
+                total_distance += distance
+                self.sim_metrics.update_metrics("avg_relocation_step_distance", distance)
+
+                duration = distance / 1000 / self.simInput.supply_model_conf["avg_relocation_speed"] * 3600
+                total_duration += duration
+
+                # Simulate step navigation time
+                yield self.env.timeout(duration)
+                worker.update_position(step_end)
+
+                # Drop off programmed scooters while available
+                current_time = self.start + datetime.timedelta(seconds=self.env.now)
+
+                actual_n_dropped_vehicles = min(
+                    scheduled_relocation["drop_off"][step_end],
+                    len(picked_vehicles)
+                )
+
+                for k in range(actual_n_dropped_vehicles):
+                    dropped_vehicle = picked_vehicles.pop()
+                    relocated_vehicles.append(dropped_vehicle)
+                    self.available_vehicles_dict[step_end].append(dropped_vehicle)
+                    self.drop_off_scooter(step_end, current_time)
+
+                self.n_scooters_relocating -= actual_n_dropped_vehicles
+
+            worker.stop_working()
+
+        # Save cumulative relocation stats
+        scooter_relocation = init_scooter_relocation(relocated_vehicles, current_time,
+                                                     collection_path[1:], distribution_path[1:],
+                                                     total_distance, total_duration, worker_id=worker.id)
+
+        self.update_relocation_stats(scooter_relocation)
+
+    def magically_relocate_scooter(self, scooter_relocation):
+        self.pick_up_scooter(
+            scooter_relocation["start_zone_ids"][0],
+            scooter_relocation["start_time"]
+        )
+        self.drop_off_scooter(
+            scooter_relocation["end_zone_ids"][0],
+            scooter_relocation["end_time"]
+        )
+        if "save_history" in self.simInput.supply_model_conf:
+            if self.simInput.supply_model_conf["save_history"]:
+                self.sim_scooter_relocations += [scooter_relocation]
+        self.n_scooter_relocations += 1
+        self.tot_scooter_relocations_distance += scooter_relocation["distance"]
+        self.n_vehicles_tot += scooter_relocation["n_vehicles"]
+
+    def pick_up_scooter(self, zone_id, time, move_vehicles=False, vehicle_ids=None):
+        self.zone_dict[zone_id].remove_vehicle(time)
+        if move_vehicles:
+            starting_zone_id = zone_id
+            relocated_vehicles = vehicle_ids
+
+            for vehicle in relocated_vehicles:
+                if vehicle in self.available_vehicles_dict[starting_zone_id]:
+                    self.available_vehicles_dict[starting_zone_id].remove(vehicle)
+                if vehicle in self.vehicles_zones:
+                    del self.vehicles_zones[vehicle]
+
+    def drop_off_scooter(self, zone_id, time, move_vehicles=False, vehicle_ids=None):
+        self.zone_dict[zone_id].add_vehicle(time)
+        if move_vehicles:
+            ending_zone_id = zone_id
+            relocated_vehicles = vehicle_ids
+
+            for vehicle in relocated_vehicles:
+                self.available_vehicles_dict[ending_zone_id].append(vehicle)
+                self.vehicles_zones[vehicle] = ending_zone_id
+
+    def update_relocation_stats(self, scooter_relocation):
+
+        if "save_history" in self.simInput.supply_model_config:
+            if self.simInput.supply_model_config["save_history"]:
+                self.sim_scooter_relocations += [scooter_relocation]
+
+        self.n_scooter_relocations += 1
+        self.tot_scooter_relocations_distance += scooter_relocation["distance"]
+        self.tot_scooter_relocations_duration += scooter_relocation["duration"]
+        self.n_vehicles_tot += scooter_relocation["n_vehicles"]
+
+        self.sim_metrics.update_metrics("min_vehicles_relocated", scooter_relocation["n_vehicles"])
+        self.sim_metrics.update_metrics("max_vehicles_relocated", scooter_relocation["n_vehicles"])
+        self.sim_metrics.update_metrics("tot_vehicles_moved", scooter_relocation["n_vehicles"])
+
+    def update_current_hour_stats(self, booking_request):
+
+        if booking_request["origin_id"] in self.current_hour_origin_count:
+            self.current_hour_origin_count[booking_request["origin_id"]] += 1
+        else:
+            self.current_hour_origin_count[booking_request["origin_id"]] = 1
+
+        if booking_request["destination_id"] in self.current_hour_destination_count:
+            self.current_hour_destination_count[booking_request["destination_id"]] += 1
+        else:
+            self.current_hour_destination_count[booking_request["destination_id"]] = 1
+
+    def reset_current_hour_stats(self):
+        self.current_hour_origin_count = {}
+        self.current_hour_destination_count = {}

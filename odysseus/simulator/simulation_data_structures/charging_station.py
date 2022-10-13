@@ -1,15 +1,15 @@
 import datetime
 
 import simpy
-from odysseus.supply_modelling.charging_station import Pole
+from odysseus.supply_modelling.service_stations.charging_station import Pole
 
 
 class ChargingStation(Pole):
 
-    def __init__(self, env, num_poles, zone_id, station_conf, sim_scenario_conf, sim_start_time):
-        engine_type = sim_scenario_conf["engine_type"]
+    def __init__(self, env, num_poles, zone_id, station_conf, engine_type, profile_type, sim_start_time):
+        engine_type = engine_type
         if engine_type == "electric":
-            profile_type = sim_scenario_conf["profile_type"]
+            profile_type = profile_type
             super().__init__(station_conf[engine_type][profile_type])
         else:
             super().__init__(station_conf[engine_type])
@@ -50,7 +50,8 @@ class ChargingStation(Pole):
             yield req
             amount = vehicle.soc.capacity - vehicle.soc.level
             yield self.env.timeout(duration)
-            vehicle.soc.put(amount)
+            if amount:
+                vehicle.soc.put(amount)
         vehicle.available = True
         vehicle.current_status = {
             "time": start_time + datetime.timedelta(seconds=duration),

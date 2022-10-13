@@ -16,6 +16,7 @@ Get started with Odysseus
    city_data_manager/index
    demand_modelling/index
    supply_modelling/index
+   simulator/index
    modules
 
 Introduction
@@ -25,12 +26,10 @@ ODySSEUS is a data management and simulation software for mobility data, focused
 
 Its goal is to provide a general, easy-to-use framework to simulate shared mobility scenarios across different cities using real-world data.
 
-Internally, it makes use of several open-source Python libraries for geospatial and mobility analysis, such as geopandas (https://geopandas.org/) and scikit-mobility [5] (https://scikit-mobility.github.io/scikit-mobility/).
+Internally, it makes use of several open-source Python libraries for geospatial and mobility analysis,
+such as geopandas (https://geopandas.org/) and scikit-mobility [5] (https://scikit-mobility.github.io/scikit-mobility/).
 
-ODySSEUS is composed by four main functional modules, each one coming with its own API, command line interface and GUI:
+This guide is organised as follows:
 
+- **Install Guide**
 - **City Data Manager**
-- **Demand Modelling**
-- **Supply Modelling**
-- **Simulator**
-

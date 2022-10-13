@@ -4,6 +4,20 @@ import numpy as np
 import pandas as pd
 
 
+def get_daytype_from_week_config(week_config, weekday):
+    for daytype in week_config["week_slots"]:
+        for day in week_config["week_slots"][daytype]:
+            if day == weekday:
+                return daytype
+
+
+def get_daytype_from_weekday(weekday):
+    if weekday in [5, 6]:
+        return "weekend"
+    else:
+        return "weekday"
+
+
 def get_weekday_string_from_int(i):
     return list(calendar.day_abbr)[i]
 
@@ -13,6 +27,7 @@ def get_weekday_int_from_string(s):
 
 
 def get_time_group_columns(trips_df_norm):
+
     trips_df_norm = trips_df_norm.sort_values(by=["start_time"]).dropna()
 
     try:

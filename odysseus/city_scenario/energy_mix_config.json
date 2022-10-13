@@ -1,0 +1,153 @@
+{
+	"Austria" : {
+		"2017": {
+			"nuclear": 0,
+			"natural_gas": 15.30,
+			"coal": 5.49,
+			"oil": 1.20,
+			"biomass": 6.46,
+			"other": 0.02,
+			"hydro": 59.13,
+			"wind": 9.21,
+			"waste": 1.42,
+			"solar": 1.78,
+			"geothermal": 0
+		}
+	},
+
+	"Germany" : {
+		"2017": {
+			"nuclear": 2.76,
+			"natural_gas": 48.11,
+			"coal": 27.56,
+			"oil": 0.96,
+			"biomass": 2.18,
+			"other": 0.10,
+			"hydro": 0.05,
+			"wind": 8.56,
+			"waste": 2.91,
+			"solar": 1.79,
+			"geothermal": 5.02
+		}
+	},
+
+	"Italy" : {
+		"2017": {
+			"nuclear": 0,
+			"natural_gas": 47.44,
+			"coal": 11.86,
+			"oil": 3.90,
+			"biomass": 5.74,
+			"other": 6.2,
+			"hydro": 12.85,
+			"wind": 6.0,
+			"waste": 1.64,
+			"solar": 8.24,
+			"geothermal": 2.1
+		},
+		"2018" : {
+			"nuclear": 0,
+			"natural_gas": 44.37,
+			"coal": 10.69,
+			"oil": 3.81,
+			"biomass": 5.79,
+			"other": 0.21,
+			"hydro": 17.43,
+			"wind": 6.12,
+			"waste": 1.67,
+			"solar": 7.82,
+			"geothermal": 2.11
+		},
+		"2020" : {
+			"nuclear": 0,
+			"natural_gas": 44.37,
+			"coal": 10.69,
+			"oil": 3.81,
+			"biomass": 5.79,
+			"other": 0.21,
+			"hydro": 17.43,
+			"wind": 6.12,
+			"waste": 1.67,
+			"solar": 7.82,
+			"geothermal": 2.11
+		}
+	},
+
+	"Netherlands" : {
+		"2017": {
+			"nuclear": 2.76,
+			"natural_gas": 48.11,
+			"coal": 27.56,
+			"oil": 0.96,
+			"biomass": 2.18,
+			"other": 0.10,
+			"hydro": 0.05,
+			"wind": 8.56,
+			"waste": 2.91,
+			"solar": 1.79,
+			"geothermal": 5.02
+		}
+	},
+
+	"Canada" : {
+		"2017": {
+			"nuclear": 14.6,
+			"natural_gas": 9.6,
+			"coal": 9.3,
+			"oil": 0.5,
+			"biomass": 2.0,
+			"other": 0.0,
+			"hydro": 58.8,
+			"wind": 4.7,
+			"waste": 0.0,
+			"solar": 0.5,
+			"geothermal": 5.02
+		}
+	},
+
+	"US" : {
+      "2017" : {
+         "nuclear": 19.68,
+         "natural_gas": 32.00,
+         "coal": 29.48,
+         "oil": 0.52,
+         "biomass": 1.54,
+         "other": 1.54,
+         "hydro": 7.34,
+         "wind": 6.22,
+         "waste": 0.00,
+         "solar": 1.30,
+         "geothermal": 0.39
+      },
+      "2019" : {
+         "nuclear": 19.31,
+         "natural_gas": 37.44,
+         "coal": 24.24,
+         "oil": 0.82,
+         "biomass": 1.27,
+         "other": 0.11,
+         "hydro": 6.79,
+         "wind": 6.95,
+         "waste": 0.40,
+         "solar": 2.24,
+         "geothermal": 0.42
+      }
+   },
+
+	"dummy_country" : {
+      "2023" : {
+         "nuclear": 19.31,
+         "natural_gas": 37.44,
+         "coal": 24.24,
+         "oil": 0.82,
+         "biomass": 1.27,
+         "other": 0.11,
+         "hydro": 6.79,
+         "wind": 6.95,
+         "waste": 0.40,
+         "solar": 2.24,
+         "geothermal": 0.42
+      }
+   }
+
+}
