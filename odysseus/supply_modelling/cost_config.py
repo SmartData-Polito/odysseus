@@ -2,14 +2,14 @@ vehicle_cost = {
 	"gasoline": {
 		"Seat Leon 1.5 TSI 2020": {
 			# "retail_price": 16612.06,
-			"leasing_cost": 2614.32,
+			"leasing_cost": 3024,
 			"washing_cost": 8,
 			"disinfection_cost": 15,
 			"cost_permin": 0.26
 		},
 		"VW Golf 7 1.0 TSI 2018": {
 			# "retail_price": 16612.06,
-			"leasing_cost": 2614.32,
+			"leasing_cost": 3324.32,
 			"washing_cost": 8,
 			"disinfection_cost": 15,
 			"cost_permin": 0.26
@@ -17,6 +17,13 @@ vehicle_cost = {
 
 	},
 	"diesel": {
+		"Seat Leon 2.0 TDI 2020": {
+			# "retail_price": 16612.06,
+			"leasing_cost": 3024,
+			"washing_cost": 8,
+			"disinfection_cost": 15,
+			"cost_permin": 0.26
+		},
 		"VW Golf 7 2.0 TDI 2018": {
 			# "retail_price": 23907,
 			"leasing_cost": 4970.64,
@@ -49,6 +56,13 @@ vehicle_cost = {
 			"leasing_cost": 5053.32,
 			"washing_cost": 8,
 			"disinfection_cost": 15,
+			"cost_permin": 0.26
+		},
+		"Fiat 500e 2020": {
+			# "retail_price": 16279.92,
+			"leasing_cost": 4000,
+			"washing_cost": 1,
+			"disinfection_cost": 5,
 			"cost_permin": 0.26
 		},
 		"Smart fortwo Electric Drive 2018": {
@@ -138,17 +152,17 @@ charging_station_costs = {
 
 fuel_costs = {
 	"gasoline": {
-		"fuel_cost": 1.43407,
+		"fuel_cost": 1.845,
 		"lower_heating_value": 42.3,  # MJ/kg
 		"density": 745.8  # g/L
 	},
 	"diesel": {
-		"fuel_cost": 1.31179,
+		"fuel_cost": 2.018,
 		"lower_heating_value": 42.7,  # MJ/kg
 		"density": 836.1  # g/L
 	},
 	"lpg": {
-		"fuel_cost": 0.62153,
+		"fuel_cost": 0.785,
 		"lower_heating_value": 46,  # MJ/kg
 		"density": 550  # g/L
 	},

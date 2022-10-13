@@ -40,9 +40,9 @@ parser.add_argument(
 )
 
 parser.set_defaults(
-    campaign_name="switch_0",
-    conf_name="fleet_dim_fuel",
-    city_scenario_folder="default",
+    campaign_name="test",
+    conf_name="generated_od_test",
+    city_scenario_folder="cyclic_scenario",
     sim_run_mode="single_run"
 )
 
@@ -96,7 +96,10 @@ if args.sim_run_mode == "single_run":
 
 elif args.sim_run_mode == "multiple_runs":
     for parameters_dict in configs_list:
-        parameters_dict["sim_general_conf"]["save_history"] = False
+        parameters_dict["sim_general_conf"]["history_to_file"] = False
+        for k in parameters_dict["sim_general_conf"]:
+            if "exclude" in k:
+                parameters_dict["sim_general_conf"][k] = True
         if args.n_cpus is not None:
             parameters_dict["n_cpus"] = int(args.n_cpus)
     multiple_runs(config_grids_dict, configs_list)

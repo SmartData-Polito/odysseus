@@ -23,11 +23,6 @@ class SimOutput():
 		sim_stats_obj = SimStats()
 		self.sim_stats = sim_stats_obj.get_stats_from_sim(sim)
 		self.sim_stats = sim_stats_obj.sim_stats
-		insert_scenario_costs(self.sim_stats, self.supply_model_conf, vehicle_cost, charging_station_costs)
-		insert_sim_costs(self.sim_stats, self.supply_model_conf, fuel_costs, administrative_cost_conf, vehicle_cost)
-		self.sim_stats.loc[
-			"profit"
-		] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - self.sim_stats["sim_cost"]
 
 		if self.sim_general_conf["save_history"]:
 
@@ -315,92 +310,102 @@ class SimOutput():
 			if key.startswith("fraction"):
 				self.sim_stats["percentage" + key[8:]] = self.sim_stats[key] * 100
 
+		insert_scenario_costs(self.sim_stats, self.supply_model_conf, vehicle_cost, charging_station_costs)
+		insert_sim_costs(self.sim_stats, self.supply_model_conf, fuel_costs, administrative_cost_conf, vehicle_cost)
+		self.sim_stats.loc[
+			"profit"
+		] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - self.sim_stats["sim_cost"]
+
 	def save_output(self, results_path, sim_general_conf, sim_scenario_conf):
 
-		if sim_general_conf["save_history"]:
+		if sim_general_conf["history_to_file"]:
 
-			self.sim_booking_requests.to_csv(
-				os.path.join(
-					results_path,
-					"sim_booking_requests.csv"
-				)
-			)
-			self.sim_bookings.to_csv(
-				os.path.join(
-					results_path,
-					"sim_bookings.csv"
-				)
-			)
-			self.sim_charges.to_csv(
-				os.path.join(
-					results_path,
-					"sim_charges.csv"
-				)
-			)
-			self.sim_not_enough_energy_requests.to_csv(
-				os.path.join(
-					results_path,
-					"sim_unsatisfied_no_energy.csv"
-				)
-			)
-			self.sim_no_close_vehicle_requests.to_csv(
-				os.path.join(
-					results_path,
-					"sim_unsatisfied_no_close_vehicle.csv"
-				)
-			)
-			self.sim_unsatisfied_requests.to_csv(
-				os.path.join(
-					results_path,
-					"sim_unsatisfied_requests.csv"
-				)
-			)
-			self.sim_system_charges_bookings.to_csv(
-				os.path.join(
-					results_path,
-					"sim_system_charges_bookings.csv"
-				)
-			)
+			if not sim_general_conf["exclude_events_files"]:
 
-			self.sim_users_charges_bookings.to_csv(
-				os.path.join(
-					results_path,
-					"sim_users_charges_bookings.csv"
+				self.sim_booking_requests.to_csv(
+					os.path.join(
+						results_path,
+						"sim_booking_requests.csv"
+					)
 				)
-			)
-			self.sim_unfeasible_charge_bookings.to_csv(
-				os.path.join(
-					results_path,
-					"sim_unfeasible_charge_bookings.csv"
+				self.sim_bookings.to_csv(
+					os.path.join(
+						results_path,
+						"sim_bookings.csv"
+					)
 				)
-			)
-			self.sim_charge_deaths.to_csv(
-				os.path.join(
-					results_path,
-					"sim_unfeasible_charges.csv"
+				self.sim_charges.to_csv(
+					os.path.join(
+						results_path,
+						"sim_charges.csv"
+					)
 				)
-			)
+				self.sim_not_enough_energy_requests.to_csv(
+					os.path.join(
+						results_path,
+						"sim_unsatisfied_no_energy.csv"
+					)
+				)
+				self.sim_no_close_vehicle_requests.to_csv(
+					os.path.join(
+						results_path,
+						"sim_unsatisfied_no_close_vehicle.csv"
+					)
+				)
+				self.sim_unsatisfied_requests.to_csv(
+					os.path.join(
+						results_path,
+						"sim_unsatisfied_requests.csv"
+					)
+				)
+				self.sim_system_charges_bookings.to_csv(
+					os.path.join(
+						results_path,
+						"sim_system_charges_bookings.csv"
+					)
+				)
 
-			self.vehicles_history.to_csv(
-				os.path.join(
-					results_path,
-					"vehicles_history.csv"
+				self.sim_users_charges_bookings.to_csv(
+					os.path.join(
+						results_path,
+						"sim_users_charges_bookings.csv"
+					)
 				)
-			)
+				self.sim_unfeasible_charge_bookings.to_csv(
+					os.path.join(
+						results_path,
+						"sim_unfeasible_charge_bookings.csv"
+					)
+				)
+				self.sim_charge_deaths.to_csv(
+					os.path.join(
+						results_path,
+						"sim_unfeasible_charges.csv"
+					)
+				)
 
-			self.stations_history.to_csv(
-				os.path.join(
-					results_path,
-					"stations_history.csv"
-				)
-			)
+			if not sim_general_conf["exclude_resources_files"]:
 
-			self.zones_history.to_csv(
-				os.path.join(
-					results_path,
-					"zones_history.csv"
+				self.vehicles_history.to_csv(
+					os.path.join(
+						results_path,
+						"vehicles_history.csv"
+					)
 				)
-			)
+
+				self.stations_history.to_csv(
+					os.path.join(
+						results_path,
+						"stations_history.csv"
+					)
+				)
+
+				self.zones_history.to_csv(
+					os.path.join(
+						results_path,
+						"zones_history.csv"
+					)
+				)
 
 			if sim_scenario_conf["relocation"]:
 				self.relocation_history.to_csv(

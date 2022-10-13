@@ -5,10 +5,15 @@ sim_general_config_grid = {
     "data_source_id": ["my_data_source"],
 
     # Run parameters
-    "sim_run_mode": ["single_run"],
     "sim_technique": ["traceB"],
     "sim_scenario_name": ["cyclic_requests"],
+
     "save_history": [True],
+    "history_to_file": [True],
+    "exclude_sim_output_obj": [False],
+    "exclude_geo_grid": [False],
+    "exclude_events_files": [False],
+    "exclude_resources_files": [False],
     "auto_plotting": [True],
 
     # Time  parameters

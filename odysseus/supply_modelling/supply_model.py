@@ -76,7 +76,7 @@ class SupplyModel:
         self.zone_dict = dict()
         self.charging_stations_dict = dict()
 
-        self.fleet = Fleet(self.grid)
+        self.fleet = Fleet(self.grid, self.valid_zones)
         self.vehicles_list = list()
 
         self.simpy_env = None

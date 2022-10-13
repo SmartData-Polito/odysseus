@@ -5,9 +5,11 @@ import numpy as np
 
 class Fleet:
 
-    def __init__(self, grid):
+    def __init__(self, grid, valid_zones):
 
         self.grid = grid
+        self.valid_zones = valid_zones
+
         self.n_vehicles_sim = -1
         self.vehicles_soc_dict = None
         self.vehicles_zones = None
@@ -51,16 +53,21 @@ class Fleet:
 
         elif how == "uniform":
             # TODO -> decide rule when division is not exact
-            n_vehicles_per_zone = int(n_vehicles_sim / len(self.grid))
-            current_zone_id = 0
-            current_zone_count = 0
+            n_vehicles_per_zone = np.ceil(n_vehicles_sim / len(self.grid))
+            print(n_vehicles_sim, n_vehicles_per_zone)
+            current_plate = 0
             self.vehicles_zones = {}
-            for i in range(self.n_vehicles_sim):
-                self.vehicles_zones[i] = current_zone_id
-                current_zone_count += 1
-                if current_zone_count >= n_vehicles_per_zone + 1:
-                    current_zone_count = 0
-                    current_zone_id += 1
+            i = 0
+            while i < n_vehicles_sim:
+                for zone in self.valid_zones:
+                    for i in range(current_plate, current_plate + int(n_vehicles_per_zone), 1):
+                        if i >= n_vehicles_sim:
+                            break
+                        else:
+                            self.vehicles_zones[i] = zone
+                    if i >= n_vehicles_sim:
+                        break
+                current_plate = current_plate + int(n_vehicles_per_zone)
 
         self.init_available_vehicles_dict()
         self.vehicles_soc_dict = {int(k): float(v) for k, v in self.vehicles_soc_dict.items()}

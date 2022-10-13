@@ -4,6 +4,7 @@ demand_model_config_grid = {
 
 	"vehicle_research_policy": ["zone"],
 
+	"user_contribution_policy": [""],
 	"user_contribution": [False],
 	"willingness": [0],
 

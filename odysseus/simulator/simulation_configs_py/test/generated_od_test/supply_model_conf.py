@@ -48,7 +48,7 @@ supply_model_config_grid = {
 	# -> relocation
 
 	"relocation": [False],
-	"relocation_strategy": ["magic_relocation"],
+	"relocation_strategy": [""],
 
 	"relocation_technique": [frozenset({})],
 

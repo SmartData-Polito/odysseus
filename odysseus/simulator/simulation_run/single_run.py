@@ -23,9 +23,6 @@ def single_run(conf_dict):
     results_path = get_output_path(
         "results", city, conf_dict["sim_scenario_name"], "single_run", conf_dict["conf_id"]
     )
-    figures_path = get_output_path(
-        "figures", city, conf_dict["sim_scenario_name"], "single_run", conf_dict["conf_id"]
-    )
 
     print(datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"], "Initialising SimInput..")
 
@@ -55,11 +52,6 @@ def single_run(conf_dict):
     pd.Series(sim_general_conf).to_csv(os.path.join(results_path, "sim_general_conf.csv"))
     pd.Series(supply_model_conf).to_csv(os.path.join(results_path, "sim_scenario_conf.csv"))
 
-    pickle.dump(
-        sim_output,
-        open(os.path.join(results_path, "sim_output.pickle"), "wb")
-    )
-
     with open(os.path.join(results_path, "n_charging_poles_by_zone.json"), "w") as f:
         json.dump(sim_output.n_charging_poles_by_zone, f)
 
@@ -69,16 +61,30 @@ def single_run(conf_dict):
             "grid.pickle"
         )
     )
-    sim_output.grid.to_file(
-        os.path.join(
-            results_path,
-            "grid.dbf"
+
+    if not sim_general_conf["exclude_sim_output_obj"]:
+
+        pickle.dump(
+            sim_output,
+            open(os.path.join(results_path, "sim_output.pickle"), "wb")
         )
-    )
+
+    if not sim_general_conf["exclude_geo_grid"]:
+
+        sim_output.grid.to_file(
+            os.path.join(
+                results_path,
+                "grid.dbf"
+            )
+        )
 
     sim_output.save_output(results_path, sim_general_conf, supply_model_conf)
 
     if sim_general_conf["auto_plotting"]:
+
+        figures_path = get_output_path(
+            "figures", city, conf_dict["sim_scenario_name"], "single_run", conf_dict["conf_id"]
+        )
 
         plotter = EFFCS_SimOutputPlotter(sim_output, city, sim_scenario_name, figures_path)
         plotter.plot_events_profile_barh()
