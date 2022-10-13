@@ -51,13 +51,13 @@ parser.add_argument(
 
 parser.set_defaults(
     read=False,
-    city="my_city_2X2_2",
+    city="my_city",
     data_source_id="my_data_source",
     week_slots_type="generic_day",
     day_slots_type="generic_hour",
-    n_hours=(24, 24),
+    n_hours=(1, 1),
     grid_params=(2, 2, 500),
-    od_params=("simple_cyclic", 1, ),
+    od_params=("uniform", 1, ),
 )
 
 args = parser.parse_args()
