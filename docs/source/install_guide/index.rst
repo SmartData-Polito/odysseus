@@ -27,6 +27,9 @@ You can replace "my-odysseus-folder" with any name you prefer.
 
 Installing geospatial libraries may require different steps while being on Windows, Mac or Linux.
 
+Test your first ODySSEUS module: City Data Manager
+---------------------------------------------------
+
 Once all libraries are installed, type the following command:
 
    .. code-block:: console
