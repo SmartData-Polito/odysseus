@@ -60,7 +60,6 @@ class VirtualODDataSource:
         hourly_od_count_dict = generate_hourly_od_count_dict(
             week_config, zone_ids, args.od_params[0], count=args.od_params[1]
         )
-        print(hourly_od_count_dict)
 
         od_matrices_by_dayslots, od_matrices_by_hour = generate_od_from_week_config(
             city_name=args.city,
@@ -70,8 +69,6 @@ class VirtualODDataSource:
             od_type="count",
             hourly_od_count_dict=hourly_od_count_dict
         )
-
-        print(od_matrices_by_dayslots)
 
         return od_matrices_by_dayslots, od_matrices_by_hour, grid_matrix, week_config
 

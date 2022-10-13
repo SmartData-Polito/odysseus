@@ -30,12 +30,14 @@ Installing geospatial libraries may require different steps while being on Windo
 Once all libraries are installed, type the following command:
 
    .. code-block:: console
+
       python -m odysseus.city_data_manager.od_matrices -h
 
 This will show a summary of command-line arguments needed to run this module.
 Let's pick default parameters for now, and let's run the module using:
 
    .. code-block:: console
+
       python -m odysseus.city_data_manager.od_matrices
 
 Now you should see something happening in your ODySSEUS folder.
@@ -56,3 +58,5 @@ In particular this folder structure should have appeared:
 If so, congratulations!
 
 We are ready to start with ODySSEUS!
+
+To follow the order of this guide, go to City Data Manager section.

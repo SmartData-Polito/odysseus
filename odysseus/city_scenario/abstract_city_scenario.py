@@ -334,6 +334,7 @@ class AbstractCityScenario:
         ]
         self.grid["origin_count"] = self.bookings_train.origin_id.value_counts()
         self.grid["destination_count"] = self.bookings_train.destination_id.value_counts()
+
         reqs_per_zone = self.bookings_train.origin_id.value_counts(
             normalize=False
         ).rename('zone_id')

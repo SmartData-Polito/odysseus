@@ -7,11 +7,6 @@ from odysseus.city_data_manager.od_matrices.virtual_od.virtual_od_data_source im
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
-    "-r", "--read", action="store_true",
-    help="If "
-)
-
-parser.add_argument(
     "-c", "--city",
     help="specify city name"
 )
@@ -19,6 +14,14 @@ parser.add_argument(
 parser.add_argument(
     "-d", "--data_source_id",
     help="specify data source id"
+)
+
+parser.add_argument(
+    "-r", "--read", action="store_true",
+    help="""
+    If active, try to read a previously generated OD matrix and ignore other parameters
+    If not active, generate a new OD matrix with specified parameters.
+    """
 )
 
 parser.add_argument(
@@ -45,17 +48,21 @@ parser.add_argument(
 
 parser.add_argument(
     "-od", "--od_params",
-    nargs=1, metavar=('count', ),
-    help="specify number of trips for a uniform OD matrix",
+    nargs=2, metavar=('od_type', 'count', ),
+    help="""
+        specify od type and params to generate OD matrices.
+        "uniform" requires parameter "count"
+        "simple_cyclic" requires parameter "count"
+    """,
 )
 
 parser.set_defaults(
     read=False,
     city="my_city",
     data_source_id="my_data_source",
-    week_slots_type="generic_day",
+    week_slots_type="all_week_days",
     day_slots_type="generic_hour",
-    n_hours=(1, 1),
+    n_hours=(24, 24),
     grid_params=(2, 2, 500),
     od_params=("uniform", 1, ),
 )
@@ -64,12 +71,16 @@ args = parser.parse_args()
 
 od_data_source = VirtualODDataSource(args.city, args.data_source_id)
 
+start = datetime.datetime.now()
+
 if not args.read:
 
+    print("Generating OD..")
     od_matrices_by_dayslots, od_matrices_by_hour, grid_matrix, week_config = od_data_source.generate(args)
 
 else:
 
+    print("Reading OD..")
     od_matrices_by_hour, week_config, grid_config = od_data_source.load_norm()
     grid_matrix = get_grid_matrix_from_config(grid_config)
 
@@ -81,6 +92,7 @@ test_start_time = train_end_time
 test_end_time = test_start_time + datetime.timedelta(hours=args.n_hours[1])
 
 if args.od_params[1] > 0:
+    print("Generating trips..")
     train_booking_requests, test_booking_requests = generate_trips_from_od(
         args.city,
         od_matrices_by_hour,
@@ -92,3 +104,9 @@ if args.od_params[1] > 0:
         test_start_time,
         test_end_time,
     )
+    print("Train trips shape:", train_booking_requests.shape)
+    print("Test trips shape:", test_booking_requests.shape)
+
+end = datetime.datetime.now()
+
+print("Execution time [sec]: ", (end-start).total_seconds())

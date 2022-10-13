@@ -3,7 +3,6 @@ import os
 import geopandas as gpd
 
 from odysseus.path_config.path_config import data_paths_dict
-from odysseus.utils.path_utils import check_create_path
 
 
 class GeoDataSource:
@@ -32,7 +31,7 @@ class GeoDataSource:
 			data_paths_dict[self.city_id]["norm"][self.data_type_id],
 			self.data_source_id
 		)
-		check_create_path(self.norm_data_path)
+		os.makedirs(self.norm_data_path, exist_ok=True)
 
 		self.gdf = gpd.GeoDataFrame()
 		self.gdf_norm = gpd.GeoDataFrame()

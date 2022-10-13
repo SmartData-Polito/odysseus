@@ -13,7 +13,6 @@ def generate_booking_requests_list(
 ):
     booking_requests_list = list()
     current_datetime = start_datetime
-    print(current_datetime)
     current_hour = current_datetime.hour
     current_weekday = current_datetime.weekday()
     current_daytype = get_daytype_from_week_config(week_config, current_weekday)
