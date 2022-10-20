@@ -95,6 +95,7 @@ def generate_hourly_od_count_dict(week_config, zone_ids, how, **kwargs):
     """
 
     hourly_od_count_dict = dict()
+
     if how == "uniform":
         for week_daytype in week_config["week_slots"].keys():
             hourly_od_count_dict[week_daytype] = {}
@@ -105,6 +106,7 @@ def generate_hourly_od_count_dict(week_config, zone_ids, how, **kwargs):
                         hourly_od_count_dict[week_daytype][hour][origin] = {}
                         for destination in zone_ids:
                             hourly_od_count_dict[week_daytype][hour][origin][destination] = kwargs["count"]
+
     if how == "simple_cyclic":
         for week_daytype in week_config["week_slots"].keys():
             hourly_od_count_dict[week_daytype] = {}
@@ -117,6 +119,23 @@ def generate_hourly_od_count_dict(week_config, zone_ids, how, **kwargs):
                         hourly_od_count_dict[week_daytype][hour][origin] = {}
                         destination = (origin + 1) % len(zone_ids)
                         hourly_od_count_dict[week_daytype][hour][origin][destination] = kwargs["count"]
+
+    if how == "uniform_single_destination":
+        for week_daytype in week_config["week_slots"].keys():
+            hourly_od_count_dict[week_daytype] = {}
+            for day_slot in week_config["day_slots"][week_daytype]:
+                day_slot_hours = week_config["day_slots"][week_daytype][day_slot]
+                for origin in zone_ids:
+                    if origin not in kwargs["exclude_zones"]:
+                        for hour in day_slot_hours:
+                            if hour not in hourly_od_count_dict[week_daytype]:
+                                hourly_od_count_dict[week_daytype][hour] = dict()
+                            if origin not in hourly_od_count_dict[week_daytype][hour]:
+                                hourly_od_count_dict[week_daytype][hour][origin] = {}
+                            destination = (origin + 1) % len(zone_ids)
+                            while destination in kwargs["exclude_zones"]:
+                                destination = (destination + 1) % len(zone_ids)
+                            hourly_od_count_dict[week_daytype][hour][origin][destination] = kwargs["count"]
 
     return hourly_od_count_dict
 
@@ -143,7 +162,7 @@ def get_hourly_od_from_count(
                     else:
                         od_df[origin][destination] = 0
 
-    return pd.DataFrame(od_df)
+    return pd.DataFrame(od_df).T
 
 
 def get_day_slot_od_from_count(
@@ -167,7 +186,7 @@ def get_day_slot_od_from_count(
                 else:
                     od_df[origin][destination] = 0
 
-    return pd.DataFrame(od_df)
+    return pd.DataFrame(od_df).T
 
 
 def generate_od_from_week_config(

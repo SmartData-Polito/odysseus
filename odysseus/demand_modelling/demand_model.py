@@ -13,7 +13,8 @@ class DemandModel:
             self,
             city_name,
             data_source_id,
-            demand_model_config
+            demand_model_config,
+            grid_crs
     ):
 
         self.demand_model_config = demand_model_config
@@ -22,6 +23,13 @@ class DemandModel:
         self.data_source_id = data_source_id
 
         self.city_scenario_folder = self.demand_model_config["city_scenario_folder"]
+        self.city_scenario_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "city_scenario",
+            "city_scenarios",
+            self.city_name,
+            self.city_scenario_folder
+        )
         self.demand_model_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
             "demand_modelling",
@@ -40,6 +48,11 @@ class DemandModel:
         self.city_scenario.read_city_scenario_for_demand_model()
         self.bookings_train = self.city_scenario.bookings_train
         self.grid = self.city_scenario.grid
+        self.grid_matrix = self.city_scenario.grid_matrix
+        self.closest_valid_zone = self.city_scenario.closest_valid_zone
+        self.bin_side_length = self.city_scenario.bin_side_length
+        self.grid_crs = grid_crs
+        self.avg_speed_kmh_mean = self.city_scenario.avg_speed_kmh_mean
 
         self.max_out_flow = float('-inf')
         self.max_in_flow = float('-inf')

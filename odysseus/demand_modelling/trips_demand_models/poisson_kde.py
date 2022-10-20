@@ -22,7 +22,8 @@ class PoissonKdeDemandModel(DemandModel):
             self,
             city_name,
             data_source_id,
-            demand_model_config
+            demand_model_config,
+            grid_crs
     ):
 
         super(PoissonKdeDemandModel, self).__init__(city_name, data_source_id, demand_model_config)
@@ -30,6 +31,7 @@ class PoissonKdeDemandModel(DemandModel):
         self.request_rates = dict()
         self.avg_request_rate = -1
         self.trip_kdes = dict()
+        self.grid_crs = grid_crs
 
         self.kde_bw = float(self.demand_model_config["kde_bandwidth"])
 
@@ -87,8 +89,46 @@ class PoissonKdeDemandModel(DemandModel):
         return self.trip_kdes
 
     def fit_model(self):
+
         self.get_requests_rates()
         self.get_trip_kdes()
+
+    def generate_booking_request(self, start_datetime, timeout):
+
+        booking_request_dict = dict()
+
+        booking_request_dict["ia_timeout"] = timeout
+        booking_request_dict["start_time"] = start_datetime
+        booking_request_dict["date"] = start_datetime.date()
+        booking_request_dict["weekday"] = start_datetime.weekday()
+        booking_request_dict["daytype"] = get_daytype_from_weekday(booking_request_dict["weekday"])
+        booking_request_dict["hour"] = start_datetime.hour
+
+        current_trip_kde = self.trip_kdes[booking_request_dict["daytype"]][booking_request_dict["hour"]]
+
+        trip_sample = current_trip_kde.sample()
+        origin_i = base_round(trip_sample[0][0], len(self.grid_matrix.index) - 1)
+        origin_j = base_round(trip_sample[0][1], len(self.grid_matrix.columns) - 1)
+        destination_i = base_round(trip_sample[0][2], len(self.grid_matrix.index) - 1)
+        destination_j = base_round(trip_sample[0][3], len(self.grid_matrix.columns) - 1)
+
+        booking_request_dict["origin_id"] = self.grid_matrix.loc[origin_i, origin_j]
+        booking_request_dict["destination_id"] = self.grid_matrix.loc[destination_i, destination_j]
+        booking_request_dict["origin_id"] = self.closest_valid_zone.loc[booking_request_dict["origin_id"]]
+        booking_request_dict["destination_id"] = self.closest_valid_zone.loc[booking_request_dict["destination_id"]]
+
+        booking_request_dict = get_distances(
+            booking_request_dict, self.grid, self.bin_side_length, self.grid_crs
+        )
+
+        booking_request_dict["duration"] = booking_request_dict["driving_distance"] / (
+            self.avg_speed_kmh_mean / 3.6
+        )
+        booking_request_dict["end_time"] = start_datetime + datetime.timedelta(
+            seconds=booking_request_dict["duration"]
+        )
+
+        return booking_request_dict
 
     def generate_booking_requests_list(self, start_datetime, end_datetime):
 

@@ -58,7 +58,7 @@ class VirtualODDataSource:
         zone_ids = np.ravel(grid_matrix.values)
 
         hourly_od_count_dict = generate_hourly_od_count_dict(
-            week_config, zone_ids, args.od_params[0], count=args.od_params[1]
+            week_config, zone_ids, args.od_params[0], count=args.od_params[1], exclude_zones=args.od_params[2]
         )
 
         od_matrices_by_dayslots, od_matrices_by_hour = generate_od_from_week_config(

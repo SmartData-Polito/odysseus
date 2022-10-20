@@ -310,11 +310,13 @@ class SimOutput():
 			if key.startswith("fraction"):
 				self.sim_stats["percentage" + key[8:]] = self.sim_stats[key] * 100
 
-		insert_scenario_costs(self.sim_stats, self.supply_model_conf, vehicle_cost, charging_station_costs)
-		insert_sim_costs(self.sim_stats, self.supply_model_conf, fuel_costs, administrative_cost_conf, vehicle_cost)
-		self.sim_stats.loc[
-			"profit"
-		] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - self.sim_stats["sim_cost"]
+		if self.sim_general_conf["save_history"]:
+
+			insert_scenario_costs(self.sim_stats, self.supply_model_conf, vehicle_cost, charging_station_costs)
+			insert_sim_costs(self.sim_stats, self.supply_model_conf, fuel_costs, administrative_cost_conf, vehicle_cost)
+			self.sim_stats.loc[
+				"profit"
+			] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - self.sim_stats["sim_cost"]
 
 	def save_output(self, results_path, sim_general_conf, sim_scenario_conf):
 

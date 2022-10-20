@@ -2,7 +2,10 @@ class Vehicle:
 
 	def __init__(self, vehicle_config, energy_mix_object):
 
+		self.vehicle_config = vehicle_config
+
 		self.engine_type = vehicle_config["engine_type"] #gasoline, diesel, lpg, gnc, electric
+		self.profile_type = vehicle_config["profile_type"] #needed for custom profiles
 		self.consumption = vehicle_config["consumption"] #km/l, km/kWh
 		self.capacity = vehicle_config["fuel_capacity"] #kWh (electric), Liter (gasoline,diesel,lpg), kilograms (gnc)
 		self.n_seats = vehicle_config["n_seats"]
@@ -63,8 +66,7 @@ class Vehicle:
 			self.charging_efficiency = 80 # %
 			self.supported_charge = vehicle_config["max_charg_power"]
 
-
-	def get_charging_time_from_perc(self, actual_level_perc, flow_amount, profile , beta=100):
+	def get_charging_time_from_perc(self, actual_level_perc, flow_amount, profile, beta=100):
 		# flow_amount is generalized to represent the amount of fuel
 		# loaded in the vehicle per unit of time
 		# electric: kW (3.3,7.4,11,22,43,50,120)
@@ -78,15 +80,20 @@ class Vehicle:
 				power_output = flow_amount / 1000
 			capacity_left = ((beta - actual_level_perc) / 100) * self.capacity
 			return (capacity_left / (power_output * (self.charging_efficiency / 100))) * 3600
-		elif self.engine_type in ["gasoline", "diesel", "lpg","cng"]:
-			flow_rate = flow_amount
-			capacity_left = ((beta - actual_level_perc)/100) * self.capacity
-			return (capacity_left/flow_rate) * 60
+
+		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
+			if profile == "":
+				flow_rate = flow_amount
+				capacity_left = ((beta - actual_level_perc)/100) * self.capacity
+				return (capacity_left/flow_rate) * 60
+			elif profile == "fixed_duration":
+				return self.vehicle_config["fixed_charging_duration"]
 
 	def get_percentage_from_charging_time(self, charging_time, flow_amount, profile):
+
 		# flow_amount is generalized to represent the amount of fuel
 		# loaded in the vehicle per unit of time
-		# electric: kW (3.3,7.4,11,22,43,50,120)
+		# electric: kW (3.3, 7.4, 11, 22, 43, 50, 120)
 		# gasoline,diesel,lpg: liter/min (between 30-50)
 		# gnc: kg/min (between 30-70)
 

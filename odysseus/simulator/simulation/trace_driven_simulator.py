@@ -38,3 +38,5 @@ class TraceDrivenSim (SharedMobilitySim):
                     self.env, self.sim_input, self.vehicles_list, booking_request_dict
                 )
                 self.process_booking_request(booking_request)
+
+                # print(booking_request_dict["start_time"])

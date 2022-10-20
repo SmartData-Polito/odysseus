@@ -113,10 +113,9 @@ class ServiceStations:
 
         self.get_station_distances()
 
-    def init_charging_poles_from_map_config(self, supply_model_path):
+    def init_charging_poles_from_map_config(self, n_charging_poles_by_zone):
 
-        with open(os.path.join(supply_model_path, "n_charging_poles_by_zone.json"), "r") as f:
-            self.n_charging_poles_by_zone = json.load(f)
+        self.n_charging_poles_by_zone = n_charging_poles_by_zone
         self.get_station_distances()
         self.n_charging_zones = len(self.n_charging_poles_by_zone)
         for zone_id in self.n_charging_poles_by_zone:

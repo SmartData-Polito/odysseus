@@ -58,13 +58,13 @@ parser.add_argument(
 
 parser.set_defaults(
     read=False,
-    city="my_city",
+    city="my_city_1X5_0",
     data_source_id="my_data_source",
-    week_slots_type="all_week_days",
+    week_slots_type="generic_day",
     day_slots_type="generic_hour",
-    n_hours=(24, 24),
-    grid_params=(2, 2, 500),
-    od_params=("uniform", 1, ),
+    n_hours=(24 * 7, 24 * 7),
+    grid_params=(1, 5, 500),
+    od_params=("uniform_single_destination", 1, (4, )),
 )
 
 args = parser.parse_args()
@@ -83,6 +83,8 @@ else:
     print("Reading OD..")
     od_matrices_by_hour, week_config, grid_config = od_data_source.load_norm()
     grid_matrix = get_grid_matrix_from_config(grid_config)
+
+print(grid_matrix)
 
 zone_ids = np.ravel(grid_matrix.values)
 

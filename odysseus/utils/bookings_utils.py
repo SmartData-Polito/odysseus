@@ -108,3 +108,13 @@ def get_grid_indexes(grid_matrix, bookings, zone_ids):
 		bookings.loc[bookings.destination_id == zone, "destination_i"] = zone_coords_dict[zone][0]
 		bookings.loc[bookings.destination_id == zone, "destination_j"] = zone_coords_dict[zone][1]
 	return bookings
+
+
+def base_round(x, base):
+	if x < 0:
+		return 0
+	elif x > base:
+		return base
+	else:
+		return round(x)
+

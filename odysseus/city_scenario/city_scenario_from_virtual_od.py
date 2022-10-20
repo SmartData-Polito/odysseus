@@ -1,3 +1,7 @@
+import json
+import os
+import pickle
+
 import pytz
 
 import shapely
@@ -34,16 +38,31 @@ class CityScenarioFromOD(AbstractCityScenario):
         self.trips_origins_test = pd.DataFrame()
         self.trips_destinations_test = pd.DataFrame()
 
+        self.norm_od_matrices_path = os.path.join(
+            root_data_path, self.city_name, "norm", "od_matrices", self.data_source_id
+        )
+
+        with open(os.path.join(self.norm_od_matrices_path, "grid_config.json"), "r") as f:
+            self.grid_config = json.load(f)
+
+        with open(os.path.join(self.norm_od_matrices_path, "week_config.json"), "r") as f:
+            self.week_config = json.load(f)
+
+        self.od_matrices = dict()
+        for week_slot in self.week_config["week_slots"].keys():
+            self.od_matrices[week_slot] = dict()
+            for day_slot in self.week_config["day_slots"][week_slot]:
+                self.od_matrices[week_slot][day_slot] = pd.read_csv(
+                    os.path.join(
+                        self.norm_od_matrices_path,
+                        "_".join([week_slot, day_slot])
+                    ) + ".csv", index_col=0
+                )
+
         self.init_train_test()
         self.create_squared_city_grid(
-            max(
-                self.bookings_train.origin_j.max(), self.bookings_test.origin_j.max(),
-                self.bookings_train.destination_j.max(), self.bookings_test.destination_j.max(),
-            ) + 1,
-            max(
-                self.bookings_train.origin_i.max(), self.bookings_test.origin_i.max(),
-                self.bookings_train.destination_i.max(), self.bookings_test.destination_i.max(),
-            ) + 1,
+            self.grid_config["n_cols"],
+            self.grid_config["n_rows"],
             self.bin_side_length
         )
 
@@ -186,3 +205,12 @@ class CityScenarioFromOD(AbstractCityScenario):
             ), axis=1
         )
         self.bookings_test = self.get_input_bookings_filtered(self.bookings_test).dropna()
+
+    def save_virtual_od_results(self):
+
+        os.makedirs(self.city_scenario_path, exist_ok=True)
+
+        print(self.od_matrices)
+
+        with open(os.path.join(self.city_scenario_path, "od_matrices.pickle"), "wb") as f:
+            pickle.dump(self.od_matrices, f)

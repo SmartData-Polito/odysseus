@@ -278,7 +278,7 @@ class EFFCS_SimOutputPlotter ():
 		plt.yticks([])
 		self.grid.plot(color="white", edgecolor="black", ax=ax)
 
-		self.grid.dropna(subset=[col]).plot(column=col, ax=ax, legend=True)
+		self.grid.dropna(subset=[col]).plot(column=col, edgecolor="white", ax=ax, legend=True)
 		plt.xlabel(None)
 		plt.xticks([])
 		plt.ylabel(None)

@@ -11,6 +11,7 @@ from odysseus.path_config.path_config import root_data_path
 def generate_booking_requests_list(
         od_matrices, week_config, start_datetime, end_datetime
 ):
+
     booking_requests_list = list()
     current_datetime = start_datetime
     current_hour = current_datetime.hour

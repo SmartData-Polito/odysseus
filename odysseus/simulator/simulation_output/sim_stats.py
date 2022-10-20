@@ -37,6 +37,12 @@ class SimStats():
 			self.sim_stats.loc["tot_n_charging_poles"] * 3.7
 		)
 
+		self.sim_stats.loc["n_booking_reqs"] = \
+			sim.n_booking_requests
+
+		self.sim_stats.loc["n_bookings"] = \
+			sim.n_bookings
+
 		self.sim_stats.loc["n_same_zone_trips"] = \
 			sim.n_same_zone_trips
 
@@ -48,16 +54,6 @@ class SimStats():
 
 		self.sim_stats.loc["n_deaths"] = \
 			sim.n_deaths
-
-		self.sim_stats["n_booking_reqs"] = \
-			self.sim_stats["n_same_zone_trips"]\
-			+ self.sim_stats["n_not_same_zone_trips"]\
-			+ self.sim_stats["n_no_close_vehicles"]\
-			+ self.sim_stats["n_deaths"]
-
-		self.sim_stats["n_bookings"] = \
-			self.sim_stats["n_same_zone_trips"]\
-			+ self.sim_stats["n_not_same_zone_trips"]
 
 		self.sim_stats["n_unsatisfied"] = \
 			self.sim_stats["n_no_close_vehicles"]\

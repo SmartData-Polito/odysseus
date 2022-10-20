@@ -1,10 +1,10 @@
 import os
 import argparse
-import datetime
+import pickle
 
-from odysseus.demand_modelling.demand_model import DemandModel
-from odysseus.demand_modelling.demand_models.poisson_kde import PoissonKdeDemandModel
-from odysseus.demand_modelling.demand_models.hourly_ods_count import HourlyODsCountDemandModel
+from odysseus.demand_modelling.trips_demand_models.poisson_kde import PoissonKdeDemandModel
+from odysseus.demand_modelling.trips_demand_models.hourly_ods_count import HourlyODsCountDemandModel
+from odysseus.demand_modelling.od_demand_models.od_demand_model import ODmatricesDemandModel
 
 from odysseus.simulator.simulation_input.sim_config_grid import SimConfGrid
 
@@ -57,24 +57,38 @@ demand_model_configs_list = SimConfGrid(demand_model_configs_grid).conf_list
 
 for demand_model_config in demand_model_configs_list:
 
+    if demand_model_config["city"].startswith("my_city"):
+        grid_crs = "epsg:3857"
+    else:
+        grid_crs = "epsg:4326"
+
     demand_model = None
 
     if demand_model_config["demand_model_type"] == "hourly_ods_count":
         demand_model = HourlyODsCountDemandModel(
             demand_model_config["city"],
             demand_model_config["data_source_id"],
-            demand_model_config
+            demand_model_config,
+            grid_crs
         )
     elif demand_model_config["demand_model_type"] == "poisson_kde":
         demand_model = PoissonKdeDemandModel(
             demand_model_config["city"],
             demand_model_config["data_source_id"],
-            demand_model_config
+            demand_model_config,
+            grid_crs
+        )
+    elif demand_model_config["demand_model_type"] == "od_matrices":
+        demand_model = ODmatricesDemandModel(
+            demand_model_config["city"],
+            demand_model_config["data_source_id"],
+            demand_model_config,
+            grid_crs
         )
 
     demand_model.fit_model()
-    # booking_requests_list = demand_model.generate_booking_requests_list(
-    #     datetime.datetime(2022, 1, 1),
-    #     datetime.datetime(2022, 1, 2),
-    # )
     demand_model.save_results()
+    pickle.dump(
+        demand_model,
+        open(os.path.join(demand_model.demand_model_path, "demand_model.pickle"), "wb")
+    )

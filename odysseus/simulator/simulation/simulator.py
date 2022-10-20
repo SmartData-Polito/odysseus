@@ -54,6 +54,7 @@ class SharedMobilitySim:
         self.sim_no_close_vehicle_requests = []
 
         self.n_booking_requests = 0
+        self.n_bookings = 0
         self.n_same_zone_trips = 0
         self.n_not_same_zone_trips = 0
         self.n_no_close_vehicles = 0
@@ -136,7 +137,7 @@ class SharedMobilitySim:
         self.tot_mobility_duration += booking_dict["duration"]
 
         if self.sim_input.supply_model_conf["relocation"] \
-                and self.sim_input.supply_model_conf["relocation_strategy"] in ["predictive"]:
+                and self.sim_input.supply_model_conf["relocation_strategy"] in ["predictive", "proactive"]:
             self.relocation_strategy.update_current_hour_stats(booking_dict)
 
         if "save_history" in self.sim_input.sim_general_conf:
@@ -195,6 +196,7 @@ class SharedMobilitySim:
         available_vehicle_flag_not_same_zone = flags_return_dict["available_vehicle_flag_not_same_zone"]
 
         if found_vehicle_flag:
+            self.n_bookings += 1
             booking_request_dict = add_consumption_emission_info(
                 booking_request_dict, self.vehicles_list[chosen_vehicle_id]
             )

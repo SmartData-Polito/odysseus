@@ -121,7 +121,6 @@ for supply_model_config in supply_model_configs_list:
         supply_model_config["city_scenario_folder"],
         supply_model_config["supply_model_folder"],
         supply_model_config,
-        init_from_map_json_config=False
     )
     supply_model.init_vehicles()
     supply_model.init_charging_poles()

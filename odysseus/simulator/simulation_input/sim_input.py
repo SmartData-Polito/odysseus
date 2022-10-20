@@ -39,7 +39,7 @@ class SimInput:
 		self.distance_matrix = pickle.Unpickler(open(os.path.join(city_scenario_path, "distance_matrix.pickle"), "rb")).load()
 		self.closest_zones = pickle.Unpickler(open(os.path.join(city_scenario_path, "closest_zones.pickle"), "rb")).load()
 
-		self.grid_crs = self.grid.crs
+		self.grid_crs = str(self.grid.crs)
 
 		self.start = datetime.datetime(
 			self.sim_general_conf["year"],
@@ -86,6 +86,7 @@ class SimInput:
 			self.booking_requests_list = self.get_booking_requests_list()
 
 		elif self.sim_general_conf["sim_technique"] == "eventG":
+			self.demand_model = pickle.Unpickler(open(os.path.join(demand_model_path, "demand_model.pickle"), "rb")).load()
 			self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
 			self.avg_request_rate = pd.DataFrame(self.request_rates.values()).mean().mean()
 			self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
@@ -95,48 +96,45 @@ class SimInput:
 			self.rate_ratio = self.desired_avg_rate / self.avg_request_rate
 			self.demand_model_conf["requests_rate_factor"] = self.rate_ratio
 
-		# supply
-
-		if self.supply_model_conf["vehicles_config_mode"] == "vehicles_zones":
-			self.n_vehicles_sim = len(self.supply_model_conf["vehicles_zones"])
-
-		if "n_vehicles" in self.supply_model_conf.keys():
-			self.n_vehicles_sim = self.supply_model_conf["n_vehicles"]
-		elif "n_vehicles_factor" in self.supply_model_conf.keys():
-			self.n_vehicles_sim = int(
-				self.n_vehicles_original * self.supply_model_conf["n_vehicles_factor"]
-			)
-		elif "fleet_load_factor" in self.supply_model_conf.keys():
-			self.n_vehicles_sim = int(
-				self.demand_model_conf["n_requests"] / self.supply_model_conf["fleet_load_factor"]
-			)
-
-		if "tot_n_charging_poles" in self.supply_model_conf.keys():
-			self.tot_n_charging_poles = self.supply_model_conf["tot_n_charging_poles"]
-		elif "n_poles_n_vehicles_factor" in self.supply_model_conf.keys():
-			self.tot_n_charging_poles = abs(
-					self.n_vehicles_sim * self.supply_model_conf["n_poles_n_vehicles_factor"]
-			)
-		elif self.supply_model_conf["cps_placement_policy"] == "old_manual":
-			self.tot_n_charging_poles = len(self.supply_model_conf["cps_zones"]) * 4
-
-		if self.supply_model_conf["distributed_cps"]:
-			if "cps_zones_percentage" in self.supply_model_conf and self.supply_model_conf["cps_placement_policy"] != "real_positions":
-				self.n_charging_zones = int(self.supply_model_conf["cps_zones_percentage"] * len(self.valid_zones))
-			elif "n_charging_zones" in self.supply_model_conf and self.supply_model_conf["cps_placement_policy"] != "real_positions":
-				if self.supply_model_conf["n_charging_zones"] > len(self.valid_zones):
-					self.supply_model_conf["n_charging_zones"] = len(self.valid_zones)
-				self.n_charging_zones = self.supply_model_conf["n_charging_zones"]
-				self.supply_model_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
-			elif "cps_zones" in self.supply_model_conf and self.supply_model_conf["cps_placement_policy"] != "real_positions":
-				self.n_charging_zones = len(self.supply_model_conf["cps_zones"])
-			elif self.supply_model_conf["cps_placement_policy"] == "real_positions":
-				self.n_charging_zones = 0
-		elif self.supply_model_conf["battery_swap"]:
-			self.n_charging_zones = 0
-			self.tot_n_charging_poles = 0
-
-		self.supply_model_conf["n_charging_zones"] = self.n_charging_zones
+		# # supply
+		#
+		# if self.supply_model_conf["vehicles_config_mode"] == "vehicles_zones":
+		# 	self.n_vehicles_sim = len(self.supply_model_conf["vehicles_zones"])
+		#
+		# if "n_vehicles" in self.supply_model_conf.keys():
+		# 	self.n_vehicles_sim = self.supply_model_conf["n_vehicles"]
+		# elif "n_vehicles_factor" in self.supply_model_conf.keys():
+		# 	self.n_vehicles_sim = int(
+		# 		self.n_vehicles_original * self.supply_model_conf["n_vehicles_factor"]
+		# 	)
+		# elif "fleet_load_factor" in self.supply_model_conf.keys():
+		# 	self.n_vehicles_sim = int(
+		# 		self.demand_model_conf["n_requests"] / self.supply_model_conf["fleet_load_factor"]
+		# 	)
+		#
+		# if "tot_n_charging_poles" in self.supply_model_conf.keys():
+		# 	self.tot_n_charging_poles = self.supply_model_conf["tot_n_charging_poles"]
+		# elif "n_poles_n_vehicles_factor" in self.supply_model_conf.keys():
+		# 	self.tot_n_charging_poles = abs(
+		# 			self.n_vehicles_sim * self.supply_model_conf["n_poles_n_vehicles_factor"]
+		# 	)
+		#
+		# if self.supply_model_conf["distributed_cps"]:
+		# 	if "cps_zones_percentage" in self.supply_model_conf and self.supply_model_conf["cps_placement_policy"] != "real_positions":
+		# 		self.n_charging_zones = int(self.supply_model_conf["cps_zones_percentage"] * len(self.valid_zones))
+		# 	elif "n_charging_zones" in self.supply_model_conf and self.supply_model_conf["cps_placement_policy"] != "real_positions":
+		# 		if self.supply_model_conf["n_charging_zones"] > len(self.valid_zones):
+		# 			self.supply_model_conf["n_charging_zones"] = len(self.valid_zones)
+		# 		self.n_charging_zones = self.supply_model_conf["n_charging_zones"]
+		# 		self.supply_model_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
+		# 	elif "cps_zones" in self.supply_model_conf and self.supply_model_conf["cps_placement_policy"] != "real_positions":
+		# 		self.n_charging_zones = len(self.supply_model_conf["cps_zones"])
+		#
+		# elif self.supply_model_conf["battery_swap"]:
+		# 	self.n_charging_zones = 0
+		# 	self.tot_n_charging_poles = 0
+		#
+		# self.supply_model_conf["n_charging_zones"] = self.n_charging_zones
 
 		self.n_charging_poles_by_zone = {}
 		self.vehicles_soc_dict = {}
@@ -153,20 +151,24 @@ class SimInput:
 
 		else:
 
-			self.supply_model_conf.update(
-				city=self.city,
-				data_source_id=self.data_source_id,
-				n_vehicles=self.n_vehicles_sim,
-				tot_n_charging_poles=self.tot_n_charging_poles,
-				n_charging_zones=self.n_charging_zones,
-				city_scenario_folder=self.city_scenario_folder,
-			)
+			# self.supply_model_conf.update(
+			# 	city=self.city,
+			# 	data_source_id=self.data_source_id,
+			# 	n_vehicles=self.n_vehicles_sim,
+			# 	tot_n_charging_poles=self.tot_n_charging_poles,
+			# 	n_charging_zones=self.n_charging_zones,
+			# 	city_scenario_folder=self.city_scenario_folder,
+			# )
 
 			self.supply_model = SupplyModel(
 				self.city, self.data_source_id,
 				self.city_scenario_folder, None,
 				self.supply_model_conf
 			)
+
+			self.n_vehicles_sim = self.supply_model.n_vehicles_sim
+			self.tot_n_charging_poles = self.supply_model.tot_n_charging_poles
+			self.n_charging_zones = self.supply_model.n_charging_zones
 
 	def get_booking_requests_list(self):
 
