@@ -11,20 +11,20 @@ class SimInput:
 
 	def __init__(self, conf_dict):
 
-		self.sim_general_conf = conf_dict["sim_general_conf"]
-		self.demand_model_conf = conf_dict["demand_model_conf"]
-		self.supply_model_conf = conf_dict["supply_model_conf"]
+		self.sim_general_config = conf_dict["sim_general_conf"]
+		self.demand_model_config = conf_dict["demand_model_conf"]
+		self.supply_model_config = conf_dict["supply_model_conf"]
 		self.city_scenario_folder = conf_dict["city_scenario_folder"]
 		supply_model = conf_dict["supply_model_object"]
 
-		self.city = self.sim_general_conf["city"]
-		self.data_source_id = self.sim_general_conf["data_source_id"]
+		self.city = self.sim_general_config["city"]
+		self.data_source_id = self.sim_general_config["data_source_id"]
 
 		city_scenario_path = os.path.join(
 			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
 			"city_scenario",
 			"city_scenarios",
-			self.sim_general_conf["city"],
+			self.sim_general_config["city"],
 			self.city_scenario_folder
 		)
 
@@ -42,19 +42,19 @@ class SimInput:
 		self.grid_crs = str(self.grid.crs)
 
 		self.start = datetime.datetime(
-			self.sim_general_conf["year"],
-			self.sim_general_conf["month_start"],
+			self.sim_general_config["year"],
+			self.sim_general_config["month_start"],
 			1, tzinfo=pytz.UTC
 		)
-		if self.sim_general_conf["month_end"] == 12:
+		if self.sim_general_config["month_end"] == 12:
 			self.end = datetime.datetime(
-				self.sim_general_conf["year"] + 1,
+				self.sim_general_config["year"] + 1,
 				1, 1, tzinfo=pytz.UTC
 			)
 		else:
 			self.end = datetime.datetime(
-				self.sim_general_conf["year"],
-				self.sim_general_conf["month_end"] + 1,
+				self.sim_general_config["year"],
+				self.sim_general_config["month_end"] + 1,
 				1, tzinfo=pytz.UTC
 			)
 		assert self.end > self.start
@@ -77,64 +77,27 @@ class SimInput:
 			os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
 			"demand_modelling",
 			"city_demand_models",
-			self.sim_general_conf["city"],
+			self.sim_general_config["city"],
 			self.city_scenario_folder
 		)
 
-		if self.sim_general_conf["sim_technique"] == "traceB":
-			self.bookings = pickle.Unpickler(open(os.path.join(city_scenario_path, "bookings_test.pickle"), "rb")).load()
+		self.demand_model = pickle.Unpickler(open(os.path.join(demand_model_path, "demand_model.pickle"), "rb")).load()
+
+		if self.demand_model_config["demand_model_type"] == "trace":
+			self.booking_requests_test = pickle.Unpickler(open(os.path.join(city_scenario_path, "bookings_test.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
 
-		elif self.sim_general_conf["sim_technique"] == "eventG":
-			self.demand_model = pickle.Unpickler(open(os.path.join(demand_model_path, "demand_model.pickle"), "rb")).load()
+		elif self.demand_model_config["demand_model_type"] == "poisson_kde":
 			self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
 			self.avg_request_rate = pd.DataFrame(self.request_rates.values()).mean().mean()
 			self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
+			self.demand_model.requests_rate_factor = self.demand_model_config["requests_rate_factor"]
 
-		if "n_requests" in self.supply_model_conf.keys():
-			self.desired_avg_rate = self.supply_model_conf["n_requests"] / self.total_days / 24 / 3600
+
+		if "n_requests" in self.supply_model_config.keys():
+			self.desired_avg_rate = self.supply_model_config["n_requests"] / self.total_days / 24 / 3600
 			self.rate_ratio = self.desired_avg_rate / self.avg_request_rate
-			self.demand_model_conf["requests_rate_factor"] = self.rate_ratio
-
-		# # supply
-		#
-		# if self.supply_model_conf["vehicles_config_mode"] == "vehicles_zones":
-		# 	self.n_vehicles_sim = len(self.supply_model_conf["vehicles_zones"])
-		#
-		# if "n_vehicles" in self.supply_model_conf.keys():
-		# 	self.n_vehicles_sim = self.supply_model_conf["n_vehicles"]
-		# elif "n_vehicles_factor" in self.supply_model_conf.keys():
-		# 	self.n_vehicles_sim = int(
-		# 		self.n_vehicles_original * self.supply_model_conf["n_vehicles_factor"]
-		# 	)
-		# elif "fleet_load_factor" in self.supply_model_conf.keys():
-		# 	self.n_vehicles_sim = int(
-		# 		self.demand_model_conf["n_requests"] / self.supply_model_conf["fleet_load_factor"]
-		# 	)
-		#
-		# if "tot_n_charging_poles" in self.supply_model_conf.keys():
-		# 	self.tot_n_charging_poles = self.supply_model_conf["tot_n_charging_poles"]
-		# elif "n_poles_n_vehicles_factor" in self.supply_model_conf.keys():
-		# 	self.tot_n_charging_poles = abs(
-		# 			self.n_vehicles_sim * self.supply_model_conf["n_poles_n_vehicles_factor"]
-		# 	)
-		#
-		# if self.supply_model_conf["distributed_cps"]:
-		# 	if "cps_zones_percentage" in self.supply_model_conf and self.supply_model_conf["cps_placement_policy"] != "real_positions":
-		# 		self.n_charging_zones = int(self.supply_model_conf["cps_zones_percentage"] * len(self.valid_zones))
-		# 	elif "n_charging_zones" in self.supply_model_conf and self.supply_model_conf["cps_placement_policy"] != "real_positions":
-		# 		if self.supply_model_conf["n_charging_zones"] > len(self.valid_zones):
-		# 			self.supply_model_conf["n_charging_zones"] = len(self.valid_zones)
-		# 		self.n_charging_zones = self.supply_model_conf["n_charging_zones"]
-		# 		self.supply_model_conf["cps_zones_percentage"] = 1 / len(self.valid_zones)
-		# 	elif "cps_zones" in self.supply_model_conf and self.supply_model_conf["cps_placement_policy"] != "real_positions":
-		# 		self.n_charging_zones = len(self.supply_model_conf["cps_zones"])
-		#
-		# elif self.supply_model_conf["battery_swap"]:
-		# 	self.n_charging_zones = 0
-		# 	self.tot_n_charging_poles = 0
-		#
-		# self.supply_model_conf["n_charging_zones"] = self.n_charging_zones
+			self.demand_model_config["requests_rate_factor"] = self.rate_ratio
 
 		self.n_charging_poles_by_zone = {}
 		self.vehicles_soc_dict = {}
@@ -151,31 +114,18 @@ class SimInput:
 
 		else:
 
-			# self.supply_model_conf.update(
-			# 	city=self.city,
-			# 	data_source_id=self.data_source_id,
-			# 	n_vehicles=self.n_vehicles_sim,
-			# 	tot_n_charging_poles=self.tot_n_charging_poles,
-			# 	n_charging_zones=self.n_charging_zones,
-			# 	city_scenario_folder=self.city_scenario_folder,
-			# )
-
 			self.supply_model = SupplyModel(
 				self.city, self.data_source_id,
 				self.city_scenario_folder, None,
-				self.supply_model_conf
+				self.supply_model_config
 			)
-
-			self.n_vehicles_sim = self.supply_model.n_vehicles_sim
-			self.tot_n_charging_poles = self.supply_model.tot_n_charging_poles
-			self.n_charging_zones = self.supply_model.n_charging_zones
 
 	def get_booking_requests_list(self):
 
-		self.bookings["start_time"] = pd.to_datetime(self.bookings["start_time"])
-		self.bookings["end_time"] = pd.to_datetime(self.bookings["end_time"])
+		self.booking_requests_test["start_time"] = pd.to_datetime(self.booking_requests_test["start_time"])
+		self.booking_requests_test["end_time"] = pd.to_datetime(self.booking_requests_test["end_time"])
 
-		return self.bookings[[
+		return self.booking_requests_test[[
 			"origin_id",
 			"destination_id",
 			"start_time",
@@ -189,10 +139,16 @@ class SimInput:
 		]].dropna().to_dict("records")
 
 	def init_vehicles(self):
-		return self.supply_model.init_vehicles()
+		self.supply_model.init_vehicles()
+		self.n_vehicles_sim = self.supply_model.n_vehicles_sim
+		self.supply_model_config["n_vehicles_sim"] = self.n_vehicles_sim
 
 	def init_charging_poles(self):
-		return self.supply_model.init_charging_poles()
+		self.supply_model.init_charging_poles()
+		self.tot_n_charging_poles = self.supply_model.tot_n_charging_poles
+		self.supply_model_config["tot_n_charging_poles"] = self.tot_n_charging_poles
+		self.n_charging_zones = self.supply_model.n_charging_zones
+		self.supply_model_config["n_charging_zones"] = self.n_charging_zones
 
 	def init_relocation(self):
 		return self.supply_model.init_relocation()

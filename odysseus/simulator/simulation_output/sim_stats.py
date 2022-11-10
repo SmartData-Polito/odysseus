@@ -1,30 +1,34 @@
 import pandas as pd
 
 
-class SimStats():
+class SimStats:
 
 	def __init__ (self):
 
 		self.valid_zones = None
 		self.sim_general_conf = None
 		self.supply_model_conf = None
+		self.demand_model_config = None
 		self.grid = None
 		self.sim_stats = None
 
 	def get_stats_from_sim (self, sim):
 
 		self.valid_zones = sim.sim_input.valid_zones
-		self.sim_general_conf = sim.sim_input.sim_general_conf
-		self.supply_model_conf = sim.sim_input.supply_model_conf
-		self.grid = sim.sim_input.grid
+		self.sim_general_conf = sim.sim_input.sim_general_config
+		self.supply_model_conf = sim.sim_input.supply_model_config
+		self.demand_model_config = sim.sim_input.demand_model_config
 
-		# Sim Stats creation
+		self.grid = sim.sim_input.grid
 
 		self.sim_stats = pd.Series(name="sim_stats", dtype=object)
 
 		self.sim_stats = pd.concat([
 			self.sim_stats,
-			pd.Series(self.supply_model_conf)
+			pd.Series(self.sim_general_conf),
+			pd.Series(self.supply_model_conf),
+			pd.Series(self.demand_model_config),
+
 		])
 
 		self.sim_stats.loc["n_vehicles_sim"] = sim.sim_input.n_vehicles_sim
@@ -131,3 +135,5 @@ class SimStats():
 
 		for metrics, value in sim.sim_metrics.metrics_iter():
 			self.sim_stats.loc[metrics] = value
+
+		self.sim_stats["sim_exec_time_sec"] = sim.sim_exec_time_sec

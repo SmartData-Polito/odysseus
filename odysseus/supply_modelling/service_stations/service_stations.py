@@ -7,8 +7,9 @@ from odysseus.supply_modelling.service_stations.service_stations_utils import re
 
 class ServiceStations:
 
-    def __init__(self, city_name, grid, tot_n_charging_poles, n_charging_zones, grid_indexes_dict,
-                 bin_side_length):
+    def __init__(
+            self, city_name, grid, tot_n_charging_poles, n_charging_zones, grid_indexes_dict, bin_side_length
+    ):
 
         self.city_name = city_name
         self.grid = grid

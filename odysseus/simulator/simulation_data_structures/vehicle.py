@@ -7,11 +7,11 @@ class Vehicle(Vehicle_definition):
 
     def __init__(
             self, env, plate, start_zone, start_soc,
-            vehicle_config, energymix_conf, engine_type,
+            vehicle_config, energymix_conf,
             sim_start_time
     ):
 
-        if engine_type == "electric":
+        if vehicle_config["engine_type"] == "electric":
             energymix = energymix_conf
         else:
             energymix = {}
@@ -43,7 +43,9 @@ class Vehicle(Vehicle_definition):
             "zone": self.zone
         }
         self.status_dict_list.append(self.current_status)
+
         yield self.env.timeout(booking_request["duration"])
+
         fuel_consumed = self.distance_to_consumption(booking_request["driving_distance"]/1000)
         percentage = self.consumption_to_percentage(fuel_consumed)
         self.soc.get(percentage)

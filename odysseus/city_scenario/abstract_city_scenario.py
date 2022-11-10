@@ -111,7 +111,7 @@ class AbstractCityScenario:
         bookings["avg_speed"] = bookings["driving_distance"] / bookings["duration"]
         bookings["avg_speed_kmh"] = bookings.avg_speed * 3.6
 
-        bookings = filter_trips_v1(bookings)
+        # bookings = filter_trips_v1(bookings, self.city_name, self.data_source_id)
 
         return bookings
 
@@ -388,4 +388,6 @@ class AbstractCityScenario:
         self.grid = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "grid.pickle"), "rb")).load()
         self.grid_matrix = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "grid_matrix.pickle"), "rb")).load()
         self.bookings_train = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "bookings_train.pickle"), "rb")).load()
-        self.closest_valid_zones = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "closest_valid_zone.pickle"), "rb")).load()
+        self.closest_valid_zone = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "closest_valid_zone.pickle"), "rb")).load()
+        self.distance_matrix = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "distance_matrix.pickle"), "rb")).load()
+        self.numerical_params_dict = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "numerical_params_dict.pickle"), "rb")).load()

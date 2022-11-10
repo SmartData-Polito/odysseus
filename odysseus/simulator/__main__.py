@@ -43,7 +43,7 @@ parser.set_defaults(
     campaign_name="smartdata_test_0",
     conf_name="scenario_B1",
     city_scenario_folder="charging_zone",
-    sim_run_mode="single_run"
+    sim_run_mode="multiple_runs"
 )
 
 args = parser.parse_args()

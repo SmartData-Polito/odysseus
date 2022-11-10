@@ -6,14 +6,14 @@ from odysseus.utils.cost_utils import insert_sim_costs, insert_scenario_costs
 from odysseus.supply_modelling.cost_config import *
 
 
-class SimOutput():
+class SimOutput:
 
 	def __init__(self, sim):
 
 		self.valid_zones = sim.sim_input.valid_zones
 
-		self.sim_general_conf = sim.sim_input.sim_general_conf
-		self.supply_model_conf = sim.sim_input.supply_model_conf
+		self.sim_general_config = sim.sim_input.sim_general_config
+		self.supply_model_config = sim.sim_input.supply_model_config
 		self.grid = sim.sim_input.grid
 		self.grid = self.grid.loc[:, ~self.grid.columns.duplicated()]
 		self.n_charging_poles_by_zone = sim.sim_input.supply_model.n_charging_poles_by_zone
@@ -24,7 +24,7 @@ class SimOutput():
 		self.sim_stats = sim_stats_obj.get_stats_from_sim(sim)
 		self.sim_stats = sim_stats_obj.sim_stats
 
-		if self.sim_general_conf["save_history"]:
+		if self.sim_general_config["save_history"]:
 
 			self.sim_booking_requests = pd.DataFrame(sim.sim_booking_requests)
 			self.sim_bookings = pd.DataFrame(sim.sim_bookings)
@@ -303,17 +303,17 @@ class SimOutput():
 				zone_df["zone_id"] = key
 				self.zones_history = pd.concat([self.zones_history, zone_df], ignore_index=True)
 
-			if self.supply_model_conf["relocation"]:
+			if self.supply_model_config["relocation"]:
 				self.relocation_history = pd.DataFrame(sim.relocation_strategy.sim_scooter_relocations)
 
 		for key in self.sim_stats.index:
 			if key.startswith("fraction"):
 				self.sim_stats["percentage" + key[8:]] = self.sim_stats[key] * 100
 
-		if self.sim_general_conf["save_history"]:
+		if self.sim_general_config["save_history"]:
 
-			insert_scenario_costs(self.sim_stats, self.supply_model_conf, vehicle_cost, charging_station_costs)
-			insert_sim_costs(self.sim_stats, self.supply_model_conf, fuel_costs, administrative_cost_conf, vehicle_cost)
+			insert_scenario_costs(self.sim_stats, self.supply_model_config, vehicle_cost, charging_station_costs)
+			insert_sim_costs(self.sim_stats, self.supply_model_config, fuel_costs, administrative_cost_conf, vehicle_cost)
 			self.sim_stats.loc[
 				"profit"
 			] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - self.sim_stats["sim_cost"]

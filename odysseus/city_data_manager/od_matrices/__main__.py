@@ -58,13 +58,13 @@ parser.add_argument(
 
 parser.set_defaults(
     read=False,
-    city="my_city_1X5_0",
+    city="my_city_0_2X2",
     data_source_id="my_data_source",
     week_slots_type="generic_day",
     day_slots_type="generic_hour",
-    n_hours=(24 * 7, 24 * 7),
+    n_hours=(24 * 30, 24 * 30),
     grid_params=(1, 5, 500),
-    od_params=("uniform_single_destination", 1, (4, )),
+    od_params=("uniform_single_destination", 1, ()),
 )
 
 args = parser.parse_args()
@@ -94,17 +94,21 @@ test_start_time = train_end_time
 test_end_time = test_start_time + datetime.timedelta(hours=args.n_hours[1])
 
 if args.od_params[1] > 0:
+
     print("Generating trips..")
+
     train_booking_requests, test_booking_requests = generate_trips_from_od(
         args.city,
-        od_matrices_by_hour,
+        od_matrices_by_dayslots,
         week_config,
         grid_matrix,
         zone_ids,
+        od_data_source.distance_matrix,
         train_start_time,
         train_end_time,
         test_start_time,
         test_end_time,
+
     )
     print("Train trips shape:", train_booking_requests.shape)
     print("Test trips shape:", test_booking_requests.shape)

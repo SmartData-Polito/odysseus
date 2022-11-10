@@ -10,9 +10,10 @@ class HourlyODsCountDemandModel(DemandModel):
             self,
             city_name,
             data_source_id,
-            demand_model_config
+            demand_model_config,
+            grid_crs
     ):
-        super(HourlyODsCountDemandModel, self).__init__(city_name, data_source_id, demand_model_config)
+        super(HourlyODsCountDemandModel, self).__init__(city_name, data_source_id, demand_model_config, grid_crs)
         self.od_matrices = dict()
 
     def fit_model(self):

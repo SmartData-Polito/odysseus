@@ -68,10 +68,7 @@ class SupplyModel:
 
         self.initial_relocation_workers_positions = []
 
-        self.service_stations = ServiceStations(
-            city_name, self.grid, self.tot_n_charging_poles, self.n_charging_zones,
-            self.city_scenario.grid_indexes_dict, self.city_scenario.bin_side_length
-        )
+        self.service_stations = None
         self.zone_dict = dict()
         self.charging_stations_dict = dict()
 
@@ -85,8 +82,8 @@ class SupplyModel:
         if self.supply_model_conf["vehicles_config_mode"] == "sim_config":
 
             self.n_vehicles_sim = int(self.supply_model_conf["n_vehicles"])
-            self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
-            self.n_charging_zones = int(self.supply_model_conf["n_charging_zones"])
+            # self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
+            # self.n_charging_zones = int(self.supply_model_conf["n_charging_zones"])
 
             self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict = \
                 self.fleet.init_vehicles_from_fleet_size(
@@ -121,6 +118,14 @@ class SupplyModel:
 
             if self.supply_model_conf["stations_placement_config_mode"] == "sim_config":
 
+                assert "n_charging_zones" in self.supply_model_conf.keys()
+                self.n_charging_zones = self.supply_model_conf["n_charging_zones"]
+
+                self.service_stations = ServiceStations(
+                    self.city_name, self.grid, self.tot_n_charging_poles, self.n_charging_zones,
+                    self.city_scenario.grid_indexes_dict, self.city_scenario.bin_side_length
+                )
+
                 self.service_stations.init_charging_poles_from_policy(
                     self.supply_model_conf["cps_placement_policy"],
                     self.supply_model_conf["engine_type"],
@@ -128,6 +133,10 @@ class SupplyModel:
 
             elif self.supply_model_conf["stations_placement_config_mode"] == "n_charging_poles_by_zone":
 
+                self.service_stations = ServiceStations(
+                    self.city_name, self.grid, 0, 0,
+                    self.city_scenario.grid_indexes_dict, self.city_scenario.bin_side_length
+                )
                 self.service_stations.init_charging_poles_from_map_config(
                     dict(self.supply_model_conf["n_charging_poles_by_zone"])
                 )
@@ -177,9 +186,7 @@ class SupplyModel:
             json.dump(self.initial_relocation_workers_positions, f, sort_keys=True, indent=4)
 
     def init_for_simulation(
-            self, simpy_env, start,
-            station_conf, vehicle_conf,
-            engine_type, profile_type, vehicle_model_name
+            self, simpy_env, start, station_conf, vehicle_conf,
     ):
 
         self.simpy_env = simpy_env
@@ -192,19 +199,19 @@ class SupplyModel:
                 zone_n_cps = self.n_charging_poles_by_zone[zone_id]
                 if zone_n_cps > 0:
                     self.charging_stations_dict[zone_id] = ChargingStation(
-                        self.simpy_env, zone_n_cps, zone_id, station_conf, engine_type, profile_type, start
+                        self.simpy_env, zone_n_cps, zone_id, station_conf,
+                        vehicle_conf["engine_type"],
+                        self.supply_model_conf["profile_type"],
+                        start
                     )
                     self.real_n_charging_zones += zone_n_cps
 
         for i in range(self.n_vehicles_sim):
-            vehicle_conf[engine_type][vehicle_model_name]["profile_type"] = profile_type
-            vehicle_conf[engine_type][vehicle_model_name]["engine_type"] = engine_type
             if self.supply_model_conf["profile_type"] == "fixed_duration":
-                vehicle_conf[engine_type][vehicle_model_name]["fixed_charging_duration"]\
-                    = self.supply_model_conf["fixed_charging_duration"]
+                vehicle_conf["fixed_charging_duration"] = self.supply_model_conf["fixed_charging_duration"]
             vehicle_object = Vehicle(
                 self.simpy_env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
-                vehicle_conf[engine_type][vehicle_model_name], self.energy_mix, engine_type, start
+                vehicle_conf, self.energy_mix, start
             )
             self.vehicles_list.append(vehicle_object)
 

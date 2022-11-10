@@ -24,20 +24,23 @@ class SimBooking(SimEvent):
 
         # COMPUTING DISTANCES WITH GEOPANDAS INSIDE THE SIMULATION IS VERY EXPENSIVE
         # TODO -> solve case when euclidean_distance = 0 (two way trips)
-        self.booking_dict["euclidean_distance"] = self.booking_request.sim_input.distance_matrix.loc[
-            self.booking_dict["origin_id"], self.booking_dict["destination_id"]
-        ] + 1
-        self.booking_dict["driving_distance"] = self.booking_dict["euclidean_distance"] * orography_factor
-        #self.booking_dict = get_distances(self.booking_dict, grid)
-        #self.booking_dict = get_walking_distances(self.booking_dict, grid)
+        # self.booking_dict["euclidean_distance"] = self.booking_request.sim_input.distance_matrix.loc[
+        #     self.booking_dict["origin_id"], self.booking_dict["destination_id"]
+        # ] + 1
+        # self.booking_dict["driving_distance"] = self.booking_dict["euclidean_distance"] * orography_factor
+        # self.booking_dict = get_distances(self.booking_dict, grid)
+        # self.booking_dict = get_walking_distances(self.booking_dict, grid)
 
         self.booking_dict["start_soc"] = vehicle.soc.level
         self.booking_dict["plate"] = vehicle.plate
         self.vehicle = vehicle
 
-    def execute(self):
+    def execute_booking(self):
+
         self.chosen_origin.remove_vehicle(self.booking_dict["start_time"])
+
         yield self.env.process(self.vehicle.booking(self.booking_dict))
+
         self.chosen_destination.add_vehicle(
             self.booking_dict["start_time"] + datetime.timedelta(seconds=self.booking_dict['duration'])
         )

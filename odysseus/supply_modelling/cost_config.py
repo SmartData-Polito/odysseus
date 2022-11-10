@@ -1,5 +1,11 @@
 vehicle_cost = {
 	"gasoline": {
+		"my_vehicle": {
+			"leasing_cost": 0,
+			"washing_cost": 0,
+			"disinfection_cost": 0,
+			"cost_permin": 0
+		},
 		"Seat Leon 1.5 TSI 2020": {
 			# "retail_price": 16612.06,
 			"leasing_cost": 3024,

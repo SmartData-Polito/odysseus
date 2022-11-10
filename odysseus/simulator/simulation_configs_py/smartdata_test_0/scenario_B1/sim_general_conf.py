@@ -1,11 +1,10 @@
 sim_general_config_grid = {
 
     # City and data source parameters
-    "city": ["my_city_1X5_0"],
+    "city": ["my_city_1_1X5"],
     "data_source_id": ["my_data_source"],
 
     # Run parameters
-    "sim_technique": ["traceB"],
     "sim_scenario_name": ["scenario_B1"],
 
     "save_history": [True],
@@ -20,5 +19,6 @@ sim_general_config_grid = {
     "year": [2023],
     "month_start": [1],
     "month_end": [1],
+    "max_sim_hours": [24 * 30]
 
 }

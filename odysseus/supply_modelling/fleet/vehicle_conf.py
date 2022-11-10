@@ -1,6 +1,12 @@
 vehicle_conf = {
 
 	"gasoline": {
+		"my_vehicle": {
+			"engine_type": "gasoline",
+			"fuel_capacity": 0.1,
+			"consumption": 100,
+			"n_seats": 5,
+		},
 		"Seat Leon 1.5 TSI 2020": {
 			"engine_type": "gasoline",
 			"fuel_capacity": 45,

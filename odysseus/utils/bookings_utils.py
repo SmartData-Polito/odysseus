@@ -1,29 +1,43 @@
-import pandas as pd
+import datetime
 
 from odysseus.utils.geospatial_utils import get_od_distance
+from odysseus.utils.time_utils import get_daytype_from_week_config
 
 
 def create_booking_request_dict(
-		timeout, current_datetime, origin_id, destination_id
+		week_config, timeout, current_datetime, origin_id, destination_id, avg_speed_kmh_mean, distance_matrix,
+		max_duration=3000
 ):
 
 	booking_request_dict = dict()
 
 	booking_request_dict["ia_timeout"] = timeout
-	booking_request_dict["start_time"] = current_datetime.__str__()
-	booking_request_dict["date"] = current_datetime.date().__str__()
+	booking_request_dict["start_time"] = current_datetime
+	booking_request_dict["date"] = current_datetime.date()
 	current_hour = current_datetime.hour
 	current_weekday = current_datetime.weekday()
-	if current_weekday in [5, 6]:
-		current_daytype = "weekend"
-	else:
-		current_daytype = "weekday"
+	current_daytype = get_daytype_from_week_config(week_config, current_weekday)
 	booking_request_dict["hour"] = current_hour
 	booking_request_dict["weekday"] = current_weekday
 	booking_request_dict["daytype"] = current_daytype
 
 	booking_request_dict["origin_id"] = int(origin_id)
 	booking_request_dict["destination_id"] = int(destination_id)
+
+	booking_request_dict = get_distances(
+		booking_request_dict, distance_matrix,
+		booking_request_dict["origin_id"], booking_request_dict["destination_id"]
+	)
+
+	booking_request_dict["duration"] = booking_request_dict["driving_distance"] / (
+			avg_speed_kmh_mean / 3.6
+	)
+	if booking_request_dict["duration"] > max_duration:
+		booking_request_dict["duration"] = max_duration
+
+	booking_request_dict["end_time"] = current_datetime + datetime.timedelta(
+		seconds=booking_request_dict["duration"]
+	)
 
 	return booking_request_dict
 
@@ -39,18 +53,14 @@ def update_req_time_info(booking_request_dict):
 	return booking_request_dict
 
 
-def get_distances(booking_or_request_dict, grid_centroids, min_distance=500, orography_factor=1.4, crs="epsg:4326"):
-	booking_or_request_dict["euclidean_distance"] = get_od_distance(
-		grid_centroids,
-		booking_or_request_dict["origin_id"],
-		booking_or_request_dict["destination_id"],
-		crs
-	)
-
-	if booking_or_request_dict["euclidean_distance"] == 0:
-		booking_or_request_dict["euclidean_distance"] = min_distance
-
+def get_distances(
+		booking_or_request_dict, distance_matrix, origin_id, destination_id,
+		orography_factor=1.4,
+):
+	booking_or_request_dict["euclidean_distance"] = distance_matrix.loc[origin_id, destination_id]
 	booking_or_request_dict["driving_distance"] = booking_or_request_dict["euclidean_distance"] * orography_factor
+	if origin_id == destination_id:
+		raise NotImplementedError("Round trips not implemented!")
 	return booking_or_request_dict
 
 

@@ -5,10 +5,10 @@ class Vehicle:
 		self.vehicle_config = vehicle_config
 
 		self.engine_type = vehicle_config["engine_type"] #gasoline, diesel, lpg, gnc, electric
-		self.profile_type = vehicle_config["profile_type"] #needed for custom profiles
+		# self.profile_type = vehicle_config["profile_type"] #needed for custom profiles
 		self.consumption = vehicle_config["consumption"] #km/l, km/kWh
 		self.capacity = vehicle_config["fuel_capacity"] #kWh (electric), Liter (gasoline,diesel,lpg), kilograms (gnc)
-		self.n_seats = vehicle_config["n_seats"]
+		# self.n_seats = vehicle_config["n_seats"]
 		# self.costs = vehicle_config["costs"]
 
 		if self.engine_type == "gasoline": # GASOLINE E5

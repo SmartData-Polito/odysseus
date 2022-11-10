@@ -15,7 +15,7 @@ class Fleet:
         self.vehicles_zones = None
         self.available_vehicles_dict = None
 
-    def init_vehicles_soc(self, soc_low=25, soc_high=100):
+    def init_vehicles_soc(self, soc_low=90, soc_high=100):
         vehicles_random_soc = list(np.random.uniform(soc_low, soc_high, self.n_vehicles_sim).astype(int))
         self.vehicles_soc_dict = {i: vehicles_random_soc[i] for i in range(self.n_vehicles_sim)}
         return self.vehicles_soc_dict

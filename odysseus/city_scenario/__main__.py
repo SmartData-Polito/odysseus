@@ -48,7 +48,7 @@ parser.add_argument(
 
 parser.set_defaults(
     data_from=["od"],
-    city=["my_city_1X5_0"],
+    city=["my_city_1_1X5"],
     data_source_id=["my_data_source"],
     bin_side_length=[500],
     train_range=("2023", "1", "2023", "1"),
@@ -89,7 +89,8 @@ for city_scenario_config in city_scenario_configs_list:
 
         print(city_scenario_config)
         city_scenario = CityScenarioFromOD(
-            city_scenario_config["city"], "my_data_source", city_scenario_config=city_scenario_config
+            city_scenario_config["city"], city_scenario_config["data_source_id"],
+            city_scenario_config=city_scenario_config
         )
         city_scenario.create_city_scenario_from_trips_data()
         city_scenario.save_virtual_od_results()

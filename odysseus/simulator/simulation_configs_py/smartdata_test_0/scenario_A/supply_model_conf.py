@@ -2,45 +2,46 @@ supply_model_config_grid = {
 
 	# -> energy supply
 
-	"engine_type": ["gasoline"],
 	"year_energymix": ["2023"],
 
-	# -> vehicles
+	# -> vehicle configuration
 
-	"vehicles_config_mode": ["vehicles_zones"],
-	"vehicle_model_name": ["VW Golf 7 1.0 TSI 2018"],
-	# "vehicles_initial_placement": ["random_greedy"],
-	"vehicles_zones": [
-		frozenset(
-			{
-				0: 0,
-			}.items()
-		)
-	],
+	"engine_type": ["gasoline"],
+	"fuel_capacity": [5],
+	"consumption": [10000],  # TODO -> this is efficiency [km/l] not consumption [l/km]
+	"n_seats": [5],
+	"vehicle_model_name": ["my_vehicle"],
+
+	# -> fleet size and initial placement
+
+	"vehicles_config_mode": ["sim_config"],
+	"n_vehicles": [1, 2, 3, 4],
+	"vehicles_initial_placement": ["random_greedy"],
+	# "vehicles_zones": [frozenset({0: 0, }.items())],
 
 	# -> charging
 
-	"stations_config_mode": ["sim_config"],
+	"charging_config_mode": ["sim_config"],
 
-	"distributed_cps": [True],
-	"system_cps": [True],
+	"n_workers": [1],
+
+	"distributed_cps": [False],
+	"system_cps": [False],
 	"profile_type": [""],
 
-	"charging_config_mode": ["sim_config"],
+	"stations_placement_config_mode": ["sim_config"],
 	"cps_placement_policy": ["uniform"],
-	"tot_n_charging_poles": [9],
-	"n_charging_zones": [9],
+	"tot_n_charging_poles": [0],
+	"n_charging_zones": [0],
 	"charging_strategy": ["reactive"],
 	"charging_relocation_strategy": ["closest_queueing"],
 	"queuing": [True],
-
 	"alpha_policy": ['auto'],
 	# "alpha": [20],
 	"beta": [100],
 
 	# -> battery swap
 
-	"n_workers": [12],
 	"battery_swap": [False],
 	"avg_reach_time": [0],
 	"avg_service_time": [0],

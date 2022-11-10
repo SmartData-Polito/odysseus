@@ -212,5 +212,8 @@ class CityScenarioFromOD(AbstractCityScenario):
 
         print(self.od_matrices)
 
+        with open(os.path.join(self.city_scenario_path, "week_config.json"), "w") as f:
+            json.dump(self.week_config, f)
+
         with open(os.path.join(self.city_scenario_path, "od_matrices.pickle"), "wb") as f:
             pickle.dump(self.od_matrices, f)
