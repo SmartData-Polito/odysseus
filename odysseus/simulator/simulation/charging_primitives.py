@@ -30,16 +30,16 @@ class ChargingPrimitives:
 		self.charging_stations_dict = sim.charging_stations_dict
 		self.zone_dict = sim.zone_dict
 
-		if self.sim_input.supply_model_conf["battery_swap"] \
-				and self.sim_input.supply_model_conf["relocation"]:
+		if self.sim_input.supply_model_config["battery_swap"] \
+				and self.sim_input.supply_model_config["relocation"]:
 			self.relocation_strategy = sim.relocation_strategy
 
 		self.workers = simpy.Resource(
 			self.env,
-			capacity=self.sim_input.supply_model_conf["n_workers"]
+			capacity=self.sim_input.supply_model_config["n_workers"]
 		)
 
-		if self.sim_input.supply_model_conf["distributed_cps"]:
+		if self.sim_input.supply_model_config["distributed_cps"]:
 			self.n_charging_poles_by_zone = self.sim_input.supply_model.n_charging_poles_by_zone
 			self.charging_poles_dict = {}
 			for zone, n in self.n_charging_poles_by_zone.items():
@@ -85,7 +85,7 @@ class ChargingPrimitives:
 		self.charging_outward_distance += charge_dict["charging_outward_distance"]
 
 		def check_queuing():
-			if self.sim_input.supply_model_conf["queuing"]:
+			if self.sim_input.supply_model_config["queuing"]:
 				return True
 			else:
 				if resource.count < resource.capacity:
@@ -100,7 +100,7 @@ class ChargingPrimitives:
 		charge["cr_soc_delta"] = cr_soc_delta
 		charge["cr_soc_delta_kwh"] = vehicle.tanktowheel_energy_from_perc(cr_soc_delta)
 
-		if self.sim_input.supply_model_conf["battery_swap"]:
+		if self.sim_input.supply_model_config["battery_swap"]:
 			if operator == "system":
 				if check_queuing():
 					with self.workers.request() as worker_request:
@@ -165,18 +165,18 @@ class ChargingPrimitives:
 
 		charge["end_time"] = charge["start_time"] + datetime.timedelta(seconds=charge["duration"])
 
-		if "save_history" in self.sim_input.sim_general_conf:
-			if self.sim_input.sim_general_conf["save_history"]:
+		if "save_history" in self.sim_input.sim_general_config:
+			if self.sim_input.sim_general_config["save_history"]:
 				self.sim_charges += [charge]
 		self.n_charges += 1
 
 	def check_system_charge(self, booking_request, vehicle, charging_strategy):
 		if charging_strategy == "reactive":
-			if vehicle.soc.level < self.sim_input.supply_model_conf["alpha"]:
+			if vehicle.soc.level < self.sim_input.supply_model_config["alpha"]:
 				charge = init_charge(
 					booking_request,
 					vehicle,
-					self.sim_input.supply_model_conf["beta"]
+					self.sim_input.supply_model_config["beta"]
 				)
 				return True, charge
 			else:
@@ -188,12 +188,12 @@ class ChargingPrimitives:
 	def check_user_charge(self, booking_request, vehicle):
 
 		if booking_request["destination_id"] in self.charging_stations_dict:
-			if booking_request["end_soc"] < self.sim_input.supply_model_conf["beta"]:
-				if np.random.binomial(1, self.sim_input.demand_model_conf["willingness"]):
+			if booking_request["end_soc"] < self.sim_input.supply_model_config["beta"]:
+				if np.random.binomial(1, self.sim_input.demand_model_config["willingness"]):
 					charge = init_charge(
 						booking_request,
 						self.vehicles_list[vehicle],
-						self.sim_input.supply_model_conf["beta"]
+						self.sim_input.supply_model_config["beta"]
 					)
 					return True, charge
 				else:

@@ -7,7 +7,8 @@ from queue import PriorityQueue, Empty
 import six
 
 sys.modules['sklearn.externals.six'] = six
-from mlrose import TSPOpt, genetic_alg
+# from mlrose import TSPOpt, genetic_alg
+from heapq import *
 
 import numpy as np
 import pandas as pd
@@ -23,21 +24,21 @@ class RelocationStrategy(RelocationPrimitives):
         relocated_vehicles = vehicles
         scooter_relocation = {}
 
-        if self.simInput.supply_model_conf["battery_swap"]:
+        if self.sim_input.supply_model_config["battery_swap"]:
 
-            if self.simInput.supply_model_conf["relocation_strategy"] == "magic_relocation":
+            if self.sim_input.supply_model_config["relocation_strategy"] == "magic_relocation":
 
                 booking_request_zone_column = int(np.floor(
-                    booking_request["origin_id"] / self.simInput.grid_matrix.shape[0]
+                    booking_request["origin_id"] / self.sim_input.grid_matrix.shape[0]
                 ))
                 booking_request_zone_row = int(
-                    booking_request["origin_id"] - booking_request_zone_column * self.simInput.grid_matrix.shape[0]
+                    booking_request["origin_id"] - booking_request_zone_column * self.sim_input.grid_matrix.shape[0]
                 )
 
                 found_vehicle_flag = False
                 r = 2  # excludes origin zone and its neighbors
 
-                while not found_vehicle_flag and r < max(self.simInput.grid_matrix.shape):
+                while not found_vehicle_flag and r < max(self.sim_input.grid_matrix.shape):
 
                     zones_ring = []
                     available_vehicles_soc_dict = {}
@@ -45,29 +46,29 @@ class RelocationStrategy(RelocationPrimitives):
                     i = booking_request_zone_row - r
                     j = booking_request_zone_column - r
                     if i >= 0 and j >= 0:
-                        while j < booking_request_zone_column + r and j < self.simInput.grid_matrix.shape[1]:
-                            zones_ring.append(self.simInput.grid_matrix.iloc[i, j])
+                        while j < booking_request_zone_column + r and j < self.sim_input.grid_matrix.shape[1]:
+                            zones_ring.append(self.sim_input.grid_matrix.iloc[i, j])
                             j += 1
 
                     i = booking_request_zone_row - r
                     j = booking_request_zone_column + r
-                    if i >= 0 and j < self.simInput.grid_matrix.shape[1]:
-                        while i < booking_request_zone_row + r and i < self.simInput.grid_matrix.shape[0]:
-                            zones_ring.append(self.simInput.grid_matrix.iloc[i, j])
+                    if i >= 0 and j < self.sim_input.grid_matrix.shape[1]:
+                        while i < booking_request_zone_row + r and i < self.sim_input.grid_matrix.shape[0]:
+                            zones_ring.append(self.sim_input.grid_matrix.iloc[i, j])
                             i += 1
 
                     i = booking_request_zone_row + r
                     j = booking_request_zone_column + r
-                    if i < self.simInput.grid_matrix.shape[0] and j < self.simInput.grid_matrix.shape[1]:
+                    if i < self.sim_input.grid_matrix.shape[0] and j < self.sim_input.grid_matrix.shape[1]:
                         while j > booking_request_zone_column - r and j > 0:
-                            zones_ring.append(self.simInput.grid_matrix.iloc[i, j])
+                            zones_ring.append(self.sim_input.grid_matrix.iloc[i, j])
                             j -= 1
 
                     i = booking_request_zone_row + r
                     j = booking_request_zone_column - r
-                    if i < self.simInput.grid_matrix.shape[0] and j >= 0:
+                    if i < self.sim_input.grid_matrix.shape[0] and j >= 0:
                         while i > booking_request_zone_row - r and i > 0:
-                            zones_ring.append(self.simInput.grid_matrix.iloc[i, j])
+                            zones_ring.append(self.sim_input.grid_matrix.iloc[i, j])
                             i -= 1
 
                     for zone_id in zones_ring:
@@ -96,13 +97,13 @@ class RelocationStrategy(RelocationPrimitives):
                     relocation_zone_id = booking_request["origin_id"]
                     relocated_vehicles = [max_soc_vehicle]
 
-                    distance = get_od_distance(
-                        self.simInput.grid_centroids,
-                        max_soc_vehicle_zone,
-                        relocation_zone_id,
-                        self.simInput.grid_crs
-                    )
-
+                    # distance = get_od_distance(
+                    #     self.sim_input.grid,
+                    #     max_soc_vehicle_zone,
+                    #     relocation_zone_id,
+                    #     self.sim_input.grid_crs
+                    # )
+                    distance = self.sim_input.distance_matrix.loc[max_soc_vehicle_zone, relocation_zone_id]
                     scooter_relocation = init_scooter_relocation(relocated_vehicles, booking_request["start_time"],
                                                                  [max_soc_vehicle_zone], [relocation_zone_id],
                                                                  distance, 0)
@@ -111,15 +112,15 @@ class RelocationStrategy(RelocationPrimitives):
 
                 relocation_zone_id = None
 
-                if self.simInput.supply_model_conf["relocation_strategy"] in ["reactive_post_charge", "reactive_post_trip"]:
+                if self.sim_input.supply_model_config["relocation_strategy"] in ["reactive_post_charge", "reactive_post_trip"]:
 
                     scheduled_relocation = None
-                    for proposed_relocation in self.scheduled_scooter_relocations:
+                    for proposed_relocation in self.scheduled_relocations:
                         if booking_request["destination_id"] in proposed_relocation["pick_up"]:
                             scheduled_relocation = proposed_relocation
 
                     if scheduled_relocation:
-                        self.scheduled_scooter_relocations.remove(scheduled_relocation)
+                        self.scheduled_relocations.remove(scheduled_relocation)
 
                         relocation_zone_id, n_relocated_vehicles = scheduled_relocation["drop_off"].popitem()
 
@@ -153,14 +154,15 @@ class RelocationStrategy(RelocationPrimitives):
 
                     relocated = True
 
-                    distance = get_od_distance(
-                        self.simInput.grid_centroids,
-                        booking_request["destination_id"],
-                        relocation_zone_id,
-                        self.simInput.grid_crs
-                    )
+                    # distance = get_od_distance(
+                    #     self.sim_input.grid,
+                    #     booking_request["destination_id"],
+                    #     relocation_zone_id,
+                    #     self.sim_input.grid_crs
+                    # )
+                    distance = self.sim_input.distance_matrix.loc[booking_request["destination_id"], relocation_zone_id]
 
-                    duration = distance / 1000 / self.simInput.supply_model_conf["avg_relocation_speed"] * 3600
+                    duration = distance / 1000 / self.sim_input.supply_model_config["avg_relocation_speed"] * 3600
 
                     scooter_relocation = init_scooter_relocation(relocated_vehicles, booking_request["end_time"],
                                                                  [booking_request["destination_id"]],
@@ -172,7 +174,7 @@ class RelocationStrategy(RelocationPrimitives):
     def choose_ending_zone(self, n=1, origin_scores_list=None, destination_scores_list=None, daytype=None, hour=None):
         """
         Chooses n ending zones given a list of origin and destination scores, according to the selected zone selection
-        technique. If the technique defines a priority (e.g.: vehicles aggregation or Delta value), returned lists are
+        technique. If the technique defines a priority (e.g.: Delta value), returned lists are
         ordered by relocation priority.
         :param n: Maximum number of zones to be selected as ending zones.
         :param origin_scores_list: List of origin scores. It is required by 'Delta' technique. Each element of this list
@@ -187,11 +189,11 @@ class RelocationStrategy(RelocationPrimitives):
         """
         ending_zone_ids = []
         n_dropped_vehicles_list = []
-        technique = dict(self.simInput.supply_model_conf["relocation_technique"])["end"]
+        technique = dict(self.sim_input.supply_model_config["relocation_technique"])["end"]
 
         if technique == "kde_sampling":
 
-            next_hour_kde = self.simInput.trip_kdes[daytype][(hour + 1) % 24]
+            next_hour_kde = self.sim_input.trip_kdes[daytype][(hour + 1) % 24]
 
             def base_round(x, base):
                 if x < 0:
@@ -203,27 +205,16 @@ class RelocationStrategy(RelocationPrimitives):
 
             def gen_relocation_zone(kde):
                 trip_sample = kde.sample()
-                origin_i = base_round(trip_sample[0][0], len(self.simInput.grid_matrix.index) - 1)
-                origin_j = base_round(trip_sample[0][1], len(self.simInput.grid_matrix.columns) - 1)
+                origin_i = base_round(trip_sample[0][0], len(self.sim_input.grid_matrix.index) - 1)
+                origin_j = base_round(trip_sample[0][1], len(self.sim_input.grid_matrix.columns) - 1)
 
-                return self.simInput.grid_matrix.loc[origin_i, origin_j]
+                return self.sim_input.grid_matrix.loc[origin_i, origin_j]
 
             for i in range(n):
                 origin_id = gen_relocation_zone(next_hour_kde)
-                while (origin_id not in self.simInput.valid_zones) or (origin_id in self.starting_zone_ids):
+                while (origin_id not in self.sim_input.valid_zones) or (origin_id in self.starting_zone_ids):
                     origin_id = gen_relocation_zone(next_hour_kde)
                 ending_zone_ids.append(origin_id)
-                n_dropped_vehicles_list.append(1)
-
-        if technique == "aggregation":
-
-            n_vehicles_by_zone = {
-                k: len(v) for k, v in
-                sorted(self.available_vehicles_dict.items(), key=lambda item: -len(item[1]))
-            }
-
-            for i in range(min(n, len(n_vehicles_by_zone))):
-                ending_zone_ids.append(n_vehicles_by_zone.popitem()[0])
                 n_dropped_vehicles_list.append(1)
 
         if technique == "delta":
@@ -247,7 +238,7 @@ class RelocationStrategy(RelocationPrimitives):
     def choose_starting_zone(self, n=1, pred_out_flows_list=None, pred_in_flows_list=None):
         """
         Chooses n starting zones given a list of origin and destination scores, according to the selected zone selection
-        technique. If the technique defines a priority (e.g.: vehicles aggregation or Delta value), returned lists are
+        technique. If the technique defines a priority (e.g.: Delta value), returned lists are
         ordered by relocation priority.
         :param n: Maximum number of zones to be selected as starting zones.
         :param pred_out_flows_list: List of hourly predicted out flows. It is required by 'Delta' technique. Each
@@ -260,18 +251,7 @@ class RelocationStrategy(RelocationPrimitives):
         """
         starting_zone_ids = []
         n_picked_vehicles_list = []
-        technique = dict(self.simInput.supply_model_conf["relocation_technique"])["start"]
-
-        if technique == "aggregation":
-
-            n_vehicles_by_zone = {
-                k: len(v) for k, v in
-                sorted(self.available_vehicles_dict.items(), key=lambda item: len(item[1]))
-            }
-
-            for i in range(min(n, len(n_vehicles_by_zone))):
-                starting_zone_ids.append(n_vehicles_by_zone.popitem()[0])
-                n_picked_vehicles_list.append(1)
+        technique = dict(self.sim_input.supply_model_config["relocation_technique"])["start"]
 
         if technique == "delta":
 
@@ -302,12 +282,14 @@ class RelocationStrategy(RelocationPrimitives):
         :return: void
         """
 
-        self.scheduled_scooter_relocations.clear()
+        # print(current_datetime, daytype, hour)
+
+        self.scheduled_relocations.clear()
 
         pred_out_flows_list = []
         pred_in_flows_list = []
 
-        if self.simInput.supply_model_conf["relocation_strategy"] == "predictive":
+        if self.sim_input.supply_model_config["relocation_strategy"] == "predictive":
 
             # Prepare flows from past hours
             if self.current_hour_origin_count:
@@ -326,17 +308,17 @@ class RelocationStrategy(RelocationPrimitives):
                         past_origin_count = self.past_hours_origin_counts[i]
                         past_destination_count = self.past_hours_destination_counts[i]
 
-                        for j in self.simInput.grid_matrix.index:
-                            for k in self.simInput.grid_matrix.columns:
-                                zone = self.simInput.grid_matrix.iloc[j, k]
+                        for j in self.sim_input.grid_matrix.index:
+                            for k in self.sim_input.grid_matrix.columns:
+                                zone = self.sim_input.grid_matrix.iloc[j, k]
 
-                                if zone in self.simInput.valid_zones:
+                                if zone in self.sim_input.valid_zones:
                                     if zone in past_origin_count:
                                         past_in_flow[i][j][k] = past_origin_count[zone]
                                     if zone in past_destination_count:
                                         past_out_flow[i][j][k] = past_destination_count[zone]
 
-                    max_flow = max(self.simInput.max_out_flow, self.simInput.max_in_flow)
+                    max_flow = max(self.sim_input.max_out_flow, self.sim_input.max_in_flow)
                     prediction_datetime = current_datetime
                     prediction_weekday = prediction_datetime.weekday()
 
@@ -381,9 +363,9 @@ class RelocationStrategy(RelocationPrimitives):
 
                     pred_in_flows = {}
                     pred_out_flows = {}
-                    for j in self.simInput.grid_matrix.index:
-                        for k in self.simInput.grid_matrix.columns:
-                            zone = self.simInput.grid_matrix.iloc[j, k]
+                    for j in self.sim_input.grid_matrix.index:
+                        for k in self.sim_input.grid_matrix.columns:
+                            zone = self.sim_input.grid_matrix.iloc[j, k]
                             pred_in_flows[zone] = prediction[0][j][k][0]
                             pred_out_flows[zone] = prediction[0][j][k][1]
 
@@ -396,9 +378,9 @@ class RelocationStrategy(RelocationPrimitives):
 
                         pred_in_flows = {}
                         pred_out_flows = {}
-                        for j in self.simInput.grid_matrix.index:
-                            for k in self.simInput.grid_matrix.columns:
-                                zone = self.simInput.grid_matrix.iloc[j, k]
+                        for j in self.sim_input.grid_matrix.index:
+                            for k in self.sim_input.grid_matrix.columns:
+                                zone = self.sim_input.grid_matrix.iloc[j, k]
                                 pred_in_flows[zone] = prediction[0][j][k][0]
                                 pred_out_flows[zone] = prediction[0][j][k][1]
 
@@ -412,8 +394,8 @@ class RelocationStrategy(RelocationPrimitives):
 
         else:
             # Get avg flows from past data
-            pred_out_flows = self.simInput.avg_out_flows_train
-            pred_in_flows = self.simInput.avg_in_flows_train
+            pred_out_flows = self.sim_input.avg_out_flows_train
+            pred_in_flows = self.sim_input.avg_in_flows_train
 
             for i in range(self.window_width):
                 pred_out_flows_list.append(pred_out_flows[daytype][(hour + 1 + i) % 24])
@@ -423,8 +405,8 @@ class RelocationStrategy(RelocationPrimitives):
 
             # Choose the maximum number of 'pick up' and 'drop off' zones proposals to be computed
             n_relocations = int(len(self.available_vehicles_dict) / 2)  # an upper bound
-            if self.simInput.supply_model_conf["relocation_strategy"] in ["proactive", "predictive"] \
-                    and "relocation_capacity" not in self.simInput.supply_model_conf:
+            if self.sim_input.supply_model_config["relocation_strategy"] in ["proactive", "predictive"] \
+                    and "relocation_capacity" not in self.sim_input.supply_model_config:
                 n_free_workers = self.relocation_workers_resource.capacity - self.relocation_workers_resource.count
                 n_relocations = min(n_relocations, n_free_workers)
 
@@ -439,11 +421,11 @@ class RelocationStrategy(RelocationPrimitives):
 
             if self.starting_zone_ids and self.ending_zone_ids:
 
-                if self.simInput.supply_model_conf["relocation_strategy"] in ["proactive", "predictive"] \
-                        and "relocation_capacity" in self.simInput.supply_model_conf:
+                if self.sim_input.supply_model_config["relocation_strategy"] in ["proactive", "predictive"] \
+                        and "relocation_capacity" in self.sim_input.supply_model_config:
                     # Distribute proposed 'pick up' and 'drop off' zones between scheduled relocations
 
-                    relocation_capacity = self.simInput.supply_model_conf["relocation_capacity"]
+                    relocation_capacity = self.sim_input.supply_model_config["relocation_capacity"]
 
                     pick_up_zone_ids = self.starting_zone_ids.copy()
                     n_picked_vehicles_list = self.n_picked_vehicles_list.copy()
@@ -474,38 +456,38 @@ class RelocationStrategy(RelocationPrimitives):
                             "drop_off": {}
                         }
 
-                        if "relocation_profitability_check" in self.simInput.supply_model_conf:
-                            relocation_profitability_check = self.simInput.supply_model_conf["relocation_profitability_check"]
+                        if "relocation_profitability_check" in self.sim_input.supply_model_config:
+                            relocation_profitability_check = self.sim_input.supply_model_config["relocation_profitability_check"]
                         else:
                             relocation_profitability_check = True
 
-                        if "relocation_vehicle_consumption" in self.simInput.supply_model_conf:
-                            relocation_vehicle_consumption = self.simInput.supply_model_conf["relocation_vehicle_consumption"]
+                        if "relocation_vehicle_consumption" in self.sim_input.supply_model_config:
+                            relocation_vehicle_consumption = self.sim_input.supply_model_config["relocation_vehicle_consumption"]
                         else:
                             relocation_vehicle_consumption = 7  # l/100km
 
-                        if "diesel_price" in self.simInput.supply_model_conf:
-                            diesel_price = self.simInput.supply_model_conf["diesel_price"]
+                        if "diesel_price" in self.sim_input.supply_model_config:
+                            diesel_price = self.sim_input.supply_model_config["diesel_price"]
                         else:
                             diesel_price = 0.65  # $/l (USA)
 
-                        if "unlock_fee" in self.simInput.supply_model_conf:
-                            unlock_fee = self.simInput.supply_model_conf["unlock_fee"]
+                        if "unlock_fee" in self.sim_input.supply_model_config:
+                            unlock_fee = self.sim_input.supply_model_config["unlock_fee"]
                         else:
                             unlock_fee = 1  # $
 
-                        if "rent_fee" in self.simInput.supply_model_conf:
-                            rent_fee = self.simInput.supply_model_conf["rent_fee"]
+                        if "rent_fee" in self.sim_input.supply_model_config:
+                            rent_fee = self.sim_input.supply_model_config["rent_fee"]
                         else:
                             rent_fee = 0.15  # $/min
 
-                        if "avg_relocation_distance" in self.simInput.supply_model_conf:
-                            avg_relocation_distance = self.simInput.supply_model_conf["avg_relocation_distance"]
+                        if "avg_relocation_distance" in self.sim_input.supply_model_config:
+                            avg_relocation_distance = self.sim_input.supply_model_config["avg_relocation_distance"]
                         else:
                             avg_relocation_distance = 1  # km
 
-                        if "avg_trip_duration" in self.simInput.supply_model_conf:
-                            avg_trip_duration = self.simInput.supply_model_conf["avg_trip_duration"]
+                        if "avg_trip_duration" in self.sim_input.supply_model_config:
+                            avg_trip_duration = self.sim_input.supply_model_config["avg_trip_duration"]
                         else:
                             avg_trip_duration = 10  # min
 
@@ -588,7 +570,7 @@ class RelocationStrategy(RelocationPrimitives):
 
                                         priority, drop_off_zone_index = drop_off_zones_priority_queue.get_nowait()
 
-                            except Empty:
+                            except:
                                 # Ran out of 'pick up' or 'drop off' zones
                                 empty_queue = True
                                 break
@@ -608,9 +590,9 @@ class RelocationStrategy(RelocationPrimitives):
 
                         if relocation_profitability_check:
                             if was_positive:
-                                self.scheduled_scooter_relocations.append(scheduled_relocation)
+                                self.scheduled_relocations.append(scheduled_relocation)
                         else:
-                            self.scheduled_scooter_relocations.append(scheduled_relocation)
+                            self.scheduled_relocations.append(scheduled_relocation)
 
                 else:
                     # Associate one 'pick up' zone and one 'drop off' zone to each scheduled relocation
@@ -632,9 +614,9 @@ class RelocationStrategy(RelocationPrimitives):
                             "drop_off": {drop_off_zone_id: tot_relocated_vehicles}
                         }
 
-                        self.scheduled_scooter_relocations.append(scheduled_relocation)
+                        self.scheduled_relocations.append(scheduled_relocation)
 
-                if self.simInput.supply_model_conf["relocation_strategy"] in ["proactive", "predictive"]:
+                if self.sim_input.supply_model_config["relocation_strategy"] in ["proactive", "predictive"]:
                     # Try to trigger immediately the relocation process
 
                     n_free_workers = self.relocation_workers_resource.capacity - self.relocation_workers_resource.count
@@ -644,20 +626,23 @@ class RelocationStrategy(RelocationPrimitives):
 
                         # Compute distances between workers and the first 'pick up' zone of each relocation
                         workers_distances_by_zone = {}
-                        for (worker, scheduled_relocation) in itertools.product(free_workers, self.scheduled_scooter_relocations):
+                        for (worker, scheduled_relocation) in itertools.product(free_workers, self.scheduled_relocations):
                             first_pick_up_zone_id = list(scheduled_relocation["pick_up"].keys())[0]
                             if first_pick_up_zone_id not in workers_distances_by_zone:
                                 workers_distances_by_zone[first_pick_up_zone_id] = {}
-                            workers_distances_by_zone[first_pick_up_zone_id][worker] = get_od_distance(
-                                self.simInput.grid_centroids,
-                                worker.current_position,
-                                first_pick_up_zone_id,
-                                self.simInput.grid_crs
-                            )
+                            # workers_distances_by_zone[first_pick_up_zone_id][worker] = get_od_distance(
+                            #     self.sim_input.grid,
+                            #     worker.current_position,
+                            #     first_pick_up_zone_id,
+                            #     self.sim_input.grid_crs
+                            # )
+                            workers_distances_by_zone[first_pick_up_zone_id][worker] = self.sim_input.distance_matrix.loc[
+                                worker.current_position, first_pick_up_zone_id
+                            ]
 
-                        for i in range(min(n_relocations, len(self.scheduled_scooter_relocations), n_free_workers)):
+                        for i in range(min(n_relocations, len(self.scheduled_relocations), n_free_workers)):
 
-                            scheduled_relocation = self.scheduled_scooter_relocations[i]
+                            scheduled_relocation = self.scheduled_relocations[i]
                             first_pick_up_zone_id = list(scheduled_relocation["pick_up"].keys())[0]
 
                             # Find nearest worker to the first 'pick up' zone
@@ -670,15 +655,21 @@ class RelocationStrategy(RelocationPrimitives):
                                     nearest_worker_distance = workers_distances[worker]
 
                             # Compute shortest path between first 'pick up' zone and the others
+                            #print(scheduled_relocation)
+
                             collection_path = self.compute_shortest_path(
                                 first_pick_up_zone_id,
-                                list(scheduled_relocation["pick_up"].keys())[1:]
+                                list(scheduled_relocation["pick_up"].keys())[1:],
+                                first_pick_up=True
                             )
+                            #print(collection_path)
                             # Compute shortest path between last 'pick up' zone and 'drop off' zones
                             distribution_path = self.compute_shortest_path(
                                 collection_path[-1],
-                                scheduled_relocation["drop_off"].keys()
+                                list(scheduled_relocation["drop_off"].keys()),
+                                first_pick_up=False
                             )
+                            #print(distribution_path)
 
                             # Add to collection path the step between current worker position and first 'pick up' zone
                             final_collection_path = [nearest_worker.current_position] + collection_path
@@ -693,7 +684,10 @@ class RelocationStrategy(RelocationPrimitives):
         window_width = len(pred_out_flows_list)
 
         delta_by_zone = {}
-        for zone, vehicles in self.available_vehicles_dict.items():
+        # print(self.available_vehicles_dict.keys())
+        for zone in self.sim_input.valid_zones:
+            vehicles = self.available_vehicles_dict[zone]
+            # print(zone, vehicles)
             flow_prediction = 0
             for i in range(window_width):
                 flow_prediction += pred_out_flows_list[i][zone]
@@ -704,51 +698,76 @@ class RelocationStrategy(RelocationPrimitives):
 
         return delta_by_zone
 
-    def compute_shortest_path(self, starting_zone_id, other_zone_ids):
-        zones = [starting_zone_id]
-        [zones.append(zone) for zone in other_zone_ids]
-
-        coords_list = []
-        for zone in zones:
-            zone_column = int(np.floor(
-                zone / self.simInput.grid_matrix.shape[0]
-            ))
-            zone_row = int(
-                zone - zone_column * self.simInput.grid_matrix.shape[0]
-            )
-            coords_list.append((zone_column, zone_row))
-
-        problem = TSPOpt(length=len(coords_list), coords=coords_list, maximize=False)
-        best_path, _ = genetic_alg(problem, max_iters=10, random_state=2)
-
-        best_path = deque(best_path)
-        starting_point = best_path[0]
-        while starting_point != 0:  # Starting point is not worker position
-            best_path.rotate(1)
-            starting_point = best_path[0]
-
-        return [zones[i] for i in list(best_path)]
+    def compute_shortest_path(self, starting_zone_id, other_zone_ids, first_pick_up):
+        if first_pick_up:
+            return [starting_zone_id]
+        else:
+            return [starting_zone_id] + other_zone_ids
+        # zones = [starting_zone_id]
+        # [zones.append(zone) for zone in other_zone_ids]
+        #
+        # coords_list = []
+        # for zone in zones:
+        #     zone_column = int(np.floor(
+        #         zone / self.sim_input.grid_matrix.shape[0]
+        #     ))
+        #     zone_row = int(
+        #         zone - zone_column * self.sim_input.grid_matrix.shape[0]
+        #     )
+        #     coords_list.append((zone_column, zone_row))
+        #
+        # print(coords_list)
+        # problem = TSPOpt(length=len(coords_list), coords=coords_list, maximize=False)
+        # best_path, _ = genetic_alg(problem, max_iters=10, random_state=2)
+        # print(best_path)
+        # best_path = deque(best_path)
+        # print(best_path)
+        # starting_point = best_path[0]
+        # while starting_point != 0:  # Starting point is not worker position
+        #     best_path.rotate(1)
+        #     starting_point = best_path[0]
+        #
+        # return [zones[i] for i in list(best_path)]
 
     def compute_zone_priorities(self, starting_zone_id, other_zone_ids):
-        zones_priority_queue = PriorityQueue()
+
+        zones_priority_queue = list()
+
         zone_distances = []
+        zone_distances_dict = dict()
         max_distance = -1
         for i in range(len(other_zone_ids)):
             other_zone_id = other_zone_ids[i]
-            distance_from_starting_zone = get_od_distance(
-                self.simInput.grid_centroids,
-                starting_zone_id,
-                other_zone_id,
-                self.simInput.grid_crs
-            )
+            # distance_from_starting_zone = get_od_distance(
+            #     self.sim_input.grid,
+            #     starting_zone_id,
+            #     other_zone_id,
+            #     self.sim_input.grid_crs
+            # )
+            distance_from_starting_zone = self.sim_input.distance_matrix.loc[starting_zone_id, other_zone_id]
             zone_distances.append(distance_from_starting_zone)
+            zone_distances_dict[other_zone_id] = distance_from_starting_zone
             if distance_from_starting_zone > max_distance:
                 max_distance = distance_from_starting_zone
 
-        for i in range(len(other_zone_ids)):
-            distance_from_starting_zone = zone_distances[i]
+        class myQueue:
 
-            priority_number = int(i / len(other_zone_ids) * 100 + distance_from_starting_zone / max_distance * 100)
-            zones_priority_queue.put((priority_number, i))
+            def __init__(self):
+
+                self.zones_priority_queue = list()
+                for i in range(len(other_zone_ids)):
+                    distance_from_starting_zone = zone_distances[i]
+
+                    priority_number = int(
+                        i / len(other_zone_ids) * 100 + distance_from_starting_zone / max_distance * 100)
+
+                    heappush(self.zones_priority_queue, (priority_number, i))
+                    # zones_priority_queue.put((priority_number, i))
+
+            def get_nowait(self):
+
+                return heappop(self.zones_priority_queue)
+
+        zones_priority_queue = myQueue()
 
         return zones_priority_queue

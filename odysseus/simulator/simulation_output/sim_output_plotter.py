@@ -89,7 +89,7 @@ class EFFCS_SimOutputPlotter ():
 		self.grid.plot(color="white", edgecolor="black", ax=ax)
 		self.grid.plot(color="lavender", edgecolor="blue", column="valid", ax=ax).plot()
 
-		if self.sim_output.supply_model_conf["distributed_cps"]:
+		if self.sim_output.supply_model_config["distributed_cps"]:
 			charging_zones = self.sim_output.n_charging_poles_by_zone.keys()
 			charging_poles_by_zone = self.sim_output.n_charging_poles_by_zone
 			self.grid.loc[charging_zones, "poles_count"] = charging_poles_by_zone
@@ -153,14 +153,13 @@ class EFFCS_SimOutputPlotter ():
 			"n_vehicles_available", "n_vehicles_charging_system", "n_vehicles_charging_users", "n_vehicles_booked"
 		]:
 			plt.figure(figsize=(15, 5))
-			
-
 			self.sim_booking_requests.set_index("start_time")[col].plot(
 				label=col, linewidth=2, alpha=0.7
 			)
 			plt.legend()
 			plt.xlabel("t")
 			plt.ylabel("n_vehicles")
+			plt.tight_layout()
 			plt.savefig(os.path.join(self.figures_path, col + "_profile.png"), transparent=True)
 			# plt.show()
 			plt.close()
@@ -278,7 +277,7 @@ class EFFCS_SimOutputPlotter ():
 		plt.yticks([])
 		self.grid.plot(color="white", edgecolor="black", ax=ax)
 
-		self.grid.dropna(subset=[col]).plot(column=col, ax=ax, legend=True)
+		self.grid.dropna(subset=[col]).plot(column=col, edgecolor="white", ax=ax, legend=True)
 		plt.xlabel(None)
 		plt.xticks([])
 		plt.ylabel(None)

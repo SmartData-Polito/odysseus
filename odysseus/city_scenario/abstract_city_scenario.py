@@ -11,6 +11,8 @@ from odysseus.utils.geospatial_utils import *
 from odysseus.path_config.path_config import *
 
 from odysseus.city_scenario.energy_mix_loader import EnergyMix
+from odysseus.city_scenario.time_resampling_utils import get_start_end_duration
+from odysseus.city_scenario.trips_selection_utils import filter_trips_v1
 
 
 class AbstractCityScenario:
@@ -57,7 +59,7 @@ class AbstractCityScenario:
         self.loader = None
         self.energy_mix = None
         self.year_energy_mix = None
-        self.tz = None
+        self.timezone = None
         self.city_scenario_path = None
         self.city_scenario_config = dict()
 
@@ -92,7 +94,7 @@ class AbstractCityScenario:
         self.bookings_test["origin_id"] = self.trips_origins_test.zone_id
         self.bookings_test["destination_id"] = self.trips_destinations_test.zone_id
 
-    def get_input_bookings_filtered(self, bookings, orography_factor=1.4):
+    def get_input_bookings_filtered(self, bookings, orography_factor=1.4, random_seconds=0):
 
         bookings = bookings.sort_values("start_time")
 
@@ -100,84 +102,20 @@ class AbstractCityScenario:
         if "driving_distance" not in bookings.columns:
             bookings["driving_distance"] = bookings.euclidean_distance * orography_factor
 
-        # TODO -> check different behaviors with additional time columns
-        #bookings = get_time_group_columns(bookings)
-        bookings["hour"] = bookings.start_hour
-        bookings["daytype"] = bookings.start_daytype
-        bookings["date"] = bookings.start_time.apply(lambda d: d.date())
-
-        bookings["random_seconds_start"] = np.random.uniform(-900, 900, len(bookings))
-        bookings.start_time = pd.to_datetime(
-            bookings.start_time, utc=True
-        ) + bookings.random_seconds_start.apply(
-            lambda sec: datetime.timedelta(seconds=sec)
-        )
-        bookings["random_seconds_end"] = np.random.uniform(-900, 900, len(bookings))
-        bookings["random_seconds_pos"] = np.random.uniform(0, 450, len(bookings))
-
-        bookings.end_time = pd.to_datetime(
-            bookings.end_time, utc=True
-        ) + bookings.random_seconds_end.apply(
-            lambda sec: datetime.timedelta(seconds=sec)
-        )
-
-        bookings["start_time"] = bookings["start_time"].dt.tz_convert(self.tz)
-        bookings["end_time"] = bookings["end_time"].dt.tz_convert(self.tz)
-        #bookings = get_time_group_columns(bookings)
-
-        bookings["hour"] = bookings.start_hour
-        bookings["daytype"] = bookings.start_daytype
-        bookings["date"] = bookings.start_time.apply(lambda d: d.date())
-
-        # TODO -> solve ambiguity when duration is present in fuzzed input data
-        bookings.loc[bookings.start_time > bookings.end_time, "end_time"] = pd.to_datetime(bookings.loc[
-            bookings.start_time > bookings.end_time, "start_time"
-        ] + bookings.loc[bookings.start_time > bookings.end_time, "random_seconds_pos"].apply(
-            lambda sec: datetime.timedelta(seconds=sec)
-        ))
-        bookings["end_time"] = pd.to_datetime(bookings["end_time"], utc=True).dt.tz_convert(self.tz)
-
-        bookings.loc[:, "duration"] = (
-                bookings.end_time - bookings.start_time
-        ).apply(lambda x: x.total_seconds())
-
-        bookings = bookings.sort_values("start_time")
-        bookings.loc[:, "ia_timeout"] = (
-                bookings.start_time - bookings.start_time.shift()
-        ).apply(lambda x: x.total_seconds()).abs().fillna(10)
-        bookings = bookings.loc[bookings.ia_timeout >= 0]
+        bookings = get_start_end_duration(bookings, self.timezone, random_seconds)
 
         bookings = bookings[bookings.duration > 0]
         bookings = bookings[bookings.driving_distance >= 0]
+
         bookings.loc[bookings.driving_distance == 0, "driving_distance"] = self.bin_side_length
         bookings["avg_speed"] = bookings["driving_distance"] / bookings["duration"]
         bookings["avg_speed_kmh"] = bookings.avg_speed * 3.6
 
-        if self.city_name in [
-            "Minneapolis", "Louisville", "Austin", "Norfolk", "Kansas City", "Chicago", "Calgary"
-        ] or self.data_source_id in ["citi_bike"]:
-            bookings = bookings[bookings.avg_speed_kmh < 30]
-            bookings = bookings[
-                (bookings.duration > 60) & (
-                    bookings.duration < 60 * 60
-                ) & (bookings.euclidean_distance > 200)
-            ]
-
-        elif self.data_source_id in ["big_data_db"]:
-            bookings = bookings[bookings.avg_speed_kmh < 120]
-            bookings = bookings[
-                (bookings.duration > 3 * 60) & (
-                    bookings.duration < 60 * 60
-                ) & (bookings.euclidean_distance > 500)
-            ]
+        # bookings = filter_trips_v1(bookings, self.city_name, self.data_source_id)
 
         return bookings
 
     def get_valid_zones(self, count_threshold=-1):
-
-        # self.valid_zones = self.trips_origins_train.origin_id.value_counts().sort_values().tail(
-        #     int(self.sim_general_conf["k_zones_factor"] * len(self.grid))
-        # ).index
 
         if count_threshold >= 0:
 
@@ -204,13 +142,7 @@ class AbstractCityScenario:
 
         else:
 
-            origin_zones = set(self.bookings_train.origin_id.dropna().unique()).union(
-                set(self.bookings_test.origin_id.dropna().unique())
-            )
-            destination_zones = set(self.bookings_train.destination_id.dropna().unique()).union(
-                set(self.bookings_test.destination_id.dropna().unique())
-            )
-            self.valid_zones = list(origin_zones.union(destination_zones))
+            self.valid_zones = list(self.grid.zone_id.unique())
 
         return self.valid_zones
 
@@ -334,6 +266,7 @@ class AbstractCityScenario:
         ]
         self.grid["origin_count"] = self.bookings_train.origin_id.value_counts()
         self.grid["destination_count"] = self.bookings_train.destination_id.value_counts()
+
         reqs_per_zone = self.bookings_train.origin_id.value_counts(
             normalize=False
         ).rename('zone_id')
@@ -455,4 +388,6 @@ class AbstractCityScenario:
         self.grid = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "grid.pickle"), "rb")).load()
         self.grid_matrix = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "grid_matrix.pickle"), "rb")).load()
         self.bookings_train = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "bookings_train.pickle"), "rb")).load()
-        self.closest_valid_zones = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "closest_valid_zone.pickle"), "rb")).load()
+        self.closest_valid_zone = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "closest_valid_zone.pickle"), "rb")).load()
+        self.distance_matrix = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "distance_matrix.pickle"), "rb")).load()
+        self.numerical_params_dict = pickle.Unpickler(open(os.path.join(self.city_scenario_path, "numerical_params_dict.pickle"), "rb")).load()

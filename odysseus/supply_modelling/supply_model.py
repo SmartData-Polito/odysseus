@@ -23,7 +23,7 @@ class SupplyModel:
             self,
             city_name, data_source_id,
             city_scenario_folder, supply_model_folder,
-            supply_model_conf, init_from_map_json_config=False
+            supply_model_conf
     ):
 
         self.city_name = city_name
@@ -31,7 +31,6 @@ class SupplyModel:
         self.city_scenario_folder = city_scenario_folder
         self.supply_model_folder = supply_model_folder
         self.supply_model_conf = supply_model_conf
-        self.init_from_map_config = init_from_map_json_config
 
         self.supply_model_path = None
 
@@ -43,8 +42,8 @@ class SupplyModel:
         )
         self.city_scenario.read_city_scenario_for_supply_model()
 
-        self.tot_n_charging_poles = int(supply_model_conf["tot_n_charging_poles"])
-        self.n_charging_zones = int(supply_model_conf["n_charging_zones"])
+        self.tot_n_charging_poles = 0
+        self.n_charging_zones = 0
         self.n_vehicles_sim = 0
         self.real_n_charging_zones = 0
 
@@ -69,10 +68,7 @@ class SupplyModel:
 
         self.initial_relocation_workers_positions = []
 
-        self.service_stations = ServiceStations(
-            city_name, self.grid, self.tot_n_charging_poles, self.n_charging_zones,
-            self.city_scenario.grid_indexes_dict, self.city_scenario.bin_side_length
-        )
+        self.service_stations = None
         self.zone_dict = dict()
         self.charging_stations_dict = dict()
 
@@ -86,8 +82,8 @@ class SupplyModel:
         if self.supply_model_conf["vehicles_config_mode"] == "sim_config":
 
             self.n_vehicles_sim = int(self.supply_model_conf["n_vehicles"])
-            self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
-            self.n_charging_zones = int(self.supply_model_conf["n_charging_zones"])
+            # self.tot_n_charging_poles = int(self.supply_model_conf["tot_n_charging_poles"])
+            # self.n_charging_zones = int(self.supply_model_conf["n_charging_zones"])
 
             self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict = \
                 self.fleet.init_vehicles_from_fleet_size(
@@ -97,12 +93,11 @@ class SupplyModel:
 
         elif self.supply_model_conf["vehicles_config_mode"] == "vehicles_zones":
 
-            frozset = self.supply_model_conf["vehicles_zones"]
-            #dict1 = {x: i for i, s in enumerate(self.supply_model_conf["vehicles_zones"]) for x in s}
+            vehicles_zones = dict(self.supply_model_conf["vehicles_zones"])
             self.n_vehicles_sim = len(self.supply_model_conf["vehicles_zones"])
             self.fleet.n_vehicles_sim = self.n_vehicles_sim
             self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict = \
-                self.fleet.init_from_vehicles_zones(dict(frozset))
+                self.fleet.init_from_vehicles_zones(vehicles_zones)
 
         return self.vehicles_soc_dict, self.vehicles_zones, self.available_vehicles_dict
 
@@ -121,16 +116,30 @@ class SupplyModel:
 
         if self.supply_model_conf["distributed_cps"]:
 
-            if not self.init_from_map_config:
+            if self.supply_model_conf["stations_placement_config_mode"] == "sim_config":
+
+                assert "n_charging_zones" in self.supply_model_conf.keys()
+                self.n_charging_zones = self.supply_model_conf["n_charging_zones"]
+
+                self.service_stations = ServiceStations(
+                    self.city_name, self.grid, self.tot_n_charging_poles, self.n_charging_zones,
+                    self.city_scenario.grid_indexes_dict, self.city_scenario.bin_side_length
+                )
 
                 self.service_stations.init_charging_poles_from_policy(
                     self.supply_model_conf["cps_placement_policy"],
                     self.supply_model_conf["engine_type"],
                 )
 
-            elif self.init_from_map_config:
+            elif self.supply_model_conf["stations_placement_config_mode"] == "n_charging_poles_by_zone":
 
-                self.service_stations.init_charging_poles_from_map_config(self.supply_model_path)
+                self.service_stations = ServiceStations(
+                    self.city_name, self.grid, 0, 0,
+                    self.city_scenario.grid_indexes_dict, self.city_scenario.bin_side_length
+                )
+                self.service_stations.init_charging_poles_from_map_config(
+                    dict(self.supply_model_conf["n_charging_poles_by_zone"])
+                )
 
             self.n_charging_poles_by_zone = self.service_stations.n_charging_poles_by_zone
             self.zones_cp_distances = self.service_stations.zones_cp_distances
@@ -177,9 +186,7 @@ class SupplyModel:
             json.dump(self.initial_relocation_workers_positions, f, sort_keys=True, indent=4)
 
     def init_for_simulation(
-            self, simpy_env, start,
-            station_conf, vehicle_conf,
-            engine_type, profile_type, vehicle_model_name
+            self, simpy_env, start, station_conf, vehicle_conf,
     ):
 
         self.simpy_env = simpy_env
@@ -192,14 +199,19 @@ class SupplyModel:
                 zone_n_cps = self.n_charging_poles_by_zone[zone_id]
                 if zone_n_cps > 0:
                     self.charging_stations_dict[zone_id] = ChargingStation(
-                        self.simpy_env, zone_n_cps, zone_id, station_conf, engine_type, profile_type, start
+                        self.simpy_env, zone_n_cps, zone_id, station_conf,
+                        vehicle_conf["engine_type"],
+                        self.supply_model_conf["profile_type"],
+                        start
                     )
                     self.real_n_charging_zones += zone_n_cps
 
         for i in range(self.n_vehicles_sim):
+            if self.supply_model_conf["profile_type"] == "fixed_duration":
+                vehicle_conf["fixed_charging_duration"] = self.supply_model_conf["fixed_charging_duration"]
             vehicle_object = Vehicle(
                 self.simpy_env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
-                vehicle_conf, self.energy_mix, engine_type, vehicle_model_name, start
+                vehicle_conf, self.energy_mix, start
             )
             self.vehicles_list.append(vehicle_object)
 
@@ -210,6 +222,8 @@ class SupplyModel:
                         self.max_driving_distance / 1000
                     )
                 )
-            else:
-                print("Policy for alpha not recognised!")
-                exit(0)
+            elif self.supply_model_conf["alpha_policy"] == "sim_config":
+                assert "alpha" in self.supply_model_conf
+        else:
+            print("Policy for alpha not recognised!")
+            exit(0)

@@ -37,6 +37,7 @@ class SimBookingRequest(SimEvent):
 
         available_vehicle_flag = False
         found_vehicle_flag = False
+        available_vehicle_flag_same_zone = False
 
         max_soc_vehicle_id = -1
         max_soc_zone_id = -1
@@ -46,12 +47,14 @@ class SimBookingRequest(SimEvent):
             found_vehicle_flag, max_soc_vehicle_origin, max_soc_origin = self.search_max_soc_vehicle(zone_id)
             max_soc_vehicle_id = max_soc_vehicle_origin
             max_soc_zone_id = self.booking_request_dict["origin_id"]
+            if found_vehicle_flag:
+                available_vehicle_flag_same_zone = True
 
         flags_return_dict = dict(
-            available_vehicle_flag = available_vehicle_flag,
-            found_vehicle_flag = found_vehicle_flag,
-            available_vehicle_flag_same_zone = True,
-            available_vehicle_flag_not_same_zone = False
+            available_vehicle_flag=available_vehicle_flag,
+            found_vehicle_flag=found_vehicle_flag,
+            available_vehicle_flag_same_zone=available_vehicle_flag_same_zone,
+            available_vehicle_flag_not_same_zone=False
         )
         return flags_return_dict, max_soc_vehicle_id, max_soc_zone_id
 

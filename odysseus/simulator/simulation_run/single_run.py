@@ -18,7 +18,6 @@ def single_run(conf_dict):
     sim_scenario_name = conf_dict["sim_scenario_name"]
 
     city = sim_general_conf["city"]
-    sim_technique = sim_general_conf["sim_technique"]
 
     results_path = get_output_path(
         "results", city, conf_dict["sim_scenario_name"], "single_run", conf_dict["conf_id"]
@@ -37,7 +36,7 @@ def single_run(conf_dict):
 
     print(datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"], "SimInput initialised!")
 
-    sim = run_sim(sim_input, sim_technique)
+    sim = run_sim_v2(sim_input)
     sim_output = SimOutput(sim)
     sim_stats = sim_output.sim_stats
 

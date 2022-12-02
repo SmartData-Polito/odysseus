@@ -36,7 +36,7 @@ class RelocationPrimitives:
 
         self.start = sim.start
 
-        self.simInput = sim.sim_input
+        self.sim_input = sim.sim_input
 
         self.vehicles_soc_dict = sim.vehicles_soc_dict
 
@@ -50,7 +50,7 @@ class RelocationPrimitives:
 
         self.relocation_workers_resource = simpy.Resource(
             self.env,
-            capacity=self.simInput.supply_model_conf["n_relocation_workers"]
+            capacity=self.sim_input.supply_model_config["n_relocation_workers"]
         )
 
         self.current_hour_origin_count = {}
@@ -68,7 +68,7 @@ class RelocationPrimitives:
 
         self.n_scooters_relocating = 0
 
-        self.scheduled_scooter_relocations = []
+        self.scheduled_relocations = []
         self.starting_zone_ids = []
         self.n_picked_vehicles_list = []
         self.ending_zone_ids = []
@@ -78,17 +78,17 @@ class RelocationPrimitives:
 
         self.relocation_workers = []
 
-        for i in range(len(self.simInput.supply_model.initial_relocation_workers_positions)):
+        for i in range(len(self.sim_input.supply_model.initial_relocation_workers_positions)):
             worker_id = i
-            initial_position = self.simInput.supply_model.initial_relocation_workers_positions[i]
+            initial_position = self.sim_input.supply_model.initial_relocation_workers_positions[i]
             self.relocation_workers.append(Worker(env, worker_id, initial_position))
 
-        if "window_width" in dict(self.simInput.supply_model_conf["relocation_technique"]):
-            self.window_width = dict(self.simInput.supply_model_conf["relocation_technique"])["window_width"]
+        if "window_width" in dict(self.sim_input.supply_model_config["relocation_technique"]):
+            self.window_width = dict(self.sim_input.supply_model_config["relocation_technique"])["window_width"]
         else:
             self.window_width = 1
 
-        if self.simInput.supply_model_conf["relocation_strategy"] == "predictive":
+        if self.sim_input.supply_model_config["relocation_strategy"] == "predictive":
 
             from odysseus.simulator.simulation_input.prediction_model import PredictionModel
 
@@ -97,15 +97,15 @@ class RelocationPrimitives:
                 "simulator",
                 "simulation_input",
                 "prediction_model",
-                self.simInput.supply_model_config["city"]
+                self.sim_input.supply_model_config["city"]
             )
 
             with open(os.path.join(prediction_model_dir, "params.json"), "r") as f:
                 prediction_model_configs = json.load(f)
 
-            self.city_shape = self.simInput.grid_matrix.shape
-            mask = self.simInput.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(
-                lambda zone_id: int(zone_id in self.simInput.valid_zones))).to_numpy()
+            self.city_shape = self.sim_input.grid_matrix.shape
+            mask = self.sim_input.grid_matrix.apply(lambda zone_id_column: zone_id_column.apply(
+                lambda zone_id: int(zone_id in self.sim_input.valid_zones))).to_numpy()
             mask = np.repeat(mask[:, :, np.newaxis], 2, axis=2)
 
             prediction_model_path = os.path.join(prediction_model_dir,
@@ -185,16 +185,17 @@ class RelocationPrimitives:
                 step_start = collection_path[j - 1]
                 step_end = collection_path[j]
 
-                distance = get_od_distance(
-                    self.simInput.grid_centroids,
-                    step_start,
-                    step_end,
-                    self.sim_input.grid_crs
-                )
+                # distance = get_od_distance(
+                #     self.sim_input.grid,
+                #     step_start,
+                #     step_end,
+                #     self.sim_input.grid_crs
+                # )
+                distance = self.sim_input.distance_matrix.loc[step_start, step_end]
                 total_distance += distance
                 self.sim_metrics.update_metrics("avg_relocation_step_distance", distance)
 
-                duration = distance / 1000 / self.simInput.supply_model_conf["avg_relocation_speed"] * 3600
+                duration = distance / 1000 / self.sim_input.supply_model_config["avg_relocation_speed"] * 3600
                 total_duration += duration
 
                 # Simulate step navigation time
@@ -222,16 +223,17 @@ class RelocationPrimitives:
                 step_start = distribution_path[j - 1]
                 step_end = distribution_path[j]
 
-                distance = get_od_distance(
-                    self.simInput.grid_centroids,
-                    step_start,
-                    step_end,
-                    self.simInput.grid_crs
-                )
+                # distance = get_od_distance(
+                #     self.sim_input.grid,
+                #     step_start,
+                #     step_end,
+                #     self.sim_input.grid_crs
+                # )
+                distance = self.sim_input.distance_matrix.loc[step_start, step_end]
                 total_distance += distance
                 self.sim_metrics.update_metrics("avg_relocation_step_distance", distance)
 
-                duration = distance / 1000 / self.simInput.supply_model_conf["avg_relocation_speed"] * 3600
+                duration = distance / 1000 / self.sim_input.supply_model_config["avg_relocation_speed"] * 3600
                 total_duration += duration
 
                 # Simulate step navigation time
@@ -272,8 +274,8 @@ class RelocationPrimitives:
             scooter_relocation["end_zone_ids"][0],
             scooter_relocation["end_time"]
         )
-        if "save_history" in self.simInput.supply_model_conf:
-            if self.simInput.supply_model_conf["save_history"]:
+        if "save_history" in self.sim_input.sim_general_config:
+            if self.sim_input.sim_general_config["save_history"]:
                 self.sim_scooter_relocations += [scooter_relocation]
         self.n_scooter_relocations += 1
         self.tot_scooter_relocations_distance += scooter_relocation["distance"]
@@ -303,8 +305,8 @@ class RelocationPrimitives:
 
     def update_relocation_stats(self, scooter_relocation):
 
-        if "save_history" in self.simInput.supply_model_config:
-            if self.simInput.supply_model_config["save_history"]:
+        if "save_history" in self.sim_input.sim_general_config:
+            if self.sim_input.sim_general_config["save_history"]:
                 self.sim_scooter_relocations += [scooter_relocation]
 
         self.n_scooter_relocations += 1

@@ -6,9 +6,15 @@ import pandas as pd
 
 def get_daytype_from_week_config(week_config, weekday):
     for daytype in week_config["week_slots"]:
-        for day in week_config["week_slots"][daytype]:
-            if day == weekday:
-                return daytype
+        if weekday in week_config["week_slots"][daytype]:
+            return daytype
+
+
+def get_day_slot_from_week_config(week_config, hour):
+    for daytype in week_config["week_slots"]:
+        for day_slot in week_config["day_slots"][daytype]:
+            if hour in week_config["day_slots"][daytype][day_slot]:
+                return day_slot
 
 
 def get_daytype_from_weekday(weekday):

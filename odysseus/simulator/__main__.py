@@ -40,10 +40,10 @@ parser.add_argument(
 )
 
 parser.set_defaults(
-    campaign_name="test",
-    conf_name="generated_od_test",
-    city_scenario_folder="cyclic_scenario",
-    sim_run_mode="single_run"
+    campaign_name="smartdata_test_0",
+    conf_name="scenario_B1",
+    city_scenario_folder="charging_zone",
+    sim_run_mode="multiple_runs"
 )
 
 args = parser.parse_args()
@@ -67,28 +67,33 @@ config_grids_dict["sim_general_config_grid"] = sim_general_conf_grid
 config_grids_dict["demand_model_config_grid"] = demand_model_conf_grid
 config_grids_dict["supply_model_config_grid"] = supply_model_conf_grid
 
-sim_general_conf_list = SimConfGrid(sim_general_conf_grid).conf_list
-configs_list = list()
-conf_id = 0
-for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
-    sim_general_conf["general_conf_id"] = general_conf_id
-    demand_conf_grid = SimConfGrid(demand_model_conf_grid)
-    for demand_conf_id, demand_model_conf in enumerate(demand_conf_grid.conf_list):
-        supply_conf_grid = SimConfGrid(supply_model_conf_grid)
-        for supply_model_conf_id, supply_model_conf in enumerate(supply_conf_grid.conf_list):
-            parameters_dict = {
-                "city_scenario_folder": args.city_scenario_folder,
-                "sim_general_conf": sim_general_conf,
-                "sim_scenario_name": sim_general_conf["sim_scenario_name"],
-                "demand_model_conf": demand_model_conf,
-                "supply_model_conf": supply_model_conf,
-                "supply_model_object": None,
-                "conf_id": "_".join(
-                    [str(general_conf_id), str(demand_conf_id), str(supply_model_conf_id)]
-                )
-            }
-            configs_list.append(parameters_dict)
-            conf_id += 1
+try:
+    sim_general_conf_list = SimConfGrid(sim_general_conf_grid).conf_list
+    configs_list = list()
+    conf_id = 0
+    for general_conf_id, sim_general_conf in enumerate(sim_general_conf_list):
+        sim_general_conf["general_conf_id"] = general_conf_id
+        demand_conf_grid = SimConfGrid(demand_model_conf_grid)
+        for demand_conf_id, demand_model_conf in enumerate(demand_conf_grid.conf_list):
+            supply_conf_grid = SimConfGrid(supply_model_conf_grid)
+            for supply_model_conf_id, supply_model_conf in enumerate(supply_conf_grid.conf_list):
+                parameters_dict = {
+                    "city_scenario_folder": args.city_scenario_folder,
+                    "sim_general_conf": sim_general_conf,
+                    "sim_scenario_name": sim_general_conf["sim_scenario_name"],
+                    "demand_model_conf": demand_model_conf,
+                    "supply_model_conf": supply_model_conf,
+                    "supply_model_object": None,
+                    "conf_id": "_".join(
+                        [str(general_conf_id), str(demand_conf_id), str(supply_model_conf_id)]
+                    )
+                }
+                configs_list.append(parameters_dict)
+                conf_id += 1
+
+except Exception:
+    print("Simulator not properly configured!")
+    exit()
 
 if args.sim_run_mode == "single_run":
     for parameters_dict in configs_list:
@@ -103,6 +108,9 @@ elif args.sim_run_mode == "multiple_runs":
         if args.n_cpus is not None:
             parameters_dict["n_cpus"] = int(args.n_cpus)
     multiple_runs(config_grids_dict, configs_list)
+
+else:
+    print("Unknown run mode: {}".format(args.sim_run_mode))
 
 end = datetime.datetime.now()
 

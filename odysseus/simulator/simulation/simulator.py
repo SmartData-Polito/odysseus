@@ -8,11 +8,17 @@ from odysseus.simulator.simulation_data_structures.sim_booking import SimBooking
 from odysseus.simulator.simulation.charging_strategies import ChargingStrategy
 from odysseus.simulator.simulation.relocation_strategies import RelocationStrategy
 
-from odysseus.supply_modelling.fleet.vehicle_conf import vehicle_conf
 from odysseus.supply_modelling.service_stations.station_conf import station_conf
 from odysseus.simulator.simulation.sim_metrics import SimMetrics
 
+import itertools
+
+import numpy as np
+
+from odysseus.simulator.simulation_data_structures.sim_booking_request import SimBookingRequest
 from odysseus.utils.bookings_utils import *
+
+np.random.seed(44)
 
 
 class SharedMobilitySim:
@@ -23,18 +29,15 @@ class SharedMobilitySim:
         self.end = sim_input.end
         self.total_seconds = sim_input.total_seconds
         self.total_days = sim_input.total_days
-        self.hours_spent = 0
         self.current_datetime = self.start
         self.current_hour = self.current_datetime.hour
         self.current_weekday = self.current_datetime.weekday()
-        if self.start.weekday() in [5, 6]:
-            self.current_daytype = "weekend"
-        else:
-            self.current_daytype = "weekday"
-
         self.update_relocation_schedule = True
-
         self.sim_input = sim_input
+
+        for daytype in self.sim_input.demand_model.week_config["week_slots"]:
+            if self.start.weekday() in self.sim_input.demand_model.week_config["week_slots"][daytype]:
+                self.current_daytype = daytype
 
         self.available_vehicles_dict = self.sim_input.supply_model.available_vehicles_dict
         self.neighbors_dict = self.sim_input.neighbors_dict
@@ -42,7 +45,7 @@ class SharedMobilitySim:
         self.vehicles_soc_dict = self.sim_input.supply_model.vehicles_soc_dict
         self.vehicles_zones = self.sim_input.supply_model.vehicles_zones
 
-        if sim_input.supply_model_conf["distributed_cps"]:
+        if sim_input.supply_model_config["distributed_cps"]:
             self.n_charging_poles_by_zone = self.sim_input.n_charging_poles_by_zone
 
         self.env = simpy.Environment()
@@ -54,6 +57,7 @@ class SharedMobilitySim:
         self.sim_no_close_vehicle_requests = []
 
         self.n_booking_requests = 0
+        self.n_bookings = 0
         self.n_same_zone_trips = 0
         self.n_not_same_zone_trips = 0
         self.n_no_close_vehicles = 0
@@ -78,11 +82,15 @@ class SharedMobilitySim:
         self.charging_return_distance = []
         self.charging_outward_distance = []
 
+        vehicle_config = {
+            "engine_type": self.sim_input.supply_model_config["engine_type"],
+            "fuel_capacity": self.sim_input.supply_model_config["fuel_capacity"],
+            "vehicle_efficiency": self.sim_input.supply_model_config["vehicle_efficiency"],
+            "vehicle_model_name": self.sim_input.supply_model_config["vehicle_model_name"],
+        }
+
         self.sim_input.supply_model.init_for_simulation(
-            self.env, self.start, station_conf, vehicle_conf,
-            self.sim_input.supply_model_conf["engine_type"],
-            self.sim_input.supply_model_conf["profile_type"],
-            self.sim_input.supply_model_conf["vehicle_model_name"]
+            self.env, self.start, station_conf, vehicle_config,
         )
 
         self.zone_dict = self.sim_input.supply_model.zone_dict
@@ -93,7 +101,7 @@ class SharedMobilitySim:
 
         self.sim_metrics = SimMetrics()
 
-        if self.sim_input.supply_model_conf["relocation"]:
+        if self.sim_input.supply_model_config["relocation"]:
             self.relocation_strategy = RelocationStrategy(self.env, self)
 
         self.charging_strategy = ChargingStrategy(self.env, self)
@@ -104,52 +112,71 @@ class SharedMobilitySim:
         self.current_arrival_rate = None
         self.current_trip_kde = None
 
-    def update_time_info(self):
+        self.sim_start_dt = None
+        self.sim_end_dt = None
+        self.sim_exec_time_sec = None
 
-        self.hours_spent += 1
+    def update_time_info(self):
 
         self.current_datetime = self.start + datetime.timedelta(seconds=self.env.now)
         if self.current_hour != self.current_datetime.hour:
             self.current_hour = self.current_datetime.hour
             self.update_relocation_schedule = True
         self.current_weekday = self.current_datetime.weekday()
-        if self.current_weekday in [5, 6]:
-            self.current_daytype = "weekend"
-        else:
-            self.current_daytype = "weekday"
+        self.current_daytype = get_daytype_from_week_config(
+            self.sim_input.demand_model.week_config, self.current_weekday
+        )
 
         if self.update_relocation_schedule \
-                and self.sim_input.supply_model_conf["relocation"] \
-                and self.sim_input.supply_model_conf["relocation_strategy"] in ["proactive",
-                                                                                       "reactive_post_charge",
-                                                                                       "reactive_post_trip",
-                                                                                       "predictive"]:
+                and self.sim_input.supply_model_config["relocation"] \
+                and self.sim_input.supply_model_config["relocation_strategy"] in ["proactive",
+                                                                                   "reactive_post_charge",
+                                                                                   "reactive_post_trip",
+                                                                                   "predictive"]:
             self.relocation_strategy.generate_relocation_schedule(self.current_datetime, self.current_daytype,
                                                                   self.current_hour)
             self.update_relocation_schedule = False
 
-    def execute_booking (self, booking, vehicle_id, zone_id):
+    def execute_booking(self, booking, vehicle_id, zone_id):
 
         booking_dict = booking.booking_dict
 
         self.tot_mobility_distance += booking_dict["driving_distance"]
         self.tot_mobility_duration += booking_dict["duration"]
 
-        if self.sim_input.supply_model_conf["relocation"] \
-                and self.sim_input.supply_model_conf["relocation_strategy"] in ["predictive"]:
+        if self.sim_input.supply_model_config["relocation"] \
+                and self.sim_input.supply_model_config["relocation_strategy"] in ["predictive", "proactive"]:
             self.relocation_strategy.update_current_hour_stats(booking_dict)
 
-        if "save_history" in self.sim_input.sim_general_conf:
-            if self.sim_input.sim_general_conf["save_history"]:
+        if "save_history" in self.sim_input.sim_general_config:
+            if self.sim_input.sim_general_config["save_history"]:
                 self.sim_bookings += [booking_dict]
+
+        self.update_time_info()
+
+        # print(
+        #     "BOOKING START",
+        #     self.current_datetime,
+        #     booking_dict["start_time"],
+        #     booking_dict["end_time"],
+        #     booking_dict["origin_id"],
+        #     booking_dict["destination_id"],
+        # )
+        # print(self.available_vehicles_dict, self.vehicles_zones)
 
         if vehicle_id in self.available_vehicles_dict[zone_id]:
             self.available_vehicles_dict[zone_id].remove(vehicle_id)
         if vehicle_id in self.vehicles_zones:
             del self.vehicles_zones[vehicle_id]
 
+        # if vehicle_id in self.available_vehicles_dict[zone_id]:
+        #     if vehicle_id in self.vehicles_zones:
+        #         print(self.available_vehicles_dict[zone_id], self.vehicles_zones[vehicle_id])
+
         self.n_booked_vehicles += 1
-        yield self.env.process(booking.execute())
+
+        yield self.env.process(booking.execute_booking())
+
         booking_dict = booking.booking_dict
         self.n_booked_vehicles -= 1
 
@@ -161,14 +188,36 @@ class SharedMobilitySim:
         self.available_vehicles_dict[relocation_zone_id].append(vehicle_id)
         self.vehicles_zones[vehicle_id] = relocation_zone_id
 
+        self.update_time_info()
+
+        # print(
+        #     "BOOKING END",
+        #     self.current_datetime,
+        #     booking_dict["start_time"],
+        #     booking_dict["end_time"],
+        #     booking_dict["origin_id"],
+        #     booking_dict["destination_id"],
+        # )
+        # print(self.available_vehicles_dict, self.vehicles_zones)
+
     def process_booking_request(self, booking_request):
 
         booking_request_dict = booking_request.booking_request_dict
+
+        # print(
+        #     "REQUEST",
+        #     self.current_datetime,
+        #     booking_request_dict["start_time"],
+        #     booking_request_dict["end_time"],
+        #     booking_request_dict["origin_id"],
+        #     booking_request_dict["destination_id"],
+        # )
+
         booking_request_dict["req_id"] = self.n_booking_requests
         self.n_booking_requests += 1
 
-        if "save_history" in self.sim_input.sim_general_conf:
-            if self.sim_input.sim_general_conf["save_history"]:
+        if "save_history" in self.sim_input.sim_general_config:
+            if self.sim_input.sim_general_config["save_history"]:
                 self.sim_booking_requests += [booking_request_dict]
                 self.list_n_vehicles_booked += [self.n_booked_vehicles]
                 self.list_n_vehicles_charging_system += [self.charging_strategy.n_vehicles_charging_system]
@@ -179,14 +228,14 @@ class SharedMobilitySim:
                     self.sim_input.n_vehicles_sim - n_vehicles_charging - self.n_booked_vehicles
                 ]
 
-        if self.sim_input.supply_model_conf["relocation"]:
+        if self.sim_input.supply_model_config["relocation"]:
             self.list_n_scooters_relocating += [self.relocation_strategy.n_scooters_relocating]
 
         self.charging_outward_distance = [self.charging_strategy.charging_outward_distance]
         self.charging_return_distance = [self.charging_strategy.charging_return_distance]
 
         flags_return_dict, chosen_vehicle_id, chosen_origin_id = booking_request.search_vehicle(
-            self.sim_input.demand_model_conf["vehicle_research_policy"]
+            self.sim_input.demand_model_config["vehicle_research_policy"]
         )
 
         available_vehicle_flag = flags_return_dict["available_vehicle_flag"]
@@ -195,6 +244,7 @@ class SharedMobilitySim:
         available_vehicle_flag_not_same_zone = flags_return_dict["available_vehicle_flag_not_same_zone"]
 
         if found_vehicle_flag:
+            self.n_bookings += 1
             booking_request_dict = add_consumption_emission_info(
                 booking_request_dict, self.vehicles_list[chosen_vehicle_id]
             )
@@ -213,9 +263,9 @@ class SharedMobilitySim:
             self.n_not_same_zone_trips += 1
 
         if not found_vehicle_flag \
-                and "relocation" in self.sim_input.supply_model_conf \
-                and self.sim_input.supply_model_conf["relocation"] \
-                and self.sim_input.supply_model_conf["relocation_strategy"] == "magic_relocation":
+                and "relocation" in self.sim_input.supply_model_config \
+                and self.sim_input.supply_model_config["relocation"] \
+                and self.sim_input.supply_model_config["relocation_strategy"] == "magic_relocation":
 
             relocated, scooter_relocation = self.relocation_strategy.check_scooter_relocation(booking_request_dict)
 
@@ -239,8 +289,8 @@ class SharedMobilitySim:
 
         if not available_vehicle_flag:
             self.n_no_close_vehicles += 1
-            if "save_history" in self.sim_input.sim_general_conf:
-                if self.sim_input.sim_general_conf["save_history"]:
+            if "save_history" in self.sim_input.sim_general_config:
+                if self.sim_input.sim_general_config["save_history"]:
                     self.sim_unsatisfied_requests += [booking_request_dict]
                     self.sim_no_close_vehicle_requests += [booking_request_dict]
 
@@ -250,13 +300,91 @@ class SharedMobilitySim:
             death["hour"] = death["start_time"].hour
             death["plate"] = chosen_vehicle_id
             death["zone_id"] = chosen_origin_id
-            if "save_history" in self.sim_input.sim_general_conf:
-                if self.sim_input.sim_general_conf["save_history"]:
+            if "save_history" in self.sim_input.sim_general_config:
+                if self.sim_input.sim_general_config["save_history"]:
                     self.sim_booking_requests_deaths += [death]
 
+    def mobility_requests_generator_from_model(self):
+
+        hours_spent = 0
+        self.update_time_info()
+        last_current_hour = self.current_hour
+
+        for i in itertools.count():
+
+            for booking_request_dict in self.sim_input.demand_model.generate_booking_requests_sim(
+                    self.current_datetime,
+                    self.sim_input.demand_model_config["requests_rate_factor"],
+                    self.sim_input.demand_model_config["avg_speed_kmh_mean"],
+                    self.sim_input.demand_model_config["max_duration"],
+                    self.sim_input.demand_model_config["fixed_driving_distance"]
+            ):
+
+                yield self.env.timeout(booking_request_dict["ia_timeout"])
+                self.update_time_info()
+
+                booking_request = SimBookingRequest(
+                    self.env, self.sim_input, self.vehicles_list, booking_request_dict
+                )
+
+                self.process_booking_request(booking_request)
+
+            if self.sim_input.demand_model_config["demand_model_type"] == "od_matrices":
+                yield self.env.timeout(3600 - self.current_datetime.minute * 60)
+                self.update_time_info()
+
+            if self.current_hour != last_current_hour:
+                last_current_hour = self.current_hour
+                hours_spent += 1
+
+            if hours_spent >= self.sim_input.sim_general_config["max_sim_hours"]:
+                break
+
+            # yield self.env.timeout(60*60)
+
+    def mobility_requests_generator_from_trace(self):
+
+        hours_spent = 0
+        self.update_time_info()
+        last_current_hour = self.current_hour
+
+        print(datetime.datetime.now(), "Simulation started ...")
+
+        for booking_request_dict in self.sim_input.booking_requests_list:
+
+            if booking_request_dict["origin_id"] in self.valid_zones\
+                    and booking_request_dict["destination_id"] in self.valid_zones:
+
+                self.update_time_info()
+                booking_request_dict = update_req_time_info(booking_request_dict)
+
+                if self.sim_input.supply_model_config["relocation"] \
+                        and self.sim_input.supply_model_config["relocation_strategy"] in ["predictive"]:
+                    self.relocation_strategy.update_current_hour_stats(booking_request_dict)
+
+                yield self.env.timeout(booking_request_dict["ia_timeout"])
+
+                booking_request = SimBookingRequest(
+                    self.env, self.sim_input, self.vehicles_list, booking_request_dict
+                )
+                self.process_booking_request(booking_request)
+
+                if self.current_hour != last_current_hour:
+                    last_current_hour = self.current_hour
+                    hours_spent += 1
+
+                if hours_spent >= self.sim_input.sim_general_config["max_sim_hours"]:
+                    break
+
     def mobility_requests_generator(self):
-        pass
+        if self.sim_input.demand_model_config["demand_model_type"] == "od_matrices":
+            self.env.process(self.mobility_requests_generator_from_model())
 
     def run(self):
-        self.env.process(self.mobility_requests_generator())
+        self.sim_start_dt = datetime.datetime.now()
+        self.mobility_requests_generator()
         self.env.run(until=self.total_seconds)
+        self.sim_end_dt = datetime.datetime.now()
+        self.sim_exec_time_sec = (
+            self.sim_end_dt - self.sim_start_dt
+        ).total_seconds()

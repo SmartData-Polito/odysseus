@@ -6,19 +6,19 @@ class ChargingStrategy(ChargingPrimitives):
 
 	def get_charge_dict(self, vehicle, charge, booking_request, operator, charging_relocation_strategy):
 
-		if self.sim_input.supply_model_conf["battery_swap"]:
+		if self.sim_input.supply_model_config["battery_swap"]:
 
 			charging_zone_id = booking_request["destination_id"]
 			charging_outward_distance = 0
 
 			if operator == "system":
 				timeout_outward = np.random.exponential(
-					self.sim_input.supply_model_conf[
+					self.sim_input.supply_model_config[
 						"avg_reach_time"
 					] * 60
 				)
 				charge["duration"] = np.random.exponential(
-					self.sim_input.supply_model_conf[
+					self.sim_input.supply_model_config[
 						"avg_service_time"
 					] * 60
 				)
@@ -30,14 +30,14 @@ class ChargingStrategy(ChargingPrimitives):
 				timeout_return = 0
 				cr_soc_delta = 0
 				charge["duration"] = np.random.normal(
-					self.sim_input.supply_model_conf[
+					self.sim_input.supply_model_config[
 						"avg_service_time_users"
 					] * 60,
 					30 * 60
 				)
 				resource = self.workers
 
-		if self.sim_input.supply_model_conf["distributed_cps"]:
+		if self.sim_input.supply_model_config["distributed_cps"]:
 
 			if charging_relocation_strategy == "closest_free":
 
@@ -119,7 +119,7 @@ class ChargingStrategy(ChargingPrimitives):
 			if operator == "system":
 
 				timeout_outward = np.random.exponential(
-					self.sim_input.supply_model_conf[
+					self.sim_input.supply_model_config[
 						"avg_reach_time"
 					] * 60
 				)
@@ -127,18 +127,11 @@ class ChargingStrategy(ChargingPrimitives):
 					booking_request["destination_id"],
 					charging_zone_id
 				)
-				if self.sim_input.supply_model_conf["relocation"]:
+				if self.sim_input.supply_model_config["relocation"]:
 					timeout_return = 2 * self.get_timeout(
 						booking_request["destination_id"],
 						charging_zone_id
 					)
-
-				charge["duration"] = vehicle.get_charging_time_from_perc(
-					vehicle.soc.level,
-					self.charging_stations_dict[charging_zone_id].flow_rate,
-					self.sim_input.supply_model_conf["profile_type"],
-					charge["end_soc"]
-				)
 
 				cr_soc_delta = self.get_cr_soc_delta(
 					booking_request["destination_id"], charging_zone_id, vehicle
@@ -158,12 +151,17 @@ class ChargingStrategy(ChargingPrimitives):
 				charging_station = self.charging_stations_dict[charging_zone_id].charging_station
 				resource = charging_station
 				timeout_outward = 0
-				charge["duration"] = self.vehicles_list[vehicle].get_charging_time_from_perc(
-					self.vehicles_list[vehicle].soc.level,
-					self.charging_stations_dict[charging_zone_id].flow_rate, charge["end_soc"]
-				)
 				timeout_return = 0
 				cr_soc_delta = 0
+
+			if "charging_duration" in self.sim_input.supply_model_config:
+				charge["duration"] = self.sim_input.supply_model_config["charging_duration"]
+			else:
+				charge["duration"] = self.vehicles_list[vehicle].get_charging_time_from_perc(
+					self.vehicles_list[vehicle].soc.level,
+					self.charging_stations_dict[charging_zone_id].flow_rate,
+					charge["end_soc"]
+				)
 
 		charge_dict = {
 			"charge": charge,
@@ -183,7 +181,7 @@ class ChargingStrategy(ChargingPrimitives):
 
 		user_charge_flag = False
 
-		if self.sim_input.demand_model_conf["user_contribution"]:
+		if self.sim_input.demand_model_config["user_contribution"]:
 			charge_flag, charge = self.check_user_charge(booking_request, vehicle)
 			if charge_flag:
 				user_charge_flag = True
@@ -198,11 +196,11 @@ class ChargingStrategy(ChargingPrimitives):
 					charge_dict = self.get_charge_dict(vehicle, charge, booking_request, "system")
 					yield self.env.process(self.charge_vehicle(charge_dict))
 		else:
-			charging_strategy = self.sim_input.supply_model_conf["charging_strategy"]
+			charging_strategy = self.sim_input.supply_model_config["charging_strategy"]
 			charge_flag, charge = self.check_system_charge(booking_request, vehicle, charging_strategy)
 			if charge_flag:
 				self.list_system_charging_bookings.append(booking_request)
-				charging_relocation_strategy = self.sim_input.supply_model_conf["charging_relocation_strategy"]
+				charging_relocation_strategy = self.sim_input.supply_model_config["charging_relocation_strategy"]
 				charge_dict = self.get_charge_dict(
 					vehicle, charge, booking_request, "system",
 					charging_relocation_strategy
@@ -211,27 +209,17 @@ class ChargingStrategy(ChargingPrimitives):
 
 		if charge_flag and not user_charge_flag:
 
-			relocation_zone_id = charge_dict["zone_id"]
+			charging_return_zone_id = charge_dict["zone_id"]
 
-			if self.sim_input.supply_model_conf["relocation"]:
-				relocation_zone_id = booking_request["destination_id"]
-
-			elif self.sim_input.supply_model_conf["battery_swap"] \
-				and self.sim_input.supply_model_conf["scooter_relocation"]:
-
-				if self.sim_input.supply_model_conf["scooter_relocation_strategy"] == "reactive_post_charge":
-					relocated, scooter_relocation = self.relocation_strategy.check_scooter_relocation(
-						booking_request,
-						vehicles=[vehicle.plate]
-					)
-
-					if relocated:
-						relocation_zone_id = scooter_relocation["end_zone_ids"][0]
-						yield self.env.process(
-							self.relocation_strategy.relocate_single_zone(scooter_relocation))
+			if "charging_return_strategy" in self.sim_input.supply_model_config:
+				if self.sim_input.supply_model_config["charging_return_strategy"] == "last_destination":
+					charging_return_zone_id = booking_request["destination_id"]
+				elif self.sim_input.supply_model_config["charging_return_strategy"] == "no_return":
+					pass
+			else:
+				pass
 
 		else:
+			charging_return_zone_id = booking_request["destination_id"]
 
-			relocation_zone_id = booking_request["destination_id"]
-
-		return relocation_zone_id
+		return charging_return_zone_id
