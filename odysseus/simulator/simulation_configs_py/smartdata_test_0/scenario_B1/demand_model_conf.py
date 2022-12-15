@@ -5,6 +5,10 @@ demand_model_config_grid = {
 
 	"vehicle_research_policy": ["zone"],
 
+	"avg_speed_kmh_mean": [1],
+	"max_duration": [3000],
+	"fixed_driving_distance": [1000],
+
 	"user_contribution_policy": [""],
 	"user_contribution": [False],
 	"willingness": [0],

@@ -30,11 +30,22 @@ class ODmatricesDemandModel(DemandModel):
     def generate_booking_requests_list(self, start_datetime, end_datetime):
         return generate_booking_requests_list(self.od_matrices, self.week_config, start_datetime, end_datetime)
 
-    def generate_booking_requests_sim(self, start_datetime, requests_rate_factor):
+    def generate_booking_requests_sim(
+            self,
+            start_datetime,
+            requests_rate_factor,
+            avg_speed_kmh_mean,
+            max_duration,
+            fixed_driving_distance
+    ):
 
         return generate_booking_requests_list(
             self.od_matrices, self.week_config, self.distance_matrix, start_datetime,
-            start_datetime + datetime.timedelta(hours=1), requests_rate_factor
+            start_datetime + datetime.timedelta(hours=1),
+            requests_rate_factor,
+            avg_speed_kmh_mean,
+            max_duration,
+            fixed_driving_distance
         )
 
     def save_results(self):

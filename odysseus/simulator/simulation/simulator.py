@@ -85,7 +85,7 @@ class SharedMobilitySim:
         vehicle_config = {
             "engine_type": self.sim_input.supply_model_config["engine_type"],
             "fuel_capacity": self.sim_input.supply_model_config["fuel_capacity"],
-            "consumption": self.sim_input.supply_model_config["consumption"],
+            "vehicle_efficiency": self.sim_input.supply_model_config["vehicle_efficiency"],
             "vehicle_model_name": self.sim_input.supply_model_config["vehicle_model_name"],
         }
 
@@ -313,7 +313,11 @@ class SharedMobilitySim:
         for i in itertools.count():
 
             for booking_request_dict in self.sim_input.demand_model.generate_booking_requests_sim(
-                    self.current_datetime, self.sim_input.demand_model_config["requests_rate_factor"]
+                    self.current_datetime,
+                    self.sim_input.demand_model_config["requests_rate_factor"],
+                    self.sim_input.demand_model_config["avg_speed_kmh_mean"],
+                    self.sim_input.demand_model_config["max_duration"],
+                    self.sim_input.demand_model_config["fixed_driving_distance"]
             ):
 
                 yield self.env.timeout(booking_request_dict["ia_timeout"])
@@ -327,12 +331,13 @@ class SharedMobilitySim:
 
             if self.sim_input.demand_model_config["demand_model_type"] == "od_matrices":
                 yield self.env.timeout(3600 - self.current_datetime.minute * 60)
+                self.update_time_info()
 
             if self.current_hour != last_current_hour:
                 last_current_hour = self.current_hour
                 hours_spent += 1
 
-            if hours_spent > self.sim_input.sim_general_config["max_sim_hours"]:
+            if hours_spent >= self.sim_input.sim_general_config["max_sim_hours"]:
                 break
 
             # yield self.env.timeout(60*60)
@@ -368,7 +373,7 @@ class SharedMobilitySim:
                     last_current_hour = self.current_hour
                     hours_spent += 1
 
-                if hours_spent > self.sim_input.sim_general_config["max_sim_hours"]:
+                if hours_spent >= self.sim_input.sim_general_config["max_sim_hours"]:
                     break
 
     def mobility_requests_generator(self):

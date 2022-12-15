@@ -3,19 +3,26 @@ supply_model_config_grid = {
 	# -> energy supply
 
 	"year_energymix": ["2023"],
+
 	# -> vehicle configuration
 
 	"engine_type": ["gasoline"],
 	"fuel_capacity": [5],
-	"consumption": [10000],  # TODO -> this is efficiency [km/l] not consumption [l/km]
+	"vehicle_efficiency": [10000],
 	"n_seats": [5],
 	"vehicle_model_name": ["my_vehicle"],
 
 	# -> fleet size and initial placement
 
-	"vehicles_config_mode": ["sim_config"],
-	"n_vehicles": [1, 2, 3, 4],
-	"vehicles_initial_placement": ["random_greedy"],
+	"vehicles_config_mode": ["vehicles_zones"],
+	# "n_vehicles": [1, 2, 3, 4],
+	# "vehicles_initial_placement": ["random_greedy"],
+	"vehicles_zones": [
+		frozenset({0: 0}.items()),
+		frozenset({0: 0, 1: 1}.items()),
+		frozenset({0: 0, 1: 1, 2: 2}.items()),
+		frozenset({0: 0, 1: 1, 2: 2, 3: 3}.items())
+	],
 
 	# -> charging
 

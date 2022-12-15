@@ -10,8 +10,11 @@ from odysseus.path_config.path_config import root_data_path
 
 
 def generate_booking_requests_list(
-        od_matrices, week_config, distance_matrix, start_datetime, end_datetime, requests_rate_factor,
-        avg_speed_kmh_mean=1,
+        od_matrices, week_config, distance_matrix, start_datetime, end_datetime,
+        requests_rate_factor,
+        avg_speed_kmh_mean,
+        max_duration,
+        fixed_driving_distance
 ):
 
     booking_requests_list = list()
@@ -32,21 +35,18 @@ def generate_booking_requests_list(
                 )
 
                 if n_bookings_to_generate:
-                    cum_timeout = 0
                     for booking_request_to_generate in range(n_bookings_to_generate):
                         booking_req_start_datetime = current_datetime + datetime.timedelta(
                             seconds=np.random.uniform(1, 60)
                         )
-                        timeout_sec = (booking_req_start_datetime-start_datetime).total_seconds()
                         booking_request = create_booking_request_dict(
                             week_config, 0,
                             booking_req_start_datetime,
-                            o_id, d_id, avg_speed_kmh_mean, distance_matrix
+                            o_id, d_id, distance_matrix,
+                            avg_speed_kmh_mean,
+                            max_duration,
+                            fixed_driving_distance
                         )
-                        # booking_request["end_time"] = current_datetime + datetime.timedelta(seconds=cum_timeout) + \
-                        #                               datetime.timedelta(seconds=15*60)
-                        #booking_request["origin_i"] = od_matrices[current_daytype][current_day_slot_str]
-                        #cum_timeout += timeout_sec
                         booking_requests_list.append(booking_request)
 
         current_datetime += datetime.timedelta(seconds=3600)
@@ -56,6 +56,7 @@ def generate_booking_requests_list(
         current_daytype = get_daytype_from_week_config(week_config, current_weekday)
 
     booking_requests_df = pd.DataFrame(booking_requests_list).sort_values("start_time").reset_index()
+
     booking_requests_df["ia_timeout"] = (
         booking_requests_df.start_time - booking_requests_df.start_time.shift(1)
     ).apply(lambda td: abs(td.total_seconds()))

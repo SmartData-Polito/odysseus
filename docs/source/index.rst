@@ -33,3 +33,8 @@ This guide is organised as follows:
 
 - **Install Guide**
 - **City Data Manager**
+- **Demand Modelling**
+- **Supply Modelling**
+- **Simulator**
+- **Output analysis**
+

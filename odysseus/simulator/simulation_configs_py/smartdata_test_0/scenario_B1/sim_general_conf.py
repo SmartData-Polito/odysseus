@@ -19,6 +19,6 @@ sim_general_config_grid = {
     "year": [2023],
     "month_start": [1],
     "month_end": [1],
-    "max_sim_hours": [24 * 30]
+    "max_sim_hours": [24*5]
 
 }

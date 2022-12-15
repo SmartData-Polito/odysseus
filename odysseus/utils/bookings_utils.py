@@ -5,8 +5,9 @@ from odysseus.utils.time_utils import get_daytype_from_week_config
 
 
 def create_booking_request_dict(
-		week_config, timeout, current_datetime, origin_id, destination_id, avg_speed_kmh_mean, distance_matrix,
-		max_duration=3000
+		week_config, timeout, current_datetime, origin_id, destination_id, distance_matrix,
+		avg_speed_kmh_mean, max_duration, fixed_driving_distance,
+		orography_factor=1.4
 ):
 
 	booking_request_dict = dict()
@@ -24,10 +25,16 @@ def create_booking_request_dict(
 	booking_request_dict["origin_id"] = int(origin_id)
 	booking_request_dict["destination_id"] = int(destination_id)
 
-	booking_request_dict = get_distances(
-		booking_request_dict, distance_matrix,
-		booking_request_dict["origin_id"], booking_request_dict["destination_id"]
-	)
+	if fixed_driving_distance:
+		booking_request_dict["driving_distance"] = fixed_driving_distance
+		booking_request_dict["euclidean_distance"] = fixed_driving_distance / orography_factor
+	else:
+		booking_request_dict = get_distances(
+			booking_request_dict, distance_matrix,
+			booking_request_dict["origin_id"],
+			booking_request_dict["destination_id"],
+			orography_factor
+		)
 
 	booking_request_dict["duration"] = booking_request_dict["driving_distance"] / (
 			avg_speed_kmh_mean / 3.6
@@ -54,8 +61,7 @@ def update_req_time_info(booking_request_dict):
 
 
 def get_distances(
-		booking_or_request_dict, distance_matrix, origin_id, destination_id,
-		orography_factor=1.4,
+		booking_or_request_dict, distance_matrix, origin_id, destination_id, orography_factor,
 ):
 	booking_or_request_dict["euclidean_distance"] = distance_matrix.loc[origin_id, destination_id]
 	booking_or_request_dict["driving_distance"] = booking_or_request_dict["euclidean_distance"] * orography_factor

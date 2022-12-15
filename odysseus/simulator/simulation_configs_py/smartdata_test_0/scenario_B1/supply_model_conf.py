@@ -7,16 +7,20 @@ supply_model_config_grid = {
 	# -> vehicle configuration
 
 	"engine_type": ["gasoline"],
-	"fuel_capacity": [20],
-	"consumption": [1],
+	"fuel_capacity": [i for i in range(10, 101, 10)],
+	"vehicle_efficiency": [1],
 	"n_seats": [5],
 	"vehicle_model_name": ["my_vehicle"],
 
 	# -> fleet size and initial placement
 
-	"vehicles_config_mode": ["sim_config"],
-	"n_vehicles": [1, 2, 3, 4],
-	"vehicles_initial_placement": ["random_greedy"],
+	"vehicles_config_mode": ["vehicles_zones"],
+	"vehicles_zones": [
+		frozenset({0: 0}.items()),
+		frozenset({0: 0, 1: 1}.items()),
+		frozenset({0: 0, 1: 1, 2: 2}.items()),
+		frozenset({0: 0, 1: 1, 2: 2, 3: 3}.items())
+	],
 
 	# -> charging
 
@@ -32,7 +36,7 @@ supply_model_config_grid = {
 	"n_charging_poles_by_zone": [
 		frozenset(
 			{
-				4: 1,
+				4: 4,
 			}.items()
 		)
 	],
@@ -41,9 +45,9 @@ supply_model_config_grid = {
 	"charging_return_strategy": ["last_destination"],
 	"queuing": [True],
 	"alpha_policy": ['manual'],
-	"alpha": [20],
+	"alpha": [50],
 	"beta": [100],
-	"charging_duration": range(0, 3600*24, 3600),
+	"charging_duration": range(3600, 3600*7, 3600),
 
 	# -> battery swap
 

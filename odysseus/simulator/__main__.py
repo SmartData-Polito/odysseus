@@ -111,6 +111,7 @@ elif args.sim_run_mode == "multiple_runs":
 
 else:
     print("Unknown run mode: {}".format(args.sim_run_mode))
+
 end = datetime.datetime.now()
 
 print("Total execution time:", (end-start).total_seconds())
