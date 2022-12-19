@@ -16,9 +16,11 @@ City Data Manager
    city_scenario/index
 
 The City Data Manager module has the following responsibilities:
+
 - Generate mobility data starting from simple configurations
+
 - Validate mobility data provided as input
-   - OD matrices with a certain temporal and spatial configuration
+
 - Create a mobility data scenario for a given city, which can be a real world city or a virtual one.
 
 The currently supported mobility data types are:

@@ -1,3 +1,4 @@
+# Mac OSX files
 *.DS_Store
 */__MACOSX/*
 
@@ -5,29 +6,6 @@ venv*/
 .vscode
 #Databases
 *.db
-
-odysseus/webapp/apis/api_cityDataManager/norm-data.json
-odysseus/webapp/apis/api_cityDataManager/raw-data.json
-
-simple_demo_0/*
-
-data/*
-docs_html/*
-docs_backup/*
-
-odysseus/data/*
-odysseus/city_scenario/city_scenarios/*
-odysseus/demand_modelling/city_demand_models/*
-odysseus/supply_modelling/city_supply_models/*
-odysseus/simulator/figures/*
-odysseus/simulator/results/*
-odysseus/simulator/simulation_input/sim_current_config/
-
-odysseus/simulator/simulation_configs_py/itsc_2021/*
-odysseus/simulator/simulation_configs_py/switch_0/*
-
-*.pickle
-*.h5
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -154,3 +132,28 @@ inter_env/*
 *.pyc
 
 *.secret
+
+# Custom files
+
+odysseus/webapp/apis/api_cityDataManager/norm-data.json
+odysseus/webapp/apis/api_cityDataManager/raw-data.json
+
+simple_demo_0/*
+
+data/*
+docs_html/*
+docs_backup/*
+
+odysseus/data/*
+odysseus/city_scenario/city_scenarios/*
+odysseus/demand_modelling/city_demand_models/*
+odysseus/supply_modelling/city_supply_models/*
+odysseus/simulator/figures/*
+odysseus/simulator/results/*
+odysseus/simulator/simulation_input/sim_current_config/
+
+odysseus/simulator/simulation_configs_py/itsc_2021/*
+odysseus/simulator/simulation_configs_py/switch_0/*
+
+*.pickle
+*.h5

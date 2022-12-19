@@ -9,7 +9,7 @@ Get started with Odysseus
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: API Reference:
 
    install_guide/index
@@ -25,9 +25,6 @@ Introduction
 ODySSEUS is a data management and simulation software for mobility data, focused mostly on shared fleets in urban environments.
 
 Its goal is to provide a general, easy-to-use framework to simulate shared mobility scenarios across different cities using real-world data.
-
-Internally, it makes use of several open-source Python libraries for geospatial and mobility analysis,
-such as geopandas (https://geopandas.org/) and scikit-mobility [5] (https://scikit-mobility.github.io/scikit-mobility/).
 
 This guide is organised as follows:
 

@@ -4,14 +4,13 @@
    contain the root `toctree` directive.
 
 Origin-Destination matrices Data Source
-=================================
+=========================================
 
 .. toctree::
    :hidden:
    :maxdepth: 2
    :caption: Moduli:
 
-   od_data_source.rst
    virtual_od_data_source.rst
 
 This module is responsible for generation and acquisition of OD matrices, as well as the creation of mobility traces
@@ -71,8 +70,7 @@ This module makes use of a standard format composed by the following files:
 
    - Tabular files containing flows between each couple of zones at a certain time compatible with week_config.json.
 
-   - A certain cell represent the flow (or the rate, or count, of probability) of trips going from origin (cell index)
-   to destination (cell column).
+   - A certain cell represent the flow (or the rate, or count, of probability) of trips going from origin (cell index) to destination (cell column).
 
    - Example folder with configs and OD matrices:
 
@@ -81,12 +79,13 @@ This module makes use of a standard format composed by the following files:
           my-odysseus-folder
           ├── odysseus
           │   ├── data
-          │   │   ├── norm
-          │   │   │   ├── my_city
-          │   │   │   │   ├── my_data_source
-          │   │   │   │   │   ├── week_config.json
-          │   │   │   │   │   ├── grid_config.json
-          │   │   │   │   │   ├── generic_day_generic_hour.csv
+          │   │   ├── my_city
+          │   │   │   ├── norm
+          │   │   │   │   ├── od_matrices
+          │   │   │   │   │   ├── my_data_source
+          │   │   │   │   │   │   ├── week_config.json
+          │   │   │   │   │   │   ├── grid_config.json
+          │   │   │   │   │   │   ├── generic_day_generic_hour.csv
 
    - Example OD matrix in generic_day_generic_hour.csv:
 

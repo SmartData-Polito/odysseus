@@ -11,3 +11,4 @@ TripsDataSource  class
 .. automodule:: odysseus.city_data_manager.geo_trips.trips_data_source
    :members:
    :undoc-members:
+
