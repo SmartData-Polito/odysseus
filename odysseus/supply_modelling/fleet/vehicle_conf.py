@@ -7,6 +7,13 @@ vehicle_conf = {
 			"vehicle_efficiency": 100,
 			"n_seats": 5,
 		},
+		"Fiat 500 1.2": {
+			"engine_type": "gasoline",
+			"fuel_capacity": 35,
+			"vehicle_efficiency": 5.8,
+			"n_seats": 5,
+			# "costs": vehicle_cost["gasoline"]["VW Golf 7 1.0 TSI 2018"]
+		},
 		"Seat Leon 1.5 TSI 2020": {
 			"engine_type": "gasoline",
 			"fuel_capacity": 45,
@@ -126,6 +133,16 @@ vehicle_conf = {
 				"three_phase_3": 4600,
 				"dcfc_1": 4600,
 				"dcfc_2": 4600
+			}
+		},
+		"Xiaomi Mi Electric Scooter Pro 2": {
+			"engine_type": "electric",
+			"fuel_capacity": 0.335,
+			"vehicle_efficiency": 1 / 0.011,
+			"n_seats": 1,
+			"max_charg_power": {
+				"wall_plug": 2300,
+				"inf": 1000000
 			}
 		},
 		"generic e-scooter": {

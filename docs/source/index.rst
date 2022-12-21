@@ -22,9 +22,9 @@ Get started with Odysseus
 Introduction
 =============
 
-ODySSEUS is a data management and simulation software for mobility data, focused mostly on shared fleets in urban environments.
+ODySSEUS is a data management and simulation software focused on shared fleets in urban environments.
 
-Its goal is to provide a general, easy-to-use framework to simulate shared mobility scenarios across different cities using real-world data.
+Its goal is to provide a general, easy-to-use framework to simulate shared mobility scenarios across different cities.
 
 This guide is organised as follows:
 
