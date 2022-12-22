@@ -99,6 +99,7 @@ if args.od_params[1] > 0:
 
     train_booking_requests, test_booking_requests = generate_trips_from_od(
         args.city,
+        args.data_source_id,
         od_matrices_by_hour,
         week_config,
         grid_matrix,

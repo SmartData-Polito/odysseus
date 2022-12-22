@@ -73,7 +73,7 @@ def generate_booking_requests_list(
 
 
 def generate_trips_from_od(
-        city_name, od_matrices, week_config, grid_matrix, zone_ids, distance_matrix,
+        city_name, data_source_id, od_matrices, week_config, grid_matrix, zone_ids, distance_matrix,
         train_start_datetime, train_end_datetime, test_start_datetime, test_end_datetime,
         requests_rate_factor=1,
         avg_speed_kmh_mean=1,
@@ -93,7 +93,7 @@ def generate_trips_from_od(
         fixed_driving_distance=fixed_driving_distance,
     ))
     norm_trips_data_path = os.path.join(
-        root_data_path, city_name, "norm", "trips", "my_data_source",
+        root_data_path, city_name, "norm", "trips", data_source_id,
     )
     os.makedirs(norm_trips_data_path, exist_ok=True)
 
