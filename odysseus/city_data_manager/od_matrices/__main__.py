@@ -57,12 +57,12 @@ parser.add_argument(
 )
 
 parser.set_defaults(
-    read=False,
-    city="my_city_0_2X2",
+    read=True,
+    city="my_city",
     data_source_id="my_data_source",
     week_slots_type="generic_day",
     day_slots_type="generic_hour",
-    n_hours=(24 * 30, 24 * 30),
+    n_hours=(24 * 1, 24 * 1),
     grid_params=(1, 5, 500),
     od_params=("uniform_single_destination", 1, ()),
 )
@@ -99,7 +99,7 @@ if args.od_params[1] > 0:
 
     train_booking_requests, test_booking_requests = generate_trips_from_od(
         args.city,
-        od_matrices_by_dayslots,
+        od_matrices_by_hour,
         week_config,
         grid_matrix,
         zone_ids,

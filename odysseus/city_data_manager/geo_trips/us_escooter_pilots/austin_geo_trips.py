@@ -7,6 +7,7 @@ from odysseus.city_data_manager.geo_trips.us_escooter_pilots.austin_census_tract
 from odysseus.city_data_manager.geo_trips.city_geo_trips import CityGeoTrips
 from odysseus.utils.geospatial_utils import get_random_point_from_shape
 
+
 class AustinGeoTrips(CityGeoTrips):
 
     def __init__(self, city_name="Austin", trips_data_source_id="city_open_data", year=2019, month=8):

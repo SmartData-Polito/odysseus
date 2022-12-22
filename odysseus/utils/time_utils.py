@@ -57,15 +57,15 @@ def get_time_group_columns(trips_df_norm):
                     vehicle_df.start_time.shift(-1) - vehicle_df.end_time
             ).apply(lambda dt: dt.total_seconds())
 
-    if "year" not in trips_df_norm:
+    if "start_year" not in trips_df_norm:
         trips_df_norm.loc[:, "start_year"] = trips_df_norm.start_time.apply(lambda dt: dt.year)
         trips_df_norm.loc[:, "end_year"] = trips_df_norm.end_time.apply(lambda dt: dt.year)
         trips_df_norm.loc[:, "year"] = trips_df_norm.loc[:, "start_year"]
-    if "month" not in trips_df_norm:
+    if "start_month" not in trips_df_norm:
         trips_df_norm.loc[:, "start_month"] = trips_df_norm.start_time.apply(lambda dt: dt.month)
         trips_df_norm.loc[:, "end_month"] = trips_df_norm.end_time.apply(lambda dt: dt.month)
         trips_df_norm.loc[:, "month"] = trips_df_norm.loc[:, "start_month"]
-    if "day" not in trips_df_norm:
+    if "start_day" not in trips_df_norm:
         trips_df_norm.loc[:, "start_day"] = trips_df_norm.start_time.apply(lambda dt: dt.day)
         trips_df_norm.loc[:, "end_day"] = trips_df_norm.end_time.apply(lambda dt: dt.day)
         trips_df_norm.loc[:, "day"] = trips_df_norm.loc[:, "start_day"]

@@ -20,7 +20,7 @@ class LouisvilleScooterTrips(TripsDataSource):
             ),
             os.path.join(
                 self.raw_data_path,
-                "Louisville-Dockless-Trips%20.csv"
+                "Louisville-Dockless-Trips.csv"
             )]
 
         trips_dfs = [pd.read_csv(raw_trips_data_path) for raw_trips_data_path in raw_trips_data_paths]

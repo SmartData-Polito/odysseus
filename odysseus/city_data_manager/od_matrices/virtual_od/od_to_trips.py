@@ -10,11 +10,15 @@ from odysseus.path_config.path_config import root_data_path
 
 
 def generate_booking_requests_list(
-        od_matrices, week_config, distance_matrix, start_datetime, end_datetime,
-        requests_rate_factor,
-        avg_speed_kmh_mean,
-        max_duration,
-        fixed_driving_distance
+        od_matrices,
+        week_config,
+        distance_matrix,
+        start_datetime,
+        end_datetime,
+        requests_rate_factor=1,
+        avg_speed_kmh_mean=1,
+        max_duration=3000,
+        fixed_driving_distance=1000
 ):
 
     booking_requests_list = list()
@@ -27,11 +31,11 @@ def generate_booking_requests_list(
 
     while current_datetime < end_datetime:
 
-        for o_id in od_matrices[current_daytype][current_day_slot_str].index:
-            for d_id in od_matrices[current_daytype][current_day_slot_str].columns:
+        for o_id in od_matrices[current_daytype][current_hour].index:
+            for d_id in od_matrices[current_daytype][current_hour].columns:
 
                 n_bookings_to_generate = int(
-                    od_matrices[current_daytype][current_day_slot_str].loc[o_id, d_id] * requests_rate_factor
+                    od_matrices[current_daytype][current_hour].loc[o_id, d_id] * requests_rate_factor
                 )
 
                 if n_bookings_to_generate:
@@ -70,7 +74,11 @@ def generate_booking_requests_list(
 
 def generate_trips_from_od(
         city_name, od_matrices, week_config, grid_matrix, zone_ids, distance_matrix,
-        train_start_datetime, train_end_datetime, test_start_datetime, test_end_datetime
+        train_start_datetime, train_end_datetime, test_start_datetime, test_end_datetime,
+        requests_rate_factor=1,
+        avg_speed_kmh_mean=1,
+        max_duration=3000,
+        fixed_driving_distance=1000
 ):
 
     train_booking_requests = pd.DataFrame(generate_booking_requests_list(
@@ -79,7 +87,10 @@ def generate_trips_from_od(
         distance_matrix,
         train_start_datetime,
         train_end_datetime,
-        requests_rate_factor=1
+        requests_rate_factor=requests_rate_factor,
+        avg_speed_kmh_mean=avg_speed_kmh_mean,
+        max_duration=max_duration,
+        fixed_driving_distance=fixed_driving_distance,
     ))
     norm_trips_data_path = os.path.join(
         root_data_path, city_name, "norm", "trips", "my_data_source",

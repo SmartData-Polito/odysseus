@@ -22,7 +22,7 @@ You can replace "my-odysseus-folder" with any name you prefer.
    .. code-block:: console
 
       git clone https://github.com/SmartData-Polito/odysseus my-odysseus-folder
-      mv my-odysseus-folder
+      cd my-odysseus-folder
       pip install --user -r requirements.txt
 
 Installing geospatial libraries may require different steps while being on Windows, Mac or Linux.
@@ -46,17 +46,19 @@ Let's pick default parameters for now, and let's run the module using:
 Now you should see something happening in your ODySSEUS folder.
 In particular this folder structure should have appeared:
 
-::
+      ::
 
-    my-odysseus-folder
-    ├── odysseus
-    │   ├── data
-    │   │   ├── norm
-    │   │   │   ├── my_city
-    │   │   │   │   ├── my_data_source
-    │   │   │   │   │   ├── week_config.json
-    │   │   │   │   │   ├── grid_config.json
-    │   │   │   │   │   ├── generic_day_generic_hour.csv
+          my-odysseus-folder
+          ├── odysseus
+          │   ├── data
+          │   │   ├── my_city
+          │   │   │   ├── norm
+          │   │   │   │   ├── od_matrices
+          │   │   │   │   │   ├── my_data_source
+          │   │   │   │   │   │   ├── week_config.json
+          │   │   │   │   │   │   ├── grid_config.json
+          │   │   │   │   │   │   ├── generic_day_generic_hour.csv
+
 
 If so, congratulations!
 
