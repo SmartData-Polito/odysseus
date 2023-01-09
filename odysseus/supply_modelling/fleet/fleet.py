@@ -40,18 +40,18 @@ class Fleet:
             zone = self.vehicles_zones[vehicle]
             self.available_vehicles_dict[zone] += [vehicle]
 
-    def init_vehicles_from_fleet_size(self, n_vehicles_sim, how):
+    def init_vehicles_from_fleet_size(self, n_vehicles_sim, vehicles_initial_placement):
 
         self.n_vehicles_sim = int(n_vehicles_sim)
         self.vehicles_soc_dict = self.init_vehicles_soc()
 
-        if how == "random":
+        if vehicles_initial_placement == "random":
             self.init_vehicles_random()
 
-        elif how == "random_greedy":
+        elif vehicles_initial_placement == "random_greedy":
             self.init_vehicles_random_greedy()
 
-        elif how == "uniform":
+        elif vehicles_initial_placement == "uniform":
             # TODO -> decide rule when division is not exact
             n_vehicles_per_zone = np.ceil(n_vehicles_sim / len(self.grid))
             print(n_vehicles_sim, n_vehicles_per_zone)

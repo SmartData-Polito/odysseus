@@ -157,9 +157,10 @@ class ChargingStrategy(ChargingPrimitives):
 			if "charging_duration" in self.sim_input.supply_model_config:
 				charge["duration"] = self.sim_input.supply_model_config["charging_duration"]
 			else:
-				charge["duration"] = self.vehicles_list[vehicle].get_charging_time_from_perc(
-					self.vehicles_list[vehicle].soc.level,
+				charge["duration"] = vehicle.get_charging_time_from_perc(
+					vehicle.soc.level,
 					self.charging_stations_dict[charging_zone_id].flow_rate,
+					self.sim_input.supply_model_config["profile_type"],
 					charge["end_soc"]
 				)
 

@@ -23,6 +23,8 @@ def single_run(conf_dict):
         "results", city, conf_dict["sim_scenario_name"], "single_run", conf_dict["conf_id"]
     )
 
+    start = datetime.datetime.now()
+
     print(datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"], "Initialising SimInput..")
 
     sim_input = SimInput(conf_dict)
@@ -32,9 +34,14 @@ def single_run(conf_dict):
     sim_input.init_charging_poles()
     #print(datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"], "Initialising relocation..")
     sim_input.init_relocation()
-    start = datetime.datetime.now()
 
-    print(datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"], "SimInput initialised!")
+    end = datetime.datetime.now()
+    print(
+        datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"],
+        "SimInput initialised, duration:", (end-start).total_seconds(), "Creating output.."
+    )
+
+    start = datetime.datetime.now()
 
     sim = run_sim_v2(sim_input)
     sim_output = SimOutput(sim)
@@ -94,8 +101,8 @@ def single_run(conf_dict):
         # TODO -> Seaborn boxplots are cool but slow
         #plotter.plot_events_hourly_count_boxplot("bookings", "start")
         #plotter.plot_events_hourly_count_boxplot("charges", "start")
-        #plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
-        #plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
+        plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
+        plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
 
         plotter.plot_city_zones()
         plotter.plot_charging_infrastructure()

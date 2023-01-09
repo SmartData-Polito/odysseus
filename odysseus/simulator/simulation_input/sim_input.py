@@ -81,23 +81,25 @@ class SimInput:
 			self.city_scenario_folder
 		)
 
-		self.demand_model = pickle.Unpickler(open(os.path.join(demand_model_path, "demand_model.pickle"), "rb")).load()
-
 		if self.demand_model_config["demand_model_type"] == "trace":
 			self.booking_requests_test = pickle.Unpickler(open(os.path.join(city_scenario_path, "bookings_test.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
-
-		elif self.demand_model_config["demand_model_type"] == "poisson_kde":
-			self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
-			self.avg_request_rate = pd.DataFrame(self.request_rates.values()).mean().mean()
-			self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
-			self.demand_model.requests_rate_factor = self.demand_model_config["requests_rate_factor"]
-
+		else:
+			self.demand_model = pickle.Unpickler(
+				open(os.path.join(demand_model_path, "demand_model.pickle"), "rb")).load()
+			if self.demand_model_config["demand_model_type"] == "poisson_kde":
+				self.request_rates = pickle.Unpickler(open(os.path.join(demand_model_path, "request_rates.pickle"), "rb")).load()
+				self.avg_request_rate = pd.DataFrame(self.request_rates.values()).mean().mean()
+				self.trip_kdes = pickle.Unpickler(open(os.path.join(demand_model_path, "trip_kdes.pickle"), "rb")).load()
+				self.demand_model.requests_rate_factor = self.demand_model_config["requests_rate_factor"]
 
 		if "n_requests" in self.supply_model_config.keys():
 			self.desired_avg_rate = self.supply_model_config["n_requests"] / self.total_days / 24 / 3600
 			self.rate_ratio = self.desired_avg_rate / self.avg_request_rate
 			self.demand_model_config["requests_rate_factor"] = self.rate_ratio
+
+		self.tot_n_charging_poles = 0
+		self.n_charging_zones = 0
 
 		self.n_charging_poles_by_zone = {}
 		self.vehicles_soc_dict = {}
@@ -149,6 +151,7 @@ class SimInput:
 		self.supply_model_config["tot_n_charging_poles"] = self.tot_n_charging_poles
 		self.n_charging_zones = self.supply_model.n_charging_zones
 		self.supply_model_config["n_charging_zones"] = self.n_charging_zones
+		self.closest_cp_zone = self.supply_model.closest_cp_zone
 
 	def init_relocation(self):
 		return self.supply_model.init_relocation()

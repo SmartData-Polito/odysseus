@@ -11,22 +11,22 @@ class Vehicle:
 		# self.n_seats = vehicle_config["n_seats"]
 		# self.costs = vehicle_config["costs"]
 
-		if self.engine_type == "gasoline": # GASOLINE E5
-			self.welltotank_emission = 17 #gCO2eq/MJ (pathway code COG-1)
-			self.welltotank_energy = 0.24 #MJ/MJgasoline
-			self.density = 745.8 # g/L
-			self.lower_heating_value = 42.3 #MJ/kg
-			self.carbon_content = 84.7 #%
-			self.thc_limits = 100 #mg/km
-			self.nox_limits = 60 #mg/km
-			self.perc_ch4_limits = 5 #%
-			self.perc_n2o_limits = 3 #%
+		if self.engine_type == "gasoline":  # GASOLINE E5
+			self.welltotank_emission = 17  # gCO2eq/MJ (pathway code COG-1)
+			self.welltotank_energy = 0.24  # MJ/MJgasoline
+			self.density = 745.8  # g/L
+			self.lower_heating_value = 42.3  # MJ/kg
+			self.carbon_content = 84.7  # %
+			self.thc_limits = 100  # mg/km
+			self.nox_limits = 60  # mg/km
+			self.perc_ch4_limits = 5  # %
+			self.perc_n2o_limits = 3  # %
 			self.gwp_ch4 = 25
 			self.gwp_n2o = 298
-		elif self.engine_type == "diesel": # DIESEL B7
-			self.welltotank_emission = 18.9 #gCO2eq/MJ (pathway code COD-1)
-			self.welltotank_energy = 0.26 #MJ/MJdiesel
-			self.density = 836.1 # g/L
+		elif self.engine_type == "diesel":  # DIESEL B7
+			self.welltotank_emission = 18.9  # gCO2eq/MJ (pathway code COD-1)
+			self.welltotank_energy = 0.26  # MJ/MJdiesel
+			self.density = 836.1  # g/L
 			self.lower_heating_value = 42.7  # MJ/kg
 			self.carbon_content = 85.4  # %
 			self.thc_limits = 90  # mg/km
@@ -36,8 +36,8 @@ class Vehicle:
 			self.gwp_ch4 = 25
 			self.gwp_n2o = 298
 		elif self.engine_type == "lpg":
-			self.welltotank_emission = 7.8 #gCO2eq/MJ (pathway code LRLP-1 min 7.7 - max 8.3)
-			self.welltotank_energy = 0.12 #MJ/MJlpg
+			self.welltotank_emission = 7.8  # gCO2eq/MJ (pathway code LRLP-1 min 7.7 - max 8.3)
+			self.welltotank_energy = 0.12  # MJ/MJlpg
 			self.density = 550 # g/L
 			self.lower_heating_value = 46  # MJ/kg
 			self.carbon_content = 82.4  # %
@@ -48,9 +48,9 @@ class Vehicle:
 			self.gwp_ch4 = 25
 			self.gwp_n2o = 298
 		elif self.engine_type == "cng":
-			self.welltotank_emission = 11.4 #gCO2eq/MJ (pathway code GMCG-1 min 10.5  - max 12.7)
-			self.welltotank_energy = 0.15 #MJ/MJcng
-			self.density = 1000 #g/kg
+			self.welltotank_emission = 11.4  # gCO2eq/MJ (pathway code GMCG-1 min 10.5  - max 12.7)
+			self.welltotank_energy = 0.15  # MJ/MJcng
+			self.density = 1000  # g/kg
 			self.lower_heating_value = 48  # MJ/kg
 			self.carbon_content = 73.5  # %
 			self.thc_limits = 100  # mg/km
@@ -60,13 +60,14 @@ class Vehicle:
 			self.gwp_ch4 = 25
 			self.gwp_n2o = 298
 		elif self.engine_type == "electric":
-			self.welltotank_emission = energy_mix_object.evaluate_emissions()#gCO2eq/kWh
-			self.welltotank_energy = energy_mix_object.evaluate_energy()#MJ/MJelectricity
-			self.tx_efficiency = 92.5 # %
-			self.charging_efficiency = 80 # %
+			self.welltotank_emission = energy_mix_object.evaluate_emissions()  # gCO2eq/kWh
+			self.welltotank_energy = energy_mix_object.evaluate_energy()  # MJ/MJelectricity
+			self.tx_efficiency = 92.5  # %
+			self.charging_efficiency = 80  # %
 			self.supported_charge = vehicle_config["max_charg_power"]
 
 	def get_charging_time_from_perc(self, actual_level_perc, flow_amount, profile, beta=100):
+
 		# flow_amount is generalized to represent the amount of fuel
 		# loaded in the vehicle per unit of time
 		# electric: kW (3.3,7.4,11,22,43,50,120)
@@ -114,7 +115,7 @@ class Vehicle:
 			tanktowheel_kwh = self.percentage_to_consumption(percentage)
 		elif self.engine_type in ["gasoline", "diesel", "lpg", "cng"]:
 			tanktowheel_kwh = self.percentage_to_consumption(percentage) * (
-					self.lower_heating_value / (1 / (self.density / 1000)) # converted lhv from MJ/kg to MJ/L
+					self.lower_heating_value / (1 / (self.density / 1000))  # converted lhv from MJ/kg to MJ/L
 			) / 3.6
 		return tanktowheel_kwh
 
@@ -135,7 +136,7 @@ class Vehicle:
 	def from_kml_to_energyperkm(self):
 		perkm_consumption = self.from_kml_to_lkm()
 		return perkm_consumption * (
-					self.lower_heating_value / (1 / (self.density / 1000)) # converted lhv from MJ/kg to MJ/L
+					self.lower_heating_value / (1 / (self.density / 1000))  # converted lhv from MJ/kg to MJ/L
 			)
 
 	def consumption_to_percentage(self, consumption):

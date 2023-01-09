@@ -6,6 +6,8 @@ import pandas as pd
 
 
 from odysseus.supply_modelling.fleet.fleet import Fleet
+from odysseus.supply_modelling.fleet.vehicle_conf import vehicle_conf as standard_vehicle_configs
+
 from odysseus.supply_modelling.service_stations.service_stations import ServiceStations
 
 from odysseus.simulator.simulation_data_structures.zone import Zone
@@ -120,6 +122,7 @@ class SupplyModel:
 
                 assert "n_charging_zones" in self.supply_model_conf.keys()
                 self.n_charging_zones = self.supply_model_conf["n_charging_zones"]
+                self.tot_n_charging_poles = self.supply_model_conf["tot_n_charging_poles"]
 
                 self.service_stations = ServiceStations(
                     self.city_name, self.grid, self.tot_n_charging_poles, self.n_charging_zones,
@@ -195,7 +198,9 @@ class SupplyModel:
             self.zone_dict[zone_id] = Zone(self.simpy_env, zone_id, start, self.available_vehicles_dict[zone_id])
 
         if self.supply_model_conf["distributed_cps"]:
+
             for zone_id in self.n_charging_poles_by_zone:
+
                 zone_n_cps = self.n_charging_poles_by_zone[zone_id]
                 if zone_n_cps > 0:
                     self.charging_stations_dict[zone_id] = ChargingStation(
@@ -207,8 +212,15 @@ class SupplyModel:
                     self.real_n_charging_zones += zone_n_cps
 
         for i in range(self.n_vehicles_sim):
+
             if self.supply_model_conf["profile_type"] == "fixed_duration":
                 vehicle_conf["fixed_charging_duration"] = self.supply_model_conf["fixed_charging_duration"]
+
+            if self.supply_model_conf["engine_type"] == "electric":
+                vehicle_conf["max_charg_power"] = standard_vehicle_configs["electric"][
+                    vehicle_conf["vehicle_model_name"]
+                ]["max_charg_power"]
+
             vehicle_object = Vehicle(
                 self.simpy_env, i, self.vehicles_zones[i], self.vehicles_soc_dict[i],
                 vehicle_conf, self.energy_mix, start

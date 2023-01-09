@@ -47,13 +47,13 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    data_from=["od"],
-    city=["my_city_1_1X5"],
-    data_source_id=["my_data_source"],
+    data_from=["trips"],
+    city=["Torino"],
+    data_source_id=["big_data_db"],
     bin_side_length=[500],
-    train_range=("2023", "1", "2023", "1"),
-    test_range=("2023", "1", "2023", "1"),
-    folder_name=["charging_zone"]
+    train_range=("2017", "10", "2017", "10"),
+    test_range=("2017", "10", "2017", "10"),
+    folder_name=["ecarsharing_car2go"]
 )
 
 args = parser.parse_args()

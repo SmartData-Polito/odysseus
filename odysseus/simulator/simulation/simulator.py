@@ -21,6 +21,33 @@ from odysseus.utils.bookings_utils import *
 np.random.seed(44)
 
 
+from functools import partial, wraps
+import simpy
+
+sim_events = []
+
+
+def trace(env, callback):
+    def get_wrapper(env_step, callback):
+        """Generate the wrapper for env.step()."""
+        @wraps(env_step)
+        def tracing_step():
+            if len(env._queue):
+                t, prio, eid, event = env._queue[0]
+                callback(t, prio, eid, event)
+            return env_step()
+        return tracing_step
+
+    env.step = get_wrapper(env.step, callback)
+
+
+def monitor(data, t, prio, eid, event):
+    data.append((t, eid, type(event)))
+
+
+monitor = partial(monitor, sim_events)
+
+
 class SharedMobilitySim:
 
     def __init__(self, sim_input):
@@ -35,9 +62,10 @@ class SharedMobilitySim:
         self.update_relocation_schedule = True
         self.sim_input = sim_input
 
-        for daytype in self.sim_input.demand_model.week_config["week_slots"]:
-            if self.start.weekday() in self.sim_input.demand_model.week_config["week_slots"][daytype]:
-                self.current_daytype = daytype
+        if sim_input.demand_model_config["demand_model_type"] != "trace":
+            for daytype in self.sim_input.demand_model.week_config["week_slots"]:
+                if self.start.weekday() in self.sim_input.demand_model.week_config["week_slots"][daytype]:
+                    self.current_daytype = daytype
 
         self.available_vehicles_dict = self.sim_input.supply_model.available_vehicles_dict
         self.neighbors_dict = self.sim_input.neighbors_dict
@@ -49,6 +77,7 @@ class SharedMobilitySim:
             self.n_charging_poles_by_zone = self.sim_input.n_charging_poles_by_zone
 
         self.env = simpy.Environment()
+        # trace(self.env, monitor)
 
         self.sim_booking_requests = []
         self.sim_bookings = []
@@ -83,10 +112,10 @@ class SharedMobilitySim:
         self.charging_outward_distance = []
 
         vehicle_config = {
+            "vehicle_model_name": self.sim_input.supply_model_config["vehicle_model_name"],
             "engine_type": self.sim_input.supply_model_config["engine_type"],
             "fuel_capacity": self.sim_input.supply_model_config["fuel_capacity"],
             "vehicle_efficiency": self.sim_input.supply_model_config["vehicle_efficiency"],
-            "vehicle_model_name": self.sim_input.supply_model_config["vehicle_model_name"],
         }
 
         self.sim_input.supply_model.init_for_simulation(
@@ -123,9 +152,11 @@ class SharedMobilitySim:
             self.current_hour = self.current_datetime.hour
             self.update_relocation_schedule = True
         self.current_weekday = self.current_datetime.weekday()
-        self.current_daytype = get_daytype_from_week_config(
-            self.sim_input.demand_model.week_config, self.current_weekday
-        )
+
+        if self.sim_input.demand_model_config["demand_model_type"] != "trace":
+            self.current_daytype = get_daytype_from_week_config(
+                self.sim_input.demand_model.week_config, self.current_weekday
+            )
 
         if self.update_relocation_schedule \
                 and self.sim_input.supply_model_config["relocation"] \
@@ -379,6 +410,8 @@ class SharedMobilitySim:
     def mobility_requests_generator(self):
         if self.sim_input.demand_model_config["demand_model_type"] == "od_matrices":
             self.env.process(self.mobility_requests_generator_from_model())
+        elif self.sim_input.demand_model_config["demand_model_type"] == "trace":
+            self.env.process(self.mobility_requests_generator_from_trace())
 
     def run(self):
         self.sim_start_dt = datetime.datetime.now()
@@ -388,3 +421,4 @@ class SharedMobilitySim:
         self.sim_exec_time_sec = (
             self.sim_end_dt - self.sim_start_dt
         ).total_seconds()
+

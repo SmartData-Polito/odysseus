@@ -41,9 +41,9 @@ parser.add_argument(
 
 parser.set_defaults(
     campaign_name="smartdata_test_0",
-    conf_name="scenario_B1",
-    city_scenario_folder="charging_zone",
-    sim_run_mode="multiple_runs"
+    conf_name="scenario_C",
+    city_scenario_folder="ecarsharing_car2go",
+    sim_run_mode="single_run"
 )
 
 args = parser.parse_args()
@@ -98,6 +98,7 @@ except Exception:
 if args.sim_run_mode == "single_run":
     for parameters_dict in configs_list:
         single_run(parameters_dict)
+        exit()
 
 elif args.sim_run_mode == "multiple_runs":
     for parameters_dict in configs_list:

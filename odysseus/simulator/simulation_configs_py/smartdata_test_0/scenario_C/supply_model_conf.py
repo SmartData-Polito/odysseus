@@ -6,48 +6,39 @@ supply_model_config_grid = {
 
 	# -> vehicle configuration
 
-	"engine_type": ["gasoline"],
-	"fuel_capacity": [i for i in range(10, 101, 10)],
-	"vehicle_efficiency": [1],
-	"n_seats": [5],
-	"vehicle_model_name": ["my_vehicle"],
+	"vehicle_model_name": ["Fiat 500e 2020"],
+	"engine_type": ["electric"],
+	"fuel_capacity": [37.3],
+	"vehicle_efficiency": [5.263],
 
 	# -> fleet size and initial placement
 
-	"vehicles_config_mode": ["vehicles_zones"],
-	"vehicles_zones": [
-		frozenset({0: 0}.items()),
-		frozenset({0: 0, 1: 1}.items()),
-		frozenset({0: 0, 1: 1, 2: 2}.items()),
-		frozenset({0: 0, 1: 1, 2: 2, 3: 3}.items())
-	],
+	"vehicles_config_mode": ["sim_config"],
+	"vehicles_initial_placement": ["random_greedy"],
+	"n_vehicles": [400],
 
 	# -> charging
 
 	"charging_config_mode": ["sim_config"],
-
-	"n_workers": [1],
-
 	"distributed_cps": [True],
 	"system_cps": [True],
-	"profile_type": [""],
+	"profile_type": ["single_phase_2"],
 
-	"stations_placement_config_mode": ["n_charging_poles_by_zone"],
-	"n_charging_poles_by_zone": [
-		frozenset(
-			{
-				4: 4,
-			}.items()
-		)
-	],
+	"stations_placement_config_mode": ["sim_config"],
+	"tot_n_charging_poles": range(20, 21, 1),
+	"n_charging_zones": [5, 10],
+	"cps_placement_policy": ["num_parkings"],
+
 	"charging_strategy": ["reactive"],
 	"charging_relocation_strategy": ["closest_queueing"],
 	"charging_return_strategy": ["last_destination"],
 	"queuing": [True],
 	"alpha_policy": ['manual'],
-	"alpha": [50],
+	"alpha": [30],
 	"beta": [100],
 	# "charging_duration": range(3600, 3600*7, 3600),
+
+	"n_workers": [1],
 
 	# -> battery swap
 
