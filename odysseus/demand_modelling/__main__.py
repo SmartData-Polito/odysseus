@@ -41,12 +41,12 @@ parser.add_argument(
 
 parser.set_defaults(
 
-    city=["my_city_1_1X5"],
-    data_source_id=["my_data_source"],
-    demand_model_type=["od_matrices"],
-    kde_bandwidth=["0"],
-    city_scenario_folder=["charging_zone"],
-    city_demand_model_folder=["charging_zone"],
+    city=["Torino"],
+    data_source_id=["big_data_db"],
+    demand_model_type=["poisson_kde"],
+    kde_bandwidth=["0.1"],
+    city_scenario_folder=["ecarsharing_car2go"],
+    city_demand_model_folder=["ecarsharing_car2go"],
 
 )
 

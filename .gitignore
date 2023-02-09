@@ -155,5 +155,9 @@ odysseus/simulator/simulation_input/sim_current_config/
 odysseus/simulator/simulation_configs_py/itsc_2021/*
 odysseus/simulator/simulation_configs_py/switch_0/*
 
+paper_figures
+paper_figures_data
+paper_figures.ipynb
+
 *.pickle
 *.h5

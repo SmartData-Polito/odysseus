@@ -318,6 +318,8 @@ class SimOutput:
 				"profit"
 			] = self.sim_stats["revenues"] - self.sim_stats["scenario_cost"] - self.sim_stats["sim_cost"]
 
+		self.sim_events = sim.sim_events
+
 	def save_output(self, results_path, sim_general_conf, sim_scenario_conf):
 
 		if sim_general_conf["history_to_file"]:
@@ -383,6 +385,15 @@ class SimOutput:
 					os.path.join(
 						results_path,
 						"sim_unfeasible_charges.csv"
+					)
+				)
+				pd.DataFrame(
+					self.sim_events,
+					columns=["real_world_dt", "sim_dt", "event_id", "event_type"]
+				).to_csv(
+					os.path.join(
+						results_path,
+						"sim_events.csv"
 					)
 				)
 

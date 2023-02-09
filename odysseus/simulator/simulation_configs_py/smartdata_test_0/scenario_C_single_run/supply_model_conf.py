@@ -25,8 +25,8 @@ supply_model_config_grid = {
 	"profile_type": ["single_phase_1"],
 
 	"stations_placement_config_mode": ["sim_config"],
-	"tot_n_charging_poles": list(range(1, 17, 3)) + list(range(17, 26, 1)) + list(range(26, 50, 3)) + list(range(50, 120, 20)),
-	"n_charging_zones": [1, 3, 5, 10, 30],
+	"tot_n_charging_poles": [40],
+	"n_charging_zones": [30, 1],
 	"cps_placement_policy": ["num_parkings"],
 
 	"charging_strategy": ["reactive"],

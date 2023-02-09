@@ -17,6 +17,7 @@ class ChargingStrategy(ChargingPrimitives):
 						"avg_reach_time"
 					] * 60
 				)
+				timeout_return = 0
 				charge["duration"] = np.random.exponential(
 					self.sim_input.supply_model_config[
 						"avg_service_time"

@@ -46,18 +46,7 @@ class SimInput:
 			self.sim_general_config["month_start"],
 			1, tzinfo=pytz.UTC
 		)
-		if self.sim_general_config["month_end"] == 12:
-			self.end = datetime.datetime(
-				self.sim_general_config["year"] + 1,
-				1, 1, tzinfo=pytz.UTC
-			)
-		else:
-			self.end = datetime.datetime(
-				self.sim_general_config["year"],
-				self.sim_general_config["month_end"] + 1,
-				1, tzinfo=pytz.UTC
-			)
-		assert self.end > self.start
+		self.end = self.start + datetime.timedelta(hours=self.sim_general_config["max_sim_hours"])
 
 		self.total_seconds = (self.end - self.start).total_seconds()
 		self.total_days = self.total_seconds / 60 / 60 / 24
@@ -84,6 +73,7 @@ class SimInput:
 		if self.demand_model_config["demand_model_type"] == "trace":
 			self.booking_requests_test = pickle.Unpickler(open(os.path.join(city_scenario_path, "bookings_test.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
+
 		else:
 			self.demand_model = pickle.Unpickler(
 				open(os.path.join(demand_model_path, "demand_model.pickle"), "rb")).load()

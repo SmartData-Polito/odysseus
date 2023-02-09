@@ -6,7 +6,7 @@ demand_model_config_grid = {
 	"vehicle_research_policy": ["neighbors_1"],
 
 	"avg_speed_kmh_mean": [1],
-	"max_duration": [60 * 60 * 3],
+	"max_duration": [60*60*3],
 	"fixed_driving_distance": [None],
 
 	"user_contribution_policy": [""],

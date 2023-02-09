@@ -1,0 +1,21 @@
+figure.figsize : 4.0, 3.0
+
+font.family : sans-serif
+font.size : 10
+
+axes.facecolor : white
+axes.edgecolor : black
+
+axes.titlesize : 10
+axes.labelsize : 13
+grid : True
+grid.color : lightgrey
+
+lines.linewidth : 2.5
+lines.markersize : 3
+lines.markeredgewidth  : 2.5
+
+xtick.labelsize : 10
+ytick.labelsize : 10
+
+legend.fontsize : 8

@@ -64,9 +64,10 @@ def get_distances(
 		booking_or_request_dict, distance_matrix, origin_id, destination_id, orography_factor,
 ):
 	booking_or_request_dict["euclidean_distance"] = distance_matrix.loc[origin_id, destination_id]
-	booking_or_request_dict["driving_distance"] = booking_or_request_dict["euclidean_distance"] * orography_factor
 	if origin_id == destination_id:
-		raise NotImplementedError("Round trips not implemented!")
+		booking_or_request_dict["euclidean_distance"] = 500
+		# raise NotImplementedError("Round trips not implemented!")
+	booking_or_request_dict["driving_distance"] = booking_or_request_dict["euclidean_distance"] * orography_factor
 	return booking_or_request_dict
 
 

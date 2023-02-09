@@ -1,7 +1,8 @@
 import copy
-import datetime
-
+import itertools
+import numpy as np
 import simpy
+# import datetime
 
 from odysseus.simulator.simulation_data_structures.sim_booking import SimBooking
 
@@ -11,23 +12,22 @@ from odysseus.simulator.simulation.relocation_strategies import RelocationStrate
 from odysseus.supply_modelling.service_stations.station_conf import station_conf
 from odysseus.simulator.simulation.sim_metrics import SimMetrics
 
-import itertools
-
-import numpy as np
 
 from odysseus.simulator.simulation_data_structures.sim_booking_request import SimBookingRequest
+
+from odysseus.utils.time_utils import *
 from odysseus.utils.bookings_utils import *
+
+from functools import partial, wraps
+
 
 np.random.seed(44)
 
-
-from functools import partial, wraps
-import simpy
-
-sim_events = []
+sim_events = list()
 
 
 def trace(env, callback):
+
     def get_wrapper(env_step, callback):
         """Generate the wrapper for env.step()."""
         @wraps(env_step)
@@ -42,7 +42,7 @@ def trace(env, callback):
 
 
 def monitor(data, t, prio, eid, event):
-    data.append((t, eid, type(event)))
+    data.append((datetime.datetime.now(), t, eid, type(event)))
 
 
 monitor = partial(monitor, sim_events)
@@ -145,6 +145,8 @@ class SharedMobilitySim:
         self.sim_end_dt = None
         self.sim_exec_time_sec = None
 
+        self.sim_events = list()
+
     def update_time_info(self):
 
         self.current_datetime = self.start + datetime.timedelta(seconds=self.env.now)
@@ -157,6 +159,8 @@ class SharedMobilitySim:
             self.current_daytype = get_daytype_from_week_config(
                 self.sim_input.demand_model.week_config, self.current_weekday
             )
+        else:
+            self.current_daytype = get_daytype_from_weekday(self.current_weekday)
 
         if self.update_relocation_schedule \
                 and self.sim_input.supply_model_config["relocation"] \
@@ -185,24 +189,10 @@ class SharedMobilitySim:
 
         self.update_time_info()
 
-        # print(
-        #     "BOOKING START",
-        #     self.current_datetime,
-        #     booking_dict["start_time"],
-        #     booking_dict["end_time"],
-        #     booking_dict["origin_id"],
-        #     booking_dict["destination_id"],
-        # )
-        # print(self.available_vehicles_dict, self.vehicles_zones)
-
         if vehicle_id in self.available_vehicles_dict[zone_id]:
             self.available_vehicles_dict[zone_id].remove(vehicle_id)
         if vehicle_id in self.vehicles_zones:
             del self.vehicles_zones[vehicle_id]
-
-        # if vehicle_id in self.available_vehicles_dict[zone_id]:
-        #     if vehicle_id in self.vehicles_zones:
-        #         print(self.available_vehicles_dict[zone_id], self.vehicles_zones[vehicle_id])
 
         self.n_booked_vehicles += 1
 
@@ -221,28 +211,9 @@ class SharedMobilitySim:
 
         self.update_time_info()
 
-        # print(
-        #     "BOOKING END",
-        #     self.current_datetime,
-        #     booking_dict["start_time"],
-        #     booking_dict["end_time"],
-        #     booking_dict["origin_id"],
-        #     booking_dict["destination_id"],
-        # )
-        # print(self.available_vehicles_dict, self.vehicles_zones)
-
     def process_booking_request(self, booking_request):
 
         booking_request_dict = booking_request.booking_request_dict
-
-        # print(
-        #     "REQUEST",
-        #     self.current_datetime,
-        #     booking_request_dict["start_time"],
-        #     booking_request_dict["end_time"],
-        #     booking_request_dict["origin_id"],
-        #     booking_request_dict["destination_id"],
-        # )
 
         booking_request_dict["req_id"] = self.n_booking_requests
         self.n_booking_requests += 1
@@ -371,8 +342,6 @@ class SharedMobilitySim:
             if hours_spent >= self.sim_input.sim_general_config["max_sim_hours"]:
                 break
 
-            # yield self.env.timeout(60*60)
-
     def mobility_requests_generator_from_trace(self):
 
         hours_spent = 0
@@ -408,17 +377,18 @@ class SharedMobilitySim:
                     break
 
     def mobility_requests_generator(self):
-        if self.sim_input.demand_model_config["demand_model_type"] == "od_matrices":
+        if self.sim_input.demand_model_config["demand_model_type"] in ["od_matrices", "poisson_kde"]:
             self.env.process(self.mobility_requests_generator_from_model())
         elif self.sim_input.demand_model_config["demand_model_type"] == "trace":
             self.env.process(self.mobility_requests_generator_from_trace())
 
     def run(self):
         self.sim_start_dt = datetime.datetime.now()
+        # trace(self.env, monitor)
         self.mobility_requests_generator()
         self.env.run(until=self.total_seconds)
+        self.sim_events = sim_events
         self.sim_end_dt = datetime.datetime.now()
         self.sim_exec_time_sec = (
             self.sim_end_dt - self.sim_start_dt
         ).total_seconds()
-

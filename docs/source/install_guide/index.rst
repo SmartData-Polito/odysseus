@@ -49,15 +49,14 @@ In particular this folder structure should have appeared:
       ::
 
           my-odysseus-folder
-          ├── odysseus
-          │   ├── data
-          │   │   ├── my_city
-          │   │   │   ├── norm
-          │   │   │   │   ├── od_matrices
-          │   │   │   │   │   ├── my_data_source
-          │   │   │   │   │   │   ├── week_config.json
-          │   │   │   │   │   │   ├── grid_config.json
-          │   │   │   │   │   │   ├── generic_day_generic_hour.csv
+          ├── data
+          │   ├── my_city
+          │   │   ├── norm
+          │   │   │   ├── od_matrices
+          │   │   │   │   ├── my_data_source
+          │   │   │   │   │   ├── week_config.json
+          │   │   │   │   │   ├── grid_config.json
+          │   │   │   │   │   ├── generic_day_generic_hour.csv
 
 
 If so, congratulations!

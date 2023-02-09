@@ -41,8 +41,8 @@ parser.add_argument(
 
 parser.set_defaults(
     campaign_name="smartdata_test_0",
-    conf_name="scenario_C",
-    city_scenario_folder="ecarsharing_car2go",
+    conf_name="scenario_D",
+    city_scenario_folder="escooters",
     sim_run_mode="single_run"
 )
 

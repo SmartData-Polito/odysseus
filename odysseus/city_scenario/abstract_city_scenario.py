@@ -248,10 +248,13 @@ class AbstractCityScenario:
         self.grid["centroid_y"] = self.grid.loc[:, "geometry"].centroid.y
         self.grid_crs = self.grid.crs
 
+        print("Identifying valid zones..")
         self.valid_zones = self.get_valid_zones()
 
+        print("Getting grid spatial indices..")
         self.grid_indexes_dict = get_grid_indexes_dict(self.grid_matrix)
 
+        print("Identifying closest valid zones..")
         self.closest_valid_zone = get_closest_zone_from_grid_matrix(
             self.grid_indexes_dict, self.grid.index.values, self.valid_zones
         )
@@ -279,6 +282,7 @@ class AbstractCityScenario:
         else:
             self.n_vehicles_original = 100
 
+        print("Getting neighboring zones indices..")
         self.neighbors_dict = self.get_neighbors_dicts()
         self.get_grid_indexes()
 
@@ -289,10 +293,12 @@ class AbstractCityScenario:
 
         self.energy_mix = EnergyMix(self.city_name, self.year_energy_mix)
 
+        print("Computing distance matrix..")
         self.distance_matrix = get_distance_matrix(
             self.grid_indexes_dict, self.valid_zones, self.valid_zones, self.bin_side_length
         )
 
+        print("Computing closest zone from grid matrix..")
         self.closest_zones = get_closest_zone_from_grid_matrix(
             self.grid_indexes_dict, self.valid_zones, self.valid_zones
         )
@@ -323,8 +329,6 @@ class AbstractCityScenario:
         self.closest_valid_zone.to_pickle(os.path.join(self.city_scenario_path, "closest_valid_zone.pickle"))
         self.distance_matrix.to_csv(os.path.join(self.city_scenario_path, "distance_matrix.csv"))
         self.distance_matrix.to_pickle(os.path.join(self.city_scenario_path, "distance_matrix.pickle"))
-        #self.closest_zones.to_csv(os.path.join(self.city_scenario_path, "closest_zones.csv"))
-        #self.closest_zones.to_pickle(os.path.join(self.city_scenario_path, "closest_zones.pickle"))
 
         with open(os.path.join(self.city_scenario_path, "valid_zones.pickle"), "wb") as f:
             pickle.dump(self.valid_zones, f)

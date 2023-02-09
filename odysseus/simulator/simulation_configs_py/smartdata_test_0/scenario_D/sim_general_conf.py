@@ -1,11 +1,11 @@
 sim_general_config_grid = {
 
     # City and data source parameters
-    "city": ["Torino"],
-    "data_source_id": ["big_data_db"],
+    "city": ["Austin"],
+    "data_source_id": ["city_open_data"],
 
     # Run parameters
-    "sim_scenario_name": ["scenario_C"],
+    "sim_scenario_name": ["scenario_D"],
 
     "save_history": [True],
     "history_to_file": [True],
@@ -16,9 +16,9 @@ sim_general_config_grid = {
     "auto_plotting": [True],
 
     # Time  parameters
-    "year": [2017],
-    "month_start": [10],
+    "year": [2019],
+    "month_start": [7],
 
-    "max_sim_hours": [24 * 30 * 3]
+    "max_sim_hours": [24 * 1]
 
 }

@@ -48,12 +48,12 @@ parser.add_argument(
 
 parser.set_defaults(
     data_from=["trips"],
-    city=["Torino"],
-    data_source_id=["big_data_db"],
+    city=["Austin"],
+    data_source_id=["city_open_data"],
     bin_side_length=[500],
-    train_range=("2017", "10", "2017", "10"),
-    test_range=("2017", "10", "2017", "10"),
-    folder_name=["ecarsharing_car2go"]
+    train_range=("2019", "7", "2019", "7"),
+    test_range=("2019", "7", "2019", "7"),
+    folder_name=["escooters"]
 )
 
 args = parser.parse_args()
@@ -69,6 +69,7 @@ for city_scenario_config in city_scenario_configs_list:
     if city_scenario_config["data_from"] == "trips":
 
         print(city_scenario_config)
+
         city_scenario = CityScenarioFromTrips(
             city_name=city_scenario_config["city"],
             data_source_id=city_scenario_config["data_source_id"],
@@ -76,13 +77,18 @@ for city_scenario_config in city_scenario_configs_list:
             read_config_from_file=False,
         )
 
+        print("Initialising train and test set..")
         city_scenario.init_train_test(
             int(city_scenario_config["train_range"][0]), int(city_scenario_config["train_range"][1]),
             int(city_scenario_config["train_range"][2]), int(city_scenario_config["train_range"][3]),
             int(city_scenario_config["test_range"][0]), int(city_scenario_config["test_range"][1]),
             int(city_scenario_config["test_range"][2]), int(city_scenario_config["test_range"][3]),
         )
+
+        print("Initialising grid..")
         city_scenario.create_squared_city_grid()
+
+        print("Creating city scenario..")
         city_scenario.create_city_scenario_from_trips_data()
 
     elif city_scenario_config["data_from"] == "od":

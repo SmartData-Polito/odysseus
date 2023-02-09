@@ -141,7 +141,14 @@ class PoissonKdeDemandModel(DemandModel):
         self.booking_requests_list = booking_requests_list
         return self.booking_requests_list
 
-    def generate_booking_requests_sim(self, start_datetime, requests_rate_factor):
+    def generate_booking_requests_sim(
+            self,
+            start_datetime,
+            requests_rate_factor,
+            avg_speed_kmh_mean,
+            max_duration,
+            fixed_driving_distance
+    ):
 
         weekday = start_datetime.weekday()
         daytype = get_daytype_from_week_config(self.week_config, weekday)
@@ -169,7 +176,7 @@ class PoissonKdeDemandModel(DemandModel):
 
         booking_request_dict = create_booking_request_dict(
             self.week_config, timeout, start_datetime, origin_id, destination_id,
-            self.avg_speed_kmh_mean * 5, self.distance_matrix
+            self.distance_matrix, self.avg_speed_kmh_mean, max_duration, fixed_driving_distance
         )
 
         return [booking_request_dict]

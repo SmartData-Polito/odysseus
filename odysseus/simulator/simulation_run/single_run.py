@@ -38,12 +38,13 @@ def single_run(conf_dict):
     end = datetime.datetime.now()
     print(
         datetime.datetime.now(), city, sim_scenario_name, conf_dict["conf_id"],
-        "SimInput initialised, duration:", (end-start).total_seconds(), "Creating output.."
+        "SimInput initialised, duration:", (end-start).total_seconds(),
     )
 
     start = datetime.datetime.now()
 
     sim = run_sim_v2(sim_input)
+
     sim_output = SimOutput(sim)
     sim_stats = sim_output.sim_stats
 
@@ -98,9 +99,9 @@ def single_run(conf_dict):
             plotter.plot_events_t()
         plotter.plot_fleet_status_t()
 
-        # TODO -> Seaborn boxplots are cool but slow
-        #plotter.plot_events_hourly_count_boxplot("bookings", "start")
-        #plotter.plot_events_hourly_count_boxplot("charges", "start")
+        # TODO -> Manage auto plotting exec time because Seaborn boxplots are cool yet slow
+        plotter.plot_events_hourly_count_boxplot("bookings", "start")
+        plotter.plot_events_hourly_count_boxplot("charges", "start")
         plotter.plot_events_hourly_count_boxplot("unsatisfied", "start")
         plotter.plot_n_vehicles_charging_hourly_mean_boxplot()
 
