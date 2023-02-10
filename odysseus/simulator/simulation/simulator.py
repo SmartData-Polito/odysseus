@@ -355,14 +355,15 @@ class SharedMobilitySim:
             if booking_request_dict["origin_id"] in self.valid_zones\
                     and booking_request_dict["destination_id"] in self.valid_zones:
 
-                self.update_time_info()
-                booking_request_dict = update_req_time_info(booking_request_dict)
-
-                if self.sim_input.supply_model_config["relocation"] \
-                        and self.sim_input.supply_model_config["relocation_strategy"] in ["predictive"]:
-                    self.relocation_strategy.update_current_hour_stats(booking_request_dict)
+                # booking_request_dict = update_req_time_info(booking_request_dict)
+                #
+                # if self.sim_input.supply_model_config["relocation"] \
+                #         and self.sim_input.supply_model_config["relocation_strategy"] in ["predictive"]:
+                #     self.relocation_strategy.update_current_hour_stats(booking_request_dict)
 
                 yield self.env.timeout(booking_request_dict["ia_timeout"])
+
+                self.update_time_info()
 
                 booking_request = SimBookingRequest(
                     self.env, self.sim_input, self.vehicles_list, booking_request_dict

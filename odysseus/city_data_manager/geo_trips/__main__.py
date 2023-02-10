@@ -11,6 +11,7 @@ from odysseus.city_data_manager.geo_trips.us_escooter_pilots.kansas_city_geo_tri
 from odysseus.city_data_manager.geo_trips.us_escooter_pilots.chicago_geo_trips import ChicagoGeoTrips
 from odysseus.city_data_manager.geo_trips.us_escooter_pilots.calgary_geo_trips import CalgaryGeoTrips
 from odysseus.city_data_manager.geo_trips.enjoy.enjoy_geo_trips import EnjoyGeoTrips
+from odysseus.city_data_manager.geo_trips.custom_data.custom_geo_trips import CustomGeoTrips
 
 parser = argparse.ArgumentParser()
 
@@ -36,10 +37,10 @@ parser.add_argument(
 
 
 parser.set_defaults(
-    cities=["Torino"],
-    data_source_ids=["big_data_db"],
-    years=["2017"],
-    months=["10"],
+    cities=["test_city"],
+    data_source_ids=["custom_trips"],
+    years=["2020"],
+    months=["9"],
 )
 
 args = parser.parse_args()
@@ -50,10 +51,7 @@ for city in args.cities:
             for month in args.months:
                 print(datetime.datetime.now(), city, data_source_id, year, month)
 
-                if data_source_id == "citi_bike":
-                    geo_trips_ds = NewYorkCityBikeGeoTrips(year=int(year), month=int(month))
-
-                elif data_source_id == "big_data_db":
+                if data_source_id == "big_data_db":
                     geo_trips_ds = BigDataDBGeoTrips(city, data_source_id, year=int(year), month=int(month))
 
                 elif data_source_id == "enjoy":
@@ -74,6 +72,9 @@ for city in args.cities:
                         geo_trips_ds = ChicagoGeoTrips(year=int(year), month=int(month))
                     elif city == "Calgary":
                         geo_trips_ds = CalgaryGeoTrips(year=int(year), month=int(month))
+
+                elif data_source_id == "custom_trips":
+                    geo_trips_ds = CustomGeoTrips(city, data_source_id, year=int(year), month=int(month))
 
                 geo_trips_ds.get_trips_od_gdfs()
                 geo_trips_ds.save_points_data()

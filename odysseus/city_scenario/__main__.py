@@ -48,12 +48,12 @@ parser.add_argument(
 
 parser.set_defaults(
     data_from=["trips"],
-    city=["Austin"],
-    data_source_id=["city_open_data"],
+    city=["test_city"],
+    data_source_id=["custom_trips"],
     bin_side_length=[500],
-    train_range=("2019", "7", "2019", "7"),
-    test_range=("2019", "7", "2019", "7"),
-    folder_name=["escooters"]
+    train_range=("2020", "9", "2020", "9"),
+    test_range=("2020", "9", "2020", "9"),
+    folder_name=["test_scenario"]
 )
 
 args = parser.parse_args()

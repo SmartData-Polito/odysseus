@@ -8,7 +8,7 @@ axes.edgecolor : black
 
 axes.titlesize : 10
 axes.labelsize : 13
-grid : True
+
 grid.color : lightgrey
 
 lines.linewidth : 2.5

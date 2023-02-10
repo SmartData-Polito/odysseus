@@ -1,6 +1,6 @@
 demand_model_config_grid = {
 
-	"demand_model_type": ["poisson_kde"],
+	"demand_model_type": ["trace"],
 	"requests_rate_factor": [1],
 
 	"vehicle_research_policy": ["zone"],

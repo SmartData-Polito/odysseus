@@ -17,7 +17,7 @@ class CityDataLoader:
         self.trips_destinations = pd.DataFrame()
         self.trips_origins = pd.DataFrame()
 
-        if self.city_name == "Roma" or self.city_name == "Torino" or self.city_name == "Milano":
+        if self.city_name in ["Roma", "Torino", "Milano", "test_city"]:
             self.tz = pytz.timezone("Europe/Rome")
         elif self.city_name == "Amsterdam":
             self.tz = pytz.timezone("Europe/Amsterdam")

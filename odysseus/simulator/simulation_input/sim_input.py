@@ -36,7 +36,7 @@ class SimInput:
 		self.neighbors_dict = pickle.Unpickler(open(os.path.join(city_scenario_path, "neighbors_dict.pickle"), "rb")).load()
 		self.integers_dict = pickle.Unpickler(open(os.path.join(city_scenario_path, "numerical_params_dict.pickle"), "rb")).load()
 		self.closest_valid_zone = pickle.Unpickler(open(os.path.join(city_scenario_path, "closest_valid_zone.pickle"), "rb")).load()
-		self.distance_matrix = pickle.Unpickler(open(os.path.join(city_scenario_path, "distance_matrix.pickle"), "rb")).load()
+		# self.distance_matrix = pickle.Unpickler(open(os.path.join(city_scenario_path, "distance_matrix.pickle"), "rb")).load()
 		self.closest_zones = pickle.Unpickler(open(os.path.join(city_scenario_path, "closest_zones.pickle"), "rb")).load()
 
 		self.grid_crs = str(self.grid.crs)

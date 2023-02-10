@@ -40,9 +40,9 @@ parser.add_argument(
 )
 
 parser.set_defaults(
-    campaign_name="smartdata_test_0",
-    conf_name="scenario_D",
-    city_scenario_folder="escooters",
+    campaign_name="test",
+    conf_name="custom_trips_test",
+    city_scenario_folder="test_scenario",
     sim_run_mode="single_run"
 )
 
@@ -98,7 +98,6 @@ except Exception:
 if args.sim_run_mode == "single_run":
     for parameters_dict in configs_list:
         single_run(parameters_dict)
-        exit()
 
 elif args.sim_run_mode == "multiple_runs":
     for parameters_dict in configs_list:

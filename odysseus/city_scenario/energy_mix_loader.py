@@ -44,7 +44,7 @@ class EnergyMix:
 			"solar": 0,  # MJ/MJel
 		}
 		self.energymix_db = read_energy_mix_config()
-		if self.city_name == "Roma" or self.city_name == "Torino" or self.city_name == "Milano":
+		if self.city_name in ["Roma", "Torino", "Milano", "test_city"]:
 			self.energy_mix_conf = self.energymix_db["Italy"][self.year]
 		elif self.city_name == "Amsterdam":
 			self.energy_mix_conf = self.energymix_db["Netherlands"][self.year]

@@ -20,11 +20,11 @@ class TripsDataSource:
 	:type vehicles_type_id: str
 	"""
 
-	def __init__(self, city_name, data_source_id, vehicles_type_id):
+	def __init__(self, city_name, data_source_id, vehicles_type_id="car_sharing"):
 
 		self.city_name = city_name
 		self.data_source_id = data_source_id
-		self.vehicles_type_id = vehicles_type_id
+
 		self.data_type_id = "trips"
 
 		self.raw_data_path = os.path.join(

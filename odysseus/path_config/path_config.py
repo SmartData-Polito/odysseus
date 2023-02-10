@@ -6,6 +6,7 @@ root_data_path = os.path.join(
 )
 
 cities = [
+	"test_city",
 	"Torino",
 	"Louisville",
 	"Minneapolis",

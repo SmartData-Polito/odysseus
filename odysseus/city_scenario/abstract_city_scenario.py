@@ -311,8 +311,8 @@ class AbstractCityScenario:
         with open(os.path.join(self.city_scenario_path, "city_scenario_config.json"), "w") as f:
             json.dump(self.city_scenario_config, f)
 
-        with open(os.path.join(self.city_scenario_path, "city_obj.pickle"), "wb") as f:
-            pickle.dump(self, f)
+        # with open(os.path.join(self.city_scenario_path, "city_obj.pickle"), "wb") as f:
+        #     pickle.dump(self, f)
 
         self.grid_matrix.to_pickle(os.path.join(self.city_scenario_path, "grid_matrix.pickle"))
         self.grid_matrix.to_csv(os.path.join(self.city_scenario_path, "grid_matrix.csv"))

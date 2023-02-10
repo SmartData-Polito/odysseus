@@ -129,20 +129,24 @@ class EFFCS_SimOutputPlotter ():
 		self.sim_booking_requests.fillna(0).set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
 			label="requests", linewidth=2, alpha=0.7
 		)
+		print(len(self.sim_booking_requests.fillna(0).set_index("start_time").iloc[:, 0].resample("60Min").count()))
 		self.sim_bookings.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
 			label="bookings", linewidth=2, alpha=0.7
 		)
+		print(len(self.sim_bookings.fillna(0).set_index("start_time").iloc[:, 0].resample("60Min").count()))
+
 		if len(self.sim_unsatisfied_requests):
 			self.sim_unsatisfied_requests.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
 				label="unsatisfied", linewidth=2, alpha=0.7
 			)
-		if len(self.sim_charges):
-			self.sim_charges.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
-				label="charges", linewidth=2, alpha=0.7
-			)
+		# if len(self.sim_charges):
+		# 	self.sim_charges.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
+		# 		label="charges", linewidth=2, alpha=0.7
+		# 	)
 		plt.legend()
 		plt.xlabel("t")
 		plt.ylabel("n_events")
+		plt.tight_layout()
 		plt.savefig(os.path.join(self.figures_path, "events_profile_t.png"), transparent=True)
 		# plt.show()
 		plt.close()

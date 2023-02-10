@@ -29,7 +29,7 @@ def create_booking_request_dict(
 		booking_request_dict["driving_distance"] = fixed_driving_distance
 		booking_request_dict["euclidean_distance"] = fixed_driving_distance / orography_factor
 	else:
-		booking_request_dict = get_distances(
+		booking_request_dict = get_distances_from_distmatrix(
 			booking_request_dict, distance_matrix,
 			booking_request_dict["origin_id"],
 			booking_request_dict["destination_id"],
@@ -60,7 +60,7 @@ def update_req_time_info(booking_request_dict):
 	return booking_request_dict
 
 
-def get_distances(
+def get_distances_from_distmatrix(
 		booking_or_request_dict, distance_matrix, origin_id, destination_id, orography_factor,
 ):
 	booking_or_request_dict["euclidean_distance"] = distance_matrix.loc[origin_id, destination_id]

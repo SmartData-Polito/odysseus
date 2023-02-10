@@ -8,7 +8,6 @@ xlrd
 rtree
 pytz
 xlsxwriter
-pyspark
 requests
 haversine
 xmltodict
