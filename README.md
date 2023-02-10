@@ -6,30 +6,6 @@ ODySSEUS is a data management and simulation software for mobility data, focused
 
 Its goal is to provide a general, easy-to-use framework to simulate shared mobility scenarios across different cities using real-world data.
 
-Internally, it makes use of several open-source Python libraries for geospatial and mobility analysis, such as geopandas (https://geopandas.org/) and scikit-mobility [5].
-
-ODySSEUS is composed by four main functional modules, each one coming with its own API, command line interface and GUI:
-
-* City Data Manager (previously UMAP [4])
-   * Upload or collect raw input data from different sources.
-   * Provide utilities to normalise data into a common format (e.g. column naming).
-   * Provide a unified interface to access and analyse normalised data.
-
-* Demand Modelling
-   * Create different demand models using:
-      * Poisson/KDE estimation and mobility samples generation [3]
-      * Deep Learning to learn and forecast mobility demand [6]
-   * Create demand-side simulation scenarios.
-
-* Supply Modelling
-   * Create fleets choosing between different modes and vehicles.
-   * Create and configure refueling/charging infrastrucures and energy mix for electricity production.
-   * Define operator strategies to manage its resources
-
-* Simulator
-   * Create and run simulation scenarios based on supply and demand configurations.
-   * Collect several performance metrics (satisfied demand, fleet handling cost, equivalent CO2 emissions, gross profit, ...)
-
 At the following link you can find a User Guide and the API reference:
 https://odysseus-dev.readthedocs.io/en/latest/index.html
 
