@@ -97,13 +97,13 @@ class RelocationStrategy(RelocationPrimitives):
                     relocation_zone_id = booking_request["origin_id"]
                     relocated_vehicles = [max_soc_vehicle]
 
-                    # distance = get_od_distance(
-                    #     self.sim_input.grid,
-                    #     max_soc_vehicle_zone,
-                    #     relocation_zone_id,
-                    #     self.sim_input.grid_crs
-                    # )
-                    distance = self.sim_input.distance_matrix.loc[max_soc_vehicle_zone, relocation_zone_id]
+                    distance = get_od_distance(
+                        self.sim_input.grid,
+                        max_soc_vehicle_zone,
+                        relocation_zone_id,
+                        self.sim_input.grid_crs
+                    )
+                    # distance = self.sim_input.distance_matrix.loc[max_soc_vehicle_zone, relocation_zone_id]
                     scooter_relocation = init_scooter_relocation(relocated_vehicles, booking_request["start_time"],
                                                                  [max_soc_vehicle_zone], [relocation_zone_id],
                                                                  distance, 0)
@@ -154,13 +154,13 @@ class RelocationStrategy(RelocationPrimitives):
 
                     relocated = True
 
-                    # distance = get_od_distance(
-                    #     self.sim_input.grid,
-                    #     booking_request["destination_id"],
-                    #     relocation_zone_id,
-                    #     self.sim_input.grid_crs
-                    # )
-                    distance = self.sim_input.distance_matrix.loc[booking_request["destination_id"], relocation_zone_id]
+                    distance = get_od_distance(
+                        self.sim_input.grid,
+                        booking_request["destination_id"],
+                        relocation_zone_id,
+                        self.sim_input.grid_crs
+                    )
+                    # distance = self.sim_input.distance_matrix.loc[booking_request["destination_id"], relocation_zone_id]
 
                     duration = distance / 1000 / self.sim_input.supply_model_config["avg_relocation_speed"] * 3600
 
@@ -630,15 +630,15 @@ class RelocationStrategy(RelocationPrimitives):
                             first_pick_up_zone_id = list(scheduled_relocation["pick_up"].keys())[0]
                             if first_pick_up_zone_id not in workers_distances_by_zone:
                                 workers_distances_by_zone[first_pick_up_zone_id] = {}
-                            # workers_distances_by_zone[first_pick_up_zone_id][worker] = get_od_distance(
-                            #     self.sim_input.grid,
-                            #     worker.current_position,
-                            #     first_pick_up_zone_id,
-                            #     self.sim_input.grid_crs
-                            # )
-                            workers_distances_by_zone[first_pick_up_zone_id][worker] = self.sim_input.distance_matrix.loc[
-                                worker.current_position, first_pick_up_zone_id
-                            ]
+                            workers_distances_by_zone[first_pick_up_zone_id][worker] = get_od_distance(
+                                self.sim_input.grid,
+                                worker.current_position,
+                                first_pick_up_zone_id,
+                                self.sim_input.grid_crs
+                            )
+                            # workers_distances_by_zone[first_pick_up_zone_id][worker] = self.sim_input.distance_matrix.loc[
+                            #     worker.current_position, first_pick_up_zone_id
+                            # ]
 
                         for i in range(min(n_relocations, len(self.scheduled_relocations), n_free_workers)):
 
@@ -738,13 +738,13 @@ class RelocationStrategy(RelocationPrimitives):
         max_distance = -1
         for i in range(len(other_zone_ids)):
             other_zone_id = other_zone_ids[i]
-            # distance_from_starting_zone = get_od_distance(
-            #     self.sim_input.grid,
-            #     starting_zone_id,
-            #     other_zone_id,
-            #     self.sim_input.grid_crs
-            # )
-            distance_from_starting_zone = self.sim_input.distance_matrix.loc[starting_zone_id, other_zone_id]
+            distance_from_starting_zone = get_od_distance(
+                self.sim_input.grid,
+                starting_zone_id,
+                other_zone_id,
+                self.sim_input.grid_crs
+            )
+            # distance_from_starting_zone = self.sim_input.distance_matrix.loc[starting_zone_id, other_zone_id]
             zone_distances.append(distance_from_starting_zone)
             zone_distances_dict[other_zone_id] = distance_from_starting_zone
             if distance_from_starting_zone > max_distance:

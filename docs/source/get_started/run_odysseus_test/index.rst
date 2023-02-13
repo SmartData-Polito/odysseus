@@ -1,6 +1,11 @@
 Run ODySSEUS test
 =================================
 
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   :caption: Moduli:
+
 Introduction
 ---------------------------------------------------
 

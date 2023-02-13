@@ -6,7 +6,7 @@ from shapely.geometry import Point, LineString, Polygon
 import geopandas as gpd
 from math import radians, cos, sin, asin, sqrt
 from haversine import haversine, Unit
-# from scipy.spatial.distance import euclidean
+from scipy.spatial.distance import euclidean
 
 
 def get_width_height_from_wgs84_bounds(x_min, y_min, bin_side_length):
@@ -161,7 +161,7 @@ def get_od_distance(grid_centroids, origin_id, destination_id, crs="epsg:3857"):
     if crs == "epsg:4326":
         return get_haversine_distance(x1, y1, x2, y2)
     elif crs == "epsg:3857":
-        return math.dist((x1, y1), (x2, y2))
+        return euclidean((x1, y1), (x2, y2))
 
 
 def miles_to_meters(miles):
@@ -204,7 +204,7 @@ def get_distance_matrix(
         for d_id in destination_zones:
             o_i, o_j = grid_indexes_dict[o_id]
             d_i, d_j = grid_indexes_dict[d_id]
-            distance_matrix[o_id][d_id] = math.dist((o_j, o_i), (d_j, d_i)) * bin_side_length
+            distance_matrix[o_id][d_id] = euclidean((o_j, o_i), (d_j, d_i)) * bin_side_length
 
     return pd.DataFrame(distance_matrix).T
 
@@ -217,7 +217,7 @@ def get_closest_zone_from_grid_matrix(grid_indexes_dict, origin_zones, destinati
         for d_id in destination_zones:
             o_i, o_j = grid_indexes_dict[o_id]
             d_i, d_j = grid_indexes_dict[d_id]
-            od_dist = math.dist((o_j, o_i), (d_j, d_i))
+            od_dist = euclidean((o_j, o_i), (d_j, d_i))
             if od_dist < min_od_dist:
                 min_od_dist = od_dist
                 min_dist_zone = d_id

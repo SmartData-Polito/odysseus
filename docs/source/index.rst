@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 ==========================
-Get started with Odysseus
+ODySSEUS
 ==========================
 
 .. toctree::
@@ -13,11 +13,8 @@ Get started with Odysseus
    :caption: API Reference:
 
    get_started/index
-   city_data_manager/index
-   demand_modelling/index
-   supply_modelling/index
-   simulator/index
-   modules
+   odysseus_modules/index
+   output_analysis/index
 
 Introduction
 =============
@@ -28,10 +25,12 @@ Its goal is to provide a general, easy-to-use framework to simulate shared mobil
 
 This guide is organised as follows:
 
-- **Install Guide**
-- **City Data Manager**
-- **Demand Modelling**
-- **Supply Modelling**
-- **Simulator**
+- **Get Started**
+   - Move your first steps with ODySSEUS
+- **ODySSEUS Modules**
+   - **City Data Manager**
+   - **Demand Modelling**
+   - **Supply Modelling**
+   - **Simulator**
 - **Output analysis**
 

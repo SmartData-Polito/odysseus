@@ -1,6 +1,11 @@
 Install Guide
 =================================
 
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   :caption: Moduli:
+
 Prerequisites
 ---------------------------------------
 

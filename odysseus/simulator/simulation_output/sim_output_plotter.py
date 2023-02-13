@@ -96,6 +96,7 @@ class EFFCS_SimOutputPlotter ():
 			self.grid.plot(color="white", edgecolor="black", ax=ax)
 			self.grid.loc[self.sim_output.valid_zones].plot(column="poles_count", ax=ax, legend=True)
 			#self.grid.loc[charging_zones].plot(ax=ax)
+			plt.tight_layout()
 			plt.savefig(os.path.join(self.figures_path, "cps_locations.png"), transparent=True)
 			plt.close()
 
@@ -129,11 +130,9 @@ class EFFCS_SimOutputPlotter ():
 		self.sim_booking_requests.fillna(0).set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
 			label="requests", linewidth=2, alpha=0.7
 		)
-		print(len(self.sim_booking_requests.fillna(0).set_index("start_time").iloc[:, 0].resample("60Min").count()))
 		self.sim_bookings.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
 			label="bookings", linewidth=2, alpha=0.7
 		)
-		print(len(self.sim_bookings.fillna(0).set_index("start_time").iloc[:, 0].resample("60Min").count()))
 
 		if len(self.sim_unsatisfied_requests):
 			self.sim_unsatisfied_requests.set_index("start_time").iloc[:, 0].resample("60Min").count().plot(
@@ -224,6 +223,7 @@ class EFFCS_SimOutputPlotter ():
 		plt.figure(figsize=(15, 5))
 		sns.boxplot(x="hour", y="_".join([which_df, "hourly", start_or_end, "count"]), data=trips_df_norm_count)
 		sns.swarmplot(x="hour", y="_".join([which_df, "hourly", start_or_end, "count"]), data=trips_df_norm_count, color="black")
+		plt.tight_layout()
 		plt.savefig(
 			os.path.join(
 				self.figures_path, "_".join([which_df, "hourly", start_or_end, "count", "boxplot.png"])
@@ -266,6 +266,7 @@ class EFFCS_SimOutputPlotter ():
 		plt.title("relocation cost hourly boxplot")
 		plt.xlabel("hour")
 		plt.ylabel("relocation cost [hours]")
+		plt.tight_layout()
 		plt.savefig(os.path.join(self.figures_path, "relocost_hourly_boxplot.png"), transparent=True)
 		# plt.show()
 		plt.close()

@@ -15,7 +15,7 @@ supply_model_config_grid = {
 
 	"vehicles_config_mode": ["sim_config"],
 	"vehicles_initial_placement": ["random_greedy"],
-	"n_vehicles": list(range(1000, 11000, 1000)),
+	"n_vehicles": [600],
 
 	# -> charging
 
@@ -49,7 +49,7 @@ supply_model_config_grid = {
 
 	# -> relocation
 
-	"relocation": [False],
+	"relocation": [False, True],
 	"relocation_strategy": ["proactive"],
 
 	"relocation_technique": [

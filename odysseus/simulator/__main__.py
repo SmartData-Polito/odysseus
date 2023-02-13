@@ -40,9 +40,9 @@ parser.add_argument(
 )
 
 parser.set_defaults(
-    campaign_name="test",
-    conf_name="custom_trips_test",
-    city_scenario_folder="test_scenario",
+    campaign_name="smartdata_test_0",
+    conf_name="scenario_D",
+    city_scenario_folder="escooters",
     sim_run_mode="single_run"
 )
 

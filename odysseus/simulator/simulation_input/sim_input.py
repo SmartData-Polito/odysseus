@@ -73,7 +73,6 @@ class SimInput:
 		if self.demand_model_config["demand_model_type"] == "trace":
 			self.booking_requests_test = pickle.Unpickler(open(os.path.join(city_scenario_path, "bookings_test.pickle"), "rb")).load()
 			self.booking_requests_list = self.get_booking_requests_list()
-
 		else:
 			self.demand_model = pickle.Unpickler(
 				open(os.path.join(demand_model_path, "demand_model.pickle"), "rb")).load()

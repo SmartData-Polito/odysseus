@@ -1,7 +1,7 @@
 sim_general_config_grid = {
 
     # City and data source parameters
-    "city": ["Austin"],
+    "city": ["Louisville"],
     "data_source_id": ["city_open_data"],
 
     # Run parameters
@@ -19,6 +19,6 @@ sim_general_config_grid = {
     "year": [2019],
     "month_start": [7],
 
-    "max_sim_hours": [24 * 1]
+    "max_sim_hours": [24 * 30 * 3]
 
 }

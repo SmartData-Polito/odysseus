@@ -41,7 +41,7 @@ parser.add_argument(
 
 parser.set_defaults(
 
-    city=["Austin"],
+    city=["Louisville"],
     data_source_id=["city_open_data"],
     demand_model_type=["poisson_kde"],
     kde_bandwidth=["0.1"],

@@ -3,14 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Get Started
-=================================
+==========================
+ODySSEUS output analysis
+==========================
 
 .. toctree::
    :hidden:
    :maxdepth: 1
-   :caption: Moduli:
+   :caption: API Reference:
 
-   install_guide/index
-   run_odysseus_test/index
+Introduction
+=============
+
+Simulation outputs are organised as follows: ...
+
 
