@@ -676,7 +676,8 @@ class RelocationStrategy(RelocationPrimitives):
 
                             # Trigger multi-step relocation
                             self.env.process(self.relocate_scooter_multiple_zones(scheduled_relocation,
-                                                                                  final_collection_path, distribution_path,
+                                                                                  final_collection_path,
+                                                                                  distribution_path,
                                                                                   nearest_worker))
 
     def compute_delta(self, pred_out_flows_list, pred_in_flows_list):

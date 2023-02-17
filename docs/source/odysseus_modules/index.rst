@@ -9,7 +9,7 @@ ODySSEUS Modules
 
 .. toctree::
    :hidden:
-   :maxdepth: 3
+   :maxdepth: 0
    :caption: API Reference:
 
    city_data_manager/index

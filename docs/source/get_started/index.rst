@@ -8,9 +8,17 @@ Get Started
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
+   :maxdepth: 0
    :caption: Moduli:
 
    install_guide/index
    run_odysseus_test/index
 
+
+In this section you will find a setup guide for Odysseus.
+The guide is organised as follows:
+
+- **Install Guide**
+   - Here you can find information about installing Odysseus and configuring your development environment
+- **Run Odysseus Test**
+   - Here you can find a tutorial helping with your first Odysseus run.

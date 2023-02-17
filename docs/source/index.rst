@@ -9,7 +9,7 @@ ODySSEUS
 
 .. toctree::
    :hidden:
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: API Reference:
 
    get_started/index
@@ -17,7 +17,7 @@ ODySSEUS
    output_analysis/index
 
 Introduction
-=============
+-------------
 
 ODySSEUS is a data management and simulation software focused on shared fleets in urban environments.
 

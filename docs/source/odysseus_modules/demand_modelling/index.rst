@@ -8,7 +8,7 @@ Demand Modelling
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
+   :maxdepth: 0
    :caption: Moduli:
 
 Introduction

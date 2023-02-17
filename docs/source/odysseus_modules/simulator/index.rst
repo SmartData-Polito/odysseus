@@ -8,56 +8,208 @@ Simulator
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
+   :maxdepth: 0
    :caption: Moduli:
 
 Introduction
 -----------------------------
 
-- Create and run simulation scenarios based on supply and demand configurations.
-- Support for trip-level simulations (single_run) and timeframe-level simulations (multiple_runs).
-- Collect several performance metrics (satisfied demand, fleet handling cost, equivalent CO2 emissions, gross profit, ...)
-- Detailed interface to analyse simulation results
+This module is responsible for running mobility simulations starting from the following configurations:
 
-Configuring simulation input
+- **General Run Configuration**:
+   - Specify namespace (city, data_source_id, output_folder)
+   - Specify option to increase/decrease output verbosity
+   - Specify automatic plotting options
+
+- **Demand Configuration**:
+   - Specify how mobility requests samples are generated
+   - Specify user behavior when searching for a vehicle
+   - Specify user behavior regarding cooperation with system operators
+
+- **Supply Configuration**:
+   - Specify energy supply configuration
+   - Specify fleet configuration
+   - Specify charging policy and parameters
+   - Specify relocation policy and parameters
+
+The files where those configurations are respectively:
+
+- **sim_general_conf.py**:
+
+- **demand_model_conf.py**:
+
+- **supply_model_conf.py**:
+
+Example configuration folder path:
+
+      ::
+
+          my-odysseus-folder
+          ├── odysseus
+          │   ├── simulator
+          │   │   ├── simulation_configs_py
+          │   │   │   ├── test
+          │   │   │   │   ├── custom_trips_test
+          │   │   │   │   │   ├── sim_general_conf.py
+          │   │   │   │   │   ├── demand_model_conf.py
+          │   │   │   │   │   ├── supply_model_conf.py
+
+
+Each configuration is a Python script containing the definition of a single variable.
+Those variable are dictionary of lists where the keys correspond to the name of a certain parameter and the list
+contains the desired values for such parameter.
+Notice that each configuration is basically a grid of parameters and selecting a very big grid might result in
+memory fault and/or very long execution time.
+
+Let's go into the details of each configuration.
+
+
+General Run Configuration
 -----------------------------
 
-The folder *odysseus/simulator/simulation_input* contains configuration files for simulation.
+- Parameters list:
 
-In particular:
+   - **city**, string
+   - **data_source_id**, string
+   - **sim_scenario_name**, string
+      - Name of the output folder where results and eventually figures will be saved.
+   - **save_history**, boolean
+      - Save list of events during simulation time.
+   - **history_to_file**, boolean
+      - Export data structures containing complete lists of booking requests, bookings, charges..
+   - **exclude_sim_output_obj**, boolean
+   - **exclude_geo_grid**, boolean
+   - **exclude_events_files**, boolean
+   - **exclude_resources_files**, boolean
+   - **auto_plotting**, boolean
+   - **year**, boolean
+   - **month_start**, boolean
+   - **max_sim_hours**, boolean
 
-- **sim_configs_target.json**: contains the name of the configuration to run
-- **sim_configs_versioned**: contains one folder for each saved configuration e.g. *sim_configs_versioned/turin_iscc_set1* contains the configuration for the first set of simulation used in ISCC paper.
 
-Each configuration folder must contain the following Python files:
+- Example:
 
-- **sim_run_conf.py**: specifies used data source, run mode (single_run or multiple_runs), number of cores to use in case of multiple runs, simulation type (trace-driven or model-driven) and output folder name
-- **sim_general_conf.py**: specifies macroscopic parameters about spatial and temporal configuration, as well as fleet load factor policy.
-- **single_run_conf.py**: specifies scenario configuration for single run
-- **model_validation_conf.py**: special case of single run
-- **multiple_runs_conf.py**: specifies scenario configuration for multiple runs
-- **vehicle_config.py**: specifies vehicles characteristics
-- **cost_conf.py**: specifies cost/revenue configuration
+      .. code-block:: console
 
-Let's create a new folder for a new configuration:
+            sim_general_config_grid = {
 
+                # City and data source parameters
+                "city": ["test_city"],
+                "data_source_id": ["custom_trips"],
 
-   .. code-block:: console
+                # Run parameters
+                "sim_scenario_name": ["custom_trips_test"],
 
-     cp -r /home/det_tesi/a.ciociola/input_simulator/ my-odysseus-folder/odysseus/simulator/simulation_input/sim_configs_versioned/
+                "save_history": [True],
+                "history_to_file": [True],
+                "exclude_sim_output_obj": [False],
+                "exclude_geo_grid": [False],
+                "exclude_events_files": [False],
+                "exclude_resources_files": [False],
+                "auto_plotting": [True],
 
-Modify configurations as you desire, then run the simulator:
+                # Time  parameters
+                "year": [2020],
+                "month_start": [9],
 
-   .. code-block:: console
+                "max_sim_hours": [24 * 30]
 
-     cd my-odysseus-folder/
-     python -m odysseus.simulator
+            }
 
-Let's wait for simulation to finish and let's check the results folder and the figures folder (figures are created automatically only in single run mode)
+Demand Configuration
+-----------------------------
 
-   .. code-block:: console
+   - Example:
 
-     ls my-odysseus-folder/simulator/results/Torino/single_run/test
-     ls my-odysseus-folder/simulator/figures/Torino/single_run/test
+      .. code-block:: console
 
-Done! Now we can explore our results and eventually produce other analysis and plots.
+            demand_model_config_grid = {
+
+                "demand_model_type": ["trace"],
+                "requests_rate_factor": [1],
+
+                "vehicle_research_policy": ["zone"],
+
+                "avg_speed_kmh_mean": [1],
+                "max_duration": [60 * 60 * 3],
+                "fixed_driving_distance": [None],
+
+                "user_contribution_policy": [""],
+                "user_contribution": [False],
+                "willingness": [0],
+
+            }
+
+Supply Configuration
+-----------------------------
+
+   - Example:
+
+      .. code-block:: console
+
+            supply_model_config_grid = {
+
+                # -> energy supply
+
+                "year_energymix": ["2023"],
+
+                # -> vehicle configuration
+
+                "vehicle_model_name": ["Smart fortwo Electric Drive 2018"],
+                "engine_type": ["electric"],
+                "fuel_capacity": [16.7],
+                "vehicle_efficiency": [5.263],
+
+                # -> fleet size and initial placement
+
+                "vehicles_config_mode": ["sim_config"],
+                "vehicles_initial_placement": ["random_greedy"],
+                "n_vehicles": [400],
+
+                # -> charging
+
+                "charging_config_mode": ["sim_config"],
+                "distributed_cps": [True],
+                "system_cps": [True],
+                "profile_type": ["single_phase_1"],
+
+                "stations_placement_config_mode": ["sim_config"],
+                "tot_n_charging_poles": [50],
+                "n_charging_zones": [30],
+                "cps_placement_policy": ["num_parkings"],
+
+                "charging_strategy": ["reactive"],
+                "charging_relocation_strategy": ["closest_free"],
+                "charging_return_strategy": ["no_return"],
+                "queuing": [True],
+                "alpha_policy": ['auto'],
+
+                "beta": [100],
+
+                "n_workers": [1],
+
+                # -> battery swap
+
+                "battery_swap": [False],
+                "avg_reach_time": [0],
+                "avg_service_time": [0],
+
+                # -> relocation
+
+                "relocation": [False],
+                "relocation_strategy": [""],
+
+                "relocation_technique": [frozenset({})],
+
+                "n_relocation_workers": [1],
+                "avg_relocation_speed": [20],  # km/h
+                "relocation_capacity": [1],
+                "relocation_profitability_check": [False],
+                "relocation_vehicle_consumption": [7],  # l/100km
+                "diesel_price": [0.65],  # $/l (USA)
+                "unlock_fee": [1],  # $
+                "rent_fee": [0.15],  # $/min
+                "avg_relocation_distance": [1],  # km
+                "avg_trip_duration": [10],  # min
+
+            }

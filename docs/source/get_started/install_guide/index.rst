@@ -3,7 +3,7 @@ Install Guide
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
+   :maxdepth: 0
    :caption: Moduli:
 
 Prerequisites

@@ -8,7 +8,7 @@ City Data Manager
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
+   :maxdepth: 0
    :caption: Moduli:
 
    od_matrices/index

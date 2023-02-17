@@ -64,6 +64,8 @@ class RelocationPrimitives:
         self.tot_scooter_relocations_distance = 0
         self.tot_scooter_relocations_duration = 0
         self.sim_scooter_relocations = []
+        self.sim_zones_relocations = []
+
         self.n_vehicles_tot = 0
 
         self.n_scooters_relocating = 0
@@ -169,7 +171,9 @@ class RelocationPrimitives:
         self.update_relocation_stats(relocation_record)
 
     def relocate_scooter_multiple_zones(self, scheduled_relocation, collection_path, distribution_path, worker):
+
         with self.relocation_workers_resource.request() as relocation_worker_request:
+
             yield relocation_worker_request
 
             worker.start_working()
@@ -215,6 +219,13 @@ class RelocationPrimitives:
                     picked_vehicle = self.available_vehicles_dict[step_end].pop()
                     picked_vehicles.append(picked_vehicle)
                     self.pick_up_scooter(step_end, current_time)
+                    self.sim_zones_relocations.append({
+                        "timestamp": current_time,
+                        "zone": step_end,
+                        "operation_type": "pickup",
+                        "n_vehicles": actual_n_picked_vehicles
+
+                    })
 
                 self.n_scooters_relocating += actual_n_picked_vehicles
 
@@ -260,9 +271,15 @@ class RelocationPrimitives:
             worker.stop_working()
 
         # Save cumulative relocation stats
-        scooter_relocation = init_scooter_relocation(relocated_vehicles, current_time,
-                                                     collection_path[1:], distribution_path[1:],
-                                                     total_distance, total_duration, worker_id=worker.id)
+        scooter_relocation = init_scooter_relocation(
+            relocated_vehicles,
+            current_time,
+            collection_path[1:],
+            distribution_path[1:],
+            total_distance,
+            total_duration,
+            worker_id=worker.id
+        )
 
         self.update_relocation_stats(scooter_relocation)
 

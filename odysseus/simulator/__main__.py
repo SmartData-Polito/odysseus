@@ -39,6 +39,11 @@ parser.add_argument(
     help="specify city scenario folder name"
 )
 
+parser.add_argument(
+    "-r", "--sim_run_mode",
+    help="specify run mode: single_run or multiple_runs"
+)
+
 parser.set_defaults(
     campaign_name="smartdata_test_0",
     conf_name="scenario_D",
