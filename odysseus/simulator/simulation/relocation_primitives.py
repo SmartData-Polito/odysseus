@@ -219,13 +219,15 @@ class RelocationPrimitives:
                     picked_vehicle = self.available_vehicles_dict[step_end].pop()
                     picked_vehicles.append(picked_vehicle)
                     self.pick_up_scooter(step_end, current_time)
-                    self.sim_zones_relocations.append({
-                        "timestamp": current_time,
-                        "zone": step_end,
-                        "operation_type": "pickup",
-                        "n_vehicles": actual_n_picked_vehicles
 
-                    })
+                self.sim_zones_relocations.append({
+                    "timestamp": current_time,
+                    "zone_start": step_start,
+                    "zone_end": step_end,
+                    "operation_type": "pickup",
+                    "n_vehicles": actual_n_picked_vehicles
+
+                })
 
                 self.n_scooters_relocating += actual_n_picked_vehicles
 
@@ -265,6 +267,15 @@ class RelocationPrimitives:
                     relocated_vehicles.append(dropped_vehicle)
                     self.available_vehicles_dict[step_end].append(dropped_vehicle)
                     self.drop_off_scooter(step_end, current_time)
+
+                self.sim_zones_relocations.append({
+                    "timestamp": current_time,
+                    "zone_start": step_start,
+                    "zone_end": step_end,
+                    "operation_type": "dropoff",
+                    "n_vehicles": actual_n_dropped_vehicles
+
+                })
 
                 self.n_scooters_relocating -= actual_n_dropped_vehicles
 

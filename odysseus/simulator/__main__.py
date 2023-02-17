@@ -45,8 +45,8 @@ parser.add_argument(
 )
 
 parser.set_defaults(
-    campaign_name="smartdata_test_0",
-    conf_name="scenario_D",
+    campaign_name="odysseus_paper",
+    conf_name="scenario_D_single_run",
     city_scenario_folder="escooters",
     sim_run_mode="single_run"
 )

@@ -305,6 +305,7 @@ class SimOutput:
 
 			if self.supply_model_config["relocation"]:
 				self.relocation_history = pd.DataFrame(sim.relocation_strategy.sim_scooter_relocations)
+				self.relocation_history_zones = pd.DataFrame(sim.relocation_strategy.sim_zones_relocations)
 
 		for key in self.sim_stats.index:
 			if key.startswith("fraction"):
@@ -425,5 +426,11 @@ class SimOutput:
 					os.path.join(
 						results_path,
 						"relocation_history.csv"
+					)
+				)
+				self.relocation_history_zones.to_csv(
+					os.path.join(
+						results_path,
+						"relocation_history_zones.csv"
 					)
 				)

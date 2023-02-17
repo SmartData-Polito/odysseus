@@ -15,7 +15,7 @@ supply_model_config_grid = {
 
 	"vehicles_config_mode": ["sim_config"],
 	"vehicles_initial_placement": ["random_greedy"],
-	"n_vehicles": range(100, 1100, 100),
+	"n_vehicles": [600],
 
 	# -> charging
 
