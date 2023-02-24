@@ -70,7 +70,9 @@ General Run Configuration
 - Parameters list:
 
    - **city**, string
+      - Name of the city used in simulation
    - **data_source_id**, string
+      - Name of the data source used for building the data scenario
    - **sim_scenario_name**, string
       - Name of the output folder where results and eventually figures will be saved.
    - **save_history**, boolean
@@ -78,13 +80,21 @@ General Run Configuration
    - **history_to_file**, boolean
       - Export data structures containing complete lists of booking requests, bookings, charges..
    - **exclude_sim_output_obj**, boolean
+      - Export/exclude binary representation of SimOutput object
    - **exclude_geo_grid**, boolean
+      - Export/exclude geographic data structures
    - **exclude_events_files**, boolean
+      - Export/exclude full event logs (requests, trips, recharges, ...)
    - **exclude_resources_files**, boolean
+      - Export/exclude full resources logs (zones, vehicles, charging stations, ...)
    - **auto_plotting**, boolean
-   - **year**, boolean
-   - **month_start**, boolean
-   - **max_sim_hours**, boolean
+      - Enable automatic plotting in single run mode
+   - **year**, integer
+      - Year to use in the what-if simulation
+   - **month_start**, integer
+      - Month when the simulation start from
+   - **max_sim_hours**, integer
+      - Number of hours to simulate
 
 
 - Example:
@@ -99,7 +109,6 @@ General Run Configuration
 
                 # Run parameters
                 "sim_scenario_name": ["custom_trips_test"],
-
                 "save_history": [True],
                 "history_to_file": [True],
                 "exclude_sim_output_obj": [False],
@@ -111,13 +120,32 @@ General Run Configuration
                 # Time  parameters
                 "year": [2020],
                 "month_start": [9],
-
                 "max_sim_hours": [24 * 30]
 
             }
 
 Demand Configuration
 -----------------------------
+
+   - **demand_model_type**, string
+      - Specify the demand model to use in the simulation
+   - **requests_rate_factor**, float
+      - Specify a factor to amplify/reduce average demand in input data
+      - Can only be used when **demand_model_type** is not "trace"
+   - **vehicle_research_policy**, string
+      - Specify the way how users search for a vehicle
+   - **avg_speed_kmh_mean**, float
+      - The average speed of a trip considering reservation time and parking time
+   - **max_duration**, int [seconds]
+      - Eventually impose a maximum duration to trips
+   - **fixed_driving_distance**, int [meters]
+      - Eventually impose the same driving distance for each trip
+   - **user_contribution**, boolean
+      - Specify whether users can contribute to charging operations
+   - **user_contribution_policy**, string
+      - Specify the way how users eventually contribute to charging operations
+   - **willingness**, float
+      - Probability that a generic user will contribute
 
    - Example:
 
@@ -127,13 +155,10 @@ Demand Configuration
 
                 "demand_model_type": ["trace"],
                 "requests_rate_factor": [1],
-
                 "vehicle_research_policy": ["zone"],
-
                 "avg_speed_kmh_mean": [1],
                 "max_duration": [60 * 60 * 3],
                 "fixed_driving_distance": [None],
-
                 "user_contribution_policy": [""],
                 "user_contribution": [False],
                 "willingness": [0],
@@ -142,6 +167,75 @@ Demand Configuration
 
 Supply Configuration
 -----------------------------
+
+   - **year_energymix**, integer as string (es. "2023")
+      - Specify the demand model to use in the simulation
+
+   - **vehicle_model_name**, string
+      - Specify vehicle model to include in the simulation
+      - Must present in vehicle_conf.py
+
+   - **engine_type**, string
+      - Specify type of engine that vehicles use
+
+   - **fuel_capacity**, float
+      - Specify capacity of tank or battery
+
+   - **vehicle_efficiency**, float [km/l or km/kwh]
+      - Specify how many kilometers the vehicle can do with 1 unit of fuel
+
+   - **vehicle_config_mode**, string
+      - Specify the way how fleet size and initial placement are configured
+      - Default: "sim_config" (use the configuration file to specify parameters)
+
+   - **vehicle_initial_placement**, string
+      - Specify the way how vehicles are placed at the beginning of the simulations
+
+   - **n_vehicles**, integer
+      - Specify number of vehicles in the fleet
+
+   - **charging_config_mode**, string
+      - Specify the way how charging operations are configured
+      - Default: "sim_config" (use the configuration file to specify parameters)
+
+   - **distributed_cps**, boolean
+      - Specify whether or not to create a charging infrastructure
+
+   - **system_cps**, boolean
+      - Specify whether the charging infrastructure is private to the system operator
+
+   - **profile_type**, string
+      - Specify charging profile
+
+   - **stations_placement_config_mode**, string
+      - Specify the way how charging stations placement is configured
+      - Default: "sim_config" (use the configuration file to specify parameters)
+
+   - **tot_n_charging_poles**, int
+      - Total number of charging poles
+
+   - **n_charging_zones**, int
+      - Number of charging zones
+
+   - **cps_placement_policy**, string
+      - Specify the way how charging stations are placed
+
+   - **charging_strategy**, string
+      - Specify the way how charging operations are performed
+      - For now only "reactive" is available
+
+   - **charging_relocation_strategy**, string
+      - Specify the way how vehicles are assigned to a charging station when they need charge
+
+   - **charging_relocation_strategy**, string
+      - Specify the way how vehicles are moved after a charging operation
+
+   - **queuing**, boolean
+      - Specify whether queuing is allowed at charging stations
+      - For now only "reactive" is available
+
+   - **alpha_policy**, string
+      - Specify policy to set the lower charging threshold
 
    - Example:
 
