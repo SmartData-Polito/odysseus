@@ -45,9 +45,9 @@ parser.add_argument(
 )
 
 parser.set_defaults(
-    campaign_name="odysseus_paper",
-    conf_name="scenario_D_single_run",
-    city_scenario_folder="escooters",
+    campaign_name="test",
+    conf_name="custom_trips_test",
+    city_scenario_folder="test_scenario",
     sim_run_mode="single_run"
 )
 

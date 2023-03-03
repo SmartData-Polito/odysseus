@@ -371,6 +371,10 @@ class AbstractCityScenario:
             columns={"start_hour": "hour"}
         ).to_csv(os.path.join(self.city_scenario_path, "out_flow_count.csv"))
 
+        self.bookings_train.groupby(
+            ["origin_id", "destination_id", "hour"], as_index=False
+        ).count().iloc[:, :4].to_csv(os.path.join(self.city_scenario_path, "od_total_count_by_hour.csv"))
+
     def read_config_from_folder_name(self):
         with open(os.path.join(self.city_scenario_path, "city_scenario_config.json"), "r") as f:
             self.city_scenario_config = json.load(f)

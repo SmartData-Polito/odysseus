@@ -48,7 +48,7 @@ Let's pick default parameters for now (which are set for the file system shown a
 
    .. code-block:: console
 
-      python -m odysseus.city_data_manager.geo_trips
+      python -m odysseus.city_data_manager.geo_trips -c test_city
 
 Now you should see something happening in your ODySSEUS folder.
 In particular this folder structure should have appeared:
@@ -72,7 +72,7 @@ This means we normalised our input data to a format ODySSEUS is able to ingest.
 
 Next step is City Data Scenario.
 
-City Data Scenario - Geo Trips
+City Data Manager - City Data Scenario
 ---------------------------------------------------
 
 This module starts from normalised data to create an initial representation of the city as seen from provided mobility data.
@@ -81,7 +81,7 @@ Start with the following command:
 
    .. code-block:: console
 
-      python -m odysseus.scenario
+      python -m odysseus.scenario -c test_city
 
 This triggers the creation of a city data scenario.
 
