@@ -3,7 +3,6 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-==========================
 ODySSEUS Modules
 ==========================
 
@@ -16,9 +15,6 @@ ODySSEUS Modules
    demand_modelling/index
    supply_modelling/index
    simulator/index
-
-Introduction
-=============
 
 
 ODySSEUS is composed by four main functional modules:

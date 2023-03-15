@@ -27,9 +27,6 @@ class ODmatricesDemandModel(DemandModel):
         with open(os.path.join(self.city_scenario_path, "week_config.json"), "r") as f:
             self.week_config = json.load(f)
 
-    def generate_booking_requests_list(self, start_datetime, end_datetime):
-        return generate_booking_requests_list(self.od_matrices, self.week_config, start_datetime, end_datetime)
-
     def generate_booking_requests_sim(
             self,
             start_datetime,

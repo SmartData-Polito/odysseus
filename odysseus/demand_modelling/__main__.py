@@ -41,12 +41,12 @@ parser.add_argument(
 
 parser.set_defaults(
 
-    city=["Louisville"],
-    data_source_id=["city_open_data"],
-    demand_model_type=["poisson_kde"],
+    city=["my_city_0_2X2"],
+    data_source_id=["my_data_source"],
+    demand_model_type=["od_matrices"],
     kde_bandwidth=["0.1"],
-    city_scenario_folder=["escooters"],
-    city_demand_model_folder=["escooters"],
+    city_scenario_folder=["simple_cyclic_X4"],
+    city_demand_model_folder=["test_demand_model_od_matrices"],
 
 )
 
@@ -64,7 +64,14 @@ for demand_model_config in demand_model_configs_list:
 
     demand_model = None
 
-    if demand_model_config["demand_model_type"] == "hourly_ods_count":
+    if demand_model_config["demand_model_type"] == "od_matrices":
+        demand_model = ODmatricesDemandModel(
+            demand_model_config["city"],
+            demand_model_config["data_source_id"],
+            demand_model_config,
+            grid_crs
+        )
+    elif demand_model_config["demand_model_type"] == "hourly_ods_count":
         demand_model = HourlyODsCountDemandModel(
             demand_model_config["city"],
             demand_model_config["data_source_id"],
@@ -73,13 +80,6 @@ for demand_model_config in demand_model_configs_list:
         )
     elif demand_model_config["demand_model_type"] == "poisson_kde":
         demand_model = PoissonKdeDemandModel(
-            demand_model_config["city"],
-            demand_model_config["data_source_id"],
-            demand_model_config,
-            grid_crs
-        )
-    elif demand_model_config["demand_model_type"] == "od_matrices":
-        demand_model = ODmatricesDemandModel(
             demand_model_config["city"],
             demand_model_config["data_source_id"],
             demand_model_config,

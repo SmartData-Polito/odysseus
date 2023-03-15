@@ -22,7 +22,7 @@ class CustomTrips(TripsDataSource):
 
     def normalise(self, year, month):
 
-        self.trips_df_norm = self.trips_df
+        self.trips_df_norm = self.trips_df.copy()
 
         self.trips_df_norm = self.trips_df_norm[[
             "start_time",

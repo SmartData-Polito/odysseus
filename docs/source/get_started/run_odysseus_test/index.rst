@@ -6,9 +6,6 @@ Run ODySSEUS test
    :maxdepth: 0
    :caption: Moduli:
 
-Introduction
----------------------------------------------------
-
 Odysseus data are organised in nested folders and stored in a public cloud bucket.
 
 The easiest way to start is to download the sample data and create a copy of the nested folder structure in your local file system.

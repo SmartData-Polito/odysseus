@@ -77,16 +77,6 @@ class PoissonKdeDemandModel(DemandModel):
                     self.trip_kdes[daytype][hour] = KernelDensity(
                         bandwidth=self.kde_bw
                     ).fit(slot_df[kde_columns].dropna())
-            # hours_list = list(range(7, 24)) + list(range(7))
-            # for hour in hours_list:
-            #     slot_df = daytype_bookings_gdf[daytype_bookings_gdf.start_hour == hour]
-            #     if len(slot_df) == 0:
-            #         rates = pd.Series(self.request_rates[daytype])
-            #         min_evaluable_rate = rates.idxmin()
-            #         while min_evaluable_rate not in self.trip_kdes[daytype].keys():
-            #             rates = rates.drop(min_evaluable_rate)
-            #             min_evaluable_rate = rates.idxmin()
-            #         self.trip_kdes[daytype][hour] = self.trip_kdes[daytype][min_evaluable_rate]
 
         return self.trip_kdes
 
@@ -95,7 +85,12 @@ class PoissonKdeDemandModel(DemandModel):
         self.get_requests_rates()
         self.get_trip_kdes()
 
-    def generate_booking_requests_list(self, start_datetime, end_datetime, requests_rate_factor):
+    def generate_booking_requests_list(
+            self,
+            start_datetime,
+            end_datetime,
+            requests_rate_factor
+    ):
 
         booking_requests_list = list()
         current_datetime = start_datetime

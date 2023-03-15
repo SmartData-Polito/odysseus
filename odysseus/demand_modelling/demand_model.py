@@ -70,10 +70,22 @@ class DemandModel:
     def fit_model(self):
         pass
 
-    def generate_booking_requests_list(self, start_datetime, end_datetime):
+    def generate_booking_requests_list(
+            self,
+            start_datetime,
+            end_datetime,
+            requests_rate_factor
+    ):
         pass
 
-    def generate_booking_requests_sim(self, start_datetime):
+    def generate_booking_requests_sim(
+            self,
+            start_datetime,
+            requests_rate_factor,
+            avg_speed_kmh_mean,
+            max_duration,
+            fixed_driving_distance
+    ):
         pass
 
     def save_config(self):

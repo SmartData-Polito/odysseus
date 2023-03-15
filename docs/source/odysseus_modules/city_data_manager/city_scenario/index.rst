@@ -14,8 +14,6 @@ City Data Scenario
    city_scenario_from_wgs84_trips.rst
    city_scenario_from_virtual_od.rst
 
-Introduction
------------------------------
 
 The City Data Scenario module takes in input a set of mobility data about a given city
 (virtual or real, possibly heterogeneous data) and outputs a set of standard data structures
