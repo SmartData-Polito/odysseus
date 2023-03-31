@@ -37,6 +37,12 @@ The main duties of the Demand Modelling module are:
 
    - Generate mobility samples starting from a fitted demand model
 
+You can run the following command to visualise a short description of parameters for this module:
+
+   .. code-block:: console
+
+      python -m odysseus.demand_modelling -h
+
 Let's start with the simplest model.
 
 Simple count model
@@ -79,3 +85,47 @@ As previously mentioned, there is no real "fitting" for this simple case: it jus
 
 Let's therefore introduce more meaningful demand models.
 
+ODt model
+---------------------------------------------------
+
+This demand model allow to fit an OD matrix from trips data. For each tuple (origin, destination, time_slot),
+the model estimates the average number of trips to generate in a uniform distribution within a hourly slot.
+
+In order to use this model, you must have created a city scenario from trips data.
+
+Then, you can run the following command:
+
+   .. code-block:: console
+
+      python -m odysseus.demand_modelling -c my_city -d my_data_source -t hourly_ods_count -C my_scenario_folder -D my_demand_model_folder
+
+Finally, by setting the parameter "requests_rate_factor" available in the demand model configuration within the simulator, the demand profile set in
+virtual OD data structures will be scaled according to "requests_rate_factor". Note that this will happen only at simulation time,
+namely in this phase only the demand model in generated.
+
+ODt KDE + Poisson model
+---------------------------------------------------
+
+This demand model allows, for each tuple (origin, destination, time_slot) to:
+
+   - Estimate a rate of an exponential distribution used to model inter-arrival times of mobility requests
+   - Fit a KDE model for spatial distribution of origins, destinations, and their relationship
+   - Generate inter-arrival times of mobility requests in the simulator
+
+This method allows to disaggregate spatial demand and remove strong correlations present
+in historical data representing only satisfied mobility demand.
+There are two available modes to set KDE bandwidth:
+
+   - Set a fixed bandwidth (parameter "kde_bandwidth")
+   - Fit dynamic bandwidths (not integrated but available through the paper ... and the repository ...)
+
+In order to use this model, you must have created a virtual OD and its city scenario. Then, by setting the parameter
+"kde_bandwidth" available in the demand model configuration, the module will fit a spatial demand model with the selected bandwidth
+for each tuple (origin, destination, time_slot).
+
+You can run the following command:
+
+   .. code-block:: console
+
+      python -m odysseus.demand_modelling -c my_city -d my_data_source -t hourly_ods_count -C my_scenario_folder
+         -D my_demand_model_folder -k 0.1
